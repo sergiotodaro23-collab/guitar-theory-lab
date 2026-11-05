@@ -9,13 +9,7 @@ gh repo create guitar-theory-lab --private --source=. --remote=origin --push
 git push origin --tags
 ```
 
-Se parti dal bundle consegnato:
-
-```bash
-git clone guitar-theory-lab.bundle guitar-theory-lab
-cd guitar-theory-lab
-git remote remove origin
-```
+Lo zip consegnato contiene già tutta la cronologia Git: basta estrarlo, entrare nella cartella e lanciare questi comandi.
 
 ## Protezione di main
 
