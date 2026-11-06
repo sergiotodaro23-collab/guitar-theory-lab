@@ -3,7 +3,7 @@ import { engine } from '../app/engine';
 import { useApp } from '../app/store';
 import { Board } from './Board';
 import { Transport } from './Transport';
-import { ExercisePanel, HarmonyPanel, JamPanels, ChordsPanel, PresetsPanel, ScalePanel } from './panels';
+import { ArpeggioPanel, ExercisePanel, HarmonyPanel, JamPanels, ChordsPanel, PresetsPanel, ScalePanel } from './panels';
 
 function useShortcuts() {
   useEffect(() => {
@@ -49,9 +49,10 @@ export function App() {
         <Board />
         <div className="panels" data-mode={mode}>
           {mode === 'harmony' ? <HarmonyPanel /> : null}
+          {mode === 'arpeggio' ? <ArpeggioPanel /> : null}
           {mode === 'jam' ? <JamPanels /> : null}
           <ScalePanel />
-          <ExercisePanel />
+          {mode !== 'arpeggio' ? <ExercisePanel /> : null}
           {mode === 'fretboard' ? <ChordsPanel /> : null}
           <PresetsPanel />
         </div>

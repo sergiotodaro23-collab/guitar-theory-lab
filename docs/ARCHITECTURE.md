@@ -26,6 +26,10 @@ La scala principale resta nelle impostazioni di studio (`tonic`, `scaleId`, posi
 - `chordVoicings(accordo)` (in `src/fretboard`) restituisce le forme eseguibili lungo il manico.
 - `settings.chordLayers` e `activeChord` (Fretboard Lab): solo l'attivo arriva a `buildMarkerLayer`, con `voicing` per il contorno della forma.
 
+## Arpeggi
+
+`src/exercises/arpeggio.ts` tiene separati i tre livelli: le note vengono da `Chord.tones`, l'ordine da `ArpeggioSpec`, la diteggiatura da `arpeggioNotes(accordo, tasto)` (finestra di cinque tasti, `pitchesInWindow`). Su una progressione `progressionArpeggioTrack` riceve gli intervalli degli accordi già calcolati da `chordSpans`, quindi il modulo esercizi non dipende da `jam`. In modalità "collega" ogni accordo parte dalla nota più vicina all'ultima suonata.
+
 ## Percorsi a fasi
 
 `Routine` è un dato serializzabile: un elenco di `RoutinePhase` con scala, posizione (`caged`, `3nps`, `range`), ottava, sequenza, direzione, note per movimento e ripetizioni.

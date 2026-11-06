@@ -7,6 +7,7 @@ import { Select, Segmented } from './controls';
 const MODES: readonly { value: AppMode; label: string }[] = [
   { value: 'fretboard', label: 'Fretboard Lab' },
   { value: 'harmony', label: 'Harmony Lab' },
+  { value: 'arpeggio', label: 'Arpeggios Lab' },
   { value: 'jam', label: 'Jam Studio' },
 ];
 
@@ -34,6 +35,13 @@ function CurrentChord() {
     return (
       <div className="now-playing">
         <span className="now-chord now-chord-text" data-testid="current-chord">{settings.chordLayers[settings.activeChord]?.symbol || 'Solo scala'}</span>
+      </div>
+    );
+  }
+  if (settings.mode === 'arpeggio' && settings.arpSource === 'chord') {
+    return (
+      <div className="now-playing">
+        <span className="now-chord" data-testid="current-chord">{settings.arpSymbol || 'Nessun accordo'}</span>
       </div>
     );
   }

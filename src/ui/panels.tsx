@@ -4,9 +4,9 @@ import { engine } from '../app/engine';
 import { sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
 import { presetRepository, useApp, usePlayhead } from '../app/store';
 import { CAGED_FORMS } from '../fretboard';
-import { INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
+import { ARP_SPAN, INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
 import { RoutineEditor } from './RoutineEditor';
-import { AVOID_PROFILES, type AvoidProfile } from '../harmony';
+import { AVOID_PROFILES, guideTones, type AvoidProfile } from '../harmony';
 import {
   COMP_PATTERNS, PROGRESSION_TEMPLATES, addChord, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord, withChord,
   type CompPattern, type Progression, type ChordDuration,
@@ -125,6 +125,8 @@ export function ScalePanel() {
         <Field label="Scala"><Select testId="scale" label="Scala" value={s.scaleId} options={scaleOptions} onChange={(scaleId: ScaleId) => update({ scaleId })} /></Field>
       </div>
       <p className="spelling" data-testid="scale-spelling">{scale.tones.map((t) => t.name).join('  ')}</p>
+      {s.mode === 'arpeggio' ? null : (
+        <>
       <Field label="Diteggiatura">
         <Segmented<PositionType>
           label="Diteggiatura"
@@ -151,6 +153,8 @@ export function ScalePanel() {
         <Field label="Forma">
           <Segmented label="Forma CAGED" value={s.cagedForm} options={CAGED_FORMS.map((f) => ({ value: f, label: f }))} onChange={(cagedForm) => update({ cagedForm })} />
         </Field>
+      )}
+        </>
       )}
       <ScaleLayersSection />
       <Field label="Sulle note">
@@ -446,6 +450,102 @@ function AudioMix({ showComp }: { readonly showComp: boolean }) {
       <Volume label="Note" value={s.volNotes} onChange={(volNotes) => update({ volNotes })} />
       {showComp ? <Volume label="Accordi" value={s.volComp} onChange={(volComp) => update({ volComp })} /> : null}
     </div>
+  );
+}
+
+const ARP_START_NAMES = ['Fondamentale', 'Terza', 'Quinta', 'Settima', 'Nona', 'Undicesima'];
+
+export function ArpeggioPanel() {
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  const chord = tryParseChord(s.arpSymbol);
+  const progression = s.arpSource === 'progression';
+  const invalid = !progression && chord === null;
+  const customValid = parseCustomPattern(s.arpCustomText) !== null;
+  const toneCount = progression ? 4 : chord?.tones.length ?? 4;
+  const quick = s.chordLayers.map((l) => l.symbol).filter((symbol, i, all) => tryParseChord(symbol) && all.indexOf(symbol) === i);
+  return (
+    <Panel title="Arpeggi" className="panel-arpeggio">
+      <Field label="Su cosa">
+        <Segmented
+          label="Sorgente degli arpeggi"
+          value={s.arpSource}
+          options={[{ value: 'chord', label: 'Un accordo' }, { value: 'progression', label: 'La progressione' }]}
+          onChange={(arpSource) => update({ arpSource })}
+        />
+      </Field>
+      {progression ? (
+        <>
+          <ChordStrip />
+          <p className="field-hint">È la stessa progressione di Harmony Lab: modificala lì.</p>
+          <Field label="Al cambio di accordo">
+            <Segmented
+              label="Collegamento tra arpeggi"
+              value={s.arpLink}
+              options={[{ value: 'connect', label: 'Collega (nota più vicina)' }, { value: 'restart', label: 'Riparti dal grado scelto' }]}
+              onChange={(arpLink) => update({ arpLink })}
+            />
+          </Field>
+          {s.arpLink === 'connect' ? <p className="field-hint">La linea non salta: ogni accordo parte dalla sua nota più vicina all’ultima suonata, poi prosegue e cambia verso ai bordi della posizione.</p> : null}
+          <Toggle checked={s.compOn} onChange={(compOn) => update({ compOn })}>Suona gli accordi</Toggle>
+        </>
+      ) : (
+        <>
+          <Field label="Accordo" hint={invalid ? 'Accordo non riconosciuto. Prova Cmaj7, Dm7, G7, Am7b5, C/E.' : undefined}>
+            <input className={`text-input ${invalid ? 'is-invalid' : ''}`} data-testid="arp-symbol" value={s.arpSymbol} aria-invalid={invalid} onChange={(e) => update({ arpSymbol: e.target.value })} />
+          </Field>
+          {quick.length > 0 ? (
+            <div className="quick-chords" role="group" aria-label="Accordi da Fretboard Lab">
+              {quick.map((symbol) => (
+                <button type="button" key={symbol} className="chord-chip small" aria-pressed={symbol === s.arpSymbol} onClick={() => update({ arpSymbol: symbol })}>{symbol}</button>
+              ))}
+            </div>
+          ) : null}
+          {chord ? (
+            <p className="spelling" data-testid="arp-spelling">
+              {chord.tones.map((t) => `${t.name} (${t.degree})`).join('  ')}
+              <span className="muted"> · guide tones: {guideTones(chord).map((t) => t.name).join(' ')}</span>
+            </p>
+          ) : null}
+        </>
+      )}
+      <Field label={`Posizione: tasti ${s.arpLow}–${s.arpLow + ARP_SPAN}`}>
+        <input className="range" type="range" min={0} max={24 - ARP_SPAN} step={1} value={s.arpLow} data-testid="arp-low" aria-label="Tasto più basso della posizione" onChange={(e) => update({ arpLow: Number(e.target.value) })} />
+      </Field>
+      <div className="row">
+        <Field label="Parti da">
+          <Select<number>
+            label="Grado di partenza"
+            testId="arp-start"
+            value={Math.min(s.arpStart, toneCount - 1)}
+            options={ARP_START_NAMES.slice(0, toneCount).map((label, i) => ({ value: i, label: i === 0 ? label : `${label} (${i}° rivolto)` }))}
+            onChange={(arpStart) => update({ arpStart })}
+          />
+        </Field>
+        <Field label="Direzione">
+          <Select
+            label="Direzione dell'arpeggio"
+            value={s.arpDirection}
+            options={[
+              { value: 'up' as const, label: 'Sale' },
+              { value: 'down' as const, label: 'Scende' },
+              { value: 'updown' as const, label: 'Sale e scende' },
+              { value: 'downup' as const, label: 'Scende e sale' },
+            ]}
+            onChange={(arpDirection) => update({ arpDirection })}
+          />
+        </Field>
+        <Field label="Note per movimento">
+          <Select label="Note per movimento negli arpeggi" value={s.arpNotesPerBeat} options={([1, 2, 3, 4] as const).map((v) => ({ value: v, label: String(v) }))} onChange={(arpNotesPerBeat) => update({ arpNotesPerBeat })} />
+        </Field>
+      </div>
+      <Toggle checked={s.arpCustomOn} onChange={(arpCustomOn) => update({ arpCustomOn })}>Pattern personalizzato</Toggle>
+      {s.arpCustomOn ? (
+        <Field label="Passi sulle note dell’accordo" hint={customValid ? (progression && s.arpLink === 'connect' ? 'Con “Collega” il pattern si applica solo ripartendo a ogni accordo.' : '1 3 2 4 su Cmaj7 fa Do Sol Mi Si, Mi Si Sol Do…') : 'Scrivi numeri da 1 a 24 separati da spazi.'}>
+          <input className={`text-input ${customValid ? '' : 'is-invalid'}`} data-testid="arp-pattern" value={s.arpCustomText} aria-invalid={!customValid} onChange={(e) => update({ arpCustomText: e.target.value })} />
+        </Field>
+      ) : null}
+    </Panel>
   );
 }
 

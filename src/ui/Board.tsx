@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { engine } from '../app/engine';
-import { boardContext } from '../app/settings';
+import { arpeggioBoardNotes, boardContext } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { AVOID_PROFILES, classifyTone, functionsAcross } from '../harmony';
 import { parsedChords } from '../jam';
-import { buildScale, chromaticName, mod, type Chord, type Scale } from '../theory';
+import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
 import { resolveChordLayer } from '../app/chordLayers';
 import { Fretboard, type LayerStyle } from '../viz/Fretboard';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
@@ -29,12 +29,16 @@ export function useHarmonyContext() {
         voicing: active?.shape?.notes ?? null,
       };
     }
+    if (settings.mode === 'arpeggio' && settings.arpSource === 'chord') {
+      const chord = tryParseChord(settings.arpSymbol);
+      return { chords: chord ? [chord] : [], chord, nextChord: null as Chord | null, chordIndex: 0, voicing: null };
+    }
     const chords = parsedChords(settings.progression);
     const chordIndex = Math.min(playheadChord ?? selected, Math.max(0, chords.length - 1));
     const chord = chords[chordIndex] ?? null;
     const nextChord = chords.length > 1 ? chords[(chordIndex + 1) % chords.length] ?? null : null;
     return { chords, chord, nextChord, chordIndex, voicing: null };
-  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, playheadChord, selected]);
+  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, settings.arpSource, settings.arpSymbol, playheadChord, selected]);
 }
 
 const LEGEND_CHORD: readonly { role: string; label: string; guide?: boolean }[] = [
@@ -94,7 +98,10 @@ export function Board() {
   const playheadPhase = usePlayhead((p) => p.phase);
   const selectedPhase = useApp((s) => s.selectedPhase);
   const phaseIndex = playheadPhase ?? selectedPhase;
-  const context = useMemo(() => boardContext(settings, phaseIndex), [settings, phaseIndex]);
+  const context = useMemo(() => (settings.mode === 'arpeggio'
+    // Arpeggios Lab draws the chord tones of the hand position, over the current scale's spelling.
+    ? { ...boardContext(settings, null), notes: arpeggioBoardNotes(chord, settings), wholeNeck: false }
+    : boardContext(settings, phaseIndex)), [settings, phaseIndex, chord]);
   const { scale } = context;
   const overlays = useMemo(
     () => visibleLayers(settings.scaleLayers).map((shown) => ({ scale: shown.scale, index: shown.index, wholeNeck: shown.layer.region === 'neck' })),

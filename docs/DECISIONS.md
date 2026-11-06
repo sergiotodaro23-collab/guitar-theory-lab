@@ -4,6 +4,8 @@ Una riga di contesto, la scelta, il perché. Le nuove in cima.
 
 ## 2026-11-06
 
+**D-13 · Arpeggi: finestra di tasti e collegamento per nota più vicina.** La posizione di un arpeggio è una finestra di cinque tasti scelta con un cursore, non una forma CAGED: vale per qualsiasi accordo, slash compresi, ed è la stessa per tutta la progressione, così la mano resta ferma mentre cambia l'armonia. Sulla progressione la modalità predefinita è "collega": al cambio di accordo la linea passa alla nota più vicina e continua nella stessa direzione, invertendo ai bordi. È l'esercizio di voice leading classico; i pattern personalizzati valgono quando ogni accordo riparte dal grado scelto.
+
 **D-12 · Metrica come segmenti, non riavvio.** Cambiare metrica in riproduzione aggiunge un segmento alla stanghetta successiva invece di fermare o di far ripartire i tick da zero. Così ciò che è già nella coda audio (fino a 120 ms) resta valido, BPM e swing continuano a funzionare, e l'interfaccia legge battuta e movimento del segmento che sta suonando. Il BPM segue l'unità della nuova metrica (in 6/8 conta gli ottavi), come già da fermo. Esercizio, accordi e accompagnamento ripartono dal loro inizio sul nuovo battere: le loro durate in battute cambiano lunghezza, e riprendere a metà sarebbe ambiguo.
 
 **D-11 · Sulla tastiera un solo accordo alla volta.** Fino a otto accordi configurabili, ma la tastiera mostra solo quello attivo (funzioni delle note e, se scelta, la forma). Gli altri sono diagrammi cliccabili e alimentano l'ispettore delle note: toccando una nota si vede cosa diventa su ogni accordo visibile. Otto accordi sovrapposti sulle stesse corde sarebbero illeggibili, come avverte la specifica.

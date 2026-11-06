@@ -13,11 +13,12 @@ npm run dev
 
 Apri l'indirizzo mostrato dal terminale. In alternativa, `npm run build:single` produce `dist/guitar-theory-lab.html`, un unico file da aprire con doppio clic.
 
-## Le tre modalità
+## Le quattro modalità
 
 - **Fretboard Lab**: tastiera a 24 tasti, scale e modi, posizioni CAGED e 3NPS, intervalli dalla seconda all'ottava, sequenze personalizzate, accordo sovrapposto. Con l'**editor avanzato** costruisci percorsi a fasi: per esempio Do maggiore in forma C a salire e in forma G a scendere.
 - **Harmony Lab**: Harmonic Context Switch. La stessa posizione resta ferma mentre cambia l'armonia e ogni nota mostra la sua funzione sull'accordo corrente.
-- **Jam Studio**: progressioni modificabili, accompagnamento sintetizzato, loop, seconda scala, aiuti visivi nascondibili.
+- **Arpeggios Lab**: arpeggi di un accordo o di tutta la progressione, con rivolti, direzioni, pattern personalizzati e arpeggi collegati per nota più vicina.
+- **Jam Studio**: progressioni modificabili, accompagnamento sintetizzato, loop, scale sovrapposte, aiuti visivi nascondibili.
 
 Scorciatoie: spazio avvia e mette in pausa, N e P cambiano accordo, + e − regolano il BPM.
 

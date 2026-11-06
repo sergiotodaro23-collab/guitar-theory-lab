@@ -280,7 +280,7 @@ test('layout holds at phone width with no page overflow', async ({ page }) => {
   await open(page);
   // The default position starts at fret 7: it must be in view, not scrolled off.
   await expect.poll(() => page.locator('.fretboard-scroll').evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
-  for (const name of ['Fretboard Lab', 'Harmony Lab', 'Jam Studio']) {
+  for (const name of ['Fretboard Lab', 'Harmony Lab', 'Arpeggios Lab', 'Jam Studio']) {
     await mode(page, name);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow, name).toBeLessThanOrEqual(0);
@@ -509,5 +509,44 @@ test('changing the meter while playing keeps the transport running and switches 
   const shown = log.shown.filter((s) => s.kind === 'beat');
   const lags = shown.map((s) => s.time - s.scheduled).filter((lag) => lag >= 0);
   expect(median(lags)).toBeLessThan(0.05);
+  expect(errors).toEqual([]);
+});
+
+test('arpeggios lab: one chord by its tones and inversion, then connected over the progression', async ({ page }) => {
+  const errors = await open(page);
+  await mode(page, 'Arpeggios Lab');
+  await expect(page.getByTestId('current-chord')).toHaveText('Cmaj7');
+  await expect(page.getByTestId('arp-spelling')).toContainText('C (1)  E (3)  G (5)  B (7)');
+  // Only chord tones are drawn, inside the five-fret position 7–11.
+  const markers = page.locator('.marker');
+  expect(await markers.count()).toBeGreaterThanOrEqual(8);
+  const roles = await markers.evaluateAll((els) => els.map((e) => e.getAttribute('data-role')));
+  expect(roles.every((r) => r === 'chord-tone')).toBe(true);
+  const frets = await markers.evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-fret'))));
+  expect(Math.min(...frets)).toBeGreaterThanOrEqual(7);
+  expect(Math.max(...frets)).toBeLessThanOrEqual(11);
+
+  // First inversion: the first note played is the third.
+  await page.getByTestId('arp-start').selectOption({ label: 'Terza (1° rivolto)' });
+  await page.getByTestId('bpm').fill('200');
+  await page.getByTestId('play').click();
+  await expect(page.locator('.active-note')).toBeVisible();
+  await expect(page.locator('.active-note').first()).toHaveAttribute('data-active-label', '3');
+  await page.getByTestId('stop').click();
+
+  // Over the shared progression, connected: the current chord follows the playhead.
+  await page.getByRole('button', { name: 'La progressione' }).click();
+  await expect(page.getByTestId('chord-strip')).toBeVisible();
+  await page.getByTestId('bpm').fill('240');
+  await page.getByTestId('play').click();
+  const first = await page.getByTestId('current-chord').textContent();
+  await expect.poll(async () => page.getByTestId('current-chord').textContent(), { timeout: 8000 }).not.toBe(first);
+  // Every highlighted note is a tone of the chord shown with it.
+  for (let i = 0; i < 6; i += 1) {
+    const label = await page.locator('.active-note').getAttribute('data-active-label', { timeout: 2000 }).catch(() => null);
+    if (label !== null) expect(['1', '3', '5', '7', 'b3', 'b7', 'b5', 'bb7', '9', '13']).toContain(label);
+    await wait(page, 150);
+  }
+  await page.getByTestId('stop').click();
   expect(errors).toEqual([]);
 });

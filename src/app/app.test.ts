@@ -83,3 +83,20 @@ describe('built-in presets', () => {
     }
   });
 });
+
+describe('arpeggios lab tracks', () => {
+  it('plays one chord as a looping exercise with no chord track', () => {
+    const t = buildTracks(sanitizeSettings({ ...DEFAULT_SETTINGS, mode: 'arpeggio', arpSource: 'chord', arpSymbol: 'G7', arpLow: 2 }));
+    expect(t.chords).toBeNull();
+    const pcs = new Set(t.exercise?.events.map((e) => (e.payload as { midi: number }).midi % 12));
+    expect([...pcs].every((pc) => [7, 11, 2, 5].includes(pc))).toBe(true);
+  });
+  it('follows the shared progression with chords and comping', () => {
+    const t = buildTracks(sanitizeSettings({ ...DEFAULT_SETTINGS, mode: 'arpeggio', arpSource: 'progression' }));
+    expect(t.chords).not.toBeNull();
+    expect(t.exercise?.lengthTicks).toBe(t.chords?.lengthTicks);
+  });
+  it('plays nothing for an unknown chord instead of failing', () => {
+    expect(buildTracks(sanitizeSettings({ ...DEFAULT_SETTINGS, mode: 'arpeggio', arpSymbol: 'Hx' })).exercise).toBeNull();
+  });
+});

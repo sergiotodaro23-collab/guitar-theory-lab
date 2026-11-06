@@ -404,3 +404,8 @@ button, select, input { font: inherit; color: inherit; }
 .diagram-dot.is-root { fill: var(--root); }
 .diagram-degree { fill: var(--void); font: 700 8px var(--display); text-anchor: middle; dominant-baseline: central; }
 .voicing-ring { fill: none; stroke: var(--tension); stroke-width: 2.4; pointer-events: none; }
+
+/* ---- Arpeggios ---- */
+.quick-chords { display: flex; flex-wrap: wrap; gap: 4px; }
+.chord-chip.small { font-size: 14px; min-width: 0; padding: 5px 9px; }
+.chord-chip.small[aria-pressed='true'] { background: var(--tension); border-color: var(--tension); color: var(--void); }

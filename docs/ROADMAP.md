@@ -38,7 +38,8 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P1-09 | Validazione con alternativa | IMPLEMENTED | P1-08 | exercises, ui | `PhaseIssue.fix` applicabile con un clic; e2e su 3NPS di pentatonica. |
 | P1-10 | Arpeggi concatenati su progressione, cambio accordo come fase | MISSING | P1-07, P1-08 | exercises, harmony | Nuovo tipo di fase "arpeggio" che segue la traccia accordi. |
 | P1-11 | Harmony Lab: dominanti secondarie, sostituzioni, voice leading | PARTIAL | P1-07 | harmony | Presenti: context switch, guide tones, note comuni, risoluzioni, targeting. |
-| P1-12 | Arpeggios Lab (workspace) | MISSING | P1-07 | ui, exercises | Quarta modalità; riusa tastiera e motore. |
+| P1-12 | Arpeggios Lab (workspace) | IMPLEMENTED | P1-07 | exercises, fretboard, app, ui | Quarta modalità. Tre livelli separati: note dell'accordo (teoria), pattern (`ArpeggioSpec`: direzione sale/scende/sale-scende/scende-sale, grado di partenza per i rivolti, passi personalizzati), diteggiatura (posizione di cinque tasti, `arpeggioNotes`). Un accordo o la progressione condivisa con Harmony Lab, con arpeggi che ripartono o si collegano per nota più vicina (voice leading, mai più di un tono al cambio su ii–V–I). Guide tones evidenziati, funzioni sulle note, accompagnamento, sincronia con il transport, due preset. Test: 9 unit sul motore, 3 sulle tracce, 1 e2e. |
+| P1-12b | Arpeggi per forma CAGED, salti di corda, sweep, target sul battere | MISSING | P1-12 | exercises | Oggi la posizione è una finestra di tasti scelta a mano. |
 | P1-13 | Preset di percorsi | PARTIAL | P1-08 | persistence, app | Il percorso è salvato con i preset di studio; due preset predefiniti. Manca una libreria di soli percorsi. |
 
 ## P2 — UX/UI Workbench
@@ -54,7 +55,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P2-07 | Mixer laterale | MISSING | — | ui, audio | Oggi volumi dentro i pannelli. |
 | P2-08 | Transport: stop/pausa, Click/Accenti 16 indicatori, timbri click | PARTIAL | P0-07 | ui, timeline, audio | Presenti avvia/pausa/ferma, TAP, swing, suddivisione. Mancano griglia 16 accenti, 4 timbri. |
 | P2-09 | Tutor pixel-art in iPod Touch 1ª gen. | MISSING | P2-02 | ui, nuovo `tutor` | Regole locali deterministiche; sprite originale. |
-| P2-10 | Quattro workspace in navigazione | PARTIAL | P1-12 | ui | Tre presenti. |
+| P2-10 | Quattro workspace in navigazione | IMPLEMENTED | P1-12 | ui | Fretboard, Harmony, Arpeggios, Jam; lo stato musicale resta condiviso. |
 
 ## P3 — Jam Studio e audio
 
@@ -86,5 +87,6 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P1-12 Arpeggios Lab**, che ora può riusare accordi, rivolti e forme.
-2. **P2-02** prototipo del design system skeuomorfico su branch dedicato, a partire dalla tastiera (P2-03) e dal transport.
+1. **P2-02** prototipo del design system skeuomorfico su branch dedicato, a partire dalla tastiera (P2-03) e dal transport.
+2. **P2-08** griglia Click / Accenti a 16 indicatori e timbri del click.
+3. **P3-02** step sequencer Simple in Jam Studio.

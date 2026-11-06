@@ -6,14 +6,15 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 218 test unitari.
-- `npm run test:e2e`: verde, 20 casi su Chromium headless.
+- `npm run check`: verde, 238 test unitari.
+- `npm run test:e2e`: verde, 22 casi su Chromium headless.
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
 ## Funziona
 
-- Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus), Jam Studio (progressioni, comping, loop, seconda scala).
+- Quattro modalità: Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus), Arpeggios Lab, Jam Studio (progressioni, comping, loop).
+- **Arpeggios Lab**: un accordo o la progressione, posizione di cinque tasti, rivolti, quattro direzioni, pattern personalizzati, arpeggi collegati per nota più vicina.
 - Tastiera 0–24 tasti a celle uniformi, CAGED (5 forme) e 3NPS (7 pattern), intervalli 2ª–8ª, sequenze personalizzate.
 - **Percorsi a fasi** (nuovo): ogni fase con scala, forma CAGED/3NPS/range di tasti, ottava, sequenza, direzione, note per movimento e ripetizioni. Fasi sul battere, tastiera che segue la fase in riproduzione.
 - **Editor avanzato** (nuovo): dialog ampio con blocchi fase riordinabili, modelli, errori con alternativa applicabile, anteprima (battute, durata, striscia delle fasi, tastiera, note, transizione).
@@ -42,4 +43,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-P1-12 Arpeggios Lab → P2-02 prototipo skeuomorfico. Dettagli in `docs/ROADMAP.md`.
+P2-02 prototipo skeuomorfico → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.
