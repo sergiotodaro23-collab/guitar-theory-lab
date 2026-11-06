@@ -15,6 +15,17 @@ Le dipendenze vanno solo verso il basso. I moduli da 1 a 6 e 8 non conoscono DOM
 
 `src/app` collega i moduli: `settings.ts` (stato salvabile), `tracks.ts` (impostazioni → tracce), `engine.ts` (unico proprietario di AudioContext e scheduler).
 
+## Scale sovrapposte
+
+La scala principale resta nelle impostazioni di studio (`tonic`, `scaleId`, posizione). Fino a quattro `ScaleLayer` in `settings.scaleLayers` aggiungono altre scale. `visibleLayers` le trasforma in `OverlayScale { scale, index, wholeNeck }` per `buildMarkerLayer`, che segna su ogni `Marker` le posizioni di lista in `layers`. Il confronto è `compareScales` nel motore teorico.
+
+## Accordi
+
+- `parseChord` legge anche il basso (`C/E`, `D/C`): `Chord.bass` porta nota, grado e rivolto. `withBass` cambia il basso mantenendo lo spelling dell'accordo.
+- `diatonicSeventh(scala, grado)` armonizza le scale eptatoniche.
+- `chordVoicings(accordo)` (in `src/fretboard`) restituisce le forme eseguibili lungo il manico.
+- `settings.chordLayers` e `activeChord` (Fretboard Lab): solo l'attivo arriva a `buildMarkerLayer`, con `voicing` per il contorno della forma.
+
 ## Percorsi a fasi
 
 `Routine` è un dato serializzabile: un elenco di `RoutinePhase` con scala, posizione (`caged`, `3nps`, `range`), ottava, sequenza, direzione, note per movimento e ripetizioni.

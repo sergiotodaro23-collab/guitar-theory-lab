@@ -3,7 +3,7 @@ import { mod, parseChord } from '../theory';
 import { PPQ } from '../timeline';
 import {
   PROGRESSION_TEMPLATES, addChord, chordSpans, chordTrack, compTrack, duplicateChord, instantiateTemplate, isValidProgression, moveChord,
-  progressionLength, removeChord, transposeProgression, updateChord, voiceChord, withChord, type Progression,
+  progressionLength, removeChord, transposeProgression, transposeSymbol, updateChord, voiceChord, withChord, type Progression,
 } from './index';
 
 const meter = { beatsPerBar: 4, beatUnit: 4 } as const;
@@ -118,5 +118,16 @@ describe('accompaniment', () => {
       const next = track.events[i + 1]?.tick ?? track.lengthTicks;
       expect(e.tick + e.payload.durationTicks).toBeLessThanOrEqual(next);
     });
+  });
+});
+
+describe('slash chords in progressions', () => {
+  it('transposes the bass with the chord', () => {
+    expect(transposeSymbol('C/E', 2)).toBe('D/F#');
+    expect(transposeSymbol('Am7/G', -2)).toBe('Gm7/F');
+  });
+  it('puts the slash bass at the bottom of the comping voicing', () => {
+    const [bass] = voiceChord(parseChord('C/E'));
+    expect((bass ?? 0) % 12).toBe(4);
   });
 });

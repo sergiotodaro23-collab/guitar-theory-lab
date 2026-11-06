@@ -42,7 +42,7 @@ export function buildTracks(s: Settings): ModeTracks {
 export function manualCompMidis(s: Settings, chordIndex: number): readonly number[] {
   const chord = parsedChords(s.progression)[chordIndex];
   if (!chord) return [];
-  const bass = 40 + (((chord.tones[0]?.pc ?? 0) - 4 + 12) % 12);
+  const bass = 40 + (((chord.bass?.pc ?? chord.tones[0]?.pc ?? 0) - 4 + 12) % 12);
   return [bass, ...guideTones(chord).map((tone) => 60 + tone.pc), 72 + (chord.tones.find((t) => t.degree.includes('5'))?.pc ?? 0) - 12];
 }
 

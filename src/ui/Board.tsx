@@ -4,8 +4,10 @@ import { boardContext } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { AVOID_PROFILES, classifyTone, functionsAcross } from '../harmony';
 import { parsedChords } from '../jam';
-import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
-import { Fretboard } from '../viz/Fretboard';
+import { buildScale, chromaticName, mod, type Chord, type Scale } from '../theory';
+import { resolveChordLayer } from '../app/chordLayers';
+import { Fretboard, type LayerStyle } from '../viz/Fretboard';
+import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
 import { buildMarkerLayer, type Marker } from '../viz/markers';
 
 export function useHarmonyContext() {
@@ -14,15 +16,25 @@ export function useHarmonyContext() {
   const playheadChord = usePlayhead((p) => p.chordIndex);
   return useMemo(() => {
     if (settings.mode === 'fretboard') {
-      const overlay = settings.overlayChord ? tryParseChord(settings.overlayChord) : null;
-      return { chords: overlay ? [overlay] : [], chord: overlay, nextChord: null as Chord | null, chordIndex: 0 };
+      // Only the active chord is drawn; the visible ones feed the note inspector.
+      const resolved = settings.chordLayers.map(resolveChordLayer);
+      const active = resolved[settings.activeChord];
+      const shown = resolved.filter((r, i) => r.chord && (r.layer.visible || i === settings.activeChord));
+      const chord = active?.chord ?? null;
+      return {
+        chords: shown.flatMap((r) => (r.chord ? [r.chord] : [])),
+        chord,
+        nextChord: null as Chord | null,
+        chordIndex: Math.max(0, shown.findIndex((r) => r === active)),
+        voicing: active?.shape?.notes ?? null,
+      };
     }
     const chords = parsedChords(settings.progression);
     const chordIndex = Math.min(playheadChord ?? selected, Math.max(0, chords.length - 1));
     const chord = chords[chordIndex] ?? null;
     const nextChord = chords.length > 1 ? chords[(chordIndex + 1) % chords.length] ?? null : null;
-    return { chords, chord, nextChord, chordIndex };
-  }, [settings.mode, settings.overlayChord, settings.progression, playheadChord, selected]);
+    return { chords, chord, nextChord, chordIndex, voicing: null };
+  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, playheadChord, selected]);
 }
 
 const LEGEND_CHORD: readonly { role: string; label: string; guide?: boolean }[] = [
@@ -37,19 +49,39 @@ const LEGEND_SCALE = [
   { role: 'scale', label: 'Scala' },
 ];
 
-function Legend({ withChord }: { readonly withChord: boolean }) {
+/** Colour, opacity and readable name of every overlay, by list position. */
+export function layerStylesOf(layers: readonly ScaleLayer[]): readonly LayerStyle[] {
+  return layers.map((layer) => {
+    const scale = buildScale(layer.tonic, layer.scaleId);
+    return { color: layer.color, opacity: layer.opacity, name: `${scale.tonicName} ${scale.definition.name}` };
+  });
+}
+
+function Legend({ withChord, layers }: { readonly withChord: boolean; readonly layers: readonly ScaleLayer[] }) {
   const items = withChord ? LEGEND_CHORD : LEGEND_SCALE;
+  const styles = layerStylesOf(layers);
   return (
-    <ul className="legend" aria-label="Legenda">
+    <ul className="legend" aria-label="Legenda" data-testid="legend">
       {items.map((item) => (
         <li key={item.label} className={`legend-item role-${item.role} ${'guide' in item && item.guide ? 'is-guide' : ''}`}>
           <span className="legend-swatch" aria-hidden="true" />
           {item.label}
         </li>
       ))}
+      {layers.map((layer, i) => (layer.visible ? (
+        <li key={layer.id} className={`legend-item legend-layer layer-${layer.color}`} data-testid="legend-layer">
+          <svg className="legend-pip" viewBox="0 0 20 20" aria-hidden="true">
+            <circle className="legend-pip-ring" cx="10" cy="10" r="6.5" />
+            <circle className={`pip layer-${layer.color}`} cx={10 + (PIP_DIRS[i]?.[0] ?? 1) * 5.5} cy={10 + (PIP_DIRS[i]?.[1] ?? -1) * 5.5} r="3.2" />
+          </svg>
+          {styles[i]?.name} <span className="muted">(punto {PIP_PLACES[i]})</span>
+        </li>
+      ) : null))}
     </ul>
   );
 }
+
+const PIP_DIRS: readonly (readonly [number, number])[] = [[1, -1], [1, 1], [-1, 1], [-1, -1]];
 
 export function Board() {
   const settings = useApp((s) => s.settings);
@@ -57,17 +89,18 @@ export function Board() {
   const setPinned = useApp((s) => s.setPinned);
   const note = usePlayhead((p) => p.note);
   const trail = usePlayhead((p) => p.trail);
-  const { chords, chord, nextChord, chordIndex } = useHarmonyContext();
+  const { chords, chord, nextChord, chordIndex, voicing } = useHarmonyContext();
 
   const playheadPhase = usePlayhead((p) => p.phase);
   const selectedPhase = useApp((s) => s.selectedPhase);
   const phaseIndex = playheadPhase ?? selectedPhase;
   const context = useMemo(() => boardContext(settings, phaseIndex), [settings, phaseIndex]);
   const { scale } = context;
-  const secondScale = useMemo(
-    () => (settings.secondScaleOn ? buildScale(settings.secondTonic, settings.secondScaleId) : null),
-    [settings.secondScaleOn, settings.secondTonic, settings.secondScaleId],
+  const overlays = useMemo(
+    () => visibleLayers(settings.scaleLayers).map((shown) => ({ scale: shown.scale, index: shown.index, wholeNeck: shown.layer.region === 'neck' })),
+    [settings.scaleLayers],
   );
+  const layerStyles = useMemo(() => layerStylesOf(settings.scaleLayers), [settings.scaleLayers]);
 
   const layer = useMemo(() => buildMarkerLayer({
     notes: context.notes,
@@ -80,9 +113,10 @@ export function Board() {
     profile: settings.avoidProfile,
     labelMode: settings.labelMode,
     pinnedPc,
-    secondScale,
+    overlays,
+    voicing,
     wholeNeck: context.wholeNeck,
-  }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, secondScale]);
+  }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, overlays, voicing]);
 
   const onPick = useCallback((marker: Marker) => {
     setPinned(useApp.getState().pinnedPc === marker.pc ? null : marker.pc);
@@ -106,10 +140,11 @@ export function Board() {
         arrows={showAids ? layer.arrows : []}
         active={active}
         trail={showAids ? trail : []}
+        layerStyles={layerStyles}
         onPick={onPick}
       />
       <div className="board-foot">
-        {showAids ? <Legend withChord={chord !== null} /> : <p className="aids-off">Aiuti nascosti: suona a orecchio, l’accordo resta in alto.</p>}
+        {showAids ? <Legend withChord={chord !== null} layers={settings.scaleLayers} /> : <p className="aids-off">Aiuti nascosti: suona a orecchio, l’accordo resta in alto.</p>}
         <NoteInspector chords={chords} chordIndex={chordIndex} scale={scale} />
       </div>
     </section>

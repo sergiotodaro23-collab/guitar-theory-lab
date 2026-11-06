@@ -22,9 +22,15 @@ Ambiente: container cloud Linux, Node 22.23, npm 10.9, Chromium headless (Playwr
 | Percorsi a fasi (C su / G giù, melodica classica, 3NPS, validazioni, JSON) | Verde |
 | Editor: apertura, modelli, aggiunta, riordino, eliminazione, alternativa a un errore, Escape, applica, riproduzione con cambio di forma | Verde (e2e) |
 | Editor a 820 px senza overflow orizzontale | Verde (e2e) |
+| Accordi multipli: builder, slash/rivolto, forma sulla tastiera, selezione, riordino, invio a Harmony Lab | Verde (e2e); 218 unit, 20 e2e dopo il blocco |
+| Scale multiple: aggiunta fino a 5, confronto, visibilità, riordino, rimozione, ricarica pagina | Verde (e2e); 181 unit, 19 e2e dopo il blocco |
 | Ispezione visiva a 1440×900 e 820×1000 | Controllata su screenshot |
 | `npm audit --omit=dev` | 0 vulnerabilità |
 | `npm audit` (dev) | 10 (8 moderate, 2 critiche) nella catena Vitest 3 (`tinypool`, `@vitest/mocker`, `minimatch`). Solo strumenti di sviluppo; la correzione richiede Vitest 4 (major). Da pianificare. |
+
+### Problemi aperti trovati durante i test
+
+- `Field` avvolge i controlli in un `<label>`: quando dentro ci sono più pulsanti (i gruppi `Segmented`), l'etichetta si associa solo al primo. Corretto per il selettore delle forme degli accordi; da correggere in tutto il componente.
 
 ### Non verificato
 

@@ -272,7 +272,7 @@ test('built-in presets load, including one that changes mode', async ({ page }) 
   await expect(page.getByTestId('builder')).toBeVisible();
   await expect(page.getByTestId('chip-0')).toContainText('A7');
   await page.getByTestId('preset-load').selectOption('fourths-dorian');
-  await expect(page.getByTestId('overlay-spelling')).toContainText('D (1)');
+  await expect(page.getByTestId('chord-spelling')).toContainText('D (1)');
 });
 
 test('layout holds at phone width with no page overflow', async ({ page }) => {
@@ -375,4 +375,97 @@ test('advanced editor fits a tablet and a phone without page overflow', async ({
   const overflow = await editor.evaluate((el) => el.scrollWidth - el.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
   await expect(editor.getByTestId('routine-apply')).toBeInViewport();
+});
+
+test('multiple scales: add up to five, compare, show, reorder, remove, survive a reload', async ({ page }) => {
+  const errors = await open(page);
+  const layers = page.getByTestId('scale-layer');
+  const add = page.getByTestId('add-scale');
+
+  await add.click();
+  await expect(layers).toHaveCount(1);
+  // C major's relative minor pentatonic, drawn over the position with its pip.
+  await expect(layers.first()).toContainText('A Pentatonica minore');
+  await expect(page.locator('.pip[data-layer="0"]').first()).toBeVisible();
+  await expect(page.getByTestId('legend-layer')).toHaveCount(1);
+
+  // Change it to C dorian and read the comparison.
+  await layers.first().getByRole('button', { name: /Pentatonica minore/ }).click();
+  await page.getByLabel('Tipo della scala 2').selectOption({ label: 'Dorica' });
+  await page.getByLabel('Tonica della scala 2').selectOption('C');
+  await expect(page.getByTestId('scale-comparison')).toContainText('Solo nella principale');
+  await expect(page.getByTestId('scale-comparison')).toContainText(/E\s+B/);
+  await expect(page.getByTestId('scale-comparison')).toContainText(/Eb\s+Bb/);
+  // Eb is not in C major: a dashed marker in the layer's colour.
+  await expect(page.locator('.marker[data-role="other-scale"]').first()).toBeVisible();
+
+  // Fill the list: later scales start hidden, the button stops at five.
+  await add.click();
+  await add.click();
+  await add.click();
+  await expect(layers).toHaveCount(4);
+  await expect(add).toBeDisabled();
+  await expect(page.getByTestId('legend-layer')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Mostra la scala 3' }).click();
+  await expect(page.getByText('Più di due scale visibili')).toBeVisible();
+  await expect(page.getByTestId('legend-layer')).toHaveCount(2);
+
+  // Reorder and remove.
+  const names = () => layers.locator('.layer-name').allTextContents();
+  const before = await names();
+  await page.getByRole('button', { name: 'Sposta la scala 3 in alto' }).click();
+  expect((await names())[0]).toBe(before[1]);
+  await page.getByRole('button', { name: 'Rimuovi la scala 5' }).click();
+  await expect(layers).toHaveCount(3);
+  await expect(add).toBeEnabled();
+
+  await page.waitForTimeout(400);
+  await page.reload();
+  await expect(layers).toHaveCount(3);
+  expect(await names()).toEqual([before[1], before[0], before[2]]);
+  expect(errors).toEqual([]);
+});
+
+test('multiple chords: build, slash bass, voicing on the neck, select, reorder, send to Harmony Lab', async ({ page }) => {
+  const errors = await open(page);
+  const chords = page.getByTestId('chord-layer');
+  await page.getByTestId('add-chord').click();
+  await expect(chords).toHaveCount(1);
+  await expect(page.getByTestId('chord-symbol')).toHaveValue('Cmaj7');
+  await expect(page.getByTestId('current-chord')).toHaveText('Cmaj7');
+
+  // Builder: C major triad in first inversion.
+  await page.getByTestId('chord-quality').selectOption({ label: 'maggiore' });
+  await page.getByTestId('chord-bass').selectOption({ label: 'E — primo rivolto (3)' });
+  await expect(page.getByTestId('chord-symbol')).toHaveValue('C/E');
+  await expect(page.getByTestId('chord-spelling')).toContainText('primo rivolto');
+
+  // Pick the open shape 0-3-2-0-1-0: its notes get the shape outline on the neck.
+  const openShape = await page.getByTestId('chord-voicing').locator('option', { hasText: '0-3-2-0-1-0' }).getAttribute('value');
+  await page.getByTestId('chord-voicing').selectOption({ value: openShape ?? '' });
+  await expect(page.locator('.marker.in-voicing')).toHaveCount(6);
+  await expect(page.locator('.marker.in-voicing[data-string="0"][data-fret="0"]')).toHaveAttribute('data-role', 'chord-tone');
+
+  // Free text still works, slash chords included.
+  await page.getByTestId('add-chord').click();
+  await page.getByTestId('chord-symbol').fill('Am7/G');
+  await expect(page.getByTestId('chord-spelling')).toContainText('terzo rivolto');
+  await page.getByTestId('add-chord').click();
+  await expect(chords).toHaveCount(3);
+  await expect(page.locator('.diagram-card')).toHaveCount(3);
+
+  // Only the active chord is on the neck; clicking a diagram switches it.
+  await page.locator('.diagram-card').first().click();
+  await expect(page.getByTestId('current-chord')).toHaveText('C/E');
+  await page.getByRole('button', { name: 'Nascondi l’accordo 3' }).click();
+  await expect(page.locator('.diagram-card')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Sposta l’accordo 2 in alto' }).click();
+  await expect(chords.first()).toContainText('Am7/G');
+
+  // The visible chords become a progression.
+  await page.getByTestId('chords-to-progression').click();
+  await expect(page.getByRole('button', { name: 'Harmony Lab', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('chip-0')).toContainText('Am7/G');
+  await expect(page.getByTestId('chip-1')).toContainText('C/E');
+  expect(errors).toEqual([]);
 });

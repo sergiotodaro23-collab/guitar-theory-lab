@@ -31,7 +31,7 @@ function CurrentChord() {
   if (settings.mode === 'fretboard') {
     return (
       <div className="now-playing">
-        <span className="now-chord now-chord-text" data-testid="current-chord">{settings.overlayChord || 'Solo scala'}</span>
+        <span className="now-chord now-chord-text" data-testid="current-chord">{settings.chordLayers[settings.activeChord]?.symbol || 'Solo scala'}</span>
       </div>
     );
   }
