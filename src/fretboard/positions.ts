@@ -139,15 +139,20 @@ function fillGaps(
 export function rangePosition(scale: Scale, lowFret: number, highFret: number, tuning = STANDARD_TUNING): ScalePosition {
   const low = Math.max(0, Math.min(lowFret, highFret));
   const high = Math.min(DEFAULT_FRETS, Math.max(lowFret, highFret));
-  const pcs = new Set(scale.tones.map((tone) => tone.pc));
+  return { label: `Tasti ${low}–${high}`, notes: pitchesInWindow(scale.tones.map((tone) => tone.pc), low, high, tuning) };
+}
+
+/** Every note of the given pitch classes between two frets, one per pitch, sorted by pitch. */
+export function pitchesInWindow(pitchClasses: readonly number[], low: number, high: number, tuning = STANDARD_TUNING): readonly FretNote[] {
+  const pcs = new Set(pitchClasses);
   const inWindow: FretNote[] = [];
   tuning.forEach((openMidi, string) => {
-    for (let fret = low; fret <= high; fret += 1) {
+    for (let fret = Math.max(0, low); fret <= Math.min(DEFAULT_FRETS, high); fret += 1) {
       const midi = openMidi + fret;
       if (pcs.has(mod(midi, 12))) inWindow.push({ string, fret, midi, pc: mod(midi, 12) });
     }
   });
-  return { label: `Tasti ${low}–${high}`, notes: uniquePitches(inWindow) };
+  return uniquePitches(inWindow);
 }
 
 /** The same shape twelve frets higher, or null when it would leave the neck. */
