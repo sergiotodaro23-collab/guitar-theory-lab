@@ -9,7 +9,7 @@ const chords = ['Dm7', 'G7', 'Cmaj7'].map(parseChord);
 
 const input = (over: Partial<MarkerInput> = {}): MarkerInput => ({
   notes, scale, chord: chords[0] ?? null, nextChord: chords[1] ?? null, chords, chordIndex: 0, focus: 'all',
-  profile: 'chord-scale', labelMode: 'function', pinnedPc: null, secondScale: null, wholeNeck: false, ...over,
+  profile: 'chord-scale', labelMode: 'function', pinnedPc: null, overlays: [], wholeNeck: false, ...over,
 });
 
 describe('marker layer', () => {
@@ -62,12 +62,32 @@ describe('marker layer', () => {
     const now = markers.find((m) => m.target === 'now');
     expect(chords[0]?.tones.map((t) => t.pc)).toContain(now?.pc);
   });
-  it('marks a pinned note at every location and a second scale', () => {
+  it('marks a pinned note at every location and an overlaid scale', () => {
     const second = buildScale('E', 'minorBlues');
-    const { markers } = buildMarkerLayer(input({ pinnedPc: 4, secondScale: second, chord: null, nextChord: null }));
+    const { markers } = buildMarkerLayer(input({ pinnedPc: 4, overlays: [{ scale: second, index: 0, wholeNeck: false }], chord: null, nextChord: null }));
     expect(markers.filter((m) => m.pinned).every((m) => m.pc === 4)).toBe(true);
     expect(markers.filter((m) => m.pinned).length).toBeGreaterThan(1);
-    expect(markers.find((m) => m.pc === 10)).toMatchObject({ role: 'second-scale', inSecondScale: true });
+    // Bb is in E blues (b5) but not in C major: drawn on its own, labelled by E blues.
+    expect(markers.find((m) => m.pc === 10)).toMatchObject({ role: 'other-scale', layers: [0], label: 'b5' });
+    // E is in both: a main-scale marker that carries the overlay's pip.
+    expect(markers.find((m) => m.pc === 4)).toMatchObject({ role: 'scale', layers: [0] });
+    // F is only in C major.
+    expect(markers.find((m) => m.pc === 5)?.layers).toEqual([]);
+  });
+  it('keeps each overlay on its list position and its region', () => {
+    const relative = { scale: buildScale('A', 'aeolian'), index: 1, wholeNeck: false };
+    const dorian = { scale: buildScale('C', 'dorian'), index: 3, wholeNeck: true };
+    const { markers } = buildMarkerLayer(input({ overlays: [relative, dorian], chord: null, nextChord: null, labelMode: 'degree' }));
+    const frets = notes.map((n) => n.fret);
+    const [low, high] = [Math.min(...frets), Math.max(...frets)];
+    // Every C major note is in A aeolian: index 1 on all of them inside the position.
+    for (const m of markers.filter((m) => m.fret >= low && m.fret <= high && m.role !== 'other-scale')) expect(m.layers).toContain(1);
+    // C dorian covers the whole neck, so its Eb appears far from the position.
+    const farEb = markers.filter((m) => m.pc === 3 && (m.fret < low - 1 || m.fret > high + 1));
+    expect(farEb.length).toBeGreaterThan(0);
+    expect(farEb.every((m) => m.role === 'other-scale' && m.label === 'b3' && m.layers.join() === '3')).toBe(true);
+    // Outside the position A aeolian adds nothing.
+    expect(markers.filter((m) => m.fret > high + 1).every((m) => !m.layers.includes(1))).toBe(true);
   });
   it('labels fingers on request', () => {
     const { markers } = buildMarkerLayer(input({ chord: null, nextChord: null, labelMode: 'finger' }));

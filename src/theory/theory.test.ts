@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildScale, chromaticName, parseChord, parseNote, pitchClass, SCALE_IDS, SCALES, TONICS, tryParseChord, transposeNote, noteName, diatonicIndex, midiToHz } from './index';
+import { buildScale, compareScales, chromaticName, parseChord, parseNote, pitchClass, SCALE_IDS, SCALES, TONICS, tryParseChord, transposeNote, noteName, diatonicIndex, midiToHz } from './index';
 
 const names = (tonic: string, id: Parameters<typeof buildScale>[1]) => buildScale(tonic, id).tones.map((t) => t.name).join(' ');
 
@@ -120,5 +120,25 @@ describe('chords against published spellings', () => {
     expect(tryParseChord('Cblah')).toBeNull();
     expect(tryParseChord('H7')).toBeNull();
     expect(tryParseChord('G7')?.family).toBe('dominant');
+  });
+});
+
+describe('scale comparison', () => {
+  it('finds no difference between a major key and its relative minor', () => {
+    const c = compareScales(buildScale('C', 'ionian'), buildScale('A', 'aeolian'));
+    expect(c.common).toEqual(['C', 'D', 'E', 'F', 'G', 'A', 'B']);
+    expect(c.onlyFirst).toEqual([]);
+    expect(c.onlySecond).toEqual([]);
+  });
+  it('shows the b3 and b7 that turn C ionian into C dorian, spelled in each scale', () => {
+    const c = compareScales(buildScale('C', 'ionian'), buildScale('C', 'dorian'));
+    expect(c.onlyFirst).toEqual(['E', 'B']);
+    expect(c.onlySecond).toEqual(['Eb', 'Bb']);
+    expect(c.common).toEqual(['C', 'D', 'F', 'G', 'A']);
+  });
+  it('finds the blue note of A minor blues against A minor pentatonic', () => {
+    const c = compareScales(buildScale('A', 'minorBlues'), buildScale('A', 'minorPentatonic'));
+    expect(c.onlyFirst).toEqual(['Eb']);
+    expect(c.onlySecond).toEqual([]);
   });
 });

@@ -5,6 +5,7 @@ import type { AvoidProfile } from '../harmony';
 import { COMP_PATTERNS, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, type CompPattern, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Scale, type ScaleId } from '../theory';
 import type { Meter, Subdivision } from '../timeline';
+import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
 
 export type AppMode = 'fretboard' | 'harmony' | 'jam';
 export type PositionType = 'caged' | '3nps' | 'neck';
@@ -33,6 +34,8 @@ export interface StudySettings {
   readonly npsStart: number;
   readonly labelMode: LabelMode;
   readonly overlayChord: string;
+  /** Up to four scales drawn over the main one. */
+  readonly scaleLayers: readonly ScaleLayer[];
   readonly exerciseOn: boolean;
   readonly exerciseMode: ExerciseMode;
   readonly routine: Routine;
@@ -56,9 +59,6 @@ export interface HarmonySettings {
   readonly focus: HarmonyFocus;
   readonly avoidProfile: AvoidProfile;
   readonly showAids: boolean;
-  readonly secondScaleOn: boolean;
-  readonly secondTonic: string;
-  readonly secondScaleId: ScaleId;
   readonly compOn: boolean;
   readonly compPattern: CompPattern;
   readonly volClick: number;
@@ -84,6 +84,7 @@ export const DEFAULT_SETTINGS: Settings = {
   npsStart: 0,
   labelMode: 'degree',
   overlayChord: '',
+  scaleLayers: [],
   exerciseOn: true,
   exerciseMode: 'single',
   routine: firstRoutine,
@@ -104,9 +105,6 @@ export const DEFAULT_SETTINGS: Settings = {
   focus: 'all',
   avoidProfile: 'chord-scale',
   showAids: true,
-  secondScaleOn: false,
-  secondTonic: 'A',
-  secondScaleId: 'minorPentatonic',
   compOn: true,
   compPattern: 'charleston',
   volClick: 0.7,
@@ -141,6 +139,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     labelMode: oneOf(r.labelMode, ['note', 'degree', 'function', 'finger', 'none'] as const, d.labelMode),
     overlayChord: typeof r.overlayChord === 'string' ? r.overlayChord : d.overlayChord,
     exerciseOn: typeof r.exerciseOn === 'boolean' ? r.exerciseOn : d.exerciseOn,
+    scaleLayers: sanitizeLayers(r),
     exerciseMode: oneOf(r.exerciseMode, ['single', 'routine'] as const, d.exerciseMode),
     routine: sanitizeRoutine(r.routine, d.routine),
     exerciseKind: oneOf(r.exerciseKind, ['scale', 'interval', 'custom'] as const, d.exerciseKind),
@@ -160,9 +159,6 @@ export function sanitizeSettings(raw: unknown): Settings {
     focus: oneOf(r.focus, ['all', 'guide', 'common', 'resolution', 'targeting'] as const, d.focus),
     avoidProfile: oneOf(r.avoidProfile, ['chord-scale', 'altered-dominants', 'modal'] as const, d.avoidProfile),
     showAids: typeof r.showAids === 'boolean' ? r.showAids : d.showAids,
-    secondScaleOn: typeof r.secondScaleOn === 'boolean' ? r.secondScaleOn : d.secondScaleOn,
-    secondTonic: oneOf(r.secondTonic, TONICS, d.secondTonic),
-    secondScaleId: oneOf(r.secondScaleId, scaleIds, d.secondScaleId),
     compOn: typeof r.compOn === 'boolean' ? r.compOn : d.compOn,
     compPattern: oneOf(r.compPattern, Object.keys(COMP_PATTERNS) as CompPattern[], d.compPattern),
     volClick: number01(r.volClick, d.volClick),

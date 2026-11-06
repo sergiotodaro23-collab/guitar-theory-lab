@@ -65,3 +65,22 @@ export function buildScale(tonicName: string, id: ScaleId): Scale {
 export function scaleToneForPc(scale: Scale, pc: number): ScaleTone | undefined {
   return scale.tones.find((tone) => tone.pc === pc);
 }
+
+export interface ScaleComparison {
+  /** Spelled as in the first scale. */
+  readonly common: readonly string[];
+  readonly onlyFirst: readonly string[];
+  /** Spelled as in the second scale. */
+  readonly onlySecond: readonly string[];
+}
+
+/** Notes two scales share and the ones that tell them apart, compared by pitch class. */
+export function compareScales(first: Scale, second: Scale): ScaleComparison {
+  const secondPcs = new Set(second.tones.map((t) => t.pc));
+  const firstPcs = new Set(first.tones.map((t) => t.pc));
+  return {
+    common: first.tones.filter((t) => secondPcs.has(t.pc)).map((t) => t.name),
+    onlyFirst: first.tones.filter((t) => !secondPcs.has(t.pc)).map((t) => t.name),
+    onlySecond: second.tones.filter((t) => !firstPcs.has(t.pc)).map((t) => t.name),
+  };
+}
