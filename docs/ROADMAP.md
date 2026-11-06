@@ -11,7 +11,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | ID | Requisito | Stato | Dip. | Moduli | Strategia · test · accettazione |
 |----|-----------|-------|------|--------|---------------------------------|
 | P0-01 | Audit del repository | IMPLEMENTED | — | docs | Sintesi in `docs/QA_REPORT.md`. |
-| P0-02 | Build, lint, typecheck, unit, e2e verdi | IMPLEMENTED | — | tutto | `npm run check` + `npm run test:e2e` (170 unit, 18 e2e su Chromium). |
+| P0-02 | Build, lint, typecheck, unit, e2e verdi | IMPLEMENTED | — | tutto | `npm run check` + `npm run test:e2e` (170 unit, 19 e2e su Chromium). |
 | P0-03 | CI GitHub eseguita | IMPLEMENTED | — | `.github` | Run #1 su `main` verde (6/11/2026). Branch protection non applicabile su repo privato Free. |
 | P0-04 | Tastiera 0–24 tasti | IMPLEMENTED | — | fretboard, viz | `DEFAULT_FRETS = 24`; test su 6×25 note, fret 24 = due ottave sopra la corda vuota, forme entro 24. |
 | P0-05 | Celle uniformi della tastiera | IMPLEMENTED | P0-04 | viz | `fretX` lineare; segnatasti 12 e 24 doppi. |
@@ -80,7 +80,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P5-01 | Licenza open source | IMPLEMENTED | GPL-3.0-or-later (D-08): `LICENSE`, `package.json`, avviso nell'app. |
 | P5-02 | CONTRIBUTING, README aggiornati | IMPLEMENTED | `CONTRIBUTING.md` con regole su licenza dei contributi, campioni e modelli. |
 | P5-03 | Audit dipendenze | IMPLEMENTED | `npm audit` alla data dell'audit (vedi QA). |
-| P5-04 | Accessibilità e performance | PARTIAL | Marker navigabili da tastiera, aria-label, reduced motion; da verificare con audit completo. |
+| P5-04 | Accessibilità e performance | PARTIAL | Marker navigabili da tastiera, aria-label, reduced motion; `Field group` per i gruppi di pulsanti (nessuna `<label>` con più controlli, verificato in e2e); da verificare con audit completo. |
 
 ## Prossimo intervento
 

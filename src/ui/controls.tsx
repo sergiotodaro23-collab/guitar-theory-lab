@@ -1,6 +1,29 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 
-export function Field({ label, children, hint }: { readonly label: string; readonly children: ReactNode; readonly hint?: string | undefined }) {
+/**
+ * A labelled form row. With a single native control (select, input) it is a
+ * <label> wrapping the control. With `group` (a Segmented or a row of buttons)
+ * it is a role="group" named by its visible label: a <label> around several
+ * controls would only label the first one.
+ */
+export function Field({ label, children, hint, group = false }: {
+  readonly label: string;
+  readonly children: ReactNode;
+  readonly hint?: string | undefined;
+  readonly group?: boolean;
+}) {
+  const id = useId();
+  if (group) {
+    const labelId = `${id}-label`;
+    const hintId = `${id}-hint`;
+    return (
+      <div className="field" role="group" aria-labelledby={labelId} aria-describedby={hint ? hintId : undefined}>
+        <span id={labelId} className="field-label">{label}</span>
+        {children}
+        {hint ? <span id={hintId} className="field-hint">{hint}</span> : null}
+      </div>
+    );
+  }
   return (
     <label className="field">
       <span className="field-label">{label}</span>
@@ -45,10 +68,11 @@ export function Segmented<T extends string | number>({ value, options, onChange,
   readonly value: T;
   readonly options: readonly Option<T>[];
   readonly onChange: (value: T) => void;
-  readonly label: string;
+  /** Names the group. Omit it inside a `<Field group>`, which already names it. */
+  readonly label?: string;
 }) {
   return (
-    <div className="segmented" role="group" aria-label={label}>
+    <div className="segmented" role={label ? 'group' : undefined} aria-label={label}>
       {options.map((option) => (
         <button
           type="button"

@@ -30,9 +30,8 @@ export function ScalePanel() {
         <Field label="Scala"><Select testId="scale" label="Scala" value={s.scaleId} options={scaleOptions} onChange={(scaleId: ScaleId) => update({ scaleId })} /></Field>
       </div>
       <p className="spelling" data-testid="scale-spelling">{scale.tones.map((t) => t.name).join('  ')}</p>
-      <Field label="Diteggiatura">
+      <Field label="Diteggiatura" group>
         <Segmented<PositionType>
-          label="Diteggiatura"
           value={s.positionType === '3nps' && !heptatonic ? 'caged' : s.positionType}
           options={[
             { value: 'caged', label: 'CAGED' },
@@ -44,22 +43,20 @@ export function ScalePanel() {
       </Field>
       {!heptatonic ? <p className="note">Il 3NPS richiede sette note: per questa scala si usa CAGED.</p> : null}
       {s.positionType === '3nps' && heptatonic ? (
-        <Field label="Parti dal grado">
+        <Field label="Parti dal grado" group>
           <Segmented<number>
-            label="Grado di partenza"
             value={s.npsStart}
             options={scale.tones.map((tone, i) => ({ value: i, label: tone.degree }))}
             onChange={(npsStart) => update({ npsStart })}
           />
         </Field>
       ) : (
-        <Field label="Forma">
-          <Segmented label="Forma CAGED" value={s.cagedForm} options={CAGED_FORMS.map((f) => ({ value: f, label: f }))} onChange={(cagedForm) => update({ cagedForm })} />
+        <Field label="Forma" group>
+          <Segmented value={s.cagedForm} options={CAGED_FORMS.map((f) => ({ value: f, label: f }))} onChange={(cagedForm) => update({ cagedForm })} />
         </Field>
       )}
-      <Field label="Sulle note">
+      <Field label="Sulle note" group>
         <Segmented<LabelMode>
-          label="Etichette"
           value={s.labelMode}
           options={[
             { value: 'degree', label: 'Grado' },
@@ -83,9 +80,8 @@ export function ExercisePanel() {
   return (
     <Panel title="Esercizio">
       <Toggle checked={s.exerciseOn} onChange={(exerciseOn) => update({ exerciseOn })}>Evidenzia le note a tempo</Toggle>
-      <Field label="Struttura">
+      <Field label="Struttura" group>
         <Segmented
-          label="Struttura dell'esercizio"
           value={s.exerciseMode}
           options={[
             { value: 'single', label: 'Esercizio singolo' },
@@ -131,9 +127,8 @@ function SingleExercise({ validCustom }: { readonly validCustom: boolean }) {
   const update = useApp((state) => state.update);
   return (
     <>
-      <Field label="Tipo">
+      <Field label="Tipo" group>
         <Segmented
-          label="Tipo di esercizio"
           value={s.exerciseKind}
           options={[
             { value: 'interval', label: 'Intervalli' },
@@ -154,9 +149,8 @@ function SingleExercise({ validCustom }: { readonly validCustom: boolean }) {
               onChange={(interval) => update({ interval })}
             />
           </Field>
-          <Field label="Ogni coppia">
+          <Field label="Ogni coppia" group>
             <Segmented
-              label="Direzione della coppia"
               value={s.pairMotion}
               options={[
                 { value: 'ascending', label: 'Sale' },
@@ -314,9 +308,8 @@ export function HarmonyPanel() {
         <ChordStrip />
         <ProgressionLoader />
         <div className="row">
-          <Field label="Cambio accordi">
+          <Field label="Cambio accordi" group>
             <Segmented
-              label="Cambio accordi"
               value={s.changeMode}
               options={[{ value: 'auto', label: 'Automatico' }, { value: 'manual', label: 'Manuale' }]}
               onChange={(changeMode) => update({ changeMode })}
@@ -324,9 +317,8 @@ export function HarmonyPanel() {
           </Field>
           {s.changeMode === 'manual' ? (
             <>
-              <Field label="Il cambio arriva">
+              <Field label="Il cambio arriva" group>
                 <Segmented
-                  label="Quantizzazione"
                   value={s.quantize}
                   options={[{ value: 'beat', label: 'Al movimento' }, { value: 'bar', label: 'Alla battuta' }]}
                   onChange={(quantize) => update({ quantize })}
@@ -339,8 +331,8 @@ export function HarmonyPanel() {
             </>
           ) : null}
         </div>
-        <Field label="Cosa guardare" hint={help}>
-          <Segmented label="Focus" value={s.focus} options={FOCUS_OPTIONS} onChange={(focus) => update({ focus })} />
+        <Field label="Cosa guardare" hint={help} group>
+          <Segmented value={s.focus} options={FOCUS_OPTIONS} onChange={(focus) => update({ focus })} />
         </Field>
         <div className="row">
           <Field label="Avoid notes" hint={AVOID_PROFILES[s.avoidProfile].description}>

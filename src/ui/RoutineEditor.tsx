@@ -39,9 +39,8 @@ function move<T>(list: readonly T[], from: number, to: number): readonly T[] {
 function PositionFields({ position, onChange }: { readonly position: PhasePosition; readonly onChange: (p: PhasePosition) => void }) {
   return (
     <>
-      <Field label="Forma">
+      <Field label="Forma" group>
         <Segmented
-          label="Tipo di forma"
           value={position.kind}
           options={[
             { value: 'caged', label: 'CAGED' },
@@ -52,14 +51,13 @@ function PositionFields({ position, onChange }: { readonly position: PhasePositi
         />
       </Field>
       {position.kind === 'caged' ? (
-        <Field label="Forma CAGED">
-          <Segmented label="Forma CAGED" value={position.form} options={CAGED_FORMS.map((f) => ({ value: f, label: f }))} onChange={(form) => onChange({ kind: 'caged', form })} />
+        <Field label="Forma CAGED" group>
+          <Segmented value={position.form} options={CAGED_FORMS.map((f) => ({ value: f, label: f }))} onChange={(form) => onChange({ kind: 'caged', form })} />
         </Field>
       ) : null}
       {position.kind === '3nps' ? (
-        <Field label="Pattern 3NPS (grado di partenza sulla sesta corda)">
+        <Field label="Pattern 3NPS (grado di partenza sulla sesta corda)" group>
           <Segmented
-            label="Pattern 3NPS"
             value={position.start}
             options={[0, 1, 2, 3, 4, 5, 6].map((n) => ({ value: n, label: String(n + 1) }))}
             onChange={(start) => onChange({ kind: '3nps', start })}
@@ -125,16 +123,15 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
         <fieldset className="block-group">
           <legend>Posizione</legend>
           <PositionFields position={phase.position} onChange={(position) => onChange({ position })} />
-          <Field label="Ottava">
-            <Segmented label={`Ottava della fase ${n}`} value={phase.octave} options={[{ value: 0 as const, label: 'Bassa' }, { value: 1 as const, label: 'Alta (+12)' }]} onChange={(octave) => onChange({ octave })} />
+          <Field label="Ottava" group>
+            <Segmented value={phase.octave} options={[{ value: 0 as const, label: 'Bassa' }, { value: 1 as const, label: 'Alta (+12)' }]} onChange={(octave) => onChange({ octave })} />
           </Field>
         </fieldset>
 
         <fieldset className="block-group">
           <legend>Sequenza</legend>
-          <Field label="Tipo">
+          <Field label="Tipo" group>
             <Segmented
-              label={`Tipo di sequenza della fase ${n}`}
               value={phase.kind}
               options={[{ value: 'scale', label: 'Scala' }, { value: 'interval', label: 'Intervalli' }, { value: 'custom', label: 'Pattern' }]}
               onChange={(kind) => onChange({ kind })}
@@ -164,9 +161,8 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
 
         <fieldset className="block-group">
           <legend>Direzione e tempo</legend>
-          <Field label="Direzione">
+          <Field label="Direzione" group>
             <Segmented
-              label={`Direzione della fase ${n}`}
               value={phase.direction}
               options={[{ value: 'up', label: 'Sale' }, { value: 'down', label: 'Scende' }, { value: 'updown', label: 'Sale e scende' }]}
               onChange={(direction) => onChange({ direction })}

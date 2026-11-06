@@ -376,3 +376,21 @@ test('advanced editor fits a tablet and a phone without page overflow', async ({
   expect(overflow).toBeLessThanOrEqual(1);
   await expect(editor.getByTestId('routine-apply')).toBeInViewport();
 });
+
+test('no <label> wraps more than one control, in every mode and in the editor', async ({ page }) => {
+  const errors = await open(page);
+  const crowdedLabels = () => page.evaluate(() => [...document.querySelectorAll('label')]
+    .map((label) => ({ text: label.textContent?.trim().slice(0, 60) ?? '', controls: label.querySelectorAll('button, input, select, textarea').length }))
+    .filter((entry) => entry.controls > 1));
+  for (const name of ['Fretboard Lab', 'Harmony Lab', 'Jam Studio']) {
+    await mode(page, name);
+    expect(await crowdedLabels(), name).toEqual([]);
+  }
+  await mode(page, 'Fretboard Lab');
+  // A labelled group is named by its visible label.
+  await expect(page.getByRole('group', { name: 'Diteggiatura', exact: true })).toHaveCount(1);
+  await page.getByTestId('open-editor').click();
+  await expect(page.getByTestId('routine-editor')).toBeVisible();
+  expect(await crowdedLabels(), 'editor').toEqual([]);
+  expect(errors).toEqual([]);
+});
