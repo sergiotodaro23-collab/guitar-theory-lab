@@ -12,6 +12,16 @@ export interface ChordTone {
   readonly semitones: number;
 }
 
+export interface ChordBass {
+  readonly note: SpelledNote;
+  readonly name: string;
+  readonly pc: number;
+  /** Chord degree when the bass is a chord tone ("3" in C/E), null for a foreign bass (D/C). */
+  readonly degree: string | null;
+  /** 0 root position, 1 first, 2 second, 3 third inversion; null when no inversion applies. */
+  readonly inversion: number | null;
+}
+
 export interface Chord {
   readonly symbol: string;
   readonly root: SpelledNote;
@@ -19,6 +29,36 @@ export interface Chord {
   readonly suffix: string;
   readonly family: ChordFamily;
   readonly tones: readonly ChordTone[];
+  /** Slash bass; null means the root is in the bass. */
+  readonly bass: ChordBass | null;
+}
+
+/** Bass on the third, fifth or seventh (sixth in a 6 chord) gives the classical inversions. */
+function inversionOf(degree: string | null): number | null {
+  if (degree === null) return null;
+  const number = Number(degree.replace(/[#b]/g, ''));
+  if (number === 1) return 0;
+  if (number === 3) return 1;
+  if (number === 5) return 2;
+  if (number === 7 || number === 6) return 3;
+  return null;
+}
+
+export const INVERSION_NAMES: readonly string[] = ['stato fondamentale', 'primo rivolto', 'secondo rivolto', 'terzo rivolto'];
+
+/** "C/E" from a chord and a bass note name; the root as bass gives the plain chord. */
+export function withBass(chord: Chord, bassName: string | null): Chord {
+  const base = parseChord(`${chord.rootName}${chord.suffix}`);
+  if (!bassName) return base;
+  const note = parseNote(bassName);
+  const pc = pitchClass(note);
+  if (pc === base.tones[0]?.pc) return base;
+  const tone = base.tones.find((t) => t.pc === pc);
+  // A chord tone keeps the chord's own spelling: Cm/Eb, never Cm/D#.
+  const spelled = tone ? tone.note : note;
+  const name = noteName(spelled);
+  const degree = tone?.degree ?? null;
+  return { ...base, symbol: `${base.symbol}/${name}`, bass: { note: spelled, name, pc, degree, inversion: inversionOf(degree) } };
 }
 
 interface QualityEntry {
@@ -75,8 +115,15 @@ export const CHORD_SUFFIXES: readonly string[] = QUALITIES.map((q) => q.suffix);
 export function parseChord(symbol: string): Chord {
   const match = /^\s*([A-Ga-g](?:#|b)?)(.*?)\s*$/.exec(symbol);
   if (!match) throw new Error(`Accordo non valido: "${symbol}"`);
+  let rawSuffix = match[2] as string;
+  // "6/9" is a quality, not a slash chord; any other "/X" names the bass.
+  const slash = /^(.*)\/([A-Ga-g](?:#|b)?)$/.exec(rawSuffix);
+  if (slash && !(rawSuffix in ALIASES)) {
+    rawSuffix = slash[1] as string;
+    const plain = parseChord(`${match[1] as string}${rawSuffix}`);
+    return withBass(plain, slash[2] as string);
+  }
   const root = parseNote(match[1] as string);
-  const rawSuffix = match[2] as string;
   const suffix = ALIASES[rawSuffix] ?? rawSuffix;
   const quality = QUALITIES.find((q) => q.suffix === suffix);
   if (!quality) throw new Error(`Qualità non riconosciuta: "${rawSuffix}"`);
@@ -92,7 +139,7 @@ export function parseChord(symbol: string): Chord {
     };
   });
   const rootName = noteName(root);
-  return { symbol: `${rootName}${suffix}`, root, rootName, suffix, family: quality.family, tones };
+  return { symbol: `${rootName}${suffix}`, root, rootName, suffix, family: quality.family, tones, bass: null };
 }
 
 export function tryParseChord(symbol: string): Chord | null {
@@ -101,4 +148,23 @@ export function tryParseChord(symbol: string): Chord | null {
   } catch {
     return null;
   }
+}
+
+const SEVENTH_SUFFIX: Readonly<Record<string, string>> = {
+  '4,7,11': 'maj7', '4,7,10': '7', '3,7,10': 'm7', '3,6,10': 'm7b5', '3,6,9': 'dim7',
+  '3,7,11': 'mMaj7', '4,8,11': 'maj7#5', '4,8,10': '7#5',
+};
+
+/**
+ * Seventh chord built in thirds on a degree of a seven-note scale, spelled as
+ * the scale spells it. Null for scales without seven notes.
+ */
+export function diatonicSeventh(scale: { readonly tones: readonly { readonly name: string; readonly pc: number }[] }, degreeIndex: number): Chord | null {
+  const tones = scale.tones;
+  if (tones.length !== 7) return null;
+  const at = (offset: number) => tones[mod(degreeIndex + offset, 7)] as { name: string; pc: number };
+  const root = at(0);
+  const key = [2, 4, 6].map((o) => mod(at(o).pc - root.pc, 12)).join(',');
+  const suffix = SEVENTH_SUFFIX[key];
+  return suffix === undefined ? null : parseChord(`${root.name}${suffix}`);
 }

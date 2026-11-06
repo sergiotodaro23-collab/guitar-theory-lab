@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildScale, compareScales, chromaticName, parseChord, parseNote, pitchClass, SCALE_IDS, SCALES, TONICS, tryParseChord, transposeNote, noteName, diatonicIndex, midiToHz } from './index';
+import { buildScale, compareScales, withBass, diatonicSeventh, chromaticName, parseChord, parseNote, pitchClass, SCALE_IDS, SCALES, TONICS, tryParseChord, transposeNote, noteName, diatonicIndex, midiToHz } from './index';
 
 const names = (tonic: string, id: Parameters<typeof buildScale>[1]) => buildScale(tonic, id).tones.map((t) => t.name).join(' ');
 
@@ -140,5 +140,47 @@ describe('scale comparison', () => {
     const c = compareScales(buildScale('A', 'minorBlues'), buildScale('A', 'minorPentatonic'));
     expect(c.onlyFirst).toEqual(['Eb']);
     expect(c.onlySecond).toEqual([]);
+  });
+});
+
+describe('slash chords and inversions', () => {
+  it('reads the bass after the slash and names the inversion', () => {
+    expect(parseChord('C/E').bass).toMatchObject({ name: 'E', degree: '3', inversion: 1 });
+    expect(parseChord('C/G').bass).toMatchObject({ name: 'G', degree: '5', inversion: 2 });
+    expect(parseChord('G7/F').bass).toMatchObject({ name: 'F', degree: 'b7', inversion: 3 });
+    expect(parseChord('Am7/G').symbol).toBe('Am7/G');
+    expect(parseChord('Am7/G').tones.map((t) => t.name)).toEqual(['A', 'C', 'E', 'G']);
+  });
+  it('keeps a foreign bass outside the chord tones', () => {
+    const d = parseChord('D/C');
+    expect(d.bass).toMatchObject({ name: 'C', degree: null, inversion: null });
+    expect(d.tones.map((t) => t.name)).toEqual(['D', 'F#', 'A']);
+  });
+  it('spells a chord-tone bass as the chord does', () => {
+    expect(withBass(parseChord('Cm'), 'D#').symbol).toBe('Cm/Eb');
+    expect(withBass(parseChord('C/E'), null).symbol).toBe('C');
+    expect(withBass(parseChord('C'), 'C').bass).toBeNull();
+  });
+  it('does not confuse the 6/9 quality with a slash chord', () => {
+    expect(parseChord('C6/9').bass).toBeNull();
+    expect(parseChord('C6/9').symbol).toBe('C69');
+  });
+  it('rejects a slash with a non-note', () => {
+    expect(tryParseChord('C/H')).toBeNull();
+  });
+});
+
+describe('diatonic sevenths', () => {
+  const sevenths = (tonic: string, id: Parameters<typeof buildScale>[1]) =>
+    [0, 1, 2, 3, 4, 5, 6].map((i) => diatonicSeventh(buildScale(tonic, id), i)?.symbol);
+  it('harmonises the major scale', () => {
+    expect(sevenths('C', 'ionian')).toEqual(['Cmaj7', 'Dm7', 'Em7', 'Fmaj7', 'G7', 'Am7', 'Bm7b5']);
+    expect(sevenths('Eb', 'ionian')).toEqual(['Ebmaj7', 'Fm7', 'Gm7', 'Abmaj7', 'Bb7', 'Cm7', 'Dm7b5']);
+  });
+  it('harmonises the harmonic minor scale', () => {
+    expect(sevenths('A', 'harmonicMinor')).toEqual(['AmMaj7', 'Bm7b5', 'Cmaj7#5', 'Dm7', 'E7', 'Fmaj7', 'G#dim7']);
+  });
+  it('returns null for pentatonics', () => {
+    expect(diatonicSeventh(buildScale('A', 'minorPentatonic'), 0)).toBeNull();
   });
 });

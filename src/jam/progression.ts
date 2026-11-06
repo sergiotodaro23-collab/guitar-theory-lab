@@ -61,7 +61,8 @@ export function updateChord(p: Progression, index: number, change: Partial<Omit<
 
 export function transposeSymbol(symbol: string, semitones: number): string {
   const chord = parseChord(symbol);
-  return `${noteName(transposeNote(chord.root, semitones))}${chord.suffix}`;
+  const bass = chord.bass ? `/${noteName(transposeNote(chord.bass.note, semitones))}` : '';
+  return `${noteName(transposeNote(chord.root, semitones))}${chord.suffix}${bass}`;
 }
 
 export function transposeProgression(p: Progression, semitones: number): Progression {
@@ -130,8 +131,8 @@ function patternBeats(pattern: CompPattern, beatsPerBar: number): readonly numbe
 
 /** Close voicing around a centre: guide tones first, bass underneath. */
 export function voiceChord(chord: Chord, previous?: readonly number[]): readonly number[] {
-  const rootPc = chord.root ? (chord.tones[0] as Chord['tones'][number]).pc : 0;
-  const bass = 40 + mod(rootPc - 4, 12); // E2..D#3
+  const bassPc = chord.bass?.pc ?? (chord.tones[0] as Chord['tones'][number]).pc;
+  const bass = 40 + mod(bassPc - 4, 12); // E2..D#3, the slash bass when there is one
   const guides = guideTones(chord);
   const others = chord.tones.filter((tone) => tone.semitones !== 0 && !guides.some((g) => g.pc === tone.pc));
   const upper = [...guides, ...others].slice(0, 4);
