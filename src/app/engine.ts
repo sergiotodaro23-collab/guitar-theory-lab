@@ -232,10 +232,13 @@ class Engine {
     const started = state !== 'stopped' && tick > 0;
 
     let note: Playhead['note'] = null;
+    let phase: Playhead['phase'] = null;
     let trail: Playhead['trail'] = [];
     const track = this.scheduler.trackAt('exercise', tick);
     if (started && track) {
       const event = trackEventAt(track as typeof track & { events: readonly { tick: number; payload: NotePayload }[] }, tick);
+      // The phase holds through the rests that close it, so the shape stays put.
+      phase = event?.payload.phase ?? null;
       if (event && tick < event.tick + event.payload.durationTicks * 4) {
         const p = event.payload;
         note = { string: p.string, fret: p.fret, midi: p.midi, index: p.index };
@@ -253,12 +256,13 @@ class Engine {
       beat: position.beat,
       subdivision: position.subdivision,
       chordIndex: this.chordIndexAt(tick),
+      phase,
       note,
       trail,
     };
     const current = usePlayhead.getState();
     const changed = current.state !== next.state || current.bar !== next.bar || current.beat !== next.beat
-      || current.subdivision !== next.subdivision || current.chordIndex !== next.chordIndex
+      || current.subdivision !== next.subdivision || current.chordIndex !== next.chordIndex || current.phase !== next.phase
       || current.note?.index !== next.note?.index;
     if (!changed) return;
     if (this.debug && this.ctx && state === 'playing') {

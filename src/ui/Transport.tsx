@@ -73,7 +73,10 @@ export function Transport() {
   return (
     <header className="rack">
       <div className="rack-top">
-        <h1 className="wordmark">Guitar Theory Lab</h1>
+        <h1 className="nameplate" data-testid="nameplate">
+          <span className="nameplate-title">GUITAR THEORY LAB</span>
+          <span className="nameplate-byline">v{__APP_VERSION__} — by Sergio Todaro</span>
+        </h1>
         <nav aria-label="Modalità">
           <Segmented label="Modalità" value={settings.mode} options={MODES} onChange={(mode) => update(withModeLabels(settings.labelMode, mode))} />
         </nav>

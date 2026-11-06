@@ -1,5 +1,5 @@
 /** Translate settings into the timeline tracks each mode needs. Pure. */
-import { exerciseTrack } from '../exercises';
+import { exerciseTrack, routineTrack } from '../exercises';
 import { chordTrack, compTrack, progressionLength, parsedChords } from '../jam';
 import { guideTones } from '../harmony';
 import { ticksPerBeat, type Track } from '../timeline';
@@ -24,7 +24,9 @@ export function buildTracks(s: Settings): ModeTracks {
   const auto = inHarmony && !manual && hasProgression;
 
   let exercise: TrackSpec | null = null;
-  if (s.exerciseOn) {
+  if (s.exerciseOn && s.exerciseMode === 'routine') {
+    exercise = routineTrack(s.routine, meter);
+  } else if (s.exerciseOn) {
     const sequence = currentExerciseSequence(s);
     if (sequence.length > 0) exercise = exerciseTrack(sequence, meter, s.notesPerBeat);
   }

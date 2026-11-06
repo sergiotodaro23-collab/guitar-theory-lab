@@ -1,4 +1,5 @@
 /** Starter presets: a place to begin, not data. They are never written to storage. */
+import { ROUTINE_TEMPLATES } from '../exercises';
 import { PROGRESSION_TEMPLATES, instantiateTemplate } from '../jam';
 import type { Settings } from './settings';
 
@@ -14,26 +15,42 @@ const template = (id: string, key: string) => {
   return instantiateTemplate(found, key);
 };
 
+const routine = (index: number) => {
+  const found = ROUTINE_TEMPLATES[index];
+  if (!found) throw new Error(`Percorso sconosciuto: ${index}`);
+  return found;
+};
+
 export const STUDY_PRESETS: readonly BuiltinPreset[] = [
   {
     id: 'thirds-c',
     name: 'Terze in Do maggiore, forma E',
-    data: { mode: 'fretboard', tonic: 'C', scaleId: 'ionian', positionType: 'caged', cagedForm: 'E', exerciseOn: true, exerciseKind: 'interval', interval: 3, direction: 'updown', pairMotion: 'ascending', notesPerBeat: 2, bpm: 72, overlayChord: '' },
+    data: { mode: 'fretboard', tonic: 'C', scaleId: 'ionian', positionType: 'caged', cagedForm: 'E', exerciseOn: true, exerciseMode: 'single', exerciseKind: 'interval', interval: 3, direction: 'updown', pairMotion: 'ascending', notesPerBeat: 2, bpm: 72, overlayChord: '' },
   },
   {
     id: 'fourths-dorian',
     name: 'Quarte in Re dorico, 3NPS',
-    data: { mode: 'fretboard', tonic: 'D', scaleId: 'dorian', positionType: '3nps', npsStart: 0, exerciseOn: true, exerciseKind: 'interval', interval: 4, direction: 'updown', pairMotion: 'alternating', notesPerBeat: 2, bpm: 66, overlayChord: 'Dm7' },
+    data: { mode: 'fretboard', tonic: 'D', scaleId: 'dorian', positionType: '3nps', npsStart: 0, exerciseOn: true, exerciseMode: 'single', exerciseKind: 'interval', interval: 4, direction: 'updown', pairMotion: 'alternating', notesPerBeat: 2, bpm: 66, overlayChord: 'Dm7' },
   },
   {
     id: 'sixths-harmonic',
     name: 'Seste in La minore armonica',
-    data: { mode: 'fretboard', tonic: 'A', scaleId: 'harmonicMinor', positionType: 'caged', cagedForm: 'G', exerciseOn: true, exerciseKind: 'interval', interval: 6, direction: 'up', pairMotion: 'ascending', notesPerBeat: 1, bpm: 60, overlayChord: 'E7' },
+    data: { mode: 'fretboard', tonic: 'A', scaleId: 'harmonicMinor', positionType: 'caged', cagedForm: 'G', exerciseOn: true, exerciseMode: 'single', exerciseKind: 'interval', interval: 6, direction: 'up', pairMotion: 'ascending', notesPerBeat: 1, bpm: 60, overlayChord: 'E7' },
   },
   {
     id: 'sequence-1235',
     name: 'Sequenza 1-2-3-5 in Sol maggiore',
-    data: { mode: 'fretboard', tonic: 'G', scaleId: 'ionian', positionType: '3nps', npsStart: 0, exerciseOn: true, exerciseKind: 'custom', customText: '1 2 3 5', direction: 'updown', notesPerBeat: 4, bpm: 70, overlayChord: '' },
+    data: { mode: 'fretboard', tonic: 'G', scaleId: 'ionian', positionType: '3nps', npsStart: 0, exerciseOn: true, exerciseMode: 'single', exerciseKind: 'custom', customText: '1 2 3 5', direction: 'updown', notesPerBeat: 4, bpm: 70, overlayChord: '' },
+  },
+  {
+    id: 'routine-caged-c-g',
+    name: 'Percorso: Do maggiore, forma C su e forma G giù',
+    data: { mode: 'fretboard', exerciseOn: true, exerciseMode: 'routine', routine: routine(0), bpm: 72, overlayChord: '' },
+  },
+  {
+    id: 'routine-melodic-classical',
+    name: 'Percorso: La minore melodica classica',
+    data: { mode: 'fretboard', exerciseOn: true, exerciseMode: 'routine', routine: routine(1), bpm: 66, overlayChord: '' },
   },
   {
     id: 'guide-251',
@@ -43,7 +60,7 @@ export const STUDY_PRESETS: readonly BuiltinPreset[] = [
   {
     id: 'thirds-251',
     name: 'Terze sopra un ii–V–I',
-    data: { mode: 'harmony', tonic: 'C', scaleId: 'ionian', positionType: 'caged', cagedForm: 'E', exerciseOn: true, exerciseKind: 'interval', interval: 3, direction: 'updown', pairMotion: 'ascending', notesPerBeat: 2, focus: 'all', changeMode: 'auto', labelMode: 'function', bpm: 72, progression: template('ii-v-i', 'C'), compOn: true },
+    data: { mode: 'harmony', tonic: 'C', scaleId: 'ionian', positionType: 'caged', cagedForm: 'E', exerciseOn: true, exerciseMode: 'single', exerciseKind: 'interval', interval: 3, direction: 'updown', pairMotion: 'ascending', notesPerBeat: 2, focus: 'all', changeMode: 'auto', labelMode: 'function', bpm: 72, progression: template('ii-v-i', 'C'), compOn: true },
   },
   {
     id: 'blues-a',
