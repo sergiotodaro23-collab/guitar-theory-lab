@@ -272,7 +272,7 @@ test('built-in presets load, including one that changes mode', async ({ page }) 
   await expect(page.getByTestId('builder')).toBeVisible();
   await expect(page.getByTestId('chip-0')).toContainText('A7');
   await page.getByTestId('preset-load').selectOption('fourths-dorian');
-  await expect(page.getByTestId('overlay-spelling')).toContainText('D (1)');
+  await expect(page.getByTestId('chord-spelling')).toContainText('D (1)');
 });
 
 test('layout holds at phone width with no page overflow', async ({ page }) => {
@@ -423,5 +423,49 @@ test('multiple scales: add up to five, compare, show, reorder, remove, survive a
   await page.reload();
   await expect(layers).toHaveCount(3);
   expect(await names()).toEqual([before[1], before[0], before[2]]);
+  expect(errors).toEqual([]);
+});
+
+test('multiple chords: build, slash bass, voicing on the neck, select, reorder, send to Harmony Lab', async ({ page }) => {
+  const errors = await open(page);
+  const chords = page.getByTestId('chord-layer');
+  await page.getByTestId('add-chord').click();
+  await expect(chords).toHaveCount(1);
+  await expect(page.getByTestId('chord-symbol')).toHaveValue('Cmaj7');
+  await expect(page.getByTestId('current-chord')).toHaveText('Cmaj7');
+
+  // Builder: C major triad in first inversion.
+  await page.getByTestId('chord-quality').selectOption({ label: 'maggiore' });
+  await page.getByTestId('chord-bass').selectOption({ label: 'E — primo rivolto (3)' });
+  await expect(page.getByTestId('chord-symbol')).toHaveValue('C/E');
+  await expect(page.getByTestId('chord-spelling')).toContainText('primo rivolto');
+
+  // Pick the open shape 0-3-2-0-1-0: its notes get the shape outline on the neck.
+  const openShape = await page.getByTestId('chord-voicing').locator('option', { hasText: '0-3-2-0-1-0' }).getAttribute('value');
+  await page.getByTestId('chord-voicing').selectOption({ value: openShape ?? '' });
+  await expect(page.locator('.marker.in-voicing')).toHaveCount(6);
+  await expect(page.locator('.marker.in-voicing[data-string="0"][data-fret="0"]')).toHaveAttribute('data-role', 'chord-tone');
+
+  // Free text still works, slash chords included.
+  await page.getByTestId('add-chord').click();
+  await page.getByTestId('chord-symbol').fill('Am7/G');
+  await expect(page.getByTestId('chord-spelling')).toContainText('terzo rivolto');
+  await page.getByTestId('add-chord').click();
+  await expect(chords).toHaveCount(3);
+  await expect(page.locator('.diagram-card')).toHaveCount(3);
+
+  // Only the active chord is on the neck; clicking a diagram switches it.
+  await page.locator('.diagram-card').first().click();
+  await expect(page.getByTestId('current-chord')).toHaveText('C/E');
+  await page.getByRole('button', { name: 'Nascondi l’accordo 3' }).click();
+  await expect(page.locator('.diagram-card')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Sposta l’accordo 2 in alto' }).click();
+  await expect(chords.first()).toContainText('Am7/G');
+
+  // The visible chords become a progression.
+  await page.getByTestId('chords-to-progression').click();
+  await expect(page.getByRole('button', { name: 'Harmony Lab', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('chip-0')).toContainText('Am7/G');
+  await expect(page.getByTestId('chip-1')).toContainText('C/E');
   expect(errors).toEqual([]);
 });

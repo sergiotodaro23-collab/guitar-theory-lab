@@ -8,10 +8,13 @@ import { INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, t
 import { RoutineEditor } from './RoutineEditor';
 import { AVOID_PROFILES, type AvoidProfile } from '../harmony';
 import {
-  COMP_PATTERNS, PROGRESSION_TEMPLATES, addChord, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord,
+  COMP_PATTERNS, PROGRESSION_TEMPLATES, addChord, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord, withChord,
   type CompPattern, type Progression, type ChordDuration,
 } from '../jam';
-import { CHORD_SUFFIXES, SCALES, SCALE_IDS, TONICS, parseChord, tryParseChord, buildScale, compareScales, type Scale, type ScaleId } from '../theory';
+import { CHORD_SUFFIXES, INVERSION_NAMES, SCALES, SCALE_IDS, TONICS, parseChord, tryParseChord, buildScale, compareScales, withBass, parseNote, pitchClass, type Chord, type Scale, type ScaleId } from '../theory';
+import { MAX_CHORDS, addChordLayer, moveChordLayer, resolveChordLayer, type ChordLayer } from '../app/chordLayers';
+import { voicingKey } from '../fretboard';
+import { ChordDiagram } from '../viz/ChordDiagram';
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
 
@@ -297,17 +300,138 @@ function SingleExercise({ validCustom }: { readonly validCustom: boolean }) {
   );
 }
 
-export function OverlayPanel() {
+const QUALITY_OPTIONS = CHORD_SUFFIXES.map((suffix) => ({ value: suffix, label: suffix === '' ? 'maggiore' : suffix }));
+
+function bassOptions(chord: Chord) {
+  const tones = chord.tones.map((t, i) => {
+    const inversion = i === 0 ? 0 : withBass(chord, t.name).bass?.inversion ?? null;
+    const name = inversion !== null ? INVERSION_NAMES[inversion] : `basso sul ${t.degree}`;
+    return { value: i === 0 ? '' : t.name, label: `${t.name} — ${name} (${t.degree})` };
+  });
+  const used = new Set(chord.tones.map((t) => t.pc));
+  const foreign = TONICS.filter((n) => !used.has(pitchClass(parseNote(n)))).map((n) => ({ value: n, label: `${n} — basso esterno` }));
+  return [...tones, ...foreign];
+}
+
+function ChordEditor({ index }: { readonly index: number }) {
+  const layers = useApp((state) => state.settings.chordLayers);
+  const update = useApp((state) => state.update);
+  const layer = layers[index];
+  const resolved = useMemo(() => (layer ? resolveChordLayer(layer) : null), [layer]);
+  if (!layer || !resolved) return null;
+  const { chord, voicings, shape } = resolved;
+  const change = (patch: Partial<ChordLayer>) => update({ chordLayers: layers.map((l, i) => (i === index ? { ...l, ...patch } : l)) });
+  const rebuild = (root: string, suffix: string, bass: string | null) => {
+    const base = tryParseChord(`${root}${suffix}`);
+    if (!base) return;
+    change({ symbol: withBass(base, bass).symbol, voicing: null });
+  };
+  const invalid = chord === null;
+  return (
+    <div className="chord-editor" data-testid="chord-editor">
+      <Field label="Simbolo" hint={invalid ? 'Accordo non riconosciuto. Prova Cmaj7, Dm9, G13, F#m7b5, C/E.' : 'Scrivi un simbolo o costruiscilo qui sotto.'}>
+        <input className={`text-input ${invalid ? 'is-invalid' : ''}`} data-testid="chord-symbol" value={layer.symbol} placeholder="Cmaj7" aria-invalid={invalid} onChange={(e) => change({ symbol: e.target.value, voicing: null })} />
+      </Field>
+      {chord ? (
+        <>
+          <div className="row">
+            <Field label="Fondamentale"><Select label="Fondamentale" value={chord.rootName} options={tonicOptions.some((o) => o.value === chord.rootName) ? tonicOptions : [...tonicOptions, { value: chord.rootName, label: chord.rootName }]} onChange={(root) => rebuild(root, chord.suffix, chord.bass?.name ?? null)} /></Field>
+            <Field label="Qualità"><Select label="Qualità" testId="chord-quality" value={chord.suffix} options={QUALITY_OPTIONS} onChange={(suffix) => rebuild(chord.rootName, suffix, chord.bass?.name ?? null)} /></Field>
+          </div>
+          <Field label="Basso">
+            <Select label="Basso" testId="chord-bass" value={chord.bass?.name ?? ''} options={bassOptions(chord)} onChange={(bass) => rebuild(chord.rootName, chord.suffix, bass || null)} />
+          </Field>
+          <p className="spelling" data-testid="chord-spelling">
+            {chord.tones.map((t) => `${t.name} (${t.degree})`).join('  ')}
+            {chord.bass ? <span className="muted"> · basso {chord.bass.name}{chord.bass.inversion !== null ? `, ${INVERSION_NAMES[chord.bass.inversion]}` : ', nota esterna all’accordo'}</span> : null}
+          </p>
+          <div className="field" role="group" aria-labelledby={`voicing-label-${layer.id}`}>
+            <span className="field-label" id={`voicing-label-${layer.id}`}>Forma sulla tastiera ({voicings.length} trovate)</span>
+            <div className="voicing-picker">
+              <button type="button" className="icon-btn" aria-label="Forma precedente" disabled={layer.voicing === null} onClick={() => change({ voicing: layer.voicing === null || layer.voicing === 0 ? null : layer.voicing - 1 })}>‹</button>
+              <Select<number>
+                label="Forma"
+                testId="chord-voicing"
+                value={layer.voicing ?? -1}
+                options={[{ value: -1, label: 'Nessuna: solo funzioni' }, ...voicings.map((v, i) => ({ value: i, label: `${i + 1} · tasto ${v.baseFret} · ${voicingKey(v)}` }))]}
+                onChange={(v) => change({ voicing: v < 0 ? null : v })}
+              />
+              <button type="button" className="icon-btn" aria-label="Forma successiva" disabled={voicings.length === 0 || layer.voicing === voicings.length - 1} onClick={() => change({ voicing: layer.voicing === null ? 0 : layer.voicing + 1 })}>›</button>
+            </div>
+          </div>
+          {shape ? <p className="field-hint">Dal basso: {shape.degrees.join(' · ')}</p> : null}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+export function ChordsPanel() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
-  const chord = s.overlayChord ? tryParseChord(s.overlayChord) : null;
-  const invalid = s.overlayChord !== '' && chord === null;
+  const layers = s.chordLayers;
+  const resolved = useMemo(() => layers.map(resolveChordLayer), [layers]);
+  const scale = useMemo(() => buildScale(s.tonic, s.scaleId), [s.tonic, s.scaleId]);
+  const full = layers.length >= MAX_CHORDS;
+  const setActive = (activeChord: number) => update({ activeChord });
+  const remove = (index: number) => {
+    const chordLayers = layers.filter((_, i) => i !== index);
+    update({ chordLayers, activeChord: Math.max(0, Math.min(s.activeChord > index ? s.activeChord - 1 : s.activeChord, chordLayers.length - 1)) });
+  };
+  const move = (index: number, delta: number) => {
+    const target = index + delta;
+    update({ chordLayers: moveChordLayer(layers, index, target), activeChord: s.activeChord === index ? target : s.activeChord === target ? index : s.activeChord });
+  };
+  const playable = resolved.filter((r) => r.chord && r.layer.visible);
   return (
-    <Panel title="Accordo sovrapposto">
-      <Field label="Accordo" hint={invalid ? 'Accordo non riconosciuto. Prova Cmaj7, Dm9, G13, F#m7b5.' : 'Lascia vuoto per vedere solo la scala.'}>
-        <input className={`text-input ${invalid ? 'is-invalid' : ''}`} data-testid="overlay-chord" value={s.overlayChord} placeholder="Cmaj7" aria-invalid={invalid} onChange={(event) => update({ overlayChord: event.target.value })} />
-      </Field>
-      {chord ? <p className="spelling" data-testid="overlay-spelling">{chord.tones.map((t) => `${t.name} (${t.degree})`).join('  ')}</p> : null}
+    <Panel title="Accordi">
+      {layers.length === 0 ? <p className="field-hint">Nessun accordo: la tastiera mostra solo la scala.</p> : (
+        <ol className="chord-list">
+          {resolved.map((r, i) => (
+            <li key={r.layer.id} className={`chord-item ${i === s.activeChord ? 'is-active' : ''} ${r.layer.visible ? '' : 'is-hidden'}`} data-testid="chord-layer">
+              <button type="button" className="chord-pick" aria-pressed={i === s.activeChord} onClick={() => setActive(i)}>
+                <span className="chord-role">{i === 0 ? 'Principale' : `Accordo ${i + 1}`}</span>
+                <strong className={r.chord ? '' : 'is-invalid-text'}>{r.layer.symbol || '—'}</strong>
+              </button>
+              <button type="button" className="icon-btn" aria-pressed={r.layer.visible} aria-label={`${r.layer.visible ? 'Nascondi' : 'Mostra'} l’accordo ${i + 1}`} onClick={() => update({ chordLayers: layers.map((l, j) => (j === i ? { ...l, visible: !l.visible } : l)) })}>{r.layer.visible ? '◉' : '○'}</button>
+              <button type="button" className="icon-btn" aria-label={`Sposta l’accordo ${i + 1} in alto`} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+              <button type="button" className="icon-btn" aria-label={`Sposta l’accordo ${i + 1} in basso`} disabled={i === layers.length - 1} onClick={() => move(i, 1)}>↓</button>
+              <button type="button" className="icon-btn" aria-label={`Rimuovi l’accordo ${i + 1}`} onClick={() => remove(i)}>✕</button>
+            </li>
+          ))}
+        </ol>
+      )}
+      {layers.length > 0 ? <ChordEditor index={Math.min(s.activeChord, layers.length - 1)} /> : null}
+      <button type="button" className="btn" data-testid="add-chord" disabled={full} onClick={() => update({ chordLayers: addChordLayer(layers, scale), activeChord: layers.length })}>+ Aggiungi accordo</button>
+      {full ? <p className="field-hint">Massimo {MAX_CHORDS} accordi.</p> : null}
+      {playable.length > 0 ? (
+        <div className="diagram-strip" aria-label="Accordi visibili">
+          {resolved.map((r, i) => {
+            if (!r.chord || !r.layer.visible) return null;
+            const shape = r.shape ?? r.voicings[0];
+            return (
+              <button type="button" key={r.layer.id} className={`diagram-card ${i === s.activeChord ? 'is-active' : ''}`} aria-pressed={i === s.activeChord} onClick={() => setActive(i)}>
+                <span className="diagram-symbol">{r.layer.symbol}</span>
+                {shape ? <ChordDiagram voicing={shape} label={`${r.layer.symbol}: ${voicingKey(shape)}`} /> : <span className="muted">Nessuna forma</span>}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+      {playable.length > 1 ? (
+        <button
+          type="button"
+          className="btn"
+          data-testid="chords-to-progression"
+          onClick={() => update({
+            progression: { name: 'Dai miei accordi', chords: playable.map((r) => withChord(r.chord?.symbol ?? r.layer.symbol)) },
+            mode: 'harmony',
+            labelMode: s.labelMode === 'degree' ? 'function' : s.labelMode,
+          })}
+        >
+          Usa come progressione in Harmony Lab
+        </button>
+      ) : null}
       <AudioMix showComp={false} />
     </Panel>
   );

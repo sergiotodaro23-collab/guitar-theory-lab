@@ -89,6 +89,13 @@ describe('marker layer', () => {
     // Outside the position A aeolian adds nothing.
     expect(markers.filter((m) => m.fret > high + 1).every((m) => !m.layers.includes(1))).toBe(true);
   });
+  it('outlines a chord shape, even where it leaves the scale position', () => {
+    const shape = [{ string: 1, fret: 3 }, { string: 2, fret: 2 }, { string: 3, fret: 0 }, { string: 4, fret: 1 }, { string: 5, fret: 0 }];
+    const { markers } = buildMarkerLayer(input({ chord: parseChord('C'), nextChord: null, voicing: shape }));
+    const outlined = markers.filter((m) => m.inVoicing);
+    expect(outlined.map((m) => `${m.string}:${m.fret}`).sort()).toEqual(shape.map((p) => `${p.string}:${p.fret}`).sort());
+    expect(outlined.every((m) => m.role === 'chord-tone')).toBe(true);
+  });
   it('labels fingers on request', () => {
     const { markers } = buildMarkerLayer(input({ chord: null, nextChord: null, labelMode: 'finger' }));
     for (const m of markers) expect(['1', '2', '3', '4']).toContain(m.label);

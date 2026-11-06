@@ -4,7 +4,8 @@ import { boardContext } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { AVOID_PROFILES, classifyTone, functionsAcross } from '../harmony';
 import { parsedChords } from '../jam';
-import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
+import { buildScale, chromaticName, mod, type Chord, type Scale } from '../theory';
+import { resolveChordLayer } from '../app/chordLayers';
 import { Fretboard, type LayerStyle } from '../viz/Fretboard';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
 import { buildMarkerLayer, type Marker } from '../viz/markers';
@@ -15,15 +16,25 @@ export function useHarmonyContext() {
   const playheadChord = usePlayhead((p) => p.chordIndex);
   return useMemo(() => {
     if (settings.mode === 'fretboard') {
-      const overlay = settings.overlayChord ? tryParseChord(settings.overlayChord) : null;
-      return { chords: overlay ? [overlay] : [], chord: overlay, nextChord: null as Chord | null, chordIndex: 0 };
+      // Only the active chord is drawn; the visible ones feed the note inspector.
+      const resolved = settings.chordLayers.map(resolveChordLayer);
+      const active = resolved[settings.activeChord];
+      const shown = resolved.filter((r, i) => r.chord && (r.layer.visible || i === settings.activeChord));
+      const chord = active?.chord ?? null;
+      return {
+        chords: shown.flatMap((r) => (r.chord ? [r.chord] : [])),
+        chord,
+        nextChord: null as Chord | null,
+        chordIndex: Math.max(0, shown.findIndex((r) => r === active)),
+        voicing: active?.shape?.notes ?? null,
+      };
     }
     const chords = parsedChords(settings.progression);
     const chordIndex = Math.min(playheadChord ?? selected, Math.max(0, chords.length - 1));
     const chord = chords[chordIndex] ?? null;
     const nextChord = chords.length > 1 ? chords[(chordIndex + 1) % chords.length] ?? null : null;
-    return { chords, chord, nextChord, chordIndex };
-  }, [settings.mode, settings.overlayChord, settings.progression, playheadChord, selected]);
+    return { chords, chord, nextChord, chordIndex, voicing: null };
+  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, playheadChord, selected]);
 }
 
 const LEGEND_CHORD: readonly { role: string; label: string; guide?: boolean }[] = [
@@ -78,7 +89,7 @@ export function Board() {
   const setPinned = useApp((s) => s.setPinned);
   const note = usePlayhead((p) => p.note);
   const trail = usePlayhead((p) => p.trail);
-  const { chords, chord, nextChord, chordIndex } = useHarmonyContext();
+  const { chords, chord, nextChord, chordIndex, voicing } = useHarmonyContext();
 
   const playheadPhase = usePlayhead((p) => p.phase);
   const selectedPhase = useApp((s) => s.selectedPhase);
@@ -103,8 +114,9 @@ export function Board() {
     labelMode: settings.labelMode,
     pinnedPc,
     overlays,
+    voicing,
     wholeNeck: context.wholeNeck,
-  }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, overlays]);
+  }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, overlays, voicing]);
 
   const onPick = useCallback((marker: Marker) => {
     setPinned(useApp.getState().pinnedPc === marker.pc ? null : marker.pc);

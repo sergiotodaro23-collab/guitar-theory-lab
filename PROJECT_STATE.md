@@ -6,8 +6,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 181 test unitari.
-- `npm run test:e2e`: verde, 19 casi su Chromium headless.
+- `npm run check`: verde, 218 test unitari.
+- `npm run test:e2e`: verde, 20 casi su Chromium headless.
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -18,6 +18,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 - **Percorsi a fasi** (nuovo): ogni fase con scala, forma CAGED/3NPS/range di tasti, ottava, sequenza, direzione, note per movimento e ripetizioni. Fasi sul battere, tastiera che segue la fase in riproduzione.
 - **Editor avanzato** (nuovo): dialog ampio con blocchi fase riordinabili, modelli, errori con alternativa applicabile, anteprima (battute, durata, striscia delle fasi, tastiera, note, transizione).
 - Minore melodica jazz (scala) e classica (percorso).
+- **Accordi multipli**: fino a 8 accordi con builder (fondamentale, qualità, basso), slash chord e rivolti, forme eseguibili cercate sul manico e contornate sulla tastiera, diagrammi, invio a Harmony Lab come progressione.
 - **Scale multiple**: fino a 5 scale (principale + 4) con `+ Aggiungi scala`, visibilità, colore, opacità, zona, riordino e confronto delle note.
 - Targhetta con versione reale e autore.
 - Metronomo e scheduler con un solo clock audio, preset versionati, sessione salvata.
@@ -41,4 +42,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-P1-07 accordi multipli → P0-08 metrica alla battuta → P2-02 prototipo skeuomorfico. Dettagli in `docs/ROADMAP.md`.
+P0-08 metrica alla battuta → P1-12 Arpeggios Lab → P2-02 prototipo skeuomorfico. Dettagli in `docs/ROADMAP.md`.

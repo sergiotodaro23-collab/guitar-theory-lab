@@ -6,6 +6,7 @@ import { COMP_PATTERNS, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgr
 import { SCALES, TONICS, buildScale, mod, type Scale, type ScaleId } from '../theory';
 import type { Meter, Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
+import { clampActive, sanitizeChordLayers, type ChordLayer } from './chordLayers';
 
 export type AppMode = 'fretboard' | 'harmony' | 'jam';
 export type PositionType = 'caged' | '3nps' | 'neck';
@@ -33,7 +34,9 @@ export interface StudySettings {
   readonly cagedForm: CagedForm;
   readonly npsStart: number;
   readonly labelMode: LabelMode;
-  readonly overlayChord: string;
+  /** Chords studied in Fretboard Lab, main first; only the active one is drawn. */
+  readonly chordLayers: readonly ChordLayer[];
+  readonly activeChord: number;
   /** Up to four scales drawn over the main one. */
   readonly scaleLayers: readonly ScaleLayer[];
   readonly exerciseOn: boolean;
@@ -83,7 +86,8 @@ export const DEFAULT_SETTINGS: Settings = {
   cagedForm: 'E',
   npsStart: 0,
   labelMode: 'degree',
-  overlayChord: '',
+  chordLayers: [],
+  activeChord: 0,
   scaleLayers: [],
   exerciseOn: true,
   exerciseMode: 'single',
@@ -129,6 +133,7 @@ export function sanitizeSettings(raw: unknown): Settings {
   } catch {
     // Keep the default.
   }
+  const chordLayers = sanitizeChordLayers(r);
   return {
     mode: oneOf(r.mode, ['fretboard', 'harmony', 'jam'] as const, d.mode),
     tonic: oneOf(r.tonic, TONICS, d.tonic),
@@ -137,7 +142,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     cagedForm: oneOf(r.cagedForm, CAGED_FORMS, d.cagedForm),
     npsStart: typeof r.npsStart === 'number' ? mod(Math.round(r.npsStart), 7) : d.npsStart,
     labelMode: oneOf(r.labelMode, ['note', 'degree', 'function', 'finger', 'none'] as const, d.labelMode),
-    overlayChord: typeof r.overlayChord === 'string' ? r.overlayChord : d.overlayChord,
+    chordLayers,
+    activeChord: clampActive(r.activeChord, chordLayers),
     exerciseOn: typeof r.exerciseOn === 'boolean' ? r.exerciseOn : d.exerciseOn,
     scaleLayers: sanitizeLayers(r),
     exerciseMode: oneOf(r.exerciseMode, ['single', 'routine'] as const, d.exerciseMode),

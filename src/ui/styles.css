@@ -377,3 +377,30 @@ button, select, input { font: inherit; color: inherit; }
 .comparison { display: flex; flex-direction: column; gap: 1px; margin: 0; font-size: 13px; }
 .comparison dt { color: var(--muted); }
 .comparison dd { margin: 0 0 5px; font: 600 15px/1.3 var(--display); word-spacing: 0.2em; }
+
+/* ---- Chords ---- */
+.chord-list { display: flex; flex-direction: column; gap: 4px; }
+.chord-item { display: flex; align-items: center; gap: 4px; background: var(--void); border: 1px solid var(--edge); border-left: 4px solid var(--edge); padding: 3px; }
+.chord-item.is-active { border-left-color: var(--tension); background: var(--deck-raised); }
+.chord-item.is-hidden .chord-pick strong { color: var(--muted); }
+.chord-pick { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; background: none; border: 0; cursor: pointer; text-align: left; padding: 5px 6px; min-height: 34px; }
+.chord-pick strong { font: 700 17px/1.1 var(--display); }
+.chord-role { font-size: 12px; color: var(--muted); min-width: 74px; }
+.is-invalid-text { color: var(--avoid); }
+.chord-editor { display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--edge); padding: 10px; }
+.voicing-picker { display: flex; gap: 4px; align-items: center; }
+.voicing-picker .select { flex: 1; min-width: 0; }
+.diagram-strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.diagram-card { flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; background: var(--void); border: 1px solid var(--edge); border-top: 3px solid var(--edge); padding: 6px 4px 4px; cursor: pointer; }
+.diagram-card.is-active { border-top-color: var(--tension); background: var(--deck-raised); }
+.diagram-symbol { font: 700 14px/1 var(--display); }
+.chord-diagram { width: 100px; height: auto; display: block; }
+.diagram-line { stroke: var(--muted); stroke-width: 1; }
+.diagram-nut { fill: var(--ink); }
+.diagram-fret { fill: var(--muted); font: 600 10px var(--display); }
+.diagram-mark { fill: var(--muted); font: 600 11px var(--display); text-anchor: middle; }
+.diagram-open { fill: none; stroke: var(--ink); stroke-width: 1.4; }
+.diagram-dot { fill: var(--chord-tone); }
+.diagram-dot.is-root { fill: var(--root); }
+.diagram-degree { fill: var(--void); font: 700 8px var(--display); text-anchor: middle; dominant-baseline: central; }
+.voicing-ring { fill: none; stroke: var(--tension); stroke-width: 2.4; pointer-events: none; }

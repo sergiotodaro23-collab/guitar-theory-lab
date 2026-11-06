@@ -100,11 +100,12 @@ const MarkerGlyph = memo(function MarkerGlyph({ marker, layerStyles, onPick }: M
   if (marker.dim) classes.push('is-dim');
   if (marker.isGuide) classes.push('is-guide');
   if (marker.pinned) classes.push('is-pinned');
+  if (marker.inVoicing) classes.push('in-voicing');
   const owner = marker.role === 'other-scale' ? layerStyles[marker.layers[0] ?? -1] : undefined;
   if (owner) classes.push(`layer-${owner.color}`);
   const fnText = marker.fn ? `, ${marker.fn.degree} dell’accordo` : '';
   const layerNames = marker.layers.map((i) => layerStyles[i]?.name).filter(Boolean);
-  const layerText = layerNames.length ? `; in ${layerNames.join(', ')}` : '';
+  const layerText = (layerNames.length ? `; in ${layerNames.join(', ')}` : '') + (marker.inVoicing ? '; nella forma dell’accordo' : '');
   const onKey = (event: KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -125,6 +126,7 @@ const MarkerGlyph = memo(function MarkerGlyph({ marker, layerStyles, onPick }: M
       onClick={() => onPick(marker)}
       onKeyDown={onKey}
     >
+      {marker.inVoicing ? <rect className="voicing-ring" x={x - RADIUS - 5} y={y - RADIUS - 5} width={(RADIUS + 5) * 2} height={(RADIUS + 5) * 2} rx={6} /> : null}
       {marker.isGuide && !marker.dim ? <circle className="guide-ring" cx={x} cy={y} r={RADIUS + 3.5} /> : null}
       {marker.target ? <circle className={`target-ring target-${marker.target}`} cx={x} cy={y} r={RADIUS + 6} /> : null}
       <Shape marker={marker} x={x} y={y} />

@@ -20,6 +20,8 @@ export interface Marker extends FretNote {
   readonly target: 'now' | 'next' | null;
   /** List positions of the overlaid scales this note belongs to. */
   readonly layers: readonly number[];
+  /** Part of the chord shape being studied. */
+  readonly inVoicing: boolean;
   readonly fn: ToneFunction | null;
 }
 
@@ -49,6 +51,8 @@ export interface MarkerInput {
   readonly labelMode: LabelMode;
   readonly pinnedPc: number | null;
   readonly overlays: readonly OverlayScale[];
+  /** A chord shape to outline on the neck; its notes are drawn even outside the position. */
+  readonly voicing?: readonly FretPosition[] | null;
   readonly wholeNeck: boolean;
 }
 
@@ -100,6 +104,10 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
       if (overlayPcs[i]?.has(note.pc) && !drawn.has(key(note))) drawn.set(key(note), note);
     }
   });
+  const voicingKeys = new Set((input.voicing ?? []).map(key));
+  for (const note of neck) {
+    if (voicingKeys.has(key(note)) && !drawn.has(key(note))) drawn.set(key(note), note);
+  }
   const layersAt = (note: FretNote): readonly number[] =>
     overlays.flatMap((o, i) => {
       if (!overlayPcs[i]?.has(note.pc)) return [];
@@ -161,6 +169,7 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
       pinned: pinnedPc !== null && mod(pinnedPc, 12) === note.pc,
       target: note.midi === targetNow ? 'now' : note.midi === targetNext ? 'next' : null,
       layers,
+      inVoicing: voicingKeys.has(key(note)),
       fn,
     };
   });
