@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   PPQ, TempoMap, TimelineScheduler, barBeatAt, loopBoundariesInRange, metronomeInRange, swingTick, trackEventAt, trackEventsInRange,
-  unswingTick, ticksPerBar, type ChordChangePayload, type Clock, type TimeConfig, type TimelineSink, type TimerDriver, type Track,
+  unswingTick, ticksPerBar, withMeterChange, nextBarLine, type ChordChangePayload, type Clock, type TimeConfig, type TimelineSink, type TimerDriver, type Track,
 } from './index';
 
 const config: TimeConfig = { meter: { beatsPerBar: 4, beatUnit: 4 }, subdivision: 1, swing: 0 };
@@ -107,6 +107,20 @@ describe('time model', () => {
     const track = { ...chordTrack(2), loop: false };
     expect(trackEventsInRange(track, 0, track.lengthTicks * 3)).toHaveLength(2);
     expect(trackEventAt(track, track.lengthTicks + 1)).toBeNull();
+  });
+  it('follows meter segments for bar lines, clicks and swing', () => {
+    const changed = withMeterChange({ ...config, swing: 0.3 }, 100, { beatsPerBar: 6, beatUnit: 8 });
+    const bar = ticksPerBar(config.meter);
+    expect(changed.segments?.map((seg) => seg.tick)).toEqual([0, bar]);
+    expect(nextBarLine(changed, 100)).toBe(bar);
+    expect(nextBarLine(changed, bar + 1)).toBe(bar + 1440);
+    // Clicks: 4/4 quarters up to the change, 6/8 eighths after it.
+    const ticks = metronomeInRange(bar - PPQ, bar + 480, changed).map((e) => `${e.kind}@${e.tick}`);
+    expect(ticks).toEqual([`beat@${bar - PPQ}`, `bar@${bar}`, `beat@${bar + 240}`]);
+    // Swing works on the eighth after the change and leaves the bar line alone.
+    expect(swingTick(bar, changed)).toBe(bar);
+    expect(swingTick(bar + 120, changed)).toBeCloseTo(bar + 156, 9);
+    expect(unswingTick(swingTick(bar + 200, changed), changed)).toBeCloseTo(bar + 200, 9);
   });
   it('tempo map stays continuous over changes', () => {
     const map = new TempoMap(10, 0, 120, config.meter);
@@ -306,13 +320,137 @@ describe('scheduler', () => {
     expect(scheduler.transportState).toBe('stopped');
   });
 
-  it('changing the meter stops playback instead of breaking the bar grid', () => {
-    const { scheduler, timer } = rig(120);
-    scheduler.play();
-    timer.advance(0.5);
-    scheduler.setMeter({ beatsPerBar: 3, beatUnit: 4 });
-    expect(scheduler.transportState).toBe('stopped');
-    expect(scheduler.timeConfig.meter.beatsPerBar).toBe(3);
+  describe('meter change during playback', () => {
+    const THREE_FOUR = { beatsPerBar: 3, beatUnit: 4 } as const;
+    const SIX_EIGHT = { beatsPerBar: 6, beatUnit: 8 } as const;
+    const BAR = ticksPerBar(config.meter);
+
+    it('keeps playing and starts the new meter on the next bar line, with no gap or double', () => {
+      const { scheduler, timer, hits, clock } = rig(120);
+      const start = clock.time + 0.06;
+      scheduler.play();
+      timer.advance(0.7); // inside the first bar of 4/4
+      scheduler.setMeter(THREE_FOUR);
+      expect(scheduler.transportState).toBe('playing');
+      expect(scheduler.pendingMeterChange).toBe(BAR);
+      timer.advance(5);
+      const beats = beatTicks(hits);
+      uniqueSorted(beats.map((h) => h.tick));
+      // Quarter notes stay half a second apart straight through the change.
+      beats.forEach((hit, i) => {
+        expect(hit.tick).toBe(i * PPQ);
+        expect(hit.time).toBeCloseTo(start + i * 0.5, 9);
+      });
+      // Bar lines: 0 in 4/4, then every three beats from the change.
+      expect(beats.filter((h) => h.kind === 'bar').map((h) => h.tick).slice(0, 4)).toEqual([0, BAR, BAR + 3 * PPQ, BAR + 6 * PPQ]);
+      expect(scheduler.pendingMeterChange).toBeNull();
+    });
+
+    it('counts eighths after a change to 6/8, at the same BPM', () => {
+      const { scheduler, timer, hits, clock } = rig(120);
+      const start = clock.time + 0.06;
+      scheduler.play();
+      timer.advance(0.3);
+      scheduler.setMeter(SIX_EIGHT);
+      timer.advance(6);
+      const after = beatTicks(hits).filter((h) => h.tick >= BAR);
+      // BPM counts the eighth: 240 ticks, still 0.5 s apart; first one exactly at the bar line, 2 s in.
+      expect(after[0]).toMatchObject({ tick: BAR, kind: 'bar' });
+      expect(after[0]?.time).toBeCloseTo(start + 2, 9);
+      after.slice(0, 13).forEach((hit, i) => {
+        expect(hit.tick).toBe(BAR + i * 240);
+        expect(hit.time).toBeCloseTo(start + 2 + i * 0.5, 9);
+        expect(hit.kind).toBe(i % 6 === 0 ? 'bar' : 'beat');
+      });
+    });
+
+    it('reads bars and beats across the change, numbering bars on', () => {
+      const { scheduler, timer, clock } = rig(120);
+      scheduler.play();
+      timer.advance(0.2);
+      scheduler.setMeter(THREE_FOUR);
+      timer.advance(4);
+      const cfg = scheduler.timeConfig;
+      expect(barBeatAt(BAR - PPQ, cfg)).toEqual({ bar: 0, beat: 3, subdivision: 0 });
+      expect(barBeatAt(BAR, cfg)).toEqual({ bar: 1, beat: 0, subdivision: 0 });
+      expect(barBeatAt(BAR + 3 * PPQ + PPQ, cfg)).toEqual({ bar: 2, beat: 1, subdivision: 0 });
+      // The UI's reading of the audio clock agrees with the schedule after the change.
+      const tick = BAR + 4 * PPQ;
+      expect(scheduler.positionAt(scheduler.timeOf(tick))).toBeCloseTo(tick, 6);
+      expect(clock.time).toBeGreaterThan(scheduler.timeOf(tick));
+    });
+
+    it('drops a change reverted before it starts', () => {
+      const { scheduler, timer, hits } = rig(120);
+      scheduler.play();
+      timer.advance(0.3);
+      scheduler.setMeter(THREE_FOUR);
+      scheduler.setMeter(config.meter);
+      expect(scheduler.pendingMeterChange).toBeNull();
+      timer.advance(5);
+      const bars = beatTicks(hits).filter((h) => h.kind === 'bar').map((h) => h.tick);
+      expect(bars.slice(0, 3)).toEqual([0, BAR, 2 * BAR]);
+    });
+
+    it('keeps a waiting meter change when the BPM changes first', () => {
+      const { scheduler, timer, hits } = rig(120);
+      scheduler.play();
+      timer.advance(0.3);
+      scheduler.setMeter(SIX_EIGHT);
+      scheduler.setBpm(60);
+      timer.advance(10);
+      const after = beatTicks(hits).filter((h) => h.tick >= BAR);
+      expect(after[1]?.tick).toBe(BAR + 240);
+      // 60 BPM on the eighth: one second per eighth.
+      expect((after[1]?.time ?? 0) - (after[0]?.time ?? 0)).toBeCloseTo(1, 9);
+    });
+
+    it('restarts an exercise and a progression end on the new downbeat', () => {
+      const { scheduler, timer, hits } = rig(120);
+      scheduler.replaceTrack(chordTrack(2));
+      scheduler.setEnd(2 * 3 * PPQ, () => scheduler.stop(), 'chords');
+      scheduler.play();
+      timer.advance(0.3);
+      scheduler.setMeter(THREE_FOUR);
+      // The engine rebuilds tracks for the new meter: two bars of 3/4.
+      const threeFourChords: Omit<Track<ChordChangePayload>, 'originTick'> = {
+        id: 'chords', lengthTicks: 6 * PPQ, loop: false,
+        events: [0, 1].map((i) => ({ tick: i * 3 * PPQ, payload: { type: 'chord' as const, chordIndex: i } })),
+      };
+      scheduler.swapTrackAtNextBar(threeFourChords);
+      timer.advance(8);
+      const chords = hits.filter((h) => h.kind === 'chords').map((h) => h.tick);
+      expect(chords).toEqual([0, BAR, BAR + 3 * PPQ]);
+      // Two bars of 3/4 after the change, then the end callback stops the transport.
+      expect(scheduler.transportState).toBe('stopped');
+    });
+
+    it('applies a change made while paused at the next bar after the pause point', () => {
+      const { scheduler, timer, hits } = rig(120);
+      scheduler.play();
+      timer.advance(2.3); // into bar 2
+      scheduler.pause();
+      scheduler.setMeter(THREE_FOUR);
+      expect(scheduler.pendingMeterChange).toBe(2 * BAR);
+      scheduler.play();
+      timer.advance(5);
+      const bars = beatTicks(hits).filter((h) => h.kind === 'bar').map((h) => h.tick);
+      expect(bars).toContain(2 * BAR);
+      expect(bars).toContain(2 * BAR + 3 * PPQ);
+      uniqueSorted(beatTicks(hits).map((h) => h.tick));
+    });
+
+    it('forgets past meters on stop and starts in the last one chosen', () => {
+      const { scheduler, timer } = rig(120);
+      scheduler.play();
+      timer.advance(0.3);
+      scheduler.setMeter(THREE_FOUR);
+      timer.advance(3);
+      scheduler.stop();
+      expect(scheduler.timeConfig.segments).toBeUndefined();
+      expect(scheduler.timeConfig.meter).toEqual(THREE_FOUR);
+      expect(barBeatAt(3 * PPQ, scheduler.timeConfig)).toEqual({ bar: 1, beat: 0, subdivision: 0 });
+    });
   });
 
   it('plays a one-shot exactly once, cancelled by stop', () => {

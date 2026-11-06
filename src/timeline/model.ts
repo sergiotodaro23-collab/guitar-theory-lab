@@ -17,15 +17,82 @@ export interface Meter {
 /** Clicks or notes per beat. */
 export type Subdivision = 1 | 2 | 3 | 4;
 
+/** A stretch of the timeline in one meter, from `tick` (a bar line) onward. */
+export interface MeterSegment {
+  readonly tick: number;
+  /** Bar number at `tick`, so bars keep counting across a change. */
+  readonly bar: number;
+  readonly meter: Meter;
+}
+
 export interface TimeConfig {
+  /** The meter in force now, i.e. of the last segment. */
   readonly meter: Meter;
   readonly subdivision: Subdivision;
   /** 0 is straight; 0.33 approximates triplet swing on the eighth. */
   readonly swing: number;
+  /**
+   * Meter changes during playback, oldest first. Absent means `meter` from
+   * tick 0. Ticks never restart, so audio already scheduled stays valid.
+   */
+  readonly segments?: readonly MeterSegment[];
 }
 
 export const ticksPerBeat = (meter: Meter): number => (PPQ * 4) / meter.beatUnit;
 export const ticksPerBar = (meter: Meter): number => ticksPerBeat(meter) * meter.beatsPerBar;
+
+export function meterSegments(config: TimeConfig): readonly MeterSegment[] {
+  return config.segments && config.segments.length > 0 ? config.segments : [{ tick: 0, bar: 0, meter: config.meter }];
+}
+
+/** The segment a tick falls in; ticks before the first segment use the first. */
+export function segmentAt(config: TimeConfig, tick: number): MeterSegment {
+  const segments = meterSegments(config);
+  let found = segments[0] as MeterSegment;
+  for (const segment of segments) {
+    if (segment.tick <= tick) found = segment;
+    else break;
+  }
+  return found;
+}
+
+function nextSegmentAfter(config: TimeConfig, tick: number): MeterSegment | undefined {
+  return meterSegments(config).find((segment) => segment.tick > tick);
+}
+
+/** First bar line at or after a tick, in whatever meter is in force there. */
+export function nextBarLine(config: TimeConfig, tick: number): number {
+  const segment = segmentAt(config, tick);
+  const bar = ticksPerBar(segment.meter);
+  const line = segment.tick + Math.ceil((tick - segment.tick) / bar) * bar;
+  const next = nextSegmentAfter(config, tick);
+  return next && next.tick < line ? next.tick : line;
+}
+
+/** First beat at or after a tick. */
+export function nextBeatLine(config: TimeConfig, tick: number): number {
+  const segment = segmentAt(config, tick);
+  const beat = ticksPerBeat(segment.meter);
+  const line = segment.tick + Math.ceil((tick - segment.tick) / beat) * beat;
+  const next = nextSegmentAfter(config, tick);
+  return next && next.tick < line ? next.tick : line;
+}
+
+/**
+ * The same config with a new meter from the next bar line after `tick`. A
+ * change not yet reached is replaced, so the last choice wins.
+ */
+export function withMeterChange(config: TimeConfig, tick: number, meter: Meter): TimeConfig {
+  const kept = meterSegments(config).filter((segment) => segment.tick <= tick);
+  const base = { ...config, segments: kept, meter: (kept[kept.length - 1] as MeterSegment).meter };
+  const origin = nextBarLine(base, tick);
+  const current = segmentAt(base, origin);
+  if (current.meter.beatsPerBar === meter.beatsPerBar && current.meter.beatUnit === meter.beatUnit) return base;
+  const bar = barBeatAt(origin, base).bar;
+  const segments = [...kept.filter((segment) => segment.tick < origin), { tick: origin, bar, meter }];
+  // Older segments only matter while their audio may still be heard.
+  return { ...config, meter, segments: segments.slice(-4) };
+}
 
 export interface BarBeat {
   readonly bar: number;
@@ -34,13 +101,15 @@ export interface BarBeat {
 }
 
 export function barBeatAt(tick: number, config: TimeConfig): BarBeat {
-  const perBeat = ticksPerBeat(config.meter);
-  const beats = Math.floor(tick / perBeat);
+  const segment = segmentAt(config, tick);
+  const local = tick - segment.tick;
+  const perBeat = ticksPerBeat(segment.meter);
+  const beats = Math.floor(local / perBeat);
   const perSub = perBeat / config.subdivision;
   return {
-    bar: Math.floor(beats / config.meter.beatsPerBar),
-    beat: beats % config.meter.beatsPerBar,
-    subdivision: Math.floor((tick % perBeat) / perSub),
+    bar: segment.bar + Math.floor(beats / segment.meter.beatsPerBar),
+    beat: beats % segment.meter.beatsPerBar,
+    subdivision: Math.floor((local - beats * perBeat) / perSub),
   };
 }
 
@@ -48,10 +117,15 @@ export function barBeatAt(tick: number, config: TimeConfig): BarBeat {
  * Swing delays what falls in the second half of each beat. The curve is piecewise
  * linear and monotonic, so note order never changes.
  */
+function beatStart(config: TimeConfig, tick: number): { start: number; beat: number } {
+  const segment = segmentAt(config, tick);
+  const beat = ticksPerBeat(segment.meter);
+  return { start: segment.tick + Math.floor((tick - segment.tick) / beat) * beat, beat };
+}
+
 export function swingTick(tick: number, config: TimeConfig): number {
   if (config.swing <= 0) return tick;
-  const beat = ticksPerBeat(config.meter);
-  const start = Math.floor(tick / beat) * beat;
+  const { start, beat } = beatStart(config, tick);
   const t = tick - start;
   const half = beat / 2;
   const swung = t < half ? t * (1 + config.swing) : half * (1 + config.swing) + (t - half) * (1 - config.swing);
@@ -61,8 +135,8 @@ export function swingTick(tick: number, config: TimeConfig): number {
 /** Inverse of swingTick: which straight tick is sounding at a swung position. */
 export function unswingTick(tick: number, config: TimeConfig): number {
   if (config.swing <= 0) return tick;
-  const beat = ticksPerBeat(config.meter);
-  const start = Math.floor(tick / beat) * beat;
+  // Segment boundaries are bar lines, where swing moves nothing.
+  const { start, beat } = beatStart(config, tick);
   const t = tick - start;
   const half = beat / 2;
   const pivot = half * (1 + config.swing);
@@ -132,15 +206,21 @@ export interface LoopBoundary {
 
 /** Metronome grid events in [from, to). Derived from the meter, never stored. */
 export function metronomeInRange(from: number, to: number, config: TimeConfig): readonly MetronomeEvent[] {
-  const beat = ticksPerBeat(config.meter);
-  const step = beat / config.subdivision;
-  const bar = ticksPerBar(config.meter);
+  const segments = meterSegments(config);
   const result: MetronomeEvent[] = [];
-  for (let n = Math.ceil(from / step); n * step < to; n += 1) {
-    const tick = n * step;
-    const kind = tick % bar === 0 ? 'bar' : tick % beat === 0 ? 'beat' : 'subdivision';
-    result.push({ kind, tick });
-  }
+  segments.forEach((segment, i) => {
+    const end = Math.min(to, segments[i + 1]?.tick ?? Infinity);
+    const start = Math.max(from, i === 0 ? -Infinity : segment.tick);
+    if (start >= end) return;
+    const beat = ticksPerBeat(segment.meter);
+    const step = beat / config.subdivision;
+    const bar = ticksPerBar(segment.meter);
+    for (let n = Math.ceil((start - segment.tick) / step); segment.tick + n * step < end; n += 1) {
+      const local = n * step;
+      const kind = local % bar === 0 ? 'bar' : local % beat === 0 ? 'beat' : 'subdivision';
+      result.push({ kind, tick: segment.tick + local });
+    }
+  });
   return result;
 }
 
