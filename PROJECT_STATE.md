@@ -6,8 +6,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 238 test unitari.
-- `npm run test:e2e`: verde, 23 casi su Chromium headless.
+- `npm run check`: verde, 249 test unitari.
+- `npm run test:e2e`: verde, 29 casi su Chromium headless (`e2e/app.spec.ts`, `e2e/appearance.spec.ts`; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -27,7 +27,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Limiti noti
 
-- Il tema predefinito è ancora il "neon" di v0.1.0. Il prototipo skeuomorfico "Workbench" si attiva da `Aspetto` nell'intestazione e aspetta l'approvazione del proprietario per diventare predefinito.
+- Aspetto **Semplificata** (predefinito, unico su smartphone verticale) e **Studio** (prototipo da validare). Due layout sullo stesso stato, vedi D-15.
 - Solo accordatura standard; nessuna vista per mancini.
 - Nessun input audio (pitch, monitor, tuner).
 - Firefox e WebKit non testati (browser assenti nell'ambiente).
@@ -43,4 +43,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-decisione sul tema Workbench (P2-02) → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.
+revisione del prototipo Studio (P2-02) → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.

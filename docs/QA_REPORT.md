@@ -22,7 +22,7 @@ Ambiente: container cloud Linux, Node 22.23, npm 10.9, Chromium headless (Playwr
 | Percorsi a fasi (C su / G giù, melodica classica, 3NPS, validazioni, JSON) | Verde |
 | Editor: apertura, modelli, aggiunta, riordino, eliminazione, alternativa a un errore, Escape, applica, riproduzione con cambio di forma | Verde (e2e) |
 | Editor a 820 px senza overflow orizzontale | Verde (e2e) |
-| Tema Workbench: attivazione, memoria tra sessioni, esclusione dai preset, contrasto WCAG ≥ 4,5:1 su pannelli, titoli, marker, LCD e testo sul banco | Verde (e2e); 238 unit, 23 e2e dopo il blocco |
+| Aspetti Semplificata/Studio: stato invariato al cambio durante la riproduzione; Semplificata forzata a 390×844, Studio disabilitato a 844×390, ripristinato a 768×1024 e 1280×800; nessun overflow in 4 modalità × 6 formati; manopole, fader e schede da tastiera; contrasto WCAG ≥ 4,5:1 in Studio; frecce della tastiera su telefono | Verde (e2e); 249 unit, 29 e2e dopo il blocco |
 | Arpeggios Lab: solo note dell'accordo nella posizione, rivolto dalla terza, arpeggi collegati sulla progressione | Verde (e2e); 238 unit, 22 e2e dopo il blocco |
 | Cambio di metrica in riproduzione: 4/4 → 3/4 → 6/8 a 120 BPM, click a 0,5 s esatti, nessun doppione, luci aggiornate alla stanghetta | Verde (e2e); 226 unit, 21 e2e dopo il blocco |
 | Accordi multipli: builder, slash/rivolto, forma sulla tastiera, selezione, riordino, invio a Harmony Lab | Verde (e2e); 218 unit, 20 e2e dopo il blocco |
