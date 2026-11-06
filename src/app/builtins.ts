@@ -56,6 +56,16 @@ export const STUDY_PRESETS: readonly BuiltinPreset[] = [
     data: { mode: 'fretboard', exerciseOn: true, exerciseMode: 'routine', routine: routine(1), bpm: 66, chordLayers: [] },
   },
   {
+    id: 'arp-cmaj7-inversions',
+    name: 'Arpeggio di Cmaj7 dalla terza, sale e scende',
+    data: { mode: 'arpeggio', arpSource: 'chord', arpSymbol: 'Cmaj7', arpLow: 7, arpStart: 1, arpDirection: 'updown', arpCustomOn: false, arpNotesPerBeat: 2, labelMode: 'function', bpm: 72 },
+  },
+  {
+    id: 'arp-251-connected',
+    name: 'Arpeggi collegati su ii–V–I in Do',
+    data: { mode: 'arpeggio', arpSource: 'progression', arpLink: 'connect', arpLow: 5, arpStart: 0, arpDirection: 'up', arpCustomOn: false, arpNotesPerBeat: 2, labelMode: 'function', bpm: 80, progression: template('ii-v-i', 'C'), compOn: true },
+  },
+  {
     id: 'guide-251',
     name: 'Guide tones su ii–V–I in Do',
     data: { mode: 'harmony', tonic: 'C', scaleId: 'ionian', positionType: 'caged', cagedForm: 'A', exerciseOn: false, focus: 'guide', changeMode: 'auto', labelMode: 'function', bpm: 84, progression: template('ii-v-i', 'C'), compOn: true },

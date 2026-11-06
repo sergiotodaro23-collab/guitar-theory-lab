@@ -280,7 +280,7 @@ test('layout holds at phone width with no page overflow', async ({ page }) => {
   await open(page);
   // The default position starts at fret 7: it must be in view, not scrolled off.
   await expect.poll(() => page.locator('.fretboard-scroll').evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
-  for (const name of ['Fretboard Lab', 'Harmony Lab', 'Jam Studio']) {
+  for (const name of ['Fretboard Lab', 'Harmony Lab', 'Arpeggios Lab', 'Jam Studio']) {
     await mode(page, name);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow, name).toBeLessThanOrEqual(0);
@@ -467,5 +467,86 @@ test('multiple chords: build, slash bass, voicing on the neck, select, reorder, 
   await expect(page.getByRole('button', { name: 'Harmony Lab', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByTestId('chip-0')).toContainText('Am7/G');
   await expect(page.getByTestId('chip-1')).toContainText('C/E');
+  expect(errors).toEqual([]);
+});
+
+test('changing the meter while playing keeps the transport running and switches at the bar line', async ({ page }) => {
+  const errors = await open(page);
+  await page.getByTestId('bpm').fill('120');
+  await page.getByTestId('play').click();
+  await expect(page.getByTestId('beat-lights').locator('.beat-light')).toHaveCount(4);
+  await wait(page, 900);
+  await page.getByTestId('meter').selectOption('3/4');
+  // Still playing: no stop, no restart.
+  await expect(page.getByTestId('beat-lights')).toHaveAttribute('data-state', 'playing');
+  await expect(page.getByTestId('play')).toHaveText('Pausa');
+  // The lights switch to three only once the new bar starts.
+  await expect(page.getByTestId('beat-lights').locator('.beat-light')).toHaveCount(3, { timeout: 4000 });
+  await wait(page, 3500);
+  await page.getByTestId('meter').selectOption('6/8');
+  await expect(page.getByTestId('beat-lights').locator('.beat-light')).toHaveCount(6, { timeout: 4000 });
+  await wait(page, 3500);
+  const log = await debug(page);
+  const beats = log.scheduled.filter((e) => e.kind === 'bar' || e.kind === 'beat');
+  // One tick line, no doubles, no going back.
+  const ticks = beats.map((b) => b.tick);
+  expect(new Set(ticks).size).toBe(ticks.length);
+  expect([...ticks].sort((a, b) => a - b)).toEqual(ticks);
+  // Every click half a second after the previous one: quarters at 120, then eighths at 120.
+  beats.slice(1).forEach((b, i) => expect(b.time - (beats[i]?.time ?? 0)).toBeCloseTo(0.5, 6));
+  // Bar lines: four beats apart, then three, then six.
+  const bars = beats.filter((b) => b.kind === 'bar').map((b) => b.tick);
+  const spans = bars.slice(1).map((t, i) => t - (bars[i] ?? 0));
+  expect(spans).toContain(4 * 480);
+  expect(spans).toContain(3 * 480);
+  expect(spans).toContain(6 * 240);
+  expect(spans.every((s) => s === 1920 || s === 1440)).toBe(true);
+  // Quarter clicks first, eighth clicks after 6/8.
+  const tickGaps = ticks.slice(1).map((t, i) => t - (ticks[i] ?? 0));
+  expect(tickGaps[0]).toBe(480);
+  expect(tickGaps[tickGaps.length - 1]).toBe(240);
+  // The screen still follows the audio clock across the changes.
+  const shown = log.shown.filter((s) => s.kind === 'beat');
+  const lags = shown.map((s) => s.time - s.scheduled).filter((lag) => lag >= 0);
+  expect(median(lags)).toBeLessThan(0.05);
+  expect(errors).toEqual([]);
+});
+
+test('arpeggios lab: one chord by its tones and inversion, then connected over the progression', async ({ page }) => {
+  const errors = await open(page);
+  await mode(page, 'Arpeggios Lab');
+  await expect(page.getByTestId('current-chord')).toHaveText('Cmaj7');
+  await expect(page.getByTestId('arp-spelling')).toContainText('C (1)  E (3)  G (5)  B (7)');
+  // Only chord tones are drawn, inside the five-fret position 7–11.
+  const markers = page.locator('.marker');
+  expect(await markers.count()).toBeGreaterThanOrEqual(8);
+  const roles = await markers.evaluateAll((els) => els.map((e) => e.getAttribute('data-role')));
+  expect(roles.every((r) => r === 'chord-tone')).toBe(true);
+  const frets = await markers.evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-fret'))));
+  expect(Math.min(...frets)).toBeGreaterThanOrEqual(7);
+  expect(Math.max(...frets)).toBeLessThanOrEqual(11);
+
+  // First inversion: the first note played is the third.
+  await page.getByTestId('arp-start').selectOption({ label: 'Terza (1° rivolto)' });
+  await page.getByTestId('bpm').fill('200');
+  await page.getByTestId('play').click();
+  await expect(page.locator('.active-note')).toBeVisible();
+  await expect(page.locator('.active-note').first()).toHaveAttribute('data-active-label', '3');
+  await page.getByTestId('stop').click();
+
+  // Over the shared progression, connected: the current chord follows the playhead.
+  await page.getByRole('button', { name: 'La progressione' }).click();
+  await expect(page.getByTestId('chord-strip')).toBeVisible();
+  await page.getByTestId('bpm').fill('240');
+  await page.getByTestId('play').click();
+  const first = await page.getByTestId('current-chord').textContent();
+  await expect.poll(async () => page.getByTestId('current-chord').textContent(), { timeout: 8000 }).not.toBe(first);
+  // Every highlighted note is a tone of the chord shown with it.
+  for (let i = 0; i < 6; i += 1) {
+    const label = await page.locator('.active-note').getAttribute('data-active-label', { timeout: 2000 }).catch(() => null);
+    if (label !== null) expect(['1', '3', '5', '7', 'b3', 'b7', 'b5', 'bb7', '9', '13']).toContain(label);
+    await wait(page, 150);
+  }
+  await page.getByTestId('stop').click();
   expect(errors).toEqual([]);
 });

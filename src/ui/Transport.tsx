@@ -7,6 +7,7 @@ import { Select, Segmented } from './controls';
 const MODES: readonly { value: AppMode; label: string }[] = [
   { value: 'fretboard', label: 'Fretboard Lab' },
   { value: 'harmony', label: 'Harmony Lab' },
+  { value: 'arpeggio', label: 'Arpeggios Lab' },
   { value: 'jam', label: 'Jam Studio' },
 ];
 
@@ -14,7 +15,9 @@ function BeatLights() {
   const settings = useApp((s) => s.settings);
   const beat = usePlayhead((p) => p.beat);
   const state = usePlayhead((p) => p.state);
-  const count = meterOf(settings).beatsPerBar;
+  const heard = usePlayhead((p) => p.beatsPerBar);
+  // While playing, the lights follow the meter being heard, which changes at the bar line.
+  const count = state === 'stopped' ? meterOf(settings).beatsPerBar : heard;
   return (
     <div className="beat-lights" role="img" aria-label={state === 'stopped' ? 'Metronomo fermo' : `Movimento ${beat + 1} di ${count}`} data-testid="beat-lights" data-beat={beat} data-state={state}>
       {Array.from({ length: count }, (_, i) => (
@@ -32,6 +35,13 @@ function CurrentChord() {
     return (
       <div className="now-playing">
         <span className="now-chord now-chord-text" data-testid="current-chord">{settings.chordLayers[settings.activeChord]?.symbol || 'Solo scala'}</span>
+      </div>
+    );
+  }
+  if (settings.mode === 'arpeggio' && settings.arpSource === 'chord') {
+    return (
+      <div className="now-playing">
+        <span className="now-chord" data-testid="current-chord">{settings.arpSymbol || 'Nessun accordo'}</span>
       </div>
     );
   }

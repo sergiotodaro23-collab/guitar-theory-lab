@@ -1,14 +1,15 @@
 /** Everything the user can configure and save. Pure and framework-free. */
 import { CAGED_FORMS, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
-import { ROUTINE_TEMPLATES, generateSequence, parseCustomPattern, resolvePhase, sanitizeRoutine, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine } from '../exercises';
+import { ARP_SPAN, ROUTINE_TEMPLATES, arpeggioNotes, generateSequence, parseCustomPattern, resolvePhase, sanitizeRoutine, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec } from '../exercises';
 import type { AvoidProfile } from '../harmony';
 import { COMP_PATTERNS, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, type CompPattern, type Progression } from '../jam';
-import { SCALES, TONICS, buildScale, mod, type Scale, type ScaleId } from '../theory';
+import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import type { Meter, Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
 import { clampActive, sanitizeChordLayers, type ChordLayer } from './chordLayers';
 
-export type AppMode = 'fretboard' | 'harmony' | 'jam';
+export type AppMode = 'fretboard' | 'harmony' | 'arpeggio' | 'jam';
+export const APP_MODES: readonly AppMode[] = ['fretboard', 'harmony', 'arpeggio', 'jam'];
 export type PositionType = 'caged' | '3nps' | 'neck';
 export type LabelMode = 'note' | 'degree' | 'function' | 'finger' | 'none';
 export type HarmonyFocus = 'all' | 'guide' | 'common' | 'resolution' | 'targeting';
@@ -69,7 +70,22 @@ export interface HarmonySettings {
   readonly volComp: number;
 }
 
-export interface Settings extends StudySettings, HarmonySettings {
+export interface ArpeggioSettings {
+  /** One chord, or the progression shared with Harmony Lab. */
+  readonly arpSource: 'chord' | 'progression';
+  readonly arpSymbol: string;
+  /** Lowest fret of the five-fret hand position. */
+  readonly arpLow: number;
+  readonly arpDirection: ArpDirection;
+  /** 0 root, 1 third, 2 fifth, 3 seventh. */
+  readonly arpStart: number;
+  readonly arpCustomOn: boolean;
+  readonly arpCustomText: string;
+  readonly arpLink: ArpLink;
+  readonly arpNotesPerBeat: Subdivision;
+}
+
+export interface Settings extends StudySettings, HarmonySettings, ArpeggioSettings {
   readonly mode: AppMode;
 }
 
@@ -114,6 +130,15 @@ export const DEFAULT_SETTINGS: Settings = {
   volClick: 0.7,
   volNotes: 0.7,
   volComp: 0.7,
+  arpSource: 'chord',
+  arpSymbol: 'Cmaj7',
+  arpLow: 7,
+  arpDirection: 'updown',
+  arpStart: 0,
+  arpCustomOn: false,
+  arpCustomText: '1 3 2 4',
+  arpLink: 'connect',
+  arpNotesPerBeat: 2,
 };
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -135,7 +160,7 @@ export function sanitizeSettings(raw: unknown): Settings {
   }
   const chordLayers = sanitizeChordLayers(r);
   return {
-    mode: oneOf(r.mode, ['fretboard', 'harmony', 'jam'] as const, d.mode),
+    mode: oneOf(r.mode, APP_MODES, d.mode),
     tonic: oneOf(r.tonic, TONICS, d.tonic),
     scaleId: oneOf(r.scaleId, scaleIds, d.scaleId),
     positionType: oneOf(r.positionType, ['caged', '3nps', 'neck'] as const, d.positionType),
@@ -170,6 +195,15 @@ export function sanitizeSettings(raw: unknown): Settings {
     volClick: number01(r.volClick, d.volClick),
     volNotes: number01(r.volNotes, d.volNotes),
     volComp: number01(r.volComp, d.volComp),
+    arpSource: oneOf(r.arpSource, ['chord', 'progression'] as const, d.arpSource),
+    arpSymbol: typeof r.arpSymbol === 'string' ? r.arpSymbol.slice(0, 24) : d.arpSymbol,
+    arpLow: typeof r.arpLow === 'number' && Number.isFinite(r.arpLow) ? clamp(Math.round(r.arpLow), 0, DEFAULT_FRETS - ARP_SPAN) : d.arpLow,
+    arpDirection: oneOf(r.arpDirection, ['up', 'down', 'updown', 'downup'] as const, d.arpDirection),
+    arpStart: typeof r.arpStart === 'number' ? clamp(Math.round(r.arpStart), 0, 5) : d.arpStart,
+    arpCustomOn: typeof r.arpCustomOn === 'boolean' ? r.arpCustomOn : d.arpCustomOn,
+    arpCustomText: typeof r.arpCustomText === 'string' ? r.arpCustomText.slice(0, 120) : d.arpCustomText,
+    arpLink: oneOf(r.arpLink, ['restart', 'connect'] as const, d.arpLink),
+    arpNotesPerBeat: oneOf(r.arpNotesPerBeat, [1, 2, 3, 4] as const, d.arpNotesPerBeat),
   };
 }
 
@@ -205,6 +239,16 @@ export function currentExerciseSequence(s: StudySettings) {
   const notes = s.positionType === 'neck' ? cagedPosition(scale, s.cagedForm).notes : currentPositionNotes(s);
   return generateSequence(notes, scale, exerciseSpecOf(s));
 }
+
+export const arpeggioSpecOf = (s: ArpeggioSettings): ArpeggioSpec => ({
+  direction: s.arpDirection,
+  start: s.arpStart,
+  customPattern: s.arpCustomOn ? parseCustomPattern(s.arpCustomText) : null,
+});
+
+/** Chord tones in the arpeggio hand position, for the board. */
+export const arpeggioBoardNotes = (chord: Chord | null, s: ArpeggioSettings): readonly FretNote[] =>
+  chord ? arpeggioNotes(chord, s.arpLow) : [];
 
 /** What the board shows: in a routine, the shape and scale of the given phase. */
 export function boardContext(s: StudySettings, phaseIndex: number | null): { scale: Scale; notes: readonly FretNote[]; wholeNeck: boolean } {

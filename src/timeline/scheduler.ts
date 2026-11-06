@@ -5,12 +5,16 @@
  */
 import {
   loopBoundariesInRange,
+  meterSegments,
   metronomeInRange,
+  nextBarLine,
+  nextBeatLine,
+  segmentAt,
   swingTick,
   trackEventsInRange,
   ticksPerBeat,
-  ticksPerBar,
   unswingTick,
+  withMeterChange,
   type LoopBoundary,
   type MetronomeEvent,
   type ScheduledTrackEvent,
@@ -65,7 +69,8 @@ export class TimelineScheduler {
   private previousTracks = new Map<string, Track>();
   private oneShots: ScheduledTrackEvent[] = [];
   private bpmValue: number;
-  private endTick: number | null = null;
+  /** End position relative to a track's origin, so it follows the track when it restarts. */
+  private end: { readonly ticks: number; readonly trackId: string | null } | null = null;
   private onEnd: (() => void) | null = null;
 
   constructor(
@@ -115,7 +120,7 @@ export class TimelineScheduler {
     if (this.state === 'playing') return;
     const from = this.state === 'paused' ? this.pausedTick : 0;
     const now = this.clock.now();
-    this.tempo = new TempoMap(now + this.startDelay, swingTick(from, this.config), this.bpmValue, this.config.meter);
+    this.tempo = this.buildTempo(now + this.startDelay, from);
     this.cursor = from;
     this.state = 'playing';
     this.stopTimer = this.timer.start(() => this.pump(), this.intervalMs);
@@ -131,9 +136,20 @@ export class TimelineScheduler {
     this.sink.cancelAfter(now);
   }
 
+  /** A tempo map starting at `from`, carrying any meter change still ahead of it. */
+  private buildTempo(time: number, from: number): TempoMap {
+    const tempo = new TempoMap(time, swingTick(from, this.config), this.bpmValue, segmentAt(this.config, from).meter);
+    for (const segment of meterSegments(this.config)) {
+      if (segment.tick > from) tempo.setMeter(segment.tick, segment.meter);
+    }
+    return tempo;
+  }
+
   stop(): void {
     if (this.state === 'stopped') return;
     this.state = 'stopped';
+    // A fresh start counts bars from the meter chosen last.
+    this.config = { meter: this.config.meter, subdivision: this.config.subdivision, swing: this.config.swing };
     this.pausedTick = 0;
     this.cursor = 0;
     this.tempo = null;
@@ -173,16 +189,34 @@ export class TimelineScheduler {
     if (this.state === 'playing' && this.tempo) {
       const time = this.tempo.timeAt(swingTick(this.cursor, this.config));
       this.config = { ...this.config, swing };
-      this.tempo = new TempoMap(time, swingTick(this.cursor, this.config), this.bpmValue, this.config.meter);
+      this.tempo = this.buildTempo(time, this.cursor);
     } else {
       this.config = { ...this.config, swing };
     }
   }
 
-  /** A meter change moves every bar line, so it can only apply on a fresh start. */
+  /**
+   * Stopped: the new meter is simply the meter. Playing or paused: it starts at
+   * the next bar line, and what is already scheduled keeps the old one.
+   */
   setMeter(meter: TimeConfig['meter']): void {
-    if (this.state !== 'stopped') this.stop();
-    this.config = { ...this.config, meter };
+    if (this.state === 'stopped') {
+      this.config = { ...this.config, meter };
+      return;
+    }
+    const at = this.state === 'paused' ? this.pausedTick : this.cursor;
+    this.config = withMeterChange(this.config, at, meter);
+    if (this.state === 'playing' && this.tempo) {
+      // Rebuild from the cursor so a change replaced before it starts leaves no trace.
+      const time = this.tempo.timeAt(swingTick(this.cursor, this.config));
+      this.tempo = this.buildTempo(time, this.cursor);
+    }
+  }
+
+  /** Where the meter changes next, or null when no change is waiting. */
+  get pendingMeterChange(): number | null {
+    const at = this.state === 'paused' ? this.pausedTick : this.cursor;
+    return meterSegments(this.config).find((segment) => segment.tick > at)?.tick ?? null;
   }
 
   /** Replace now, keeping the phase of the old version. For harmony edits during playback. */
@@ -202,8 +236,7 @@ export class TimelineScheduler {
       this.tracks.set(track.id, { ...track, originTick: 0 });
       return;
     }
-    const bar = ticksPerBar(this.config.meter);
-    const origin = Math.ceil(this.cursor / bar) * bar;
+    const origin = nextBarLine(this.config, this.state === 'paused' ? this.pausedTick : this.cursor);
     if (origin === this.cursor && !this.tracks.has(track.id)) {
       this.tracks.set(track.id, { ...track, originTick: origin });
       return;
@@ -227,32 +260,47 @@ export class TimelineScheduler {
     return current;
   }
 
-  /** Stop automatically at this tick: non-looping progressions. Null runs forever. */
-  setEnd(tick: number | null, onEnd: (() => void) | null): void {
-    this.endTick = tick;
+  /**
+   * Stop automatically: non-looping progressions. With a track id the end is
+   * counted from that track's start, so it moves when the track restarts at a
+   * new meter. Null runs forever.
+   */
+  setEnd(ticks: number | null, onEnd: (() => void) | null, trackId: string | null = null): void {
+    this.end = ticks === null ? null : { ticks, trackId };
     this.onEnd = onEnd;
+  }
+
+  private endTick(): number | null {
+    if (!this.end) return null;
+    if (this.end.trackId === null) return this.end.ticks;
+    const pending = this.pendingTracks.find((track) => track.id === this.end?.trackId);
+    const origin = pending?.originTick ?? this.tracks.get(this.end.trackId)?.originTick ?? 0;
+    return origin + this.end.ticks;
   }
 
   /** Earliest grid tick for a manual chord change that has not been scheduled yet. */
   nextQuantizedTick(unit: 'beat' | 'bar'): number {
-    const size = unit === 'bar' ? ticksPerBar(this.config.meter) : ticksPerBeat(this.config.meter);
-    return Math.ceil(this.cursor / size) * size;
+    return unit === 'bar' ? nextBarLine(this.config, this.cursor) : nextBeatLine(this.config, this.cursor);
   }
 
   private pump(): void {
     if (this.state !== 'playing' || !this.tempo) return;
     const horizon = this.clock.now() + this.lookAhead;
-    const stepTicks = ticksPerBeat(this.config.meter) / this.config.subdivision;
 
-    // Advance one grid step at a time so a pending swap lands exactly at its tick.
+    // Advance one grid step at a time so a pending swap or meter change lands exactly at its tick.
     while (this.state === 'playing' && this.timeOf(this.cursor) < horizon) {
-      const to = (Math.floor(this.cursor / stepTicks) + 1) * stepTicks;
+      const segment = segmentAt(this.config, this.cursor);
+      const stepTicks = ticksPerBeat(segment.meter) / this.config.subdivision;
+      let to = segment.tick + (Math.floor((this.cursor - segment.tick) / stepTicks) + 1) * stepTicks;
+      const change = meterSegments(this.config).find((s) => s.tick > this.cursor);
+      if (change && change.tick < to) to = change.tick;
       this.promotePending(this.cursor);
       this.emitRange(this.cursor, to);
       this.cursor = to;
-      if (this.endTick !== null && this.cursor >= this.endTick) {
+      const endTick = this.endTick();
+      if (endTick !== null && this.cursor >= endTick) {
         const callback = this.onEnd;
-        const endTime = this.timeOf(this.endTick);
+        const endTime = this.timeOf(endTick);
         const remaining = Math.max(0, endTime - this.clock.now());
         this.halt();
         if (callback) scheduleOnce(this.timer, remaining, callback);

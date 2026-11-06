@@ -4,7 +4,7 @@
  */
 import { WebAudioSink, workerTimer } from '../audio/webAudioSink';
 import {
-  PPQ, TimelineScheduler, barBeatAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
+  PPQ, TimelineScheduler, barBeatAt, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
   type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink,
 } from '../timeline';
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
@@ -83,7 +83,8 @@ class Engine {
     this.audio?.setVolume('comp', s.volComp);
   }
 
-  private syncTracks(s: Settings): void {
+  /** With `meterChanged`, every track restarts on the bar line where the new meter begins. */
+  private syncTracks(s: Settings, meterChanged = false): void {
     const tracks: ModeTracks = buildTracks(s);
     const apply = (id: 'exercise' | 'chords' | 'comp', atBar: boolean) => {
       const spec = tracks[id];
@@ -95,22 +96,23 @@ class Engine {
       else this.scheduler.replaceTrack(spec);
     };
     apply('exercise', true);
-    apply('chords', false);
-    apply('comp', false);
-    this.scheduler.setEnd(tracks.endTick, tracks.endTick === null ? null : () => this.stop());
+    apply('chords', meterChanged);
+    apply('comp', meterChanged);
+    this.scheduler.setEnd(tracks.endTick, tracks.endTick === null ? null : () => this.stop(), 'chords');
   }
 
   private onSettings(s: Settings, previous: Settings): void {
-    if (s.meterId !== previous.meterId) {
+    const meterChanged = s.meterId !== previous.meterId;
+    if (meterChanged) {
+      // Playing on: the new meter starts at the next bar line, tracks restart there.
       this.scheduler.setMeter(meterOf(s));
       this.manualChanges = [];
-      this.afterTransport();
     }
     if (s.bpm !== previous.bpm) this.scheduler.setBpm(s.bpm);
     if (s.subdivision !== previous.subdivision) this.scheduler.setSubdivision(s.subdivision);
     if (s.swing !== previous.swing) this.scheduler.setSwing(s.swing);
     if (s.volClick !== previous.volClick || s.volNotes !== previous.volNotes || s.volComp !== previous.volComp) this.applyVolumes(s);
-    this.syncTracks(s);
+    this.syncTracks(s, meterChanged);
     if (s.mode !== previous.mode || s.changeMode !== previous.changeMode) this.manualChanges = [];
     if (this.scheduler.transportState !== 'playing') this.publish();
   }
@@ -256,20 +258,22 @@ class Engine {
       beat: position.beat,
       subdivision: position.subdivision,
       chordIndex: this.chordIndexAt(tick),
+      beatsPerBar: segmentAt(this.scheduler.timeConfig, Math.max(tick, 0)).meter.beatsPerBar,
       phase,
       note,
       trail,
     };
     const current = usePlayhead.getState();
     const changed = current.state !== next.state || current.bar !== next.bar || current.beat !== next.beat
-      || current.subdivision !== next.subdivision || current.chordIndex !== next.chordIndex || current.phase !== next.phase
+      || current.subdivision !== next.subdivision || current.chordIndex !== next.chordIndex || current.phase !== next.phase || current.beatsPerBar !== next.beatsPerBar
       || current.note?.index !== next.note?.index;
     if (!changed) return;
     if (this.debug && this.ctx && state === 'playing') {
-      const perBeat = (PPQ * 4) / this.scheduler.timeConfig.meter.beatUnit;
+      const segment = segmentAt(this.scheduler.timeConfig, tick);
+      const perBeat = (PPQ * 4) / segment.meter.beatUnit;
       const time = this.ctx.currentTime - (this.ctx.outputLatency || this.ctx.baseLatency || 0);
       if (current.beat !== next.beat || current.bar !== next.bar) {
-        const beatTick = Math.floor(tick / perBeat) * perBeat;
+        const beatTick = segment.tick + Math.floor((tick - segment.tick) / perBeat) * perBeat;
         this.debug.shown.push({ kind: 'beat', tick: beatTick, value: next.beat, time, scheduled: this.scheduler.timeOf(beatTick) });
       }
       if (next.note && current.note?.index !== next.note.index) {

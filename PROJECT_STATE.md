@@ -6,18 +6,20 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 218 test unitari.
-- `npm run test:e2e`: verde, 20 casi su Chromium headless.
+- `npm run check`: verde, 238 test unitari.
+- `npm run test:e2e`: verde, 22 casi su Chromium headless.
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
 ## Funziona
 
-- Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus), Jam Studio (progressioni, comping, loop, seconda scala).
+- Quattro modalità: Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus), Arpeggios Lab, Jam Studio (progressioni, comping, loop).
+- **Arpeggios Lab**: un accordo o la progressione, posizione di cinque tasti, rivolti, quattro direzioni, pattern personalizzati, arpeggi collegati per nota più vicina.
 - Tastiera 0–24 tasti a celle uniformi, CAGED (5 forme) e 3NPS (7 pattern), intervalli 2ª–8ª, sequenze personalizzate.
 - **Percorsi a fasi** (nuovo): ogni fase con scala, forma CAGED/3NPS/range di tasti, ottava, sequenza, direzione, note per movimento e ripetizioni. Fasi sul battere, tastiera che segue la fase in riproduzione.
 - **Editor avanzato** (nuovo): dialog ampio con blocchi fase riordinabili, modelli, errori con alternativa applicabile, anteprima (battute, durata, striscia delle fasi, tastiera, note, transizione).
 - Minore melodica jazz (scala) e classica (percorso).
+- **Cambio di metrica in riproduzione**: il transport non si ferma, la nuova metrica parte alla stanghetta successiva (anche verso 6/8, dove il BPM conta gli ottavi).
 - **Accordi multipli**: fino a 8 accordi con builder (fondamentale, qualità, basso), slash chord e rivolti, forme eseguibili cercate sul manico e contornate sulla tastiera, diagrammi, invio a Harmony Lab come progressione.
 - **Scale multiple**: fino a 5 scale (principale + 4) con `+ Aggiungi scala`, visibilità, colore, opacità, zona, riordino e confronto delle note.
 - Targhetta con versione reale e autore.
@@ -26,7 +28,6 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 ## Limiti noti
 
 - Interfaccia ancora nel tema "neon" di v0.1.0: il design skeuomorfico (P2-02) non è iniziato, salvo la targhetta.
-- Cambiare metrica ferma la riproduzione.
 - Solo accordatura standard; nessuna vista per mancini.
 - Nessun input audio (pitch, monitor, tuner).
 - Firefox e WebKit non testati (browser assenti nell'ambiente).
@@ -42,4 +43,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-P0-08 metrica alla battuta → P1-12 Arpeggios Lab → P2-02 prototipo skeuomorfico. Dettagli in `docs/ROADMAP.md`.
+P2-02 prototipo skeuomorfico → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.
