@@ -8,7 +8,7 @@ Ambiente: container cloud Linux, Node 22.23, npm 10.9, Chromium headless (Playwr
 
 - Branch `main` (3b3c314) e `claude/serene-hopper-ubi687`; nessuna PR; nessun tag sul remoto (il `v0.1.0` citato nei documenti non è stato pubblicato).
 - CI: workflow `ci.yml` eseguito una volta su `main`, esito verde.
-- Licenza: `UNLICENSED` in `package.json`, nessun file `LICENSE` né `CONTRIBUTING`.
+- Licenza: all'audit `UNLICENSED`, senza `LICENSE` né `CONTRIBUTING`. Risolto con GPL-3.0-or-later (D-08).
 - Segreti: nessuno nel codice né nella CI.
 - Deployment: nessuna configurazione di pubblicazione (Pages o simili). Non eseguito.
 

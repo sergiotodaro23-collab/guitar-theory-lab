@@ -30,10 +30,14 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 - Firefox e WebKit non testati (browser assenti nell'ambiente).
 - Vulnerabilità solo nelle dipendenze di sviluppo (Vitest 3), vedi QA.
 
-## In attesa del proprietario
+## Licenza
 
-- Licenza: proposta GPL-3.0-or-later o MIT (`docs/DECISIONS.md`, D-08).
-- Pubblicazione del tag `v0.1.0` e di eventuali release.
+GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/DECISIONS.md` D-08).
+
+## In attesa
+
+- Tag `v0.1.0`: approvato, ma il push dei tag è bloccato dall'ambiente cloud. Va pubblicato dal sito GitHub o da un clone locale.
+- PR [#1](https://github.com/sergiotodaro23-collab/guitar-theory-lab/pull/1) verso `main`.
 
 ## Prossimo task
 

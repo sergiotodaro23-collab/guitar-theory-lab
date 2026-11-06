@@ -4,7 +4,7 @@ Una riga di contesto, la scelta, il perché. Le nuove in cima.
 
 ## 2026-11-06
 
-**D-08 · Licenza: proposta, in attesa di approvazione.** Oggi `UNLICENSED`, che contraddice l'obiettivo open source. Proposta: **GPL-3.0-or-later**: garantisce che i fork restino liberi ed è compatibile con eventuali runtime DSP copyleft (da verificare per NAM in P4-01). Alternativa: **MIT**, più permissiva, se si preferisce la massima riusabilità. Il proprietario decide; finché non decide, non si aggiunge `LICENSE`.
+**D-08 · Licenza GPL-3.0-or-later (approvata dal proprietario).** Il proprietario ha scelto la GPL 3.0 al posto della MIT: le versioni derivate devono restare libere. Variante "or later", come proposto: permette di adottare versioni future della GPL. `LICENSE` contiene il testo ufficiale; il piè di pagina dell'app mostra l'avviso di licenza e il link ai sorgenti, come chiede la sezione 5(d) per i programmi interattivi. Ogni dipendenza, campione o modello aggiunto deve avere una licenza compatibile con la GPL-3.0 (MIT, BSD, Apache-2.0, LGPL e GPL lo sono).
 
 **D-07 · Percorsi a fasi come dati dichiarativi.** Un esercizio è `Routine { name, phases[] }`; ogni fase porta scala, posizione (CAGED, 3NPS o range di tasti), ottava, tipo di sequenza, direzione, note per movimento e ripetizioni. Niente linguaggio di scripting: i "blocchi" dell'editor sono i gruppi di campi di una fase. Copre gli esempi della specifica (forma C su / G giù, melodica classica, relativa minore, 3NPS diversi) ed è serializzabile nei preset senza migrazioni, grazie a `sanitizeRoutine`.
 

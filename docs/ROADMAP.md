@@ -19,7 +19,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P0-07 | Timeline condivisa unica | IMPLEMENTED | — | timeline, app | Già presente: `TimelineScheduler` su `AudioContext.currentTime`. |
 | P0-08 | Cambio metrica senza fermare la riproduzione | PARTIAL | P0-07 | timeline | Oggi ferma il transport. Strategia: cambio alla battuta successiva con nuovo segmento di `TempoMap`. Test: stanghette coerenti dopo il cambio. |
 | P0-09 | Test cross-browser Firefox/WebKit | BLOCKED | — | e2e | Solo Chromium installato nell'ambiente cloud. Aggiungere progetti Playwright quando i browser sono disponibili (CI: `npx playwright install firefox webkit`). |
-| P0-10 | Tag `v0.1.0` sul remoto | MISSING | — | git | Il tag è citato nei documenti ma non esiste su GitHub. Push dei tag solo con autorizzazione del proprietario. |
+| P0-10 | Tag `v0.1.0` sul remoto | BLOCKED | — | git | Approvato dal proprietario e creato in locale su `3b3c314`, ma l'ambiente cloud rifiuta il push dei tag (403). Da pubblicare dal sito GitHub o da un clone locale. |
 
 ## P1 — Core didattico
 
@@ -77,8 +77,8 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 | ID | Requisito | Stato | Note |
 |----|-----------|-------|------|
-| P5-01 | Licenza open source | BLOCKED | `package.json` dice `UNLICENSED`. Proposta in `DECISIONS.md`, serve l'approvazione del proprietario. |
-| P5-02 | CONTRIBUTING, README aggiornati | PARTIAL | README presente; CONTRIBUTING da scrivere insieme alla licenza. |
+| P5-01 | Licenza open source | IMPLEMENTED | GPL-3.0-or-later (D-08): `LICENSE`, `package.json`, avviso nell'app. |
+| P5-02 | CONTRIBUTING, README aggiornati | IMPLEMENTED | `CONTRIBUTING.md` con regole su licenza dei contributi, campioni e modelli. |
 | P5-03 | Audit dipendenze | IMPLEMENTED | `npm audit` alla data dell'audit (vedi QA). |
 | P5-04 | Accessibilità e performance | PARTIAL | Marker navigabili da tastiera, aria-label, reduced motion; da verificare con audit completo. |
 

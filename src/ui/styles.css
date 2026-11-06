@@ -252,7 +252,8 @@ button, select, input { font: inherit; color: inherit; }
 .saved-list { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
 .saved-list li { display: flex; justify-content: space-between; gap: 10px; }
 .status { font-size: 13px; color: var(--chord-tone); min-height: 1.3em; }
-.foot { margin-top: 18px; color: var(--muted); font-size: 13px; }
+.foot { margin-top: 18px; color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
+.legal a { color: var(--chord-tone); }
 
 @media (max-width: 1150px) {
   .time-controls { margin-left: 0; }

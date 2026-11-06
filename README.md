@@ -29,3 +29,7 @@ npm run test:e2e   # test nel browser reale con misura della sincronizzazione
 ```
 
 Vedi `PROJECT_STATE.md`, `docs/ROADMAP.md`, `docs/MASTER_SPEC.md` e `docs/ARCHITECTURE.md`.
+
+## Licenza
+
+Copyright © 2026 Sergio Todaro. Guitar Theory Lab è software libero: puoi ridistribuirlo e modificarlo secondo i termini della GNU General Public License, versione 3 o (a tua scelta) successiva. È distribuito senza alcuna garanzia. Il testo completo è in `LICENSE`; per contribuire vedi `CONTRIBUTING.md`.

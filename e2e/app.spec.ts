@@ -309,6 +309,7 @@ test('nameplate shows the real version and a 24-fret neck', async ({ page }) => 
   await open(page);
   await expect(page.getByTestId('nameplate')).toContainText('GUITAR THEORY LAB');
   await expect(page.getByTestId('nameplate')).toContainText(/v\d+\.\d+\.\d+ — by Sergio Todaro/);
+  await expect(page.getByTestId('license-notice')).toContainText('GNU GPL 3.0');
   await page.getByRole('button', { name: 'Tutta la tastiera' }).click();
   // Every string at fret 24 is its open note two octaves up: E A D G B E, all in C major.
   await expect(page.locator('.marker[data-fret="24"]')).toHaveCount(6);

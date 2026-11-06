@@ -2,7 +2,7 @@
   "name": "guitar-theory-lab",
   "version": "0.1.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "GPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "vite",
