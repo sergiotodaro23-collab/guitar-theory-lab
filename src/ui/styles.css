@@ -14,7 +14,13 @@
   --outside: #8f84b8;
   --root: #ff5ca8;
   --scale: #9d7bff;
-  --second: #b8ff5c;
+  /* Overlaid scales: one colour each, always paired with a pip position. */
+  --layer-teal: #3df2e0;
+  --layer-amber: #ffc24d;
+  --layer-lime: #b8ff5c;
+  --layer-coral: #ff8a65;
+  --layer-sky: #6cc6ff;
+  --layer-rose: #ff7ad1;
   --hot: #ffffff;
 
   --cut: 8px;
@@ -152,7 +158,6 @@ button, select, input { font: inherit; color: inherit; }
 .role-root .shape { fill: var(--root); stroke: var(--root); }
 .role-root .marker-label { fill: var(--void); }
 .role-scale .shape { fill: #2d1e63; stroke: var(--scale); }
-.role-second-scale .shape { fill: transparent; stroke: var(--second); }
 .role-chord-tone .shape { fill: var(--chord-tone); stroke: var(--chord-tone); }
 .role-chord-tone .marker-label { fill: var(--void); }
 .role-tension .shape { fill: var(--tension); stroke: var(--tension); }
@@ -162,7 +167,6 @@ button, select, input { font: inherit; color: inherit; }
 .role-outside .shape { fill: var(--void); stroke: var(--outside); }
 .role-outside .marker-label { fill: var(--muted); font-size: 11px; }
 .guide-ring { fill: none; stroke: var(--chord-tone); stroke-width: 2; }
-.second-ring { fill: none; stroke: var(--second); stroke-width: 1.6; stroke-dasharray: 2 3; }
 .target-ring { fill: none; stroke: var(--hot); stroke-width: 2.5; }
 .target-next { stroke-dasharray: 4 4; opacity: 0.8; }
 .marker.is-dim { opacity: 0.22; }
@@ -339,3 +343,37 @@ button, select, input { font: inherit; color: inherit; }
   .editor-preview { border-left: 0; border-top: 1px solid var(--edge); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---- Overlaid scales ---- */
+.layer-teal { --layer: var(--layer-teal); }
+.layer-amber { --layer: var(--layer-amber); }
+.layer-lime { --layer: var(--layer-lime); }
+.layer-coral { --layer: var(--layer-coral); }
+.layer-sky { --layer: var(--layer-sky); }
+.layer-rose { --layer: var(--layer-rose); }
+.pip { fill: var(--layer); stroke: var(--void); stroke-width: 1.5; pointer-events: none; }
+/* A note only an overlay contains: hollow, dashed, in that overlay's colour. */
+.role-other-scale .shape { fill: var(--void); stroke: var(--layer, var(--outside)); stroke-width: 2; stroke-dasharray: 4 2; }
+.role-other-scale .marker-label { fill: var(--layer, var(--muted)); font-size: 11px; }
+.legend-pip { width: 20px; height: 20px; flex: none; }
+.legend-pip-ring { fill: #2d1e63; stroke: var(--scale); stroke-width: 1.5; }
+
+.panel-subtitle { font: 600 14px/1.2 var(--display); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.layers { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--edge); padding-top: 10px; }
+.layers .btn { align-self: flex-start; }
+.layer-list { display: flex; flex-direction: column; gap: 6px; }
+.layer-item { background: var(--void); border: 1px solid var(--edge); border-left: 4px solid var(--layer); }
+.layer-item.is-hidden { border-left-style: dashed; }
+.layer-item.is-hidden .layer-name { color: var(--muted); }
+.layer-head { display: flex; align-items: center; gap: 4px; padding: 4px; }
+.layer-swatch { width: 24px; height: 24px; flex: none; display: grid; place-items: center; background: var(--layer); color: var(--void); font: 700 13px/1 var(--display); border-radius: 50%; }
+.layer-name { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 6px; cursor: pointer; font-size: 14px; min-height: 34px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.layer-name::after { content: ' ▾'; color: var(--muted); }
+.layer-name[aria-expanded='true']::after { content: ' ▴'; }
+.layer-head .icon-btn { width: 32px; height: 32px; }
+.layer-head .icon-btn[aria-pressed='true'] { color: var(--layer); }
+.layer-body { display: flex; flex-direction: column; gap: 10px; padding: 4px 10px 12px; }
+.spelling.small { font-size: 14px; color: var(--layer); }
+.comparison { display: flex; flex-direction: column; gap: 1px; margin: 0; font-size: 13px; }
+.comparison dt { color: var(--muted); }
+.comparison dd { margin: 0 0 5px; font: 600 15px/1.3 var(--display); word-spacing: 0.2em; }

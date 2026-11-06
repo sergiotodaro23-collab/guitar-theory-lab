@@ -209,7 +209,7 @@ function Preview({ draft, selected, onSelect }: { readonly draft: Routine; reado
   const current = plan.phases[selected];
   const layer = useMemo(() => current ? buildMarkerLayer({
     notes: current.notes, scale: current.scale, chord: null, nextChord: null, chords: [], chordIndex: 0, focus: 'all',
-    profile: settings.avoidProfile, labelMode: 'degree', pinnedPc: null, secondScale: null, wholeNeck: false,
+    profile: settings.avoidProfile, labelMode: 'degree', pinnedPc: null, overlays: [], wholeNeck: false,
   }) : null, [current, settings.avoidProfile]);
 
   return (

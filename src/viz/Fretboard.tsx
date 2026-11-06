@@ -57,7 +57,7 @@ function roleName(marker: Marker): string {
   switch (marker.role) {
     case 'root': return 'tonica';
     case 'scale': return 'nota della scala';
-    case 'second-scale': return 'nota della seconda scala';
+    case 'other-scale': return 'nota di una scala sovrapposta';
     case 'chord-tone': return marker.isGuide ? 'guide tone' : 'chord tone';
     case 'tension': return 'tensione';
     case 'avoid': return 'avoid contestuale';
@@ -76,20 +76,35 @@ function Shape({ marker, x, y }: { readonly marker: Marker; readonly x: number; 
   return <circle className="shape" cx={x} cy={y} r={marker.role === 'outside' ? r * 0.85 : r} />;
 }
 
+/** Look of an overlaid scale, indexed by its position in the user's list. */
+export interface LayerStyle {
+  /** Suffix of a `layer-*` CSS class. */
+  readonly color: string;
+  readonly opacity: number;
+  readonly name: string;
+}
+
+/** Pip offsets around a note, by list position: top-right, bottom-right, bottom-left, top-left. */
+const PIP_OFFSETS: readonly (readonly [number, number])[] = [[1, -1], [1, 1], [-1, 1], [-1, -1]];
+
 interface MarkerProps {
   readonly marker: Marker;
+  readonly layerStyles: readonly LayerStyle[];
   readonly onPick: (marker: Marker) => void;
 }
 
-const MarkerGlyph = memo(function MarkerGlyph({ marker, onPick }: MarkerProps) {
+const MarkerGlyph = memo(function MarkerGlyph({ marker, layerStyles, onPick }: MarkerProps) {
   const x = noteX(marker.fret);
   const y = stringY(marker.string);
   const classes = ['marker', `role-${marker.role}`];
   if (marker.dim) classes.push('is-dim');
   if (marker.isGuide) classes.push('is-guide');
   if (marker.pinned) classes.push('is-pinned');
-  if (marker.inSecondScale) classes.push('in-second');
+  const owner = marker.role === 'other-scale' ? layerStyles[marker.layers[0] ?? -1] : undefined;
+  if (owner) classes.push(`layer-${owner.color}`);
   const fnText = marker.fn ? `, ${marker.fn.degree} dell’accordo` : '';
+  const layerNames = marker.layers.map((i) => layerStyles[i]?.name).filter(Boolean);
+  const layerText = layerNames.length ? `; in ${layerNames.join(', ')}` : '';
   const onKey = (event: KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -106,15 +121,21 @@ const MarkerGlyph = memo(function MarkerGlyph({ marker, onPick }: MarkerProps) {
       data-role={marker.role}
       role="button"
       tabIndex={marker.dim ? -1 : 0}
-      aria-label={`Corda ${6 - marker.string}, tasto ${marker.fret}: ${roleName(marker)}${fnText}`}
+      aria-label={`Corda ${6 - marker.string}, tasto ${marker.fret}: ${roleName(marker)}${fnText}${layerText}`}
       onClick={() => onPick(marker)}
       onKeyDown={onKey}
     >
       {marker.isGuide && !marker.dim ? <circle className="guide-ring" cx={x} cy={y} r={RADIUS + 3.5} /> : null}
-      {marker.inSecondScale ? <circle className="second-ring" cx={x} cy={y} r={RADIUS + 3.5} /> : null}
       {marker.target ? <circle className={`target-ring target-${marker.target}`} cx={x} cy={y} r={RADIUS + 6} /> : null}
       <Shape marker={marker} x={x} y={y} />
       <text className="marker-label" x={x} y={y + 1}>{marker.label}</text>
+      {marker.layers.map((index) => {
+        const style = layerStyles[index];
+        const offset = PIP_OFFSETS[index];
+        if (!style || !offset) return null;
+        const d = RADIUS * 0.8;
+        return <circle key={index} className={`pip layer-${style.color}`} style={{ opacity: style.opacity }} data-layer={index} cx={x + offset[0] * d} cy={y + offset[1] * d} r={4.6} />;
+      })}
     </g>
   );
 });
@@ -150,10 +171,13 @@ export interface FretboardProps {
   readonly arrows: readonly FretArrow[];
   readonly active: ActiveNote | null;
   readonly trail: readonly FretPosition[];
+  readonly layerStyles?: readonly LayerStyle[];
   readonly onPick: (marker: Marker) => void;
 }
 
-export function Fretboard({ markers, arrows, active, trail, onPick }: FretboardProps) {
+const NO_LAYERS: readonly LayerStyle[] = [];
+
+export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAYERS, onPick }: FretboardProps) {
   const scroller = useRef<HTMLDivElement>(null);
   const lowestFret = markers.length > 0 ? Math.min(...markers.map((m) => m.fret)) : 0;
 
@@ -179,7 +203,7 @@ export function Fretboard({ markers, arrows, active, trail, onPick }: FretboardP
         <FretGrid />
         {arrows.map((arrow, i) => <ArrowLine key={i} arrow={arrow} />)}
         {markers.map((marker) => (
-          <MarkerGlyph key={`${marker.string}-${marker.fret}`} marker={marker} onPick={onPick} />
+          <MarkerGlyph key={`${marker.string}-${marker.fret}`} marker={marker} layerStyles={layerStyles} onPick={onPick} />
         ))}
         {trail.map((note, i) => (
           <circle key={i} className="trail" style={{ opacity: 0.55 - i * 0.16 }} cx={noteX(note.fret)} cy={stringY(note.string)} r={RADIUS + 3} />

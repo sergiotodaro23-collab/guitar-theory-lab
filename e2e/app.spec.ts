@@ -376,3 +376,52 @@ test('advanced editor fits a tablet and a phone without page overflow', async ({
   expect(overflow).toBeLessThanOrEqual(1);
   await expect(editor.getByTestId('routine-apply')).toBeInViewport();
 });
+
+test('multiple scales: add up to five, compare, show, reorder, remove, survive a reload', async ({ page }) => {
+  const errors = await open(page);
+  const layers = page.getByTestId('scale-layer');
+  const add = page.getByTestId('add-scale');
+
+  await add.click();
+  await expect(layers).toHaveCount(1);
+  // C major's relative minor pentatonic, drawn over the position with its pip.
+  await expect(layers.first()).toContainText('A Pentatonica minore');
+  await expect(page.locator('.pip[data-layer="0"]').first()).toBeVisible();
+  await expect(page.getByTestId('legend-layer')).toHaveCount(1);
+
+  // Change it to C dorian and read the comparison.
+  await layers.first().getByRole('button', { name: /Pentatonica minore/ }).click();
+  await page.getByLabel('Tipo della scala 2').selectOption({ label: 'Dorica' });
+  await page.getByLabel('Tonica della scala 2').selectOption('C');
+  await expect(page.getByTestId('scale-comparison')).toContainText('Solo nella principale');
+  await expect(page.getByTestId('scale-comparison')).toContainText(/E\s+B/);
+  await expect(page.getByTestId('scale-comparison')).toContainText(/Eb\s+Bb/);
+  // Eb is not in C major: a dashed marker in the layer's colour.
+  await expect(page.locator('.marker[data-role="other-scale"]').first()).toBeVisible();
+
+  // Fill the list: later scales start hidden, the button stops at five.
+  await add.click();
+  await add.click();
+  await add.click();
+  await expect(layers).toHaveCount(4);
+  await expect(add).toBeDisabled();
+  await expect(page.getByTestId('legend-layer')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Mostra la scala 3' }).click();
+  await expect(page.getByText('Più di due scale visibili')).toBeVisible();
+  await expect(page.getByTestId('legend-layer')).toHaveCount(2);
+
+  // Reorder and remove.
+  const names = () => layers.locator('.layer-name').allTextContents();
+  const before = await names();
+  await page.getByRole('button', { name: 'Sposta la scala 3 in alto' }).click();
+  expect((await names())[0]).toBe(before[1]);
+  await page.getByRole('button', { name: 'Rimuovi la scala 5' }).click();
+  await expect(layers).toHaveCount(3);
+  await expect(add).toBeEnabled();
+
+  await page.waitForTimeout(400);
+  await page.reload();
+  await expect(layers).toHaveCount(3);
+  expect(await names()).toEqual([before[1], before[0], before[2]]);
+  expect(errors).toEqual([]);
+});

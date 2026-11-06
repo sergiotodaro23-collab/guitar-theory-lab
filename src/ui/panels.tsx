@@ -11,12 +11,103 @@ import {
   COMP_PATTERNS, PROGRESSION_TEMPLATES, addChord, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord,
   type CompPattern, type Progression, type ChordDuration,
 } from '../jam';
-import { CHORD_SUFFIXES, SCALES, SCALE_IDS, TONICS, parseChord, tryParseChord, buildScale, type ScaleId } from '../theory';
+import { CHORD_SUFFIXES, SCALES, SCALE_IDS, TONICS, parseChord, tryParseChord, buildScale, compareScales, type Scale, type ScaleId } from '../theory';
+import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
 
 const tonicOptions = TONICS.map((t) => ({ value: t, label: t }));
 const scaleOptions = SCALE_IDS.map((id) => ({ value: id, label: SCALES[id].name }));
 const suffixOptions = CHORD_SUFFIXES.map((s) => ({ value: s, label: s === '' ? 'maggiore' : s }));
+
+function LayerItem({ layer, index, count, main }: {
+  readonly layer: ScaleLayer;
+  readonly index: number;
+  readonly count: number;
+  readonly main: Scale;
+}) {
+  const layers = useApp((state) => state.settings.scaleLayers);
+  const update = useApp((state) => state.update);
+  const [open, setOpen] = useState(false);
+  const scale = useMemo(() => buildScale(layer.tonic, layer.scaleId), [layer.tonic, layer.scaleId]);
+  const comparison = useMemo(() => compareScales(main, scale), [main, scale]);
+  const n = index + 2;
+  const change = (patch: Partial<ScaleLayer>) => update({ scaleLayers: layers.map((l, i) => (i === index ? { ...l, ...patch } : l)) });
+  const bodyId = `layer-body-${layer.id}`;
+  return (
+    <li className={`layer-item layer-${layer.color} ${layer.visible ? '' : 'is-hidden'}`} data-testid="scale-layer">
+      <div className="layer-head">
+        <span className="layer-swatch" aria-hidden="true">{n}</span>
+        <button type="button" className="layer-name" aria-expanded={open} aria-controls={bodyId} onClick={() => setOpen(!open)}>
+          {scale.tonicName} {scale.definition.name}
+        </button>
+        <button type="button" className="icon-btn" aria-pressed={layer.visible} aria-label={`${layer.visible ? 'Nascondi' : 'Mostra'} la scala ${n}`} onClick={() => change({ visible: !layer.visible })}>
+          {layer.visible ? '◉' : '○'}
+        </button>
+        <button type="button" className="icon-btn" aria-label={`Sposta la scala ${n} in alto`} disabled={index === 0} onClick={() => update({ scaleLayers: moveLayer(layers, index, index - 1) })}>↑</button>
+        <button type="button" className="icon-btn" aria-label={`Sposta la scala ${n} in basso`} disabled={index === count - 1} onClick={() => update({ scaleLayers: moveLayer(layers, index, index + 1) })}>↓</button>
+        <button type="button" className="icon-btn" aria-label={`Rimuovi la scala ${n}`} onClick={() => update({ scaleLayers: layers.filter((_, i) => i !== index) })}>✕</button>
+      </div>
+      {open ? (
+        <div className="layer-body" id={bodyId}>
+          <div className="row">
+            <Field label="Tonica"><Select label={`Tonica della scala ${n}`} value={layer.tonic} options={tonicOptions} onChange={(tonic) => change({ tonic })} /></Field>
+            <Field label="Scala"><Select label={`Tipo della scala ${n}`} value={layer.scaleId} options={scaleOptions} onChange={(scaleId: ScaleId) => change({ scaleId })} /></Field>
+          </div>
+          <p className="spelling small">{scale.tones.map((t) => t.name).join('  ')}</p>
+          <Field label="Dove">
+            <Segmented
+              label={`Zona della scala ${n}`}
+              value={layer.region}
+              options={[{ value: 'position', label: 'Nella posizione' }, { value: 'neck', label: 'Tutta la tastiera' }]}
+              onChange={(region) => change({ region })}
+            />
+          </Field>
+          <div className="row">
+            <Field label="Colore">
+              <Select<LayerColor> label={`Colore della scala ${n}`} value={layer.color} options={LAYER_COLORS.map((c) => ({ value: c, label: LAYER_COLOR_NAMES[c] }))} onChange={(color) => change({ color })} />
+            </Field>
+            <Field label={`Opacità ${Math.round(layer.opacity * 100)}%`}>
+              <input className="range" type="range" min={0.25} max={1} step={0.05} value={layer.opacity} aria-label={`Opacità della scala ${n}`} onChange={(e) => change({ opacity: Number(e.target.value) })} />
+            </Field>
+          </div>
+          <dl className="comparison" data-testid="scale-comparison">
+            <dt>In comune con {main.tonicName} {main.definition.name}</dt>
+            <dd>{comparison.common.join(' ') || '—'}</dd>
+            <dt>Solo nella principale</dt>
+            <dd>{comparison.onlyFirst.join(' ') || '—'}</dd>
+            <dt>Solo in questa</dt>
+            <dd>{comparison.onlySecond.join(' ') || '—'}</dd>
+          </dl>
+        </div>
+      ) : null}
+    </li>
+  );
+}
+
+function ScaleLayersSection() {
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  const main = useMemo(() => buildScale(s.tonic, s.scaleId), [s.tonic, s.scaleId]);
+  const layers = s.scaleLayers;
+  const full = layers.length >= MAX_EXTRA_SCALES;
+  return (
+    <section className="layers" aria-label="Altre scale">
+      <h3 className="panel-subtitle">Altre scale <span className="muted">({layers.length + 1} di {MAX_SCALES})</span></h3>
+      {layers.length > 0 ? (
+        <ol className="layer-list">
+          {layers.map((layer, i) => <LayerItem key={layer.id} layer={layer} index={i} count={layers.length} main={main} />)}
+        </ol>
+      ) : null}
+      {isCrowded(layers) ? (
+        <p className="note" role="status">Più di due scale visibili: ogni scala ha il suo punto attorno alla nota. Abbassa l’opacità o nascondi quelle che non stai confrontando.</p>
+      ) : null}
+      <button type="button" className="btn" data-testid="add-scale" disabled={full} onClick={() => update({ scaleLayers: addLayer(layers, s) })}>
+        + Aggiungi scala
+      </button>
+      {full ? <p className="field-hint">Massimo {MAX_SCALES} scale, principale compresa.</p> : null}
+    </section>
+  );
+}
 
 export function ScalePanel() {
   const s = useApp((state) => state.settings);
@@ -25,6 +116,7 @@ export function ScalePanel() {
   const heptatonic = scale.tones.length === 7;
   return (
     <Panel title="Scala e posizione">
+      <h3 className="panel-subtitle">Scala principale</h3>
       <div className="row">
         <Field label="Tonica"><Select testId="tonic" label="Tonica" value={s.tonic} options={tonicOptions} onChange={(tonic) => update({ tonic })} /></Field>
         <Field label="Scala"><Select testId="scale" label="Scala" value={s.scaleId} options={scaleOptions} onChange={(scaleId: ScaleId) => update({ scaleId })} /></Field>
@@ -57,6 +149,7 @@ export function ScalePanel() {
           <Segmented label="Forma CAGED" value={s.cagedForm} options={CAGED_FORMS.map((f) => ({ value: f, label: f }))} onChange={(cagedForm) => update({ cagedForm })} />
         </Field>
       )}
+      <ScaleLayersSection />
       <Field label="Sulle note">
         <Segmented<LabelMode>
           label="Etichette"
@@ -438,13 +531,7 @@ export function JamPanels() {
         <Field label="Cosa guardare" hint={FOCUS_OPTIONS.find((f) => f.value === s.focus)?.help}>
           <Select label="Focus" value={s.focus} options={FOCUS_OPTIONS} onChange={(focus) => update({ focus })} />
         </Field>
-        <Toggle checked={s.secondScaleOn} onChange={(secondScaleOn) => update({ secondScaleOn })}>Sovrapponi una seconda scala</Toggle>
-        {s.secondScaleOn ? (
-          <div className="row">
-            <Field label="Tonica"><Select label="Tonica seconda scala" value={s.secondTonic} options={tonicOptions} onChange={(secondTonic) => update({ secondTonic })} /></Field>
-            <Field label="Scala"><Select label="Seconda scala" value={s.secondScaleId} options={scaleOptions} onChange={(secondScaleId: ScaleId) => update({ secondScaleId })} /></Field>
-          </div>
-        ) : null}
+        <p className="field-hint">Per sovrapporre altre scale usa “+ Aggiungi scala” nel pannello Scala.</p>
       </Panel>
     </>
   );

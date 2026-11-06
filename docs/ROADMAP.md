@@ -30,7 +30,8 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P1-03 | CAGED 5 forme, 3NPS 7 pattern | IMPLEMENTED | — | fretboard | Test da manuale su forme in Sol; tutte le tonalità entro 24 tasti. CAGED esclude volutamente la prima posizione con corde vuote (vedi `DECISIONS.md`). |
 | P1-04 | Intervalli 2ª–8ª, sequenze personalizzate | IMPLEMENTED | — | exercises | Test sulle terze da manuale. Mancano intervalli cromatici e permutazioni automatiche. |
 | P1-05 | Accordature alternative e personalizzate | MISSING | P0-04 | fretboard, settings, ui | Le funzioni accettano già `tuning`: aggiungere preset (Drop D, DADGAD, Open G…), editor, persistenza. Test: mapping e forme con tuning diversi. |
-| P1-06 | Scale multiple (fino a 5) | PARTIAL | — | settings, viz, ui | Oggi: una scala + `secondScale` in Jam. Strategia: `scales: ScaleLayer[]` con colore/opacità/visibilità, `+ Aggiungi scala`, massimo 2 visibili per default. |
+| P1-06 | Scale multiple (fino a 5) | IMPLEMENTED | — | theory, app, viz, ui | Scala principale + fino a 4 `ScaleLayer` (`src/app/scaleLayers.ts`): `+ Aggiungi scala`, lista espandibile, tonica e tipo, zona (posizione o tutta la tastiera), visibilità, colore, opacità, riordino, rimozione, confronto (`compareScales`). Nuove scale nascoste oltre la seconda visibile, avviso di densità. Ogni scala ha un punto colorato in una posizione fissa attorno alla nota. Migrazione della vecchia "seconda scala". Test: 7 unit sul modello, 3 sul confronto, 2 sul marker layer; 1 e2e completo. |
+| P1-06b | Forma CAGED/3NPS indipendente per scala sovrapposta | MISSING | P1-06 | viz, ui | Oggi una scala sovrapposta segue la posizione della principale o copre tutta la tastiera. |
 | P1-07 | Accordi multipli (fino a 8), Chord Builder, slash, rivolti, voicing | PARTIAL | — | theory, harmony, ui | Oggi: parser di simboli con estensioni e alterazioni, accordo sovrapposto singolo. Mancano slash/basso, rivolti, voicing eseguibili, builder, lista accordi. |
 | P1-08 | Esercizi a fasi: forma/posizione/direzione per fase | IMPLEMENTED | P1-03 | exercises, app, ui | `src/exercises/routine.ts`: fasi dichiarative serializzabili, ottava alta, range di tasti, ripetizioni, suddivisione per fase, inizio fase sul battere. 12 test (C su / G giù, 3NPS, relativa, validazioni, round-trip JSON). |
 | P1-09 | Validazione con alternativa | IMPLEMENTED | P1-08 | exercises, ui | `PhaseIssue.fix` applicabile con un clic; e2e su 3NPS di pentatonica. |
@@ -84,6 +85,6 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P1-06 Scale multiple** e **P1-07 accordi multipli** (modello dati a layer, poi UI con `+ Aggiungi`).
+1. **P1-07 accordi multipli** (fino a 8, stesso schema a livelli delle scale) con slash chord e rivolti.
 2. **P0-08** cambio metrica alla battuta.
 3. **P2-02** prototipo del design system skeuomorfico su branch dedicato, a partire dalla tastiera (P2-03) e dal transport.
