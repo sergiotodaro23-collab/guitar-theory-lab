@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildScale, SCALE_IDS, TONICS, mod, type ScaleId } from '../theory';
-import { CAGED_FORMS, allFretNotes, cagedPosition, fingerPosition, midiAt, threeNpsPosition, spellPosition } from './index';
+import { CAGED_FORMS, DEFAULT_FRETS, allFretNotes, cagedPosition, fingerPosition, midiAt, threeNpsPosition, spellPosition } from './index';
 
 const shape = (notes: readonly { string: number; fret: number }[]) => {
   const byString: Record<number, number[]> = {};
@@ -13,6 +13,30 @@ describe('fretboard map', () => {
     expect(midiAt({ string: 0, fret: 0 })).toBe(40);
     expect(midiAt({ string: 5, fret: 12 })).toBe(76);
     expect(allFretNotes(22)).toHaveLength(6 * 23);
+  });
+  it('covers frets 0 to 24 inclusive by default', () => {
+    const neck = allFretNotes();
+    expect(neck).toHaveLength(6 * 25);
+    expect(DEFAULT_FRETS).toBe(24);
+    // Fret 24 is two octaves above the open string: E2 → E4 on string 6, E4 → E6 on string 1.
+    expect(midiAt({ string: 0, fret: 24 })).toBe(64);
+    expect(midiAt({ string: 5, fret: 24 })).toBe(88);
+    expect(neck.filter((n) => n.fret === 24).map((n) => n.pc)).toEqual([4, 9, 2, 7, 11, 4]);
+  });
+  it('places every CAGED and 3NPS shape inside frets 0–24', () => {
+    for (const tonic of TONICS) {
+      for (const form of CAGED_FORMS) {
+        for (const n of cagedPosition(buildScale(tonic, 'ionian'), form).notes) {
+          expect(n.fret, `${tonic} ${form}`).toBeGreaterThanOrEqual(0);
+          expect(n.fret, `${tonic} ${form}`).toBeLessThanOrEqual(24);
+        }
+      }
+      for (let start = 0; start < 7; start += 1) {
+        const p = threeNpsPosition(buildScale(tonic, 'ionian'), start);
+        expect(p, `${tonic} 3NPS ${start}`).not.toBeNull();
+        expect(Math.max(...(p?.notes ?? []).map((n) => n.fret))).toBeLessThanOrEqual(24);
+      }
+    }
   });
 });
 

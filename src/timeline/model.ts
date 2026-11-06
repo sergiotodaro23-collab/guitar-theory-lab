@@ -78,6 +78,8 @@ export interface NotePayload {
   readonly durationTicks: number;
   /** Position in the exercise, for the progressive highlight. */
   readonly index: number;
+  /** Phase of a multi-phase routine, so the board can show that phase's shape. */
+  readonly phase?: number;
 }
 
 export interface ChordChangePayload {
