@@ -30,6 +30,7 @@ const FretGrid = memo(function FretGrid() {
   return (
     <g>
       <rect className="board" x={NUT_X} y={TOP - 12} width={RIGHT - NUT_X} height={BOTTOM - TOP + 24} />
+      <rect className="board-grain" x={NUT_X} y={TOP - 12} width={RIGHT - NUT_X} height={BOTTOM - TOP + 24} />
       {INLAYS.map((fret) => (
         <circle key={fret} className="inlay" cx={noteX(fret)} cy={(TOP + BOTTOM) / 2} r={5} />
       ))}
@@ -195,6 +196,31 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
     <div className="fretboard-scroll" ref={scroller}>
       <svg className="fretboard" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="group" aria-label="Tastiera della chitarra">
         <defs>
+          {/* Materials for the workbench look; the classic theme ignores them. */}
+          <linearGradient id="gtl-maple" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#dcb67a" />
+            <stop offset="0.12" stopColor="#ecd09a" />
+            <stop offset="0.55" stopColor="#f2d9a6" />
+            <stop offset="0.9" stopColor="#e6c58c" />
+            <stop offset="1" stopColor="#cfa468" />
+          </linearGradient>
+          <pattern id="gtl-grain" width="420" height="38" patternUnits="userSpaceOnUse">
+            <path d="M0 6 C 90 3, 210 10, 420 5" stroke="#b9874a" strokeOpacity="0.22" strokeWidth="1.2" fill="none" />
+            <path d="M0 17 C 120 21, 260 13, 420 18" stroke="#a87638" strokeOpacity="0.16" strokeWidth="0.9" fill="none" />
+            <path d="M0 29 C 140 25, 300 33, 420 28" stroke="#b9874a" strokeOpacity="0.2" strokeWidth="1.4" fill="none" />
+            <path d="M60 12 C 70 11, 85 13, 98 12" stroke="#8f5f2c" strokeOpacity="0.25" strokeWidth="0.8" fill="none" />
+          </pattern>
+          <linearGradient id="gtl-fret" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#7e8287" />
+            <stop offset="0.5" stopColor="#f1f2f4" />
+            <stop offset="1" stopColor="#8a8e93" />
+          </linearGradient>
+          <radialGradient id="gtl-pearl" cx="0.35" cy="0.35" r="0.75">
+            <stop offset="0" stopColor="#ffffff" />
+            <stop offset="0.5" stopColor="#e6e9ef" />
+            <stop offset="0.8" stopColor="#d6dbe6" />
+            <stop offset="1" stopColor="#b9bfcc" />
+          </radialGradient>
           <marker id="arrow-guide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M0 0 L8 4 L0 8 z" className="arrowhead-guide" />
           </marker>

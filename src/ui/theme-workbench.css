@@ -1,0 +1,290 @@
+/*
+ * Workbench theme (prototype, docs/DECISIONS.md D-14).
+ * A guitar on a workbench: a maple fingerboard with nickel frets and pearl
+ * dots, an anodised rack for the transport, paper cards for the panels.
+ * Everything is scoped to [data-theme='workbench']; the classic theme is untouched.
+ * Materials are CSS gradients and SVG patterns: no images to load.
+ */
+
+.appearance { display: flex; align-items: center; gap: 8px; }
+.appearance-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+:root[data-theme='workbench'] {
+  /* Paper and ink: panels, inputs, labels. */
+  --void: #fbf7ec;
+  --deck: #f3ecdc;
+  --deck-raised: #e4d9c0;
+  --edge: #a99878;
+  --ink: #241b12;
+  --muted: #5e5140;
+
+  /* Musical meaning keeps its colours' roles, darkened to read on maple and paper. */
+  --chord-tone: #0d6b62;
+  --tension: #9a5800;
+  --avoid: #b0231b;
+  --outside: #6f6455;
+  --root: #a3201a;
+  --scale: #1d3561;
+  --hot: #12100c;
+
+  --layer-teal: #0d6b62;
+  --layer-amber: #b06a00;
+  --layer-lime: #4c7a12;
+  --layer-coral: #c2471f;
+  --layer-sky: #1f63a8;
+  --layer-rose: #a8306f;
+
+  /* Materials. */
+  --bench: #3a2a1d;
+  --bench-light: #4a3626;
+  --bench-ink: #f1e6d0;
+  --bench-muted: #d6c5a6;
+  --rack-top: #34363a;
+  --rack-bottom: #1d1e21;
+  --rack-ink: #eceef1;
+  --rack-muted: #b5bac2;
+  --led-off: #3b1210;
+  --led-red: #ff3b24;
+  --led-green: #41e06a;
+  --lcd: #1e2416;
+  --lcd-ink: #c8f27a;
+  --focus: #1a5fd0;
+
+  color-scheme: light;
+}
+
+/* ---- Bench: what the guitar and the panels lie on ---- */
+:root[data-theme='workbench'],
+:root[data-theme='workbench'] body {
+  background-color: var(--bench);
+  background-image:
+    repeating-linear-gradient(176deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(183deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 23px),
+    linear-gradient(180deg, var(--bench-light), var(--bench));
+  background-attachment: fixed;
+  color: var(--ink);
+}
+:root[data-theme='workbench'] :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ---- Rack: anodised aluminium, engraved white labels, LEDs ---- */
+:root[data-theme='workbench'] .rack {
+  background: linear-gradient(180deg, var(--rack-top), var(--rack-bottom));
+  border-bottom: 1px solid #000;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 3px 10px rgba(0, 0, 0, 0.55);
+  color: var(--rack-ink);
+}
+:root[data-theme='workbench'] .rack .appearance-label,
+:root[data-theme='workbench'] .rack .bpm-unit,
+:root[data-theme='workbench'] .rack .swing,
+:root[data-theme='workbench'] .rack .next-chord { color: var(--rack-muted); }
+
+/* Hardware buttons: moulded plastic caps with a soft bevel. */
+:root[data-theme='workbench'] .rack .segmented { background: #121315; border-radius: 4px; clip-path: none; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8); }
+:root[data-theme='workbench'] .rack .segment { color: var(--rack-muted); border-radius: 3px; }
+:root[data-theme='workbench'] .rack .segment:hover:not(:disabled) { color: #fff; }
+:root[data-theme='workbench'] .rack .segment[aria-pressed='true'] {
+  background: linear-gradient(180deg, #5b5f66, #3c3f44);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 6px rgba(120, 255, 160, 0.55);
+}
+:root[data-theme='workbench'] .rack .play,
+:root[data-theme='workbench'] .rack .stop,
+:root[data-theme='workbench'] .rack .tap,
+:root[data-theme='workbench'] .rack .nudge {
+  clip-path: none;
+  border-radius: 5px;
+  color: var(--rack-ink);
+  background: linear-gradient(180deg, #55585e, #34363b);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -2px 0 rgba(0, 0, 0, 0.35), 0 2px 3px rgba(0, 0, 0, 0.6);
+}
+:root[data-theme='workbench'] .rack .play:active,
+:root[data-theme='workbench'] .rack .tap:active,
+:root[data-theme='workbench'] .rack .nudge:active { transform: translateY(1px); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6); }
+/* The play button carries its own LED: green while playing. */
+:root[data-theme='workbench'] .rack .play { position: relative; padding-left: 30px; }
+:root[data-theme='workbench'] .rack .play::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -4.5px;
+  border-radius: 50%;
+  background: #173a20;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+:root[data-theme='workbench'] .rack .play[aria-pressed='true'] { background: linear-gradient(180deg, #5b5f66, #3c3f44); }
+:root[data-theme='workbench'] .rack .play[aria-pressed='true']::before { background: var(--led-green); box-shadow: 0 0 8px var(--led-green); }
+:root[data-theme='workbench'] .rack .stop:disabled { opacity: 0.55; }
+
+/* BPM and chord on a backlit LCD. */
+:root[data-theme='workbench'] .rack .bpm-readout,
+:root[data-theme='workbench'] .rack .now-playing {
+  background: var(--lcd);
+  padding: 5px 10px;
+  border-radius: 3px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.85), 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+:root[data-theme='workbench'] .rack .bpm-input { color: var(--lcd-ink); border-bottom: 0; text-shadow: 0 0 6px rgba(200, 242, 122, 0.35); }
+:root[data-theme='workbench'] .rack .bpm-unit { color: #8fae58; }
+:root[data-theme='workbench'] .rack .now-chord { color: var(--lcd-ink); text-shadow: 0 0 8px rgba(200, 242, 122, 0.35); }
+:root[data-theme='workbench'] .rack .next-chord { color: #8fae58; }
+
+/* Beat lights are LEDs in bezels: red, the downbeat green. */
+:root[data-theme='workbench'] .beat-light {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  transform: none;
+  background: var(--led-off);
+  border: 2px solid #111;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+:root[data-theme='workbench'] .beat-light.is-first { background: #12301a; border-color: #111; }
+:root[data-theme='workbench'] .beat-light.is-on { background: var(--led-red); border-color: #111; box-shadow: 0 0 9px var(--led-red), inset 0 -1px 2px rgba(0, 0, 0, 0.3); }
+:root[data-theme='workbench'] .beat-light.is-first.is-on { background: var(--led-green); border-color: #111; box-shadow: 0 0 9px var(--led-green); }
+
+:root[data-theme='workbench'] .rack .select { background: #141518; color: var(--rack-ink); border: 1px solid #000; border-radius: 3px; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8); }
+:root[data-theme='workbench'] .rack .range { accent-color: #c9ccd2; }
+
+/* ---- Fingerboard: maple, nickel frets, bone nut, pearl dots ---- */
+:root[data-theme='workbench'] .board-section {
+  padding: 10px 0 4px;
+}
+:root[data-theme='workbench'] .board-grain { display: inline; fill: url(#gtl-grain); pointer-events: none; }
+:root[data-theme='workbench'] .board { fill: url(#gtl-maple); stroke: #7a5226; stroke-width: 1.5; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.55)); }
+:root[data-theme='workbench'] .fret { stroke: url(#gtl-fret); stroke-width: 3.2; }
+:root[data-theme='workbench'] .nut { stroke: #efe6cf; stroke-width: 7; filter: drop-shadow(1px 0 1px rgba(0, 0, 0, 0.45)); }
+:root[data-theme='workbench'] .inlay { fill: url(#gtl-pearl); stroke: rgba(80, 60, 30, 0.35); stroke-width: 0.6; }
+:root[data-theme='workbench'] .string { stroke: #6f7276; opacity: 0.95; filter: drop-shadow(0 1.5px 0.6px rgba(60, 35, 10, 0.45)); }
+:root[data-theme='workbench'] .fret-number { fill: var(--bench-ink); }
+
+/* Markers: printed discs on the maple, dark enough for cream labels. */
+:root[data-theme='workbench'] .marker .shape { fill: #fbf7ec; stroke: var(--scale); filter: drop-shadow(0 1px 1px rgba(40, 20, 0, 0.45)); }
+:root[data-theme='workbench'] .marker-label { fill: var(--ink); }
+:root[data-theme='workbench'] .role-scale .shape { fill: var(--scale); stroke: #0f1f3d; }
+:root[data-theme='workbench'] .role-scale .marker-label { fill: var(--void); }
+:root[data-theme='workbench'] .role-root .shape { fill: var(--root); stroke: #5e0f0b; }
+:root[data-theme='workbench'] .role-chord-tone .shape { fill: var(--chord-tone); stroke: #063b36; }
+:root[data-theme='workbench'] .role-tension .shape { fill: var(--tension); stroke: #5a3300; }
+:root[data-theme='workbench'] .role-tension .marker-label,
+:root[data-theme='workbench'] .role-chord-tone .marker-label,
+:root[data-theme='workbench'] .role-root .marker-label { fill: var(--void); }
+:root[data-theme='workbench'] .role-avoid .shape { fill: #fbf7ec; stroke: var(--avoid); }
+:root[data-theme='workbench'] .role-avoid .marker-label { fill: var(--avoid); }
+:root[data-theme='workbench'] .role-outside .shape { fill: #fbf7ec; stroke: var(--outside); }
+:root[data-theme='workbench'] .role-outside .marker-label { fill: var(--outside); }
+:root[data-theme='workbench'] .role-other-scale .shape { fill: #fbf7ec; stroke: var(--layer, var(--outside)); }
+:root[data-theme='workbench'] .role-other-scale .marker-label { fill: var(--layer, var(--muted)); }
+:root[data-theme='workbench'] .marker.is-pinned .shape { stroke: var(--focus); stroke-width: 3.6; }
+:root[data-theme='workbench'] .marker:hover .shape,
+:root[data-theme='workbench'] .marker:focus-visible .shape { stroke: var(--focus); stroke-width: 3.4; }
+:root[data-theme='workbench'] .marker.is-dim { opacity: 0.3; }
+:root[data-theme='workbench'] .guide-ring { stroke: var(--chord-tone); stroke-width: 2.4; }
+:root[data-theme='workbench'] .voicing-ring { stroke: #12100c; }
+:root[data-theme='workbench'] .pip { stroke: #fbf7ec; }
+/* The note being played lights up like a lamp under the string. */
+:root[data-theme='workbench'] .active-halo { fill: #fff3c4; opacity: 0.7; }
+:root[data-theme='workbench'] .active-core { fill: #12100c; filter: drop-shadow(0 0 6px #ffcf4d); }
+:root[data-theme='workbench'] .active-label { fill: #fff3c4; }
+:root[data-theme='workbench'] .trail { stroke: #12100c; }
+
+/* ---- Below the board: text sits on the bench ---- */
+:root[data-theme='workbench'] .board-foot,
+:root[data-theme='workbench'] .legend,
+:root[data-theme='workbench'] .inspector-empty,
+:root[data-theme='workbench'] .aids-off,
+:root[data-theme='workbench'] .foot { color: var(--bench-ink); }
+:root[data-theme='workbench'] .legend .muted,
+:root[data-theme='workbench'] .foot .muted { color: var(--bench-muted); }
+:root[data-theme='workbench'] .legend {
+  background: rgba(20, 12, 6, 0.35);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+:root[data-theme='workbench'] .legend-item.role-scale .legend-swatch { background: var(--scale); border-color: #f1e6d0; }
+:root[data-theme='workbench'] .legend-item.role-chord-tone .legend-swatch { border: 1.5px solid #f1e6d0; }
+:root[data-theme='workbench'] .legend-item.role-root .legend-swatch { border: 1.5px solid #f1e6d0; }
+:root[data-theme='workbench'] .legend-item.role-tension .legend-swatch { border: 1.5px solid #f1e6d0; }
+:root[data-theme='workbench'] .legend-item.role-avoid .legend-swatch { border-bottom-color: #ff8a80; }
+:root[data-theme='workbench'] .legend-item.role-outside .legend-swatch { border-color: #f1e6d0; }
+:root[data-theme='workbench'] .legend-pip-ring { fill: var(--scale); stroke: #f1e6d0; }
+:root[data-theme='workbench'] .inspector { background: var(--deck); color: var(--ink); padding: 8px 12px; border-radius: 3px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45); }
+:root[data-theme='workbench'] .foot a,
+:root[data-theme='workbench'] .legal a { color: #ffd889; }
+
+/* ---- Panels: paper cards with a printed label strip ---- */
+:root[data-theme='workbench'] .panel {
+  background:
+    repeating-linear-gradient(0deg, rgba(120, 95, 60, 0.035) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #faf5e8, #f1e9d6);
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 4px 10px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  color: var(--ink);
+}
+:root[data-theme='workbench'] .panel-title {
+  align-self: flex-start;
+  font: 700 14px/1 var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fbf7ec;
+  background: #2b2016;
+  padding: 6px 10px 5px;
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+:root[data-theme='workbench'] .panel .segmented,
+:root[data-theme='workbench'] .editor-dialog .segmented { background: #e6dcc4; clip-path: none; border-radius: 4px; box-shadow: inset 0 1px 2px rgba(60, 40, 10, 0.25); }
+:root[data-theme='workbench'] .panel .segment,
+:root[data-theme='workbench'] .editor-dialog .segment { color: var(--muted); border-radius: 3px; }
+:root[data-theme='workbench'] .panel .segment:hover:not(:disabled),
+:root[data-theme='workbench'] .editor-dialog .segment:hover:not(:disabled) { color: var(--ink); }
+:root[data-theme='workbench'] .panel .segment[aria-pressed='true'],
+:root[data-theme='workbench'] .editor-dialog .segment[aria-pressed='true'] { background: #2b2016; color: #fbf7ec; }
+:root[data-theme='workbench'] .select,
+:root[data-theme='workbench'] .text-input { background: #fffdf6; color: var(--ink); border-radius: 3px; border-color: #a99878; }
+:root[data-theme='workbench'] .btn,
+:root[data-theme='workbench'] .icon-btn {
+  clip-path: none;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #fffdf6, #e7dcc3);
+  color: var(--ink);
+  border: 1px solid #a99878;
+  box-shadow: 0 1px 1px rgba(60, 40, 10, 0.25);
+}
+:root[data-theme='workbench'] .btn:hover,
+:root[data-theme='workbench'] .icon-btn:hover:not(:disabled) { background: linear-gradient(180deg, #fff, #efe5ce); }
+:root[data-theme='workbench'] .btn-accent { background: #2b2016; color: #fbf7ec; border-color: #2b2016; }
+:root[data-theme='workbench'] .btn-accent:hover { background: #3d2e20; }
+:root[data-theme='workbench'] .toggle-box { background: #fffdf6; border-color: #7d6d52; border-radius: 3px; }
+:root[data-theme='workbench'] .toggle input:checked + .toggle-box { background: var(--chord-tone); border-color: var(--chord-tone); }
+:root[data-theme='workbench'] .range { accent-color: #2b2016; }
+:root[data-theme='workbench'] .spelling { color: var(--chord-tone); }
+:root[data-theme='workbench'] .note { color: var(--tension); }
+:root[data-theme='workbench'] .link { color: var(--focus); }
+:root[data-theme='workbench'] .chord-chip { background: #fffdf6; color: var(--ink); }
+:root[data-theme='workbench'] .chord-chip.is-current,
+:root[data-theme='workbench'] .chord-chip.small[aria-pressed='true'] { background: #2b2016; border-color: #2b2016; color: #fbf7ec; }
+:root[data-theme='workbench'] .diagram-card { background: #fffdf6; }
+:root[data-theme='workbench'] .diagram-nut { fill: #2b2016; }
+:root[data-theme='workbench'] .diagram-line { stroke: #7d6d52; }
+:root[data-theme='workbench'] .diagram-open { stroke: #2b2016; }
+:root[data-theme='workbench'] .layer-item,
+:root[data-theme='workbench'] .chord-item,
+:root[data-theme='workbench'] .routine-phase { background: #fffdf6; }
+
+/* ---- Advanced editor: a large sheet laid over the bench ---- */
+:root[data-theme='workbench'] .editor-dialog { background: #f6efdf; border: 0; border-radius: 3px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75); }
+:root[data-theme='workbench'] .editor-dialog::backdrop { background: rgba(20, 12, 6, 0.7); }
+:root[data-theme='workbench'] .editor-header { background: #2b2016; color: #fbf7ec; }
+:root[data-theme='workbench'] .editor-header .field-label { color: #d6c5a6; }
+/* On the dark header strip the main action is a cream key, the secondary one outlined. */
+:root[data-theme='workbench'] .editor-header .btn-accent { background: linear-gradient(180deg, #fffdf6, #e7dcc3); color: #241b12; border-color: #fffdf6; }
+:root[data-theme='workbench'] .editor-header .btn-accent:disabled { opacity: 0.5; }
+:root[data-theme='workbench'] .editor-header .btn:not(.btn-accent) { background: transparent; color: #fbf7ec; border-color: #d6c5a6; box-shadow: none; }
+:root[data-theme='workbench'] .editor-preview { background: #efe6d1; }
+:root[data-theme='workbench'] .phase-block { background: #fffdf6; }
+:root[data-theme='workbench'] .preview-board { background: var(--bench); border-color: #2b2016; }

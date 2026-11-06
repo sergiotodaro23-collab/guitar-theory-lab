@@ -85,8 +85,12 @@ export interface ArpeggioSettings {
   readonly arpNotesPerBeat: Subdivision;
 }
 
+export type Appearance = 'classic' | 'workbench';
+
 export interface Settings extends StudySettings, HarmonySettings, ArpeggioSettings {
   readonly mode: AppMode;
+  /** Visual theme only: never changes what is played or shown musically. */
+  readonly appearance: Appearance;
 }
 
 const firstRoutine = ROUTINE_TEMPLATES[0];
@@ -96,6 +100,7 @@ if (!firstTemplate) throw new Error('Nessuna progressione predefinita');
 
 export const DEFAULT_SETTINGS: Settings = {
   mode: 'fretboard',
+  appearance: 'classic',
   tonic: 'C',
   scaleId: 'ionian',
   positionType: 'caged',
@@ -161,6 +166,7 @@ export function sanitizeSettings(raw: unknown): Settings {
   const chordLayers = sanitizeChordLayers(r);
   return {
     mode: oneOf(r.mode, APP_MODES, d.mode),
+    appearance: oneOf(r.appearance, ['classic', 'workbench'] as const, d.appearance),
     tonic: oneOf(r.tonic, TONICS, d.tonic),
     scaleId: oneOf(r.scaleId, scaleIds, d.scaleId),
     positionType: oneOf(r.positionType, ['caged', '3nps', 'neck'] as const, d.positionType),

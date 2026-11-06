@@ -39,9 +39,17 @@ function useShortcuts() {
   }, []);
 }
 
+function useAppearance() {
+  const appearance = useApp((s) => s.settings.appearance);
+  useEffect(() => {
+    document.documentElement.dataset.theme = appearance;
+  }, [appearance]);
+}
+
 export function App() {
   const mode = useApp((s) => s.settings.mode);
   useShortcuts();
+  useAppearance();
   return (
     <>
       <Transport />

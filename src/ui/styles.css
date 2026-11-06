@@ -145,6 +145,7 @@ button, select, input { font: inherit; color: inherit; }
 .fretboard-scroll { overflow-x: auto; }
 .fretboard { display: block; width: 100%; min-width: 1000px; height: auto; }
 .board { fill: #0a0519; stroke: var(--edge); }
+.board-grain { display: none; }
 .fret { stroke: var(--edge); stroke-width: 2; }
 .nut { stroke: var(--chord-tone); stroke-width: 5; filter: drop-shadow(0 0 4px var(--chord-tone)); }
 .string { stroke: #cfc6f2; opacity: 0.7; }

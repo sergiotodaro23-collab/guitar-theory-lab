@@ -47,8 +47,8 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | ID | Requisito | Stato | Dip. | Moduli | Strategia · test · accettazione |
 |----|-----------|-------|------|--------|---------------------------------|
 | P2-01 | Editor avanzato a schermo ampio | IMPLEMENTED | P1-08 | ui | `<dialog>` modale (focus, Escape = annulla, scroll indipendenti, responsive a colonna sotto 900 px), blocchi fase con Scala/Posizione/Sequenza/Direzione e tempo, riordino, duplica, elimina, modelli, anteprima con striscia temporale, tastiera, note e transizione. e2e su desktop e tablet. |
-| P2-02 | Design system skeuomorfico (Workbench A) | PARTIAL | — | ui/styles | Solo la targhetta in alluminio. Il resto è ancora tema scuro "neon". Strategia: token di materiali (legno, metallo, carta), componenti manopola/fader/LED, prototipo su branch prima della sostituzione globale. |
-| P2-03 | Tastiera in legno credibile | MISSING | P2-02 | viz | Texture SVG leggere, segnatasti madreperla, corde con spessori reali. |
+| P2-02 | Design system skeuomorfico (Workbench A) | PARTIAL | — | ui | Prototipo come tema opzionale "Workbench" (`src/ui/theme-workbench.css`, D-14): banco in legno, rack anodizzato con LED e display LCD, schede di carta con etichette stampate, editor come foglio sul banco. Il tema classico resta predefinito finché il proprietario non approva la sostituzione. Test: e2e con contrasto WCAG ≥ 4,5:1 misurato su pannelli, etichette dei marker, LCD e testo sul banco. Mancano manopole, fader e mixer (P2-07). |
+| P2-03 | Tastiera in legno credibile | PARTIAL | P2-02 | viz | Nel tema Workbench: acero con venature (pattern SVG), tasti in nichel, capotasto in osso, segnatasti in madreperla, corde con ombra. Celle sempre uniformi. Da rifinire: bordino laterale, corde rivestite più spesse. |
 | P2-04 | Legenda grande, adattiva, in basso a destra | PARTIAL | — | ui | Oggi in basso a sinistra, piccola; forme già distinte oltre al colore. |
 | P2-05 | Barra etichette con "Intervalli" e layer indipendenti | PARTIAL | — | viz, ui | Etichette presenti tranne intervalli; layer non separati. |
 | P2-06 | Pannelli comprimibili, modalità Studio/Workbench/Focus | MISSING | — | ui | |
@@ -87,6 +87,6 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P2-02** prototipo del design system skeuomorfico su branch dedicato, a partire dalla tastiera (P2-03) e dal transport.
+1. **P2-02** decisione del proprietario sul tema Workbench; se approvato, renderlo predefinito e rifinire (manopole, fader, mixer P2-07).
 2. **P2-08** griglia Click / Accenti a 16 indicatori e timbri del click.
 3. **P3-02** step sequencer Simple in Jam Studio.

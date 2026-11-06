@@ -22,6 +22,7 @@ Ambiente: container cloud Linux, Node 22.23, npm 10.9, Chromium headless (Playwr
 | Percorsi a fasi (C su / G giù, melodica classica, 3NPS, validazioni, JSON) | Verde |
 | Editor: apertura, modelli, aggiunta, riordino, eliminazione, alternativa a un errore, Escape, applica, riproduzione con cambio di forma | Verde (e2e) |
 | Editor a 820 px senza overflow orizzontale | Verde (e2e) |
+| Tema Workbench: attivazione, memoria tra sessioni, esclusione dai preset, contrasto WCAG ≥ 4,5:1 su pannelli, titoli, marker, LCD e testo sul banco | Verde (e2e); 238 unit, 23 e2e dopo il blocco |
 | Arpeggios Lab: solo note dell'accordo nella posizione, rivolto dalla terza, arpeggi collegati sulla progressione | Verde (e2e); 238 unit, 22 e2e dopo il blocco |
 | Cambio di metrica in riproduzione: 4/4 → 3/4 → 6/8 a 120 BPM, click a 0,5 s esatti, nessun doppione, luci aggiornate alla stanghetta | Verde (e2e); 226 unit, 21 e2e dopo il blocco |
 | Accordi multipli: builder, slash/rivolto, forma sulla tastiera, selezione, riordino, invio a Harmony Lab | Verde (e2e); 218 unit, 20 e2e dopo il blocco |
@@ -42,7 +43,7 @@ Ambiente: container cloud Linux, Node 22.23, npm 10.9, Chromium headless (Playwr
 
 ### Divergenze principali dalla specifica
 
-1. Interfaccia in tema scuro "neon", lontana dallo skeuomorfismo realistico richiesto (P2-02).
+1. Interfaccia in tema scuro "neon", lontana dallo skeuomorfismo realistico richiesto (P2-02). Prototipo "Workbench" disponibile come tema opzionale.
 2. ~~Tre workspace su quattro: manca Arpeggios Lab.~~ Risolto (P1-12).
 3. Scale e accordi multipli assenti o limitati (seconda scala solo in Jam, un accordo sovrapposto).
 4. Nessun input chitarra: niente pitch detection, Live Monitor, Tuner.

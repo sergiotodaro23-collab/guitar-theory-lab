@@ -87,6 +87,15 @@ export function Transport() {
           <span className="nameplate-title">GUITAR THEORY LAB</span>
           <span className="nameplate-byline">v{__APP_VERSION__} — by Sergio Todaro</span>
         </h1>
+        <div className="appearance" role="group" aria-label="Aspetto">
+          <span className="appearance-label">Aspetto</span>
+          <Segmented
+            label="Aspetto dell'interfaccia"
+            value={settings.appearance}
+            options={[{ value: 'classic', label: 'Classico' }, { value: 'workbench', label: 'Workbench (prototipo)' }]}
+            onChange={(appearance) => update({ appearance })}
+          />
+        </div>
         <nav aria-label="Modalità">
           <Segmented label="Modalità" value={settings.mode} options={MODES} onChange={(mode) => update(withModeLabels(settings.labelMode, mode))} />
         </nav>

@@ -6,6 +6,7 @@ import '@fontsource/chakra-petch/700.css';
 import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
 import './ui/styles.css';
+import './ui/theme-workbench.css';
 import { App } from './ui/App';
 
 const root = document.getElementById('root');

@@ -7,7 +7,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 ## Verificato in questa sessione
 
 - `npm run check`: verde, 238 test unitari.
-- `npm run test:e2e`: verde, 22 casi su Chromium headless.
+- `npm run test:e2e`: verde, 23 casi su Chromium headless.
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -27,7 +27,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Limiti noti
 
-- Interfaccia ancora nel tema "neon" di v0.1.0: il design skeuomorfico (P2-02) non è iniziato, salvo la targhetta.
+- Il tema predefinito è ancora il "neon" di v0.1.0. Il prototipo skeuomorfico "Workbench" si attiva da `Aspetto` nell'intestazione e aspetta l'approvazione del proprietario per diventare predefinito.
 - Solo accordatura standard; nessuna vista per mancini.
 - Nessun input audio (pitch, monitor, tuner).
 - Firefox e WebKit non testati (browser assenti nell'ambiente).
@@ -43,4 +43,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-P2-02 prototipo skeuomorfico → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.
+decisione sul tema Workbench (P2-02) → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.
