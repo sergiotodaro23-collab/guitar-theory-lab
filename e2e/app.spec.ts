@@ -469,3 +469,45 @@ test('multiple chords: build, slash bass, voicing on the neck, select, reorder, 
   await expect(page.getByTestId('chip-1')).toContainText('C/E');
   expect(errors).toEqual([]);
 });
+
+test('changing the meter while playing keeps the transport running and switches at the bar line', async ({ page }) => {
+  const errors = await open(page);
+  await page.getByTestId('bpm').fill('120');
+  await page.getByTestId('play').click();
+  await expect(page.getByTestId('beat-lights').locator('.beat-light')).toHaveCount(4);
+  await wait(page, 900);
+  await page.getByTestId('meter').selectOption('3/4');
+  // Still playing: no stop, no restart.
+  await expect(page.getByTestId('beat-lights')).toHaveAttribute('data-state', 'playing');
+  await expect(page.getByTestId('play')).toHaveText('Pausa');
+  // The lights switch to three only once the new bar starts.
+  await expect(page.getByTestId('beat-lights').locator('.beat-light')).toHaveCount(3, { timeout: 4000 });
+  await wait(page, 3500);
+  await page.getByTestId('meter').selectOption('6/8');
+  await expect(page.getByTestId('beat-lights').locator('.beat-light')).toHaveCount(6, { timeout: 4000 });
+  await wait(page, 3500);
+  const log = await debug(page);
+  const beats = log.scheduled.filter((e) => e.kind === 'bar' || e.kind === 'beat');
+  // One tick line, no doubles, no going back.
+  const ticks = beats.map((b) => b.tick);
+  expect(new Set(ticks).size).toBe(ticks.length);
+  expect([...ticks].sort((a, b) => a - b)).toEqual(ticks);
+  // Every click half a second after the previous one: quarters at 120, then eighths at 120.
+  beats.slice(1).forEach((b, i) => expect(b.time - (beats[i]?.time ?? 0)).toBeCloseTo(0.5, 6));
+  // Bar lines: four beats apart, then three, then six.
+  const bars = beats.filter((b) => b.kind === 'bar').map((b) => b.tick);
+  const spans = bars.slice(1).map((t, i) => t - (bars[i] ?? 0));
+  expect(spans).toContain(4 * 480);
+  expect(spans).toContain(3 * 480);
+  expect(spans).toContain(6 * 240);
+  expect(spans.every((s) => s === 1920 || s === 1440)).toBe(true);
+  // Quarter clicks first, eighth clicks after 6/8.
+  const tickGaps = ticks.slice(1).map((t, i) => t - (ticks[i] ?? 0));
+  expect(tickGaps[0]).toBe(480);
+  expect(tickGaps[tickGaps.length - 1]).toBe(240);
+  // The screen still follows the audio clock across the changes.
+  const shown = log.shown.filter((s) => s.kind === 'beat');
+  const lags = shown.map((s) => s.time - s.scheduled).filter((lag) => lag >= 0);
+  expect(median(lags)).toBeLessThan(0.05);
+  expect(errors).toEqual([]);
+});

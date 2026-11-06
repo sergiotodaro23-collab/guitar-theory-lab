@@ -17,7 +17,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P0-05 | Celle uniformi della tastiera | IMPLEMENTED | P0-04 | viz | `fretX` lineare; segnatasti 12 e 24 doppi. |
 | P0-06 | Targhetta con versione reale | IMPLEMENTED | — | ui, vite | `__APP_VERSION__` da `package.json`; e2e verifica testo. |
 | P0-07 | Timeline condivisa unica | IMPLEMENTED | — | timeline, app | Già presente: `TimelineScheduler` su `AudioContext.currentTime`. |
-| P0-08 | Cambio metrica senza fermare la riproduzione | PARTIAL | P0-07 | timeline | Oggi ferma il transport. Strategia: cambio alla battuta successiva con nuovo segmento di `TempoMap`. Test: stanghette coerenti dopo il cambio. |
+| P0-08 | Cambio metrica senza fermare la riproduzione | IMPLEMENTED | P0-07 | timeline, app, ui | Segmenti di metrica sulla timeline (`MeterSegment`, `withMeterChange`): il cambio parte alla stanghetta successiva, i tick non ripartono, la `TempoMap` cambia l'unità del BPM (ottavi in 6/8). Tracce e fine progressione ripartono sul nuovo battere; le luci dei movimenti seguono la metrica udita. Funziona anche in pausa; un cambio annullato prima della stanghetta sparisce. Test: 9 unit (griglia continua, 4/4→3/4, 4/4→6/8, BPM durante l'attesa, pausa, stop, tracce, swing), 1 e2e con misura dei click nel browser. |
 | P0-09 | Test cross-browser Firefox/WebKit | BLOCKED | — | e2e | Solo Chromium installato nell'ambiente cloud. Aggiungere progetti Playwright quando i browser sono disponibili (CI: `npx playwright install firefox webkit`). |
 | P0-10 | Tag `v0.1.0` sul remoto | BLOCKED | — | git | Approvato dal proprietario e creato in locale su `3b3c314`, ma l'ambiente cloud rifiuta il push dei tag (403). Da pubblicare dal sito GitHub o da un clone locale. |
 
@@ -86,6 +86,5 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P0-08** cambio metrica alla battuta.
-2. **P1-12 Arpeggios Lab**, che ora può riusare accordi, rivolti e forme.
-3. **P2-02** prototipo del design system skeuomorfico su branch dedicato, a partire dalla tastiera (P2-03) e dal transport.
+1. **P1-12 Arpeggios Lab**, che ora può riusare accordi, rivolti e forme.
+2. **P2-02** prototipo del design system skeuomorfico su branch dedicato, a partire dalla tastiera (P2-03) e dal transport.

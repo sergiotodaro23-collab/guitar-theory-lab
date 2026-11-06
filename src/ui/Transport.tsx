@@ -14,7 +14,9 @@ function BeatLights() {
   const settings = useApp((s) => s.settings);
   const beat = usePlayhead((p) => p.beat);
   const state = usePlayhead((p) => p.state);
-  const count = meterOf(settings).beatsPerBar;
+  const heard = usePlayhead((p) => p.beatsPerBar);
+  // While playing, the lights follow the meter being heard, which changes at the bar line.
+  const count = state === 'stopped' ? meterOf(settings).beatsPerBar : heard;
   return (
     <div className="beat-lights" role="img" aria-label={state === 'stopped' ? 'Metronomo fermo' : `Movimento ${beat + 1} di ${count}`} data-testid="beat-lights" data-beat={beat} data-state={state}>
       {Array.from({ length: count }, (_, i) => (

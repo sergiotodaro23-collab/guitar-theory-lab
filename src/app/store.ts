@@ -55,6 +55,8 @@ export interface Playhead {
   readonly beat: number;
   readonly subdivision: number;
   readonly chordIndex: number | null;
+  /** Beats in the bar being heard: during a meter change it is the old meter until the bar line. */
+  readonly beatsPerBar: number;
   /** Routine phase under the playhead; null outside routines or when stopped. */
   readonly phase: number | null;
   readonly note: { readonly string: number; readonly fret: number; readonly midi: number; readonly index: number } | null;
@@ -62,5 +64,5 @@ export interface Playhead {
 }
 
 export const usePlayhead = create<Playhead>(() => ({
-  state: 'stopped', bar: 0, beat: 0, subdivision: 0, chordIndex: null, phase: null, note: null, trail: [],
+  state: 'stopped', bar: 0, beat: 0, subdivision: 0, chordIndex: null, beatsPerBar: 4, phase: null, note: null, trail: [],
 }));

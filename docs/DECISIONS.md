@@ -4,6 +4,8 @@ Una riga di contesto, la scelta, il perché. Le nuove in cima.
 
 ## 2026-11-06
 
+**D-12 · Metrica come segmenti, non riavvio.** Cambiare metrica in riproduzione aggiunge un segmento alla stanghetta successiva invece di fermare o di far ripartire i tick da zero. Così ciò che è già nella coda audio (fino a 120 ms) resta valido, BPM e swing continuano a funzionare, e l'interfaccia legge battuta e movimento del segmento che sta suonando. Il BPM segue l'unità della nuova metrica (in 6/8 conta gli ottavi), come già da fermo. Esercizio, accordi e accompagnamento ripartono dal loro inizio sul nuovo battere: le loro durate in battute cambiano lunghezza, e riprendere a metà sarebbe ambiguo.
+
 **D-11 · Sulla tastiera un solo accordo alla volta.** Fino a otto accordi configurabili, ma la tastiera mostra solo quello attivo (funzioni delle note e, se scelta, la forma). Gli altri sono diagrammi cliccabili e alimentano l'ispettore delle note: toccando una nota si vede cosa diventa su ogni accordo visibile. Otto accordi sovrapposti sulle stesse corde sarebbero illeggibili, come avverte la specifica.
 
 **D-10 · Voicing cercati, non tabellati.** `chordVoicings` esplora il manico per posizioni di quattro tasti: una nota o una corda muta per corda, basso richiesto in fondo, almeno tre corde, al massimo una corda muta interna, quattro dita oppure barrè sul tasto più basso, corde vuote solo nelle prime posizioni. Gli accordi da cinque note in su possono omettere la quinta, poi la fondamentale, poi la nona; se non entra nulla, restano almeno guide tones e basso. I test controllano 14 forme da manuale (C, G, E, Am, D, F, Bm, Cmaj7, G7, Dm7, A7, Em7, C/E, G/B). La tabella fissa avrebbe coperto meno accordi e non le slash chord.

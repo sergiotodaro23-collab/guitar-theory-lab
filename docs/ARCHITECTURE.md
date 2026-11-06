@@ -49,6 +49,7 @@ Le avoid notes non sono una verità assoluta. `AvoidProfile` sceglie la tradizio
 - Tempo in tick da inizio riproduzione, 480 PPQ. Il BPM conta l'unità della metrica: in 6/8 conta gli ottavi.
 - I tick non tornano indietro. Ogni `Track` ha lunghezza e `originTick` propri e si avvolge da sola, quindi un esercizio di 40 note scorre su una progressione di 12 battute restando sulla griglia.
 - Il metronomo è derivato dalla metrica con `metronomeInRange`, non memorizzato.
+- La metrica è una sequenza di `MeterSegment` (tick d'inizio, numero di battuta, metrica). Un cambio in riproduzione aggiunge un segmento alla stanghetta successiva: battute, click, swing e `TempoMap` leggono il segmento del tick, quindi l'audio già programmato resta valido. Lo stop riparte con un solo segmento.
 - `TempoMap` converte tick e secondi con segmenti di tempo: un cambio BPM vale da ciò che non è ancora schedulato, e la posizione già udibile mantiene il vecchio tempo.
 - Lo swing è una curva monotona applicata a tick → tempo, con la sua inversa per la lettura visiva.
 
@@ -73,7 +74,7 @@ L'interfaccia non ha timer musicali: ricava tutto dalla posizione corrente.
 | Scala, posizione, esercizio | `swapTrackAtNextBar`: alla battuta successiva |
 | Accordi, comping | `replaceTrack`: subito, stessa fase |
 | Cambio manuale | One-shot sul prossimo movimento o battuta |
-| Metrica | Ferma la riproduzione: sposterebbe tutte le stanghette |
+| Metrica | Alla stanghetta successiva: nuovo `MeterSegment`, tracce e progressione ripartono sul nuovo battere |
 | Pausa | Annulla l'audio già schedulato, riprende dallo stesso tick |
 
 ## Estendere con P1

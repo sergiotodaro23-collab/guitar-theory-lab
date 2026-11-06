@@ -11,7 +11,7 @@ export interface ModeTracks {
   readonly exercise: TrackSpec | null;
   readonly chords: TrackSpec | null;
   readonly comp: TrackSpec | null;
-  /** Tick where playback ends for a non-looping progression. */
+  /** Ticks after the chord track starts where a non-looping progression ends. */
   readonly endTick: number | null;
 }
 
