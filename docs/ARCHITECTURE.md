@@ -6,7 +6,7 @@ Le dipendenze vanno solo verso il basso. I moduli da 1 a 6 e 8 non conoscono DOM
 |---|--------|----------|----------------------|
 | 1 | Music Theory Engine | `src/theory` | `SpelledNote`, `buildScale`, `parseChord`: note con la lettera, non solo l'altezza |
 | 2 | Fretboard & Fingering | `src/fretboard` | `cagedPosition`, `threeNpsPosition`, `fingerPosition` → `FretNote[]` |
-| 3 | Exercise Generator | `src/exercises` | `generateSequence(posizione, scala, spec)`, `exerciseTrack` |
+| 3 | Exercise Generator | `src/exercises` | `generateSequence(posizione, scala, spec)`, `exerciseTrack`; percorsi: `resolvePhase`, `planRoutine`, `routineTrack` |
 | 4 | Chord & Harmony | `src/harmony` | `classifyTone(pc, accordo, {profile})` → `ToneFunction`; `resolveTone`, `commonTones`, `targetingPath` |
 | 5 | Metronome & Scheduler | `src/timeline`, `src/audio` | `TimelineScheduler`, `TimelineSink`, `WebAudioSink` |
 | 6 | Jam Session Engine | `src/jam` | Modifiche pure a `Progression`, `chordTrack`, `compTrack` |
@@ -14,6 +14,18 @@ Le dipendenze vanno solo verso il basso. I moduli da 1 a 6 e 8 non conoscono DOM
 | 8 | Preset Persistence | `src/persistence` | `PresetRepository` con schema versionato e validazione |
 
 `src/app` collega i moduli: `settings.ts` (stato salvabile), `tracks.ts` (impostazioni → tracce), `engine.ts` (unico proprietario di AudioContext e scheduler).
+
+## Percorsi a fasi
+
+`Routine` è un dato serializzabile: un elenco di `RoutinePhase` con scala, posizione (`caged`, `3nps`, `range`), ottava, sequenza, direzione, note per movimento e ripetizioni.
+
+```
+RoutinePhase ──resolvePhase──▶ forma dal Fretboard Engine + sequenza + problemi (con alternativa)
+Routine ──planRoutine──▶ fasi in fila, ognuna chiusa alla stanghetta
+Routine ──routineTrack──▶ Track di NotePayload con `phase`
+```
+
+Lo scheduler non sa nulla delle fasi. L'engine pubblica `phase` nel playhead leggendo l'ultimo evento suonato, e `boardContext(settings, phase)` sceglie forma e scala da mostrare. Da fermo la tastiera mostra la fase selezionata nel pannello.
 
 ## Posizione fisica e funzione armonica
 

@@ -1,53 +1,40 @@
 # Stato del progetto
 
-Versione 0.1.0. Ultimo aggiornamento: 6 novembre 2026.
+Versione 0.1.0 (package.json). Ultimo aggiornamento: 6 novembre 2026, branch `claude/serene-hopper-ubi687`.
 
-## Verificato
+Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
-Comandi: `npm run check` e `npm run test:e2e`, entrambi verdi su Chromium headless e Node 22.
+## Verificato in questa sessione
 
-| Verifica | Come | Esito |
-|----------|------|-------|
-| Lint, type-check strict, build | ESLint, `tsc`, Vite | Nessun errore |
-| Test unitari | Vitest, 156 casi | Tutti verdi |
-| Test nel browser reale | Playwright, 15 casi sulla build di produzione | Tutti verdi |
-| Audio prodotto | Livello letto dall'AnalyserNode all'uscita del grafo | Picco 0,33 |
-| Click rispetto allo schedule | Attacco rilevato nei campioni contro il tempo previsto, 120 BPM | Scarto costante di 6,1 ms |
-| Schermo rispetto all'audio | Tempo del cambio visivo contro il tempo schedulato | Da 8 a 20 ms, al massimo circa un fotogramma |
-| Griglia | Intervalli tra movimenti a 120 BPM | 0,5 s, precisione 6 decimali |
-| Correttezza musicale | Spelling, accordi e forme contro valori da manuale, su 17 toniche | Tutti verdi |
-| Preset | Salvataggio, ricarica pagina, caricamento, eliminazione | Tutti verdi |
+- `npm run check`: verde, 170 test unitari.
+- `npm run test:e2e`: verde, 18 casi su Chromium headless.
+- CI GitHub: run #1 su `main` verde.
+- Dettagli e limiti in `docs/QA_REPORT.md`.
 
-## Non verificato
+## Funziona
 
-- Nessuno ha ascoltato il risultato: timbro e bilanciamento sono da giudicare a orecchio.
-- Latenza reale di casse e cuffie: il compenso usa `outputLatency` del browser, spesso impreciso con il Bluetooth.
-- Safari e Firefox: i test girano solo su Chromium.
-- GitHub Actions: il workflow è scritto ma non è mai stato eseguito.
+- Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus), Jam Studio (progressioni, comping, loop, seconda scala).
+- Tastiera 0–24 tasti a celle uniformi, CAGED (5 forme) e 3NPS (7 pattern), intervalli 2ª–8ª, sequenze personalizzate.
+- **Percorsi a fasi** (nuovo): ogni fase con scala, forma CAGED/3NPS/range di tasti, ottava, sequenza, direzione, note per movimento e ripetizioni. Fasi sul battere, tastiera che segue la fase in riproduzione.
+- **Editor avanzato** (nuovo): dialog ampio con blocchi fase riordinabili, modelli, errori con alternativa applicabile, anteprima (battute, durata, striscia delle fasi, tastiera, note, transizione).
+- Minore melodica jazz (scala) e classica (percorso).
+- Targhetta con versione reale e autore.
+- Metronomo e scheduler con un solo clock audio, preset versionati, sessione salvata.
 
-## Blocchi
+## Limiti noti
 
-- **GitHub**: nessun account collegato alla sessione di sviluppo. Il repository remoto non esiste ancora. Procedura pronta in `docs/GITHUB_AND_RELEASES.md`.
-- **Specifica originale**: non disponibile. Il progetto parte dal documento di aggiornamento, quindi eventuali funzioni richieste solo nella prima versione non sono controllate.
-
-## Funzionalità
-
-P0, tutto presente: motore teorico, tastiera interattiva, scale e modi, CAGED, 3NPS, intervalli dalla seconda all'ottava, sequenze personalizzate, metronomo sincronizzato, evidenziazione progressiva, accordo sovrapposto, Harmonic Context Switch con sei modalità, preset di base, test.
-
-Jam minimale, anticipato da P1: progression builder completo, 6 progressioni predefinite, trasposizione, loop, 6 pattern di comping sintetizzato, volumi, seconda scala, target tones, risoluzioni, aiuti nascondibili.
-
-## Limitazioni note
-
+- Interfaccia ancora nel tema "neon" di v0.1.0: il design skeuomorfico (P2-02) non è iniziato, salvo la targhetta.
 - Cambiare metrica ferma la riproduzione.
-- Tuning solo standard, 22 tasti, nessuna vista per mancini.
-- La diteggiatura è euristica: da controllare sulle forme 3NPS con estensioni ampie.
-- Su telefono i controlli di trasporto scorrono via con la pagina.
-- Le tabelle delle avoid notes riflettono una tradizione didattica, non una regola: ogni profilo è modificabile in `src/harmony/function.ts`.
+- Solo accordatura standard; nessuna vista per mancini.
+- Nessun input audio (pitch, monitor, tuner).
+- Firefox e WebKit non testati (browser assenti nell'ambiente).
+- Vulnerabilità solo nelle dipendenze di sviluppo (Vitest 3), vedi QA.
 
-## Prossimi passi (P1)
+## In attesa del proprietario
 
-1. Collegare GitHub e controllare la prima esecuzione della CI.
-2. Ascolto e taratura dei volumi con la chitarra in mano.
-3. Chord Builder con estensioni libere e note personalizzate sulla tastiera.
-4. Arpeggi e rivolti come nuovo tipo di esercizio.
-5. Preset di sole progressioni, separati da quelli di studio.
+- Licenza: proposta GPL-3.0-or-later o MIT (`docs/DECISIONS.md`, D-08).
+- Pubblicazione del tag `v0.1.0` e di eventuali release.
+
+## Prossimo task
+
+P1-06 scale multiple → P1-07 accordi multipli → P0-08 metrica alla battuta → P2-02 prototipo skeuomorfico. Dettagli in `docs/ROADMAP.md`.
