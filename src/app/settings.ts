@@ -85,7 +85,8 @@ export interface ArpeggioSettings {
   readonly arpNotesPerBeat: Subdivision;
 }
 
-export type Appearance = 'classic' | 'workbench';
+/** Two permanent looks over the same state: essential, or the studio console. */
+export type Appearance = 'simple' | 'studio';
 
 export interface Settings extends StudySettings, HarmonySettings, ArpeggioSettings {
   readonly mode: AppMode;
@@ -100,7 +101,7 @@ if (!firstTemplate) throw new Error('Nessuna progressione predefinita');
 
 export const DEFAULT_SETTINGS: Settings = {
   mode: 'fretboard',
-  appearance: 'classic',
+  appearance: 'simple',
   tonic: 'C',
   scaleId: 'ionian',
   positionType: 'caged',
@@ -166,7 +167,8 @@ export function sanitizeSettings(raw: unknown): Settings {
   const chordLayers = sanitizeChordLayers(r);
   return {
     mode: oneOf(r.mode, APP_MODES, d.mode),
-    appearance: oneOf(r.appearance, ['classic', 'workbench'] as const, d.appearance),
+    // Names used by the first prototype are carried over.
+    appearance: r.appearance === 'workbench' ? 'studio' : r.appearance === 'classic' ? 'simple' : oneOf(r.appearance, ['simple', 'studio'] as const, d.appearance),
     tonic: oneOf(r.tonic, TONICS, d.tonic),
     scaleId: oneOf(r.scaleId, scaleIds, d.scaleId),
     positionType: oneOf(r.positionType, ['caged', '3nps', 'neck'] as const, d.positionType),

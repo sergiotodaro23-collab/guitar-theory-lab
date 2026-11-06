@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, type KeyboardEvent } from 'react';
+import { memo, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { DEFAULT_FRETS, type FretPosition } from '../fretboard';
 import type { FretArrow, Marker } from './markers';
 
@@ -183,6 +183,16 @@ const NO_LAYERS: readonly LayerStyle[] = [];
 export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAYERS, onPick }: FretboardProps) {
   const scroller = useRef<HTMLDivElement>(null);
   const lowestFret = markers.length > 0 ? Math.min(...markers.map((m) => m.fret)) : 0;
+  const [view, setView] = useState<{ low: number; high: number; scrolls: boolean }>({ low: 0, high: DEFAULT_FRETS, scrolls: false });
+
+  // Whether the neck overflows depends on the box width, which changes on resize and rotation.
+  useEffect(() => {
+    const element = scroller.current;
+    if (!element || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => setView(visibleFrets(element)));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   // On a narrow screen, keep the position in view rather than the empty low frets.
   useEffect(() => {
@@ -190,13 +200,30 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
     if (!element || element.scrollWidth <= element.clientWidth) return;
     const ratio = noteX(Math.max(0, lowestFret - 1)) / WIDTH;
     element.scrollLeft = Math.max(0, ratio * element.scrollWidth - 12);
+    setView(visibleFrets(element));
   }, [lowestFret]);
 
+  const step = (direction: number) => {
+    const element = scroller.current;
+    if (!element) return;
+    // Four frets at a time: one hand position.
+    const fretWidth = (element.scrollWidth * (fretX(1) - fretX(0))) / WIDTH;
+    element.scrollBy({ left: direction * fretWidth * 4, behavior: 'smooth' });
+  };
+
   return (
-    <div className="fretboard-scroll" ref={scroller}>
+    <div className="fretboard-wrap">
+      {view.scrolls ? (
+        <div className="fret-nav" data-testid="fret-nav">
+          <button type="button" className="fret-nav-btn" aria-label="Mostra i tasti più bassi" disabled={view.low <= 0} onClick={() => step(-1)}>‹</button>
+          <span className="fret-nav-range" aria-live="polite">Tasti {view.low}–{view.high}</span>
+          <button type="button" className="fret-nav-btn" aria-label="Mostra i tasti più alti" disabled={view.high >= DEFAULT_FRETS} onClick={() => step(1)}>›</button>
+        </div>
+      ) : null}
+    <div className="fretboard-scroll" ref={scroller} onScroll={(e) => setView(visibleFrets(e.currentTarget))}>
       <svg className="fretboard" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="group" aria-label="Tastiera della chitarra">
         <defs>
-          {/* Materials for the workbench look; the classic theme ignores them. */}
+          {/* Materials for the Studio look; the Simple look ignores them. */}
           <linearGradient id="gtl-maple" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#dcb67a" />
             <stop offset="0.12" stopColor="#ecd09a" />
@@ -245,5 +272,16 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
         ) : null}
       </svg>
     </div>
+    </div>
   );
+}
+
+/** Frets fully or mostly in view, and whether the neck is wider than its box. */
+function visibleFrets(element: HTMLElement): { low: number; high: number; scrolls: boolean } {
+  const scrolls = element.scrollWidth > element.clientWidth + 1;
+  const scale = WIDTH / element.scrollWidth;
+  const left = element.scrollLeft * scale;
+  const right = (element.scrollLeft + element.clientWidth) * scale;
+  const fretAt = (x: number) => Math.min(DEFAULT_FRETS, Math.max(0, Math.round(((x - NUT_X) / (RIGHT - NUT_X)) * DEFAULT_FRETS)));
+  return { low: fretAt(left), high: fretAt(right), scrolls };
 }

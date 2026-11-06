@@ -5,7 +5,6 @@ import { sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType,
 import { presetRepository, useApp, usePlayhead } from '../app/store';
 import { CAGED_FORMS } from '../fretboard';
 import { ARP_SPAN, INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
-import { RoutineEditor } from './RoutineEditor';
 import { AVOID_PROFILES, guideTones, type AvoidProfile } from '../harmony';
 import {
   COMP_PATTERNS, PROGRESSION_TEMPLATES, addChord, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord, withChord,
@@ -112,7 +111,29 @@ function ScaleLayersSection() {
   );
 }
 
-export function ScalePanel() {
+/** How notes are labelled on the neck. Shared: Simple shows it in the scale panel, Studio above the neck. */
+export function LabelModeSelector() {
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  return (
+    <Field label="Sulle note">
+      <Segmented<LabelMode>
+        label="Etichette"
+        value={s.labelMode}
+        options={[
+          { value: 'degree', label: 'Grado' },
+          { value: 'note', label: 'Nome' },
+          { value: 'function', label: 'Funzione' },
+          { value: 'finger', label: 'Dito' },
+          { value: 'none', label: 'Nulla' },
+        ]}
+        onChange={(labelMode) => update({ labelMode })}
+      />
+    </Field>
+  );
+}
+
+export function ScalePanel({ showLabels = true }: { readonly showLabels?: boolean }) {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const scale = useMemo(() => buildScale(s.tonic, s.scaleId), [s.tonic, s.scaleId]);
@@ -157,20 +178,7 @@ export function ScalePanel() {
         </>
       )}
       <ScaleLayersSection />
-      <Field label="Sulle note">
-        <Segmented<LabelMode>
-          label="Etichette"
-          value={s.labelMode}
-          options={[
-            { value: 'degree', label: 'Grado' },
-            { value: 'note', label: 'Nome' },
-            { value: 'function', label: 'Funzione' },
-            { value: 'finger', label: 'Dito' },
-            { value: 'none', label: 'Nulla' },
-          ]}
-          onChange={(labelMode) => update({ labelMode })}
-        />
-      </Field>
+      {showLabels ? <LabelModeSelector /> : null}
     </Panel>
   );
 }
@@ -179,7 +187,7 @@ export function ExercisePanel() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const validCustom = parseCustomPattern(s.customText) !== null;
-  const [editorOpen, setEditorOpen] = useState(false);
+  const setEditorOpen = useApp((state) => state.setEditorOpen);
   return (
     <Panel title="Esercizio">
       <Toggle checked={s.exerciseOn} onChange={(exerciseOn) => update({ exerciseOn })}>Evidenzia le note a tempo</Toggle>
@@ -195,7 +203,6 @@ export function ExercisePanel() {
         />
       </Field>
       <button type="button" className="btn btn-editor" data-testid="open-editor" onClick={() => setEditorOpen(true)}>Apri editor avanzato</button>
-      <RoutineEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
       {s.exerciseMode === 'routine' ? <RoutineSummary /> : <SingleExercise validCustom={validCustom} />}
     </Panel>
   );
@@ -445,7 +452,7 @@ function AudioMix({ showComp }: { readonly showComp: boolean }) {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   return (
-    <div className="row">
+    <div className="row audio-mix">
       <Volume label="Click" value={s.volClick} onChange={(volClick) => update({ volClick })} />
       <Volume label="Note" value={s.volNotes} onChange={(volNotes) => update({ volNotes })} />
       {showComp ? <Volume label="Accordi" value={s.volComp} onChange={(volComp) => update({ volComp })} /> : null}

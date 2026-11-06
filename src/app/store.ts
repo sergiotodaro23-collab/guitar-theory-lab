@@ -19,6 +19,9 @@ export interface AppState {
   readonly pinnedPc: number | null;
   /** Routine phase shown on the board while stopped. */
   readonly selectedPhase: number;
+  /** The advanced editor lives above both layouts, so switching look keeps its draft. */
+  readonly editorOpen: boolean;
+  readonly setEditorOpen: (open: boolean) => void;
   readonly update: (change: Partial<Settings>) => void;
   readonly setSelectedChord: (index: number) => void;
   readonly setPinned: (pc: number | null) => void;
@@ -30,6 +33,8 @@ export const useApp = create<AppState>((set) => ({
   selectedChord: 0,
   pinnedPc: null,
   selectedPhase: 0,
+  editorOpen: false,
+  setEditorOpen: (editorOpen) => set({ editorOpen }),
   update: (change) => set((state) => {
     const settings = { ...state.settings, ...change };
     const last = Math.max(0, settings.progression.chords.length - 1);

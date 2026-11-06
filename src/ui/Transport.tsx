@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { engine } from '../app/engine';
 import { BPM_MAX, BPM_MIN, METERS, meterOf, type AppMode, type LabelMode } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
@@ -11,7 +11,7 @@ const MODES: readonly { value: AppMode; label: string }[] = [
   { value: 'jam', label: 'Jam Studio' },
 ];
 
-function BeatLights() {
+export function BeatLights() {
   const settings = useApp((s) => s.settings);
   const beat = usePlayhead((p) => p.beat);
   const state = usePlayhead((p) => p.state);
@@ -27,7 +27,7 @@ function BeatLights() {
   );
 }
 
-function CurrentChord() {
+export function CurrentChord() {
   const settings = useApp((s) => s.settings);
   const chordIndex = usePlayhead((p) => p.chordIndex);
   const selected = useApp((s) => s.selectedChord);
@@ -64,13 +64,64 @@ function withModeLabels(labelMode: LabelMode, mode: AppMode): { mode: AppMode; l
   return { mode, labelMode };
 }
 
-export function Transport() {
-  const settings = useApp((s) => s.settings);
-  const update = useApp((s) => s.update);
-  const state = usePlayhead((p) => p.state);
-  const taps = useRef<number[]>([]);
+export function Nameplate() {
+  return (
+    <h1 className="nameplate" data-testid="nameplate">
+      <span className="nameplate-title">GUITAR THEORY LAB</span>
+      <span className="nameplate-byline">v{__APP_VERSION__} — by Sergio Todaro</span>
+    </h1>
+  );
+}
 
-  const tap = () => {
+/** The look toggle. Studio is disabled, not hidden, where the screen cannot hold it. */
+export function AppearanceToggle({ studioAllowed }: { readonly studioAllowed: boolean }) {
+  const appearance = useApp((s) => s.settings.appearance);
+  const update = useApp((s) => s.update);
+  return (
+    <div className="appearance" role="group" aria-label="Aspetto" data-testid="appearance">
+      <span className="appearance-label">Aspetto</span>
+      <Segmented
+        label="Aspetto dell'interfaccia"
+        value={appearance}
+        options={[
+          { value: 'simple', label: 'Semplificata' },
+          { value: 'studio', label: 'Studio', disabled: !studioAllowed },
+        ]}
+        onChange={(value) => update({ appearance: value })}
+      />
+      {!studioAllowed ? <span className="appearance-note">Studio richiede uno schermo più grande</span> : null}
+    </div>
+  );
+}
+
+export function ModeNav() {
+  const mode = useApp((s) => s.settings.mode);
+  const labelMode = useApp((s) => s.settings.labelMode);
+  const update = useApp((s) => s.update);
+  return (
+    <nav aria-label="Modalità" className="mode-nav">
+      <Segmented label="Modalità" value={mode} options={MODES} onChange={(next) => update(withModeLabels(labelMode, next))} />
+    </nav>
+  );
+}
+
+export function PlayControls() {
+  const state = usePlayhead((p) => p.state);
+  return (
+    <div className="transport-buttons">
+      <button type="button" className="play" data-testid="play" aria-pressed={state === 'playing'} onClick={() => engine.toggle()}>
+        {state === 'playing' ? 'Pausa' : state === 'paused' ? 'Riprendi' : 'Avvia'}
+      </button>
+      <button type="button" className="stop" data-testid="stop" disabled={state === 'stopped'} onClick={() => engine.stop()}>Ferma</button>
+    </div>
+  );
+}
+
+/** Tap tempo: the average of the last taps within 2.5 s. */
+export function useTap(): () => void {
+  const update = useApp((s) => s.update);
+  const taps = useRef<number[]>([]);
+  return () => {
     const now = performance.now();
     taps.current = [...taps.current.filter((t) => now - t < 2500), now];
     if (taps.current.length >= 2) {
@@ -79,77 +130,86 @@ export function Transport() {
       update({ bpm: Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(60000 / average))) });
     }
   };
+}
+
+export function BpmInput() {
+  const bpm = useApp((s) => s.settings.bpm);
+  const update = useApp((s) => s.update);
+  return (
+    <label className="bpm-readout">
+      <input
+        data-testid="bpm"
+        className="bpm-input"
+        type="number"
+        min={BPM_MIN}
+        max={BPM_MAX}
+        value={bpm}
+        aria-label="BPM"
+        onChange={(event) => {
+          const value = Number(event.target.value);
+          if (Number.isFinite(value) && value >= BPM_MIN && value <= BPM_MAX) update({ bpm: Math.round(value) });
+        }}
+      />
+      <span className="bpm-unit">BPM</span>
+    </label>
+  );
+}
+
+export function MeterSelect() {
+  const meterId = useApp((s) => s.settings.meterId);
+  const update = useApp((s) => s.update);
+  return <Select label="Metrica" testId="meter" value={meterId} options={Object.keys(METERS).map((id) => ({ value: id, label: id }))} onChange={(value) => update({ meterId: value })} />;
+}
+
+export function ClickSelect() {
+  const subdivision = useApp((s) => s.settings.subdivision);
+  const update = useApp((s) => s.update);
+  return (
+    <Select
+      label="Suddivisione del click"
+      value={subdivision}
+      options={[
+        { value: 1 as const, label: 'Click: movimenti' },
+        { value: 2 as const, label: 'Click: ottavi' },
+        { value: 3 as const, label: 'Click: terzine' },
+        { value: 4 as const, label: 'Click: sedicesimi' },
+      ]}
+      onChange={(value) => update({ subdivision: value })}
+    />
+  );
+}
+
+/** Simple look: one rack, with the time settings folded away on narrow screens. */
+export function Transport({ studioAllowed }: { readonly studioAllowed: boolean }) {
+  const settings = useApp((s) => s.settings);
+  const update = useApp((s) => s.update);
+  const tap = useTap();
+  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
     <header className="rack">
       <div className="rack-top">
-        <h1 className="nameplate" data-testid="nameplate">
-          <span className="nameplate-title">GUITAR THEORY LAB</span>
-          <span className="nameplate-byline">v{__APP_VERSION__} — by Sergio Todaro</span>
-        </h1>
-        <div className="appearance" role="group" aria-label="Aspetto">
-          <span className="appearance-label">Aspetto</span>
-          <Segmented
-            label="Aspetto dell'interfaccia"
-            value={settings.appearance}
-            options={[{ value: 'classic', label: 'Classico' }, { value: 'workbench', label: 'Workbench (prototipo)' }]}
-            onChange={(appearance) => update({ appearance })}
-          />
-        </div>
-        <nav aria-label="Modalità">
-          <Segmented label="Modalità" value={settings.mode} options={MODES} onChange={(mode) => update(withModeLabels(settings.labelMode, mode))} />
-        </nav>
+        <Nameplate />
+        <AppearanceToggle studioAllowed={studioAllowed} />
+        <ModeNav />
       </div>
       <div className="rack-controls">
-        <div className="transport-buttons">
-          <button type="button" className="play" data-testid="play" aria-pressed={state === 'playing'} onClick={() => engine.toggle()}>
-            {state === 'playing' ? 'Pausa' : state === 'paused' ? 'Riprendi' : 'Avvia'}
-          </button>
-          <button type="button" className="stop" data-testid="stop" disabled={state === 'stopped'} onClick={() => engine.stop()}>Ferma</button>
-        </div>
+        <PlayControls />
         <div className="bpm">
           <button type="button" className="nudge" aria-label="Rallenta di 1 BPM" onClick={() => engine.nudgeBpm(-1)}>−</button>
-          <label className="bpm-readout">
-            <input
-              data-testid="bpm"
-              className="bpm-input"
-              type="number"
-              min={BPM_MIN}
-              max={BPM_MAX}
-              value={settings.bpm}
-              aria-label="BPM"
-              onChange={(event) => {
-                const value = Number(event.target.value);
-                if (Number.isFinite(value) && value >= BPM_MIN && value <= BPM_MAX) update({ bpm: Math.round(value) });
-              }}
-            />
-            <span className="bpm-unit">BPM</span>
-          </label>
+          <BpmInput />
           <button type="button" className="nudge" aria-label="Accelera di 1 BPM" onClick={() => engine.nudgeBpm(1)}>+</button>
           <input className="range bpm-range" type="range" min={BPM_MIN} max={BPM_MAX} value={settings.bpm} aria-label="Regola il BPM" onChange={(event) => update({ bpm: Number(event.target.value) })} />
           <button type="button" className="tap" onClick={tap}>Tap</button>
         </div>
         <BeatLights />
         <CurrentChord />
-        <div className="time-controls">
-          <Select
-            label="Metrica"
-            testId="meter"
-            value={settings.meterId}
-            options={Object.keys(METERS).map((id) => ({ value: id, label: id }))}
-            onChange={(meterId) => update({ meterId })}
-          />
-          <Select
-            label="Suddivisione del click"
-            value={settings.subdivision}
-            options={[
-              { value: 1 as const, label: 'Click: movimenti' },
-              { value: 2 as const, label: 'Click: ottavi' },
-              { value: 3 as const, label: 'Click: terzine' },
-              { value: 4 as const, label: 'Click: sedicesimi' },
-            ]}
-            onChange={(subdivision) => update({ subdivision })}
-          />
+        <button type="button" className="time-more-toggle" aria-expanded={moreOpen} aria-controls="time-controls" onClick={() => setMoreOpen(!moreOpen)}>
+          Metrica e click
+        </button>
+        <div className={`time-controls ${moreOpen ? 'is-open' : ''}`} id="time-controls">
+          <MeterSelect />
+          <ClickSelect />
           <label className="swing">
             <span>Swing</span>
             <input className="range" type="range" min={0} max={0.5} step={0.01} value={settings.swing} aria-label="Swing" onChange={(event) => update({ swing: Number(event.target.value) })} />

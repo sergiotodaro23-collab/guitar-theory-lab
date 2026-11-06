@@ -1,0 +1,408 @@
+/*
+ * Studio look (docs/DECISIONS.md D-15): a dark aluminium console with walnut
+ * end cheeks, an amber LCD, real knobs and faders, a recessed bay holding a
+ * maple neck. Scoped to [data-theme='studio'] and to the st-* layout classes,
+ * so the Simple look is untouched.
+ */
+
+.appearance { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.appearance-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.appearance-note { font-size: 12px; color: var(--muted); }
+/* Phone held upright: only Simple exists, so the toggle would offer one choice. */
+@media (max-width: 599px) { .appearance { display: none; } }
+
+:root[data-theme='studio'] {
+  --void: #15171a;
+  --deck: #24272c;
+  --deck-raised: #33373d;
+  --edge: #464b53;
+  --ink: #eef0f2;
+  --muted: #b3b9c2;
+
+  --chord-tone: #0d6b62;
+  --tension: #9a5800;
+  --avoid: #b0231b;
+  --outside: #6f6455;
+  --root: #a3201a;
+  --scale: #1d3561;
+  --hot: #12100c;
+  --layer-teal: #0d6b62;
+  --layer-amber: #b06a00;
+  --layer-lime: #4c7a12;
+  --layer-coral: #c2471f;
+  --layer-sky: #1f63a8;
+  --layer-rose: #a8306f;
+
+  --amber: #ffb547;
+  --amber-dim: #6b4a17;
+  --lcd-bg: #1a1207;
+  --silk: #c9ced6;
+  --plate-top: #2d3035;
+  --plate-bottom: #1f2125;
+  --walnut: #5a3a22;
+  --focus: #ffb547;
+
+  color-scheme: dark;
+  font-size: 15.5px;
+}
+
+:root[data-theme='studio'] body {
+  background: radial-gradient(ellipse at 50% 0%, #24262a 0%, #111214 70%);
+  background-attachment: fixed;
+  color: var(--ink);
+}
+:root[data-theme='studio'] :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ---- Chassis: aluminium face, walnut cheeks ---- */
+.st-chassis {
+  position: relative;
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: 0 26px;
+}
+.st-chassis::before, .st-chassis::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 5px),
+    linear-gradient(90deg, #3e2717, var(--walnut) 40%, #6d4a2e 60%, #3e2717);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+}
+.st-chassis::before { left: 0; border-radius: 6px 0 0 6px; }
+.st-chassis::after { right: 0; border-radius: 0 6px 6px 0; }
+
+.st-header, .st-transport, .st-bay, .st-deck, .st-mixer {
+  background: linear-gradient(180deg, var(--plate-top), var(--plate-bottom));
+  border: 1px solid #0b0c0d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 2px 6px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+}
+
+.st-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  margin-top: 10px;
+}
+.st-header .mode-nav { flex: 1; display: flex; justify-content: center; }
+.st-silk { font: 600 11.5px/1.2 var(--display); text-transform: uppercase; letter-spacing: 0.12em; color: var(--silk); }
+
+/* Mode selector and every button row: moulded keys with a status LED. */
+:root[data-theme='studio'] .segmented {
+  background: #121315;
+  clip-path: none;
+  border-radius: 7px;
+  padding: 3px;
+  gap: 3px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+:root[data-theme='studio'] .segment {
+  position: relative;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 5px;
+  color: #c3c8cf;
+  background: linear-gradient(180deg, #353940, #2a2d32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-size: 14.5px;
+}
+:root[data-theme='studio'] .segment:hover:not(:disabled) { color: #fff; background: linear-gradient(180deg, #3d424a, #30343a); }
+:root[data-theme='studio'] .segment[aria-pressed='true'] {
+  color: var(--amber);
+  background: linear-gradient(180deg, #2a2d32, #202226);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.7), inset 0 2px 0 var(--amber);
+}
+:root[data-theme='studio'] .segment:disabled { opacity: 0.4; }
+.st-header .mode-nav .segment { font-size: 15.5px; padding: 9px 18px; }
+
+/* ---- Transport module ---- */
+.st-transport {
+  display: flex;
+  align-items: center;
+  gap: 14px 18px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  margin-top: 8px;
+}
+:root[data-theme='studio'] .play,
+:root[data-theme='studio'] .stop,
+:root[data-theme='studio'] .tap,
+:root[data-theme='studio'] .btn,
+:root[data-theme='studio'] .icon-btn,
+:root[data-theme='studio'] .nudge {
+  clip-path: none;
+  border-radius: 6px;
+  color: var(--ink);
+  border: 1px solid #0d0e10;
+  background: linear-gradient(180deg, #474b53, #33363c);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 2px 3px rgba(0, 0, 0, 0.55);
+}
+:root[data-theme='studio'] .play:active,
+:root[data-theme='studio'] .tap:active,
+:root[data-theme='studio'] .btn:active { transform: translateY(1px); box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.6); }
+:root[data-theme='studio'] .st-transport .play { min-width: 128px; min-height: 52px; font-size: 17px; position: relative; padding-left: 34px; }
+:root[data-theme='studio'] .st-transport .stop { min-height: 52px; padding: 0 18px; }
+:root[data-theme='studio'] .st-transport .tap { min-height: 52px; padding: 0 18px; }
+:root[data-theme='studio'] .play::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #193b22;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+:root[data-theme='studio'] .play[aria-pressed='true'] { color: #fff; }
+:root[data-theme='studio'] .play[aria-pressed='true']::before { background: #49e070; box-shadow: 0 0 9px #49e070; }
+:root[data-theme='studio'] .stop:disabled { opacity: 0.5; }
+
+/* The LCD: chord big, counter, tempo and beat LEDs on one backlit glass. */
+.st-lcd {
+  flex: 1 1 360px;
+  min-width: 300px;
+  background: radial-gradient(ellipse at 30% 0%, #2a1c0a, var(--lcd-bg) 70%);
+  border-radius: 6px;
+  padding: 8px 14px;
+  border: 1px solid #000;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--amber);
+  font-family: var(--display);
+  text-shadow: 0 0 7px rgba(255, 181, 71, 0.35);
+}
+.lcd-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.lcd-main { min-height: 44px; }
+:root[data-theme='studio'] .st-lcd .now-playing { min-width: 0; }
+:root[data-theme='studio'] .st-lcd .now-chord { color: var(--amber); font-size: 38px; }
+:root[data-theme='studio'] .st-lcd .now-chord-text { font-size: 26px; }
+:root[data-theme='studio'] .st-lcd .next-chord { color: #c98b33; font-size: 16px; }
+.lcd-counter { font: 700 20px/1 var(--display); font-variant-numeric: tabular-nums; min-width: 64px; }
+.lcd-bpm { display: inline-flex; align-items: center; gap: 4px; }
+.lcd-nudge { background: transparent; border: 1px solid var(--amber-dim); color: var(--amber); border-radius: 4px; width: 30px; height: 30px; font: 700 16px/1 var(--display); cursor: pointer; }
+.lcd-nudge:hover { background: rgba(255, 181, 71, 0.1); }
+:root[data-theme='studio'] .st-lcd .bpm-input { color: var(--amber); border-bottom: 0; font-size: 26px; width: 66px; background: transparent; text-shadow: inherit; }
+:root[data-theme='studio'] .st-lcd .bpm-unit { color: #c98b33; }
+:root[data-theme='studio'] .st-lcd .beat-light { width: 12px; height: 12px; border-radius: 50%; transform: none; background: #3a2508; border: 1px solid #000; }
+:root[data-theme='studio'] .st-lcd .beat-light.is-first { background: #4a3009; }
+:root[data-theme='studio'] .st-lcd .beat-light.is-on { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+:root[data-theme='studio'] .st-lcd .beat-light.is-first.is-on { background: #fff1d6; box-shadow: 0 0 10px var(--amber); }
+
+.st-time { display: grid; grid-template-columns: auto auto; align-items: center; gap: 6px 10px; }
+:root[data-theme='studio'] .select,
+:root[data-theme='studio'] .text-input {
+  background: #15171a;
+  color: var(--ink);
+  border: 1px solid #3a3f46;
+  border-radius: 6px;
+  min-height: 40px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+:root[data-theme='studio'] .text-input.is-invalid { border-color: #ff6b5e; }
+
+/* Knobs: a skirted cap on an arc that lights up to the value. */
+.knob { display: grid; justify-items: center; gap: 1px; min-width: 70px; }
+.knob-dial { width: 60px; height: 60px; cursor: ns-resize; touch-action: none; border-radius: 50%; }
+.knob-dial svg { width: 100%; height: 100%; display: block; }
+.knob-track { fill: none; stroke: #0e0f11; stroke-width: 4; stroke-linecap: round; }
+.knob-value { fill: none; stroke: var(--amber); stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 0 3px rgba(255, 181, 71, 0.6)); }
+.knob-skirt { fill: #1a1c1f; stroke: #0b0c0d; }
+.knob-cap { fill: #3d4148; stroke: #555a62; stroke-width: 1; }
+.knob-pointer { stroke: #f2f3f5; stroke-width: 2.6; stroke-linecap: round; }
+.knob-label { font: 600 11.5px/1.2 var(--display); text-transform: uppercase; letter-spacing: 0.1em; color: var(--silk); }
+.knob-readout { font: 600 12.5px/1.2 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---- Instrument bay: the neck, full width, in a recessed well ---- */
+.st-main { padding: 8px 0 24px; }
+.st-bay { padding: 10px 14px 12px; background: linear-gradient(180deg, #1b1d20, #141517); box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8); }
+.st-bay-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.st-bay-toolbar .field { flex-direction: row; align-items: center; gap: 10px; }
+:root[data-theme='studio'] .st-bay .board-section { margin-bottom: 0; }
+:root[data-theme='studio'] .board-grain { display: inline; fill: url(#gtl-grain); pointer-events: none; }
+:root[data-theme='studio'] .board { fill: url(#gtl-maple); stroke: #7a5226; stroke-width: 1.5; filter: drop-shadow(0 5px 7px rgba(0, 0, 0, 0.7)); }
+:root[data-theme='studio'] .fret { stroke: url(#gtl-fret); stroke-width: 3.2; }
+:root[data-theme='studio'] .nut { stroke: #efe6cf; stroke-width: 7; filter: drop-shadow(1px 0 1px rgba(0, 0, 0, 0.45)); }
+:root[data-theme='studio'] .inlay { fill: url(#gtl-pearl); stroke: rgba(80, 60, 30, 0.35); stroke-width: 0.6; }
+:root[data-theme='studio'] .string { stroke: #6f7276; opacity: 0.95; filter: drop-shadow(0 1.5px 0.6px rgba(60, 35, 10, 0.45)); }
+:root[data-theme='studio'] .fret-number { fill: var(--silk); }
+
+/* Markers: printed discs on maple, each role with its own fill and a cream label. */
+:root[data-theme='studio'] .marker .shape { fill: #fbf7ec; stroke: var(--scale); filter: drop-shadow(0 1px 1px rgba(40, 20, 0, 0.45)); }
+:root[data-theme='studio'] .marker-label { fill: #241b12; }
+:root[data-theme='studio'] .role-scale .shape { fill: var(--scale); stroke: #0f1f3d; }
+:root[data-theme='studio'] .role-root .shape { fill: var(--root); stroke: #5e0f0b; }
+:root[data-theme='studio'] .role-chord-tone .shape { fill: var(--chord-tone); stroke: #063b36; }
+:root[data-theme='studio'] .role-tension .shape { fill: var(--tension); stroke: #5a3300; }
+:root[data-theme='studio'] .role-scale .marker-label,
+:root[data-theme='studio'] .role-root .marker-label,
+:root[data-theme='studio'] .role-chord-tone .marker-label,
+:root[data-theme='studio'] .role-tension .marker-label { fill: #fbf7ec; }
+:root[data-theme='studio'] .role-avoid .shape { fill: #fbf7ec; stroke: var(--avoid); }
+:root[data-theme='studio'] .role-avoid .marker-label { fill: var(--avoid); }
+:root[data-theme='studio'] .role-outside .shape { fill: #fbf7ec; stroke: var(--outside); }
+:root[data-theme='studio'] .role-outside .marker-label { fill: var(--outside); }
+:root[data-theme='studio'] .role-other-scale .shape { fill: #fbf7ec; stroke: var(--layer, var(--outside)); }
+:root[data-theme='studio'] .role-other-scale .marker-label { fill: var(--layer, #5e5140); }
+:root[data-theme='studio'] .marker:hover .shape,
+:root[data-theme='studio'] .marker:focus-visible .shape { stroke: #1a5fd0; stroke-width: 3.4; }
+:root[data-theme='studio'] .marker.is-pinned .shape { stroke: #1a5fd0; stroke-width: 3.6; }
+:root[data-theme='studio'] .marker.is-dim { opacity: 0.3; }
+:root[data-theme='studio'] .guide-ring { stroke: var(--chord-tone); stroke-width: 2.4; }
+:root[data-theme='studio'] .voicing-ring { stroke: #12100c; }
+:root[data-theme='studio'] .pip { stroke: #fbf7ec; }
+:root[data-theme='studio'] .target-ring { stroke: #12100c; }
+:root[data-theme='studio'] .active-halo { fill: #fff3c4; opacity: 0.75; }
+:root[data-theme='studio'] .active-core { fill: #12100c; filter: drop-shadow(0 0 6px var(--amber)); }
+:root[data-theme='studio'] .active-label { fill: #fff3c4; }
+:root[data-theme='studio'] .trail { stroke: #12100c; }
+
+/* Inspector left, legend right, both on plates inside the bay. */
+:root[data-theme='studio'] .board-foot { margin-top: 10px; align-items: stretch; }
+:root[data-theme='studio'] .legend {
+  order: 2;
+  margin-left: auto;
+  background: #0f1012;
+  border: 1px solid #2c3036;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14.5px;
+  color: var(--ink);
+  gap: 8px 18px;
+  max-width: 760px;
+}
+:root[data-theme='studio'] .legend-swatch { width: 14px; height: 14px; }
+:root[data-theme='studio'] .legend-item.role-scale .legend-swatch { background: var(--scale); border: 1.5px solid #c9ced6; }
+:root[data-theme='studio'] .legend-item.role-chord-tone .legend-swatch,
+:root[data-theme='studio'] .legend-item.role-root .legend-swatch,
+:root[data-theme='studio'] .legend-item.role-tension .legend-swatch { border: 1.5px solid #c9ced6; }
+:root[data-theme='studio'] .legend-item.role-chord-tone.is-guide .legend-swatch { box-shadow: 0 0 0 2px #0f1012, 0 0 0 3.5px #3fbfb2; }
+:root[data-theme='studio'] .legend-item.role-avoid .legend-swatch { border-bottom-color: #ff6b5e; }
+:root[data-theme='studio'] .legend-item.role-outside .legend-swatch { border-color: #c9ced6; }
+:root[data-theme='studio'] .legend-pip-ring { fill: var(--scale); stroke: #c9ced6; }
+:root[data-theme='studio'] .legend .muted { color: var(--muted); }
+:root[data-theme='studio'] .inspector,
+:root[data-theme='studio'] .inspector-empty { order: 1; }
+:root[data-theme='studio'] .inspector { background: #0f1012; border: 1px solid #2c3036; border-radius: 6px; padding: 10px 14px; }
+:root[data-theme='studio'] .fn-item { background: #24272c; }
+
+/* ---- Deck: tab rail, module area, mixer ---- */
+.st-lower { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 8px; margin-top: 8px; align-items: start; }
+.st-deck { display: grid; grid-template-columns: 170px minmax(0, 1fr); min-height: 380px; overflow: hidden; }
+.st-tabs { display: flex; flex-direction: column; gap: 4px; padding: 10px; background: #18191c; border-right: 1px solid #0b0c0d; }
+.st-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  text-align: left;
+  border: 1px solid #0d0e10;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #33363c, #282b30);
+  color: #c3c8cf;
+  font: 600 15px/1 var(--display);
+  cursor: pointer;
+}
+.st-tab:hover { color: #fff; }
+.st-tab[aria-selected='true'] { color: var(--amber); background: linear-gradient(180deg, #24272b, #1d1f23); box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.6); }
+.st-tab-led { width: 8px; height: 8px; border-radius: 50%; background: #3a2508; flex: none; }
+.st-tab[aria-selected='true'] .st-tab-led { background: var(--amber); box-shadow: 0 0 7px var(--amber); }
+.st-module { padding: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; align-content: start; }
+
+:root[data-theme='studio'] .st-module .panel {
+  background: #202327;
+  border: 1px solid #33373d;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  padding: 14px 16px 16px;
+}
+:root[data-theme='studio'] .panel-title { font: 600 13px/1.2 var(--display); text-transform: uppercase; letter-spacing: 0.12em; color: var(--silk); }
+:root[data-theme='studio'] .panel-subtitle { color: var(--silk); }
+:root[data-theme='studio'] .field-label { font-size: 13.5px; color: var(--muted); }
+:root[data-theme='studio'] .field-hint { font-size: 13.5px; color: var(--muted); }
+:root[data-theme='studio'] .spelling { color: #5fd3c6; }
+:root[data-theme='studio'] .note { color: var(--amber); }
+:root[data-theme='studio'] .link { color: var(--amber); }
+:root[data-theme='studio'] .range { accent-color: var(--amber); }
+:root[data-theme='studio'] .btn-accent { background: linear-gradient(180deg, #ffc56b, #e89a26); color: #1a1207; border-color: #6b4a17; }
+:root[data-theme='studio'] .toggle-box { background: #15171a; border-color: #555a62; border-radius: 4px; }
+:root[data-theme='studio'] .toggle input:checked + .toggle-box { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 6px rgba(255, 181, 71, 0.6); }
+:root[data-theme='studio'] .chord-chip { background: #15171a; border-color: #3a3f46; color: var(--ink); border-radius: 6px; }
+:root[data-theme='studio'] .chord-chip.is-current,
+:root[data-theme='studio'] .chord-chip.small[aria-pressed='true'] { background: var(--amber); border-color: var(--amber); color: #1a1207; }
+:root[data-theme='studio'] .layer-item,
+:root[data-theme='studio'] .chord-item,
+:root[data-theme='studio'] .routine-phase,
+:root[data-theme='studio'] .diagram-card { background: #15171a; border-radius: 6px; }
+:root[data-theme='studio'] .chord-item.is-active,
+:root[data-theme='studio'] .diagram-card.is-active,
+:root[data-theme='studio'] .routine-phase.is-current { border-left-color: var(--amber); border-top-color: var(--amber); }
+:root[data-theme='studio'] .diagram-dot { fill: #3fbfb2; }
+/* In Studio the mixer has its own faders: the copies inside modules go. */
+:root[data-theme='studio'] .st-module .audio-mix { display: none; }
+
+.st-mixer { padding: 12px 10px 14px; }
+.st-mixer-title { margin: 0 0 8px 6px; }
+.st-faders { display: flex; justify-content: space-between; gap: 6px; }
+.fader { display: grid; justify-items: center; gap: 6px; cursor: pointer; }
+.fader-value { font: 600 13px/1 var(--display); color: var(--amber); font-variant-numeric: tabular-nums; }
+.fader-slot { height: 190px; width: 34px; display: grid; place-items: center; background: #0e0f11; border-radius: 6px; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9); }
+.fader-slot input {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 30px;
+  height: 172px;
+  margin: 0;
+  accent-color: var(--amber);
+  cursor: pointer;
+}
+.fader-label { font: 600 11.5px/1.2 var(--display); text-transform: uppercase; letter-spacing: 0.08em; color: var(--silk); }
+.meter { display: grid; grid-auto-rows: 13px; gap: 3px; justify-items: center; align-content: end; padding-top: 18px; }
+.meter-led { width: 16px; height: 11px; border-radius: 2px; background: #1c1e21; box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.8); }
+.meter-ok.is-on { background: #49e070; box-shadow: 0 0 5px #49e070; }
+.meter-warm.is-on { background: var(--amber); box-shadow: 0 0 5px var(--amber); }
+.meter-hot.is-on { background: #ff5a44; box-shadow: 0 0 5px #ff5a44; }
+.meter-label { font: 600 11.5px/1.2 var(--display); text-transform: uppercase; color: var(--silk); margin-top: 4px; }
+
+:root[data-theme='studio'] .foot { color: var(--muted); padding: 0 4px; }
+:root[data-theme='studio'] .legal a { color: var(--amber); }
+
+/* ---- Advanced editor as a console window ---- */
+:root[data-theme='studio'] .editor-dialog { background: #1b1d20; border: 1px solid #0b0c0d; border-radius: 10px; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85); }
+:root[data-theme='studio'] .editor-dialog::backdrop { background: rgba(5, 5, 6, 0.75); }
+:root[data-theme='studio'] .editor-header { background: linear-gradient(180deg, var(--plate-top), var(--plate-bottom)); border-bottom-color: #0b0c0d; }
+:root[data-theme='studio'] .editor-preview { background: #17191c; border-left-color: #0b0c0d; }
+:root[data-theme='studio'] .phase-block { background: #24272c; border-color: #3a3f46; border-radius: 8px; }
+:root[data-theme='studio'] .phase-block.is-selected { border-left-color: var(--amber); }
+:root[data-theme='studio'] .block-group { border-color: #3a3f46; border-radius: 6px; }
+:root[data-theme='studio'] .strip-seg { background: #24272c; border-radius: 6px; }
+:root[data-theme='studio'] .strip-seg.is-selected { border-top-color: var(--amber); }
+:root[data-theme='studio'] .preview-board { background: #141517; border-color: #2c3036; border-radius: 6px; }
+:root[data-theme='studio'] .preview-notes { color: #5fd3c6; }
+:root[data-theme='studio'] .issue { background: #15171a; }
+
+/* ---- Studio on smaller screens (tablets): same console, reflowed ---- */
+@media (max-width: 1180px) {
+  .st-lower { grid-template-columns: 1fr; }
+  .st-mixer .st-faders { justify-content: flex-start; gap: 22px; }
+  .fader-slot { height: 120px; }
+  .fader-slot input { height: 104px; }
+  .meter { grid-auto-rows: 7px; gap: 2px; }
+  .meter-led { height: 6px; }
+}
+@media (max-width: 900px) {
+  .st-chassis { padding: 0 10px; }
+  .st-chassis::before, .st-chassis::after { display: none; }
+  .st-deck { grid-template-columns: 1fr; }
+  .st-tabs { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid #0b0c0d; }
+  .st-tab { flex: none; }
+  .st-module { grid-template-columns: 1fr; padding: 10px; }
+  .st-header .mode-nav { order: 3; flex-basis: 100%; justify-content: flex-start; overflow-x: auto; }
+  .st-header .mode-nav .segmented { flex-wrap: nowrap; }
+}
