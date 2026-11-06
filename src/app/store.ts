@@ -17,22 +17,28 @@ export interface AppState {
   /** Chord shown while stopped, and the manual mode's current chord. */
   readonly selectedChord: number;
   readonly pinnedPc: number | null;
+  /** Routine phase shown on the board while stopped. */
+  readonly selectedPhase: number;
   readonly update: (change: Partial<Settings>) => void;
   readonly setSelectedChord: (index: number) => void;
   readonly setPinned: (pc: number | null) => void;
+  readonly setSelectedPhase: (index: number) => void;
 }
 
 export const useApp = create<AppState>((set) => ({
   settings: sanitizeSettings(presetRepository.loadSession() ?? DEFAULT_SETTINGS),
   selectedChord: 0,
   pinnedPc: null,
+  selectedPhase: 0,
   update: (change) => set((state) => {
     const settings = { ...state.settings, ...change };
     const last = Math.max(0, settings.progression.chords.length - 1);
-    return { settings, selectedChord: Math.min(state.selectedChord, last) };
+    const lastPhase = Math.max(0, settings.routine.phases.length - 1);
+    return { settings, selectedChord: Math.min(state.selectedChord, last), selectedPhase: Math.min(state.selectedPhase, lastPhase) };
   }),
   setSelectedChord: (selectedChord) => set({ selectedChord }),
   setPinned: (pinnedPc) => set({ pinnedPc }),
+  setSelectedPhase: (selectedPhase) => set({ selectedPhase }),
 }));
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -49,10 +55,12 @@ export interface Playhead {
   readonly beat: number;
   readonly subdivision: number;
   readonly chordIndex: number | null;
+  /** Routine phase under the playhead; null outside routines or when stopped. */
+  readonly phase: number | null;
   readonly note: { readonly string: number; readonly fret: number; readonly midi: number; readonly index: number } | null;
   readonly trail: readonly { readonly string: number; readonly fret: number }[];
 }
 
 export const usePlayhead = create<Playhead>(() => ({
-  state: 'stopped', bar: 0, beat: 0, subdivision: 0, chordIndex: null, note: null, trail: [],
+  state: 'stopped', bar: 0, beat: 0, subdivision: 0, chordIndex: null, phase: null, note: null, trail: [],
 }));

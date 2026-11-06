@@ -4,7 +4,8 @@ import { engine } from '../app/engine';
 import { sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
 import { presetRepository, useApp, usePlayhead } from '../app/store';
 import { CAGED_FORMS } from '../fretboard';
-import { INTERVAL_NAMES, parseCustomPattern, type IntervalNumber } from '../exercises';
+import { INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
+import { RoutineEditor } from './RoutineEditor';
 import { AVOID_PROFILES, type AvoidProfile } from '../harmony';
 import {
   COMP_PATTERNS, PROGRESSION_TEMPLATES, addChord, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord,
@@ -78,9 +79,58 @@ export function ExercisePanel() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const validCustom = parseCustomPattern(s.customText) !== null;
+  const [editorOpen, setEditorOpen] = useState(false);
   return (
     <Panel title="Esercizio">
       <Toggle checked={s.exerciseOn} onChange={(exerciseOn) => update({ exerciseOn })}>Evidenzia le note a tempo</Toggle>
+      <Field label="Struttura">
+        <Segmented
+          label="Struttura dell'esercizio"
+          value={s.exerciseMode}
+          options={[
+            { value: 'single', label: 'Esercizio singolo' },
+            { value: 'routine', label: 'Percorso a fasi' },
+          ]}
+          onChange={(exerciseMode) => update({ exerciseMode })}
+        />
+      </Field>
+      <button type="button" className="btn btn-editor" data-testid="open-editor" onClick={() => setEditorOpen(true)}>Apri editor avanzato</button>
+      <RoutineEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
+      {s.exerciseMode === 'routine' ? <RoutineSummary /> : <SingleExercise validCustom={validCustom} />}
+    </Panel>
+  );
+}
+
+function RoutineSummary() {
+  const routine = useApp((state) => state.settings.routine);
+  const selectedPhase = useApp((state) => state.selectedPhase);
+  const setSelectedPhase = useApp((state) => state.setSelectedPhase);
+  const playing = usePlayhead((p) => p.phase);
+  const current = playing ?? selectedPhase;
+  return (
+    <div className="routine-summary" data-testid="routine-summary">
+      <p className="routine-name">{routine.name}</p>
+      <ol className="routine-phases">
+        {routine.phases.map((phase, i) => {
+          const scale = buildScale(phase.tonic, phase.scaleId);
+          return (
+            <li key={phase.id}>
+              <button type="button" className={`routine-phase ${i === current ? 'is-current' : ''}`} aria-pressed={i === current} onClick={() => setSelectedPhase(i)}>
+                <strong>{i + 1}</strong> {scale.tonicName} {scale.definition.name}, {positionLabel(phase.position, scale)}{phase.octave ? ' alta' : ''}, {describeDirection(phase.direction)}{phase.repeats > 1 ? ` ×${phase.repeats}` : ''}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+function SingleExercise({ validCustom }: { readonly validCustom: boolean }) {
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  return (
+    <>
       <Field label="Tipo">
         <Segmented
           label="Tipo di esercizio"
@@ -150,7 +200,7 @@ export function ExercisePanel() {
           />
         </Field>
       </div>
-    </Panel>
+    </>
   );
 }
 

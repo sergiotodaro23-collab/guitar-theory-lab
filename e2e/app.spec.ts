@@ -304,3 +304,75 @@ test('the single-file build plays from disk with no server', async ({ page }) =>
   expect(family).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test('nameplate shows the real version and a 24-fret neck', async ({ page }) => {
+  await open(page);
+  await expect(page.getByTestId('nameplate')).toContainText('GUITAR THEORY LAB');
+  await expect(page.getByTestId('nameplate')).toContainText(/v\d+\.\d+\.\d+ — by Sergio Todaro/);
+  await expect(page.getByTestId('license-notice')).toContainText('GNU GPL 3.0');
+  await page.getByRole('button', { name: 'Tutta la tastiera' }).click();
+  // Every string at fret 24 is its open note two octaves up: E A D G B E, all in C major.
+  await expect(page.locator('.marker[data-fret="24"]')).toHaveCount(6);
+});
+
+test('advanced editor: build a two-phase routine, cancel with Escape, apply, and play it', async ({ page }) => {
+  const errors = await open(page);
+  await page.getByTestId('open-editor').click();
+  const editor = page.getByTestId('routine-editor');
+  await expect(editor).toBeVisible();
+  // The dialog covers most of the screen.
+  const box = await editor.boundingBox();
+  expect((box?.width ?? 0) / (page.viewportSize()?.width ?? 1)).toBeGreaterThan(0.8);
+
+  await editor.getByLabel('Parti da un modello').selectOption({ label: 'Do maggiore: forma C su, forma G giù' });
+  await expect(editor.getByTestId('phase-block')).toHaveCount(2);
+  await expect(editor.getByTestId('preview-notes')).toHaveText(/^[A-G]( [A-G]){15,}$/);
+
+  // Add, reorder and remove a phase.
+  await editor.getByTestId('add-phase').click();
+  await expect(editor.getByTestId('phase-block')).toHaveCount(3);
+  await editor.getByRole('button', { name: 'Sposta la fase 3 in alto' }).click();
+  await editor.getByRole('button', { name: 'Elimina la fase 2' }).click();
+  await expect(editor.getByTestId('phase-block')).toHaveCount(2);
+
+  // An impossible choice is reported with a working alternative.
+  await editor.getByLabel('Scala della fase 1').selectOption({ label: 'Pentatonica minore' });
+  await editor.getByTestId('phase-block').first().getByRole('button', { name: '3NPS' }).click();
+  await expect(editor.getByRole('alert')).toContainText('3NPS');
+  await editor.getByRole('button', { name: 'Usa la forma CAGED E' }).click();
+  await expect(editor.getByRole('alert')).toHaveCount(0);
+
+  // Escape discards the draft.
+  await page.keyboard.press('Escape');
+  await expect(editor).toBeHidden();
+  await expect(page.getByTestId('routine-summary')).toHaveCount(0);
+
+  await page.getByTestId('open-editor').click();
+  await editor.getByLabel('Parti da un modello').selectOption({ label: 'Do maggiore: forma C su, forma G giù' });
+  await editor.getByTestId('routine-apply').click();
+  await expect(editor).toBeHidden();
+  await expect(page.getByTestId('routine-summary')).toContainText('forma C');
+  await expect(page.getByTestId('routine-summary')).toContainText('forma G');
+  await expect(page.getByTestId('open-editor')).toBeFocused();
+
+  // Phase 1 shows the C form (frets 12–15); playing walks it, then moves to the G form (5–8).
+  const frets = async () => page.locator('.marker').evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-fret'))));
+  expect(Math.min(...await frets())).toBeGreaterThanOrEqual(11);
+  await page.getByTestId('bpm').fill('240');
+  await page.getByTestId('play').click();
+  await expect(page.locator('.active-note')).toBeVisible();
+  await expect.poll(async () => Math.max(...await frets()), { timeout: 15_000 }).toBeLessThanOrEqual(9);
+  await page.getByTestId('stop').click();
+  expect(errors).toEqual([]);
+});
+
+test('advanced editor fits a tablet and a phone without page overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 820, height: 1000 });
+  await open(page);
+  await page.getByTestId('open-editor').click();
+  const editor = page.getByTestId('routine-editor');
+  await expect(editor.getByTestId('phase-block')).toHaveCount(2);
+  const overflow = await editor.evaluate((el) => el.scrollWidth - el.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+  await expect(editor.getByTestId('routine-apply')).toBeInViewport();
+});

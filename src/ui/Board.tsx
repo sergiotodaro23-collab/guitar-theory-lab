@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { engine } from '../app/engine';
-import { currentPositionNotes, currentScale } from '../app/settings';
+import { boardContext } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { AVOID_PROFILES, classifyTone, functionsAcross } from '../harmony';
 import { parsedChords } from '../jam';
-import { buildScale, chromaticName, mod, tryParseChord, type Chord } from '../theory';
+import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
 import { Fretboard } from '../viz/Fretboard';
 import { buildMarkerLayer, type Marker } from '../viz/markers';
 
@@ -59,14 +59,18 @@ export function Board() {
   const trail = usePlayhead((p) => p.trail);
   const { chords, chord, nextChord, chordIndex } = useHarmonyContext();
 
-  const scale = useMemo(() => currentScale(settings), [settings]);
+  const playheadPhase = usePlayhead((p) => p.phase);
+  const selectedPhase = useApp((s) => s.selectedPhase);
+  const phaseIndex = playheadPhase ?? selectedPhase;
+  const context = useMemo(() => boardContext(settings, phaseIndex), [settings, phaseIndex]);
+  const { scale } = context;
   const secondScale = useMemo(
     () => (settings.secondScaleOn ? buildScale(settings.secondTonic, settings.secondScaleId) : null),
     [settings.secondScaleOn, settings.secondTonic, settings.secondScaleId],
   );
 
   const layer = useMemo(() => buildMarkerLayer({
-    notes: currentPositionNotes(settings),
+    notes: context.notes,
     scale,
     chord,
     nextChord,
@@ -77,8 +81,8 @@ export function Board() {
     labelMode: settings.labelMode,
     pinnedPc,
     secondScale,
-    wholeNeck: settings.positionType === 'neck',
-  }), [settings, scale, chord, nextChord, chords, chordIndex, pinnedPc, secondScale]);
+    wholeNeck: context.wholeNeck,
+  }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, secondScale]);
 
   const onPick = useCallback((marker: Marker) => {
     setPinned(useApp.getState().pinnedPc === marker.pc ? null : marker.pc);
@@ -106,17 +110,16 @@ export function Board() {
       />
       <div className="board-foot">
         {showAids ? <Legend withChord={chord !== null} /> : <p className="aids-off">Aiuti nascosti: suona a orecchio, l’accordo resta in alto.</p>}
-        <NoteInspector chords={chords} chordIndex={chordIndex} />
+        <NoteInspector chords={chords} chordIndex={chordIndex} scale={scale} />
       </div>
     </section>
   );
 }
 
-function NoteInspector({ chords, chordIndex }: { readonly chords: readonly Chord[]; readonly chordIndex: number }) {
+function NoteInspector({ chords, chordIndex, scale }: { readonly chords: readonly Chord[]; readonly chordIndex: number; readonly scale: Scale }) {
   const settings = useApp((s) => s.settings);
   const pinnedPc = useApp((s) => s.pinnedPc);
   const setPinned = useApp((s) => s.setPinned);
-  const scale = currentScale(settings);
   if (pinnedPc === null) {
     return <p className="inspector-empty">Tocca una nota per ascoltarla e vedere cosa diventa su ogni accordo.</p>;
   }

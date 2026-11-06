@@ -29,7 +29,7 @@ export const SCALES: Readonly<Record<ScaleId, ScaleDefinition>> = {
   aeolian: def('aeolian', 'Minore naturale (eolia)', '1 2 b3 4 5 b6 b7', -9),
   locrian: def('locrian', 'Locria', '1 b2 b3 4 b5 b6 b7', -11),
   harmonicMinor: def('harmonicMinor', 'Minore armonica', '1 2 b3 4 5 b6 7', -9),
-  melodicMinor: def('melodicMinor', 'Minore melodica', '1 2 b3 4 5 6 7', -9),
+  melodicMinor: def('melodicMinor', 'Minore melodica (jazz)', '1 2 b3 4 5 6 7', -9),
   majorPentatonic: def('majorPentatonic', 'Pentatonica maggiore', '1 2 3 5 6', 0),
   minorPentatonic: def('minorPentatonic', 'Pentatonica minore', '1 b3 4 5 b7', -9),
   minorBlues: def('minorBlues', 'Blues minore', '1 b3 4 b5 5 b7', -9),

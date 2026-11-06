@@ -15,7 +15,7 @@ Apri l'indirizzo mostrato dal terminale. In alternativa, `npm run build:single` 
 
 ## Le tre modalità
 
-- **Fretboard Lab**: scale e modi, posizioni CAGED e 3NPS, intervalli dalla seconda all'ottava, sequenze personalizzate, accordo sovrapposto.
+- **Fretboard Lab**: tastiera a 24 tasti, scale e modi, posizioni CAGED e 3NPS, intervalli dalla seconda all'ottava, sequenze personalizzate, accordo sovrapposto. Con l'**editor avanzato** costruisci percorsi a fasi: per esempio Do maggiore in forma C a salire e in forma G a scendere.
 - **Harmony Lab**: Harmonic Context Switch. La stessa posizione resta ferma mentre cambia l'armonia e ogni nota mostra la sua funzione sull'accordo corrente.
 - **Jam Studio**: progressioni modificabili, accompagnamento sintetizzato, loop, seconda scala, aiuti visivi nascondibili.
 
@@ -28,4 +28,8 @@ npm run check      # lint, type-check, test unitari, build
 npm run test:e2e   # test nel browser reale con misura della sincronizzazione
 ```
 
-Vedi `docs/ARCHITECTURE.md`, `docs/GITHUB_AND_RELEASES.md` e `PROJECT_STATE.md`.
+Vedi `PROJECT_STATE.md`, `docs/ROADMAP.md`, `docs/MASTER_SPEC.md` e `docs/ARCHITECTURE.md`.
+
+## Licenza
+
+Copyright © 2026 Sergio Todaro. Guitar Theory Lab è software libero: puoi ridistribuirlo e modificarlo secondo i termini della GNU General Public License, versione 3 o (a tua scelta) successiva. È distribuito senza alcuna garanzia. Il testo completo è in `LICENSE`; per contribuire vedi `CONTRIBUTING.md`.

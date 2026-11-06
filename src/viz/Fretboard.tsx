@@ -11,10 +11,12 @@ const BOTTOM = HEIGHT - 38;
 const STRING_GAP = (BOTTOM - TOP) / 5;
 const RADIUS = 13;
 
-/** Gentler than a real scale length, so the high frets stay readable. */
-function fretX(fret: number): number {
-  const curve = (f: number) => 1 - 2 ** (-f / 26);
-  return NUT_X + (RIGHT - NUT_X) * (curve(fret) / curve(DEFAULT_FRETS));
+/**
+ * Uniform cells, not the real scale length: this is a study instrument, so
+ * fret 24 must be as readable and clickable as fret 1.
+ */
+export function fretX(fret: number): number {
+  return NUT_X + ((RIGHT - NUT_X) * fret) / DEFAULT_FRETS;
 }
 
 const noteX = (fret: number): number => (fret === 0 ? NUT_X - 26 : (fretX(fret - 1) + fretX(fret)) / 2);
@@ -22,6 +24,7 @@ const noteX = (fret: number): number => (fret === 0 ? NUT_X - 26 : (fretX(fret -
 const stringY = (string: number): number => BOTTOM - string * STRING_GAP;
 
 const INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
+const DOUBLE_INLAYS = [12, 24];
 
 const FretGrid = memo(function FretGrid() {
   return (
@@ -30,7 +33,7 @@ const FretGrid = memo(function FretGrid() {
       {INLAYS.map((fret) => (
         <circle key={fret} className="inlay" cx={noteX(fret)} cy={(TOP + BOTTOM) / 2} r={5} />
       ))}
-      {[12].map((fret) => (
+      {DOUBLE_INLAYS.map((fret) => (
         <g key={fret}>
           <circle className="inlay" cx={noteX(fret)} cy={TOP + STRING_GAP * 1.5} r={5} />
           <circle className="inlay" cx={noteX(fret)} cy={BOTTOM - STRING_GAP * 1.5} r={5} />
@@ -43,7 +46,7 @@ const FretGrid = memo(function FretGrid() {
       {[0, 1, 2, 3, 4, 5].map((string) => (
         <line key={string} className="string" style={{ strokeWidth: 2.4 - string * 0.32 }} x1={NUT_X - 40} x2={RIGHT} y1={stringY(string)} y2={stringY(string)} />
       ))}
-      {[...INLAYS, 12].map((fret) => (
+      {[...INLAYS, ...DOUBLE_INLAYS].map((fret) => (
         <text key={fret} className="fret-number" x={noteX(fret)} y={HEIGHT - 8}>{fret}</text>
       ))}
     </g>

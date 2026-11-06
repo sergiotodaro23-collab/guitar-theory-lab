@@ -1,6 +1,6 @@
 /** Everything the user can configure and save. Pure and framework-free. */
 import { CAGED_FORMS, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
-import { generateSequence, parseCustomPattern, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion } from '../exercises';
+import { ROUTINE_TEMPLATES, generateSequence, parseCustomPattern, resolvePhase, sanitizeRoutine, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine } from '../exercises';
 import type { AvoidProfile } from '../harmony';
 import { COMP_PATTERNS, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, type CompPattern, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Scale, type ScaleId } from '../theory';
@@ -11,6 +11,8 @@ export type PositionType = 'caged' | '3nps' | 'neck';
 export type LabelMode = 'note' | 'degree' | 'function' | 'finger' | 'none';
 export type HarmonyFocus = 'all' | 'guide' | 'common' | 'resolution' | 'targeting';
 export type ChangeMode = 'auto' | 'manual';
+/** One exercise on the current shape, or a routine of phases built in the editor. */
+export type ExerciseMode = 'single' | 'routine';
 
 export const METERS: Readonly<Record<string, Meter>> = {
   '4/4': { beatsPerBar: 4, beatUnit: 4 },
@@ -32,6 +34,8 @@ export interface StudySettings {
   readonly labelMode: LabelMode;
   readonly overlayChord: string;
   readonly exerciseOn: boolean;
+  readonly exerciseMode: ExerciseMode;
+  readonly routine: Routine;
   readonly exerciseKind: ExerciseKind;
   readonly interval: IntervalNumber;
   readonly direction: Direction;
@@ -66,6 +70,8 @@ export interface Settings extends StudySettings, HarmonySettings {
   readonly mode: AppMode;
 }
 
+const firstRoutine = ROUTINE_TEMPLATES[0];
+if (!firstRoutine) throw new Error('Nessun percorso predefinito');
 const firstTemplate = PROGRESSION_TEMPLATES[0];
 if (!firstTemplate) throw new Error('Nessuna progressione predefinita');
 
@@ -79,6 +85,8 @@ export const DEFAULT_SETTINGS: Settings = {
   labelMode: 'degree',
   overlayChord: '',
   exerciseOn: true,
+  exerciseMode: 'single',
+  routine: firstRoutine,
   exerciseKind: 'interval',
   interval: 3,
   direction: 'updown',
@@ -133,6 +141,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     labelMode: oneOf(r.labelMode, ['note', 'degree', 'function', 'finger', 'none'] as const, d.labelMode),
     overlayChord: typeof r.overlayChord === 'string' ? r.overlayChord : d.overlayChord,
     exerciseOn: typeof r.exerciseOn === 'boolean' ? r.exerciseOn : d.exerciseOn,
+    exerciseMode: oneOf(r.exerciseMode, ['single', 'routine'] as const, d.exerciseMode),
+    routine: sanitizeRoutine(r.routine, d.routine),
     exerciseKind: oneOf(r.exerciseKind, ['scale', 'interval', 'custom'] as const, d.exerciseKind),
     interval: oneOf(r.interval, [2, 3, 4, 5, 6, 7, 8] as const, d.interval),
     direction: oneOf(r.direction, ['up', 'down', 'updown'] as const, d.direction),
@@ -192,6 +202,18 @@ export function currentExerciseSequence(s: StudySettings) {
   const scale = currentScale(s);
   const notes = s.positionType === 'neck' ? cagedPosition(scale, s.cagedForm).notes : currentPositionNotes(s);
   return generateSequence(notes, scale, exerciseSpecOf(s));
+}
+
+/** What the board shows: in a routine, the shape and scale of the given phase. */
+export function boardContext(s: StudySettings, phaseIndex: number | null): { scale: Scale; notes: readonly FretNote[]; wholeNeck: boolean } {
+  if (s.exerciseOn && s.exerciseMode === 'routine') {
+    const phase = s.routine.phases[Math.min(phaseIndex ?? 0, s.routine.phases.length - 1)];
+    if (phase) {
+      const resolved = resolvePhase(phase);
+      return { scale: resolved.scale, notes: resolved.notes, wholeNeck: false };
+    }
+  }
+  return { scale: currentScale(s), notes: currentPositionNotes(s), wholeNeck: s.positionType === 'neck' };
 }
 
 export const meterOf = (s: Pick<StudySettings, 'meterId'>): Meter => METERS[s.meterId] ?? { beatsPerBar: 4, beatUnit: 4 };

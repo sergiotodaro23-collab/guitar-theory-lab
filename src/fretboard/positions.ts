@@ -5,7 +5,8 @@
 import { diatonicIndex, mod, type Scale, type SpelledNote } from '../theory';
 
 export const STANDARD_TUNING: readonly number[] = [40, 45, 50, 55, 59, 64];
-export const DEFAULT_FRETS = 22;
+/** Frets 0–24 inclusive: every position of a 24-fret neck is reachable. */
+export const DEFAULT_FRETS = 24;
 
 export interface FretPosition {
   readonly string: number;
@@ -129,6 +130,30 @@ function fillGaps(
     if (best) result.push(best);
   }
   return [...result].sort(byPitchThenString);
+}
+
+/**
+ * Every scale tone inside a fret window, one per pitch. For exercises bound to
+ * a selected stretch of the neck rather than to a named shape.
+ */
+export function rangePosition(scale: Scale, lowFret: number, highFret: number, tuning = STANDARD_TUNING): ScalePosition {
+  const low = Math.max(0, Math.min(lowFret, highFret));
+  const high = Math.min(DEFAULT_FRETS, Math.max(lowFret, highFret));
+  const pcs = new Set(scale.tones.map((tone) => tone.pc));
+  const inWindow: FretNote[] = [];
+  tuning.forEach((openMidi, string) => {
+    for (let fret = low; fret <= high; fret += 1) {
+      const midi = openMidi + fret;
+      if (pcs.has(mod(midi, 12))) inWindow.push({ string, fret, midi, pc: mod(midi, 12) });
+    }
+  });
+  return { label: `Tasti ${low}–${high}`, notes: uniquePitches(inWindow) };
+}
+
+/** The same shape twelve frets higher, or null when it would leave the neck. */
+export function shiftOctave(notes: readonly FretNote[], frets = DEFAULT_FRETS): readonly FretNote[] | null {
+  const shifted = notes.map((note) => ({ ...note, fret: note.fret + 12, midi: note.midi + 12 }));
+  return shifted.every((note) => note.fret <= frets) ? shifted : null;
 }
 
 /** Starting degree for each 3NPS shape equals its index in the scale. */
