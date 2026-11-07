@@ -6,7 +6,7 @@ Gerarchia: decisioni recenti del proprietario → questa specifica → codice e 
 
 ## 1. Prodotto
 
-Laboratorio gratuito e open source per lo studio della chitarra elettrica, nel browser, senza backend. Non è una DAW né un visualizzatore di scale. Nessun paywall; donazioni eventuali non sbloccano funzioni.
+Laboratorio gratuito e open source per lo studio della chitarra elettrica, nel browser, senza backend. **Desktop-first** (direttiva del 7 novembre 2026): computer o laptop, chitarra elettrica, scheda audio USB, cuffie o monitor, eventualmente controller MIDI. Tablet e telefono restano supportati senza condizionare il desktop. Non è una DAW né un visualizzatore di scale. Nessun paywall; donazioni eventuali non sbloccano funzioni.
 
 Quattro workspace: **Fretboard Lab**, **Harmony Lab**, **Arpeggios Lab**, **Jam Studio**. Lo stato musicale sopravvive al cambio di workspace.
 
@@ -25,6 +25,8 @@ Quattro workspace: **Fretboard Lab**, **Harmony Lab**, **Arpeggios Lab**, **Jam 
 - Fino a 5 scale: scala principale + `+ Aggiungi scala`, lista espandibile; per ognuna tonica, tipo, posizione, visibilità, colore, opacità, modifica, rimozione, riordino. Al massimo due visibili all'inizio, altre in overlay con regole di leggibilità.
 - Fino a 8 accordi: accordo principale + `+ Aggiungi accordo`; visibilità e selezione indipendenti; riusabili in progressioni, esercizi e Jam.
 - Niente toggle statici numerati (S1–S5, 1–8).
+- Sovrapposizioni leggibili anche quando le scale condividono note: forme e contorni distinti, non solo piccoli punti colorati, senza nascondere il nome della nota.
+- **Configurazione per singolo accordo della progressione**: ogni accordo porta le sue scale, arpeggi, layer, colori, forme, visibilità, posizioni e intervalli di tasti, target e guide tones, comportamento in riproduzione (es. ii–V–I: Dm7 solo arpeggio, G7 misolidio più un layer, Cmaj7 arpeggio e guide tones). La tastiera cambia con l'accordo attivo, in manuale e in automatico. Un solo modello dati per Harmony, Arpeggios e Jam, salvabile e riutilizzabile; per configurazione al massimo 5 scale e 8 layer, non tutti visibili per forza.
 
 ## 4. Exercise Engine
 
@@ -39,9 +41,10 @@ Pulsante `Apri editor avanzato` nel pannello Esercizio → workspace ampio sovra
 ## 6. Workspace
 
 - **Fretboard Lab**: esplorazione, scale e accordi, CAGED/3NPS, etichette, layer, esercizi, note live, preset. Tastiera con priorità visiva, pannelli comprimibili.
-- **Harmony Lab**: progressioni modificabili, gradi e funzioni, diatonici e non, dominanti secondarie e sostituzioni, chord/guide tones, tensioni e risoluzioni, voice leading, note comuni, target notes, Harmonic Context Switch manuale o automatico, ascolto, preset. Accordo attivo sempre riconoscibile.
-- **Arpeggios Lab**: arpeggi per accordo, direzioni, pattern personalizzati, rivolti, posizioni, collegamenti, passaggi di corda, guide tones, target notes, voice leading, arpeggi su progressioni, sincronizzazione, preset. Struttura teorica, pattern e diteggiatura separati.
+- **Harmony Lab**: interscambio modale e configurazione per accordo come parte centrale; progressioni modificabili, gradi e funzioni, diatonici e non, dominanti secondarie e sostituzioni, chord/guide tones, tensioni e risoluzioni, voice leading, note comuni, target notes, Harmonic Context Switch manuale o automatico, ascolto, preset. Accordo attivo sempre riconoscibile.
+- **Arpeggios Lab** (livello dell'editor avanzato): triadi maggiori, minori, diminuite, aumentate; maj7, m7, 7, mMaj7, m7♭5, dim7; sus, add, seste, none, estensioni, alterati e slash supportati dal motore. Forme lungo il manico, CAGED dove pertinente, una, due o tre ottave solo se fisicamente realizzabili, cambi di posizione, salti di corda, sweep, salita e discesa con percorsi diversi, partenza da qualsiasi grado, collegamenti tra arpeggi, voice leading e target. Distinguere note teoriche, sequenza musicale, posizioni sulla tastiera e diteggiatura suggerita; editor a fasi con ripetizioni, BPM, suddivisioni, direzioni, anteprima, percorsi concatenati sulla progressione. Inoltre: arpeggi per accordo, direzioni, pattern personalizzati, rivolti, posizioni, collegamenti, passaggi di corda, guide tones, target notes, voice leading, arpeggi su progressioni, sincronizzazione, preset. Struttura teorica, pattern e diteggiatura separati.
 - **Jam Studio**: progressioni, tonalità, trasposizione, BPM, metrica, swing, generi (rock, blues, jazz, funk, fusion, metal, latin, ambient), batteria, basso, strumenti armonici, tracce, mixer, mute/solo, fill, cambio pattern in riproduzione, loop, drone, preset, MIDI eventuale. Almeno quattro pattern per strumento/genere dove ha senso. Jam pronta senza arrangiare.
+- **Jam Studio, evoluzione per fasi**: A) groove, swing, accenti, velocity, bilanciamento, basso e comping più musicali, Fusion credibile senza copiare registrazioni protette, sincronia nei cambi; B) più kit e timbri (acustici ed elettronici, basso più realistico, comping per genere), campioni originali o con licenza compatibile e leggeri; C) arrangiamenti: intro, strofa, ritornello, bridge, outro, variazioni A–D, fill, transizioni, dinamiche, mute, solo, preset musicali; D) backing track audio locali dell'utente, mai caricate su server senza scelta esplicita: riproduzione sincronizzata, mappa di accordi e sezioni, loop, volume, stem se presenti, scale e arpeggi sincronizzati (time-stretch, separazione degli stem e analisi armonica automatica in seguito).
 - **Drum step sequencer** (solo in Jam Studio): 16 step, kick/snare/hi-hat e altri, accenti, velocity, swing, pattern A–D, fill, sync. Modalità Simple (preset, griglia essenziale) e Advanced (velocity dettagliata, ghost, probability, 32/64 step, piano roll). Solo campioni originali o con licenza compatibile.
 
 ## 7. Tempo e audio
@@ -51,6 +54,8 @@ Pulsante `Apri editor avanzato` nel pannello Esercizio → workspace ampio sovra
 - Loop: ripetizione di esercizi, progressioni e pattern; niente looper audio generico (futuro).
 - Catena: `Guitar Input → Direct Signal → Pitch Analysis → Optional Amp Processing → Monitoring → Output`. Gain di ingresso, monitoring, click, jam, master separati; DI per l'analisi. Permessi, dispositivi, errori. Mai monitoring automatico che possa creare feedback.
 - **Live Monitor**: avvio/stop, ingresso, livello, gain, pitch, frequenza, confidenza, marker rosso con fade sull'ampiezza, target, feedback dove affidabile, calibrazione. Un segnale monofonico dà il pitch, non corda e tasto: distinguere pitch, posizioni possibili, probabile, guidata dal contesto.
+- **Live Monitor avanzato**: tracciamento più stabile, meno falsi cambi, note brevi e rumore, persistenza e dissolvenza dei marker, posizione probabile presentata come stima con le altre posizioni riconoscibili. **Calibrazione** guidata ed empirica, con regolazione manuale: distinguere latenza di acquisizione, di analisi, di ascolto e la compensazione per il riscontro sugli esercizi; mai presentare come misurato ciò che il browser non espone.
+- **Polifonia**: solo come studio sperimentale (DSP o ML, prototipi isolati, misure di precisione, CPU, memoria, latenza). YIN è monofonico: nessuna promessa di riconoscimento degli accordi.
 - **Tuner** sulla stessa pipeline: nota, frequenza, cent, riferimento configurabile, stabilità, accordature configurate, segnale debole.
 - **Amp modeling**: studio di fattibilità (NAM WASM, AudioWorklet, IR, alternative, TONE3000 come catalogo eventuale). PoC isolata, misure, licenze, sicurezza token. Niente servizi a pagamento, credenziali nel codice o pulsanti finti. Bypass e monitoring pulito sempre.
 
@@ -66,7 +71,15 @@ Pulsante `Apri editor avanzato` nel pannello Esercizio → workspace ampio sovra
 - Pannelli Scale, Chords, Exercise comprimibili; estetica cartacea con controlli moderni e accessibili.
 - Progressive disclosure senza togliere funzioni.
 - **Tutor**: dentro un iPod Touch di prima generazione credibile, lievi segni d'uso, chiudibile, minimizzabile, riposizionabile, mai stabilmente sopra la tastiera. Personaggio originale in pixel art (riferimento di linguaggio: Otaclock), chitarrista con capelli lunghi; animazioni idle, saluto, spiegazione, suggerimento, feedback positivo, errore. Modalità Silent, Contextual, Tutor; regole locali deterministiche, nessun servizio AI a pagamento. Nessun asset Konami.
+- **Layout desktop**: barra del trasporto sempre visibile; tastiera principale sempre in vista durante lo studio; scale, accordi, esercizi e pannelli secondari scorrono per conto loro; i cambi di contenuto non spostano gli elementi principali; funziona anche con finestre desktop piccole. Gerarchia chiara tra elementi fissi e contenuti scorrevoli, non decine di pannelli fissi.
 - Responsive: 1440×900, 1280×800, tablet orizzontale, viewport piccoli; modalità Studio, Workbench, Focus. Stati hover/active/pressed/selected/muted/disabled/focus, tooltip, tastiera, contrasto, touch target, reduced motion, screen reader.
+
+### 8.1 Requisiti per il redesign definitivo (Claude Design, dopo le funzioni)
+
+- Trasporto: play e pausa con simboli standard, stop, reset distinto da stop, stato sempre riconoscibile.
+- Tempo: BPM su un display LED dedicato, senza controlli ridondanti; il display principale può mostrare informazioni di contesto.
+- Tastiera: sempre leggibile e visibile, marker grandi come nella Semplificata, layer riconoscibili per colore e forma, legenda stabile, scelta delle informazioni da mostrare.
+- Telefono e tutor in Studio: tutor contestuale, anteprima dell'accordo, della scala o dell'arpeggio successivo, mini-tastiera di 12–15 tasti, nascondibile, riducibile o ruotabile; l'anteprima è configurabile e non interferisce con la tastiera principale.
 
 ## 9. Qualità e open source
 
@@ -76,4 +89,4 @@ Pulsante `Apri editor avanzato` nel pannello Esercizio → workspace ampio sovra
 
 ## 10. Definition of Done
 
-Implementata; funziona nel flusso previsto; musicalmente corretta; nessun controllo decorativo; errori gestiti; test pertinenti verdi; nessuna regressione nota; documentata; accessibile nei limiti del componente; coerente con la UX prevista. Per l'audio: dispositivi e piattaforme realmente verificati.
+Implementata; funziona nel flusso previsto; musicalmente corretta; nessun controllo decorativo; errori gestiti; test pertinenti verdi; nessuna regressione nota; documentata; accessibile nei limiti del componente; coerente con la UX prevista. Per l'audio: dispositivi e piattaforme realmente verificati. Ogni voce distingue: implementato, testato con segnali sintetici, verificato con hardware reale, parziale, mancante.
