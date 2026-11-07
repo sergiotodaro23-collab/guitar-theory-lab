@@ -105,6 +105,11 @@ describe('chords against published spellings', () => {
     ['Am6', 'A C E F#'],
     ['Fmaj7#11', 'F A C E B'],
     ['AmMaj7', 'A C E G#'],
+    ['G7b5', 'G B Db F'],
+    ['Amadd9', 'A C E B'],
+    ['Cadd11', 'C E G F'],
+    ['D9sus4', 'D G A C E'],
+    ['G11', 'G B D F A C'],
   ])('%s', (symbol, expected) => {
     expect(parseChord(symbol).tones.map((t) => t.name).join(' ')).toBe(expected);
   });
@@ -115,6 +120,7 @@ describe('chords against published spellings', () => {
     expect(parseChord('Bø').symbol).toBe('Bm7b5');
     expect(parseChord('C°7').symbol).toBe('Cdim7');
     expect(parseChord('Am(maj7)').symbol).toBe('AmMaj7');
+    expect(parseChord('Am(add9)').symbol).toBe('Amadd9');
   });
   it('rejects unknown qualities without throwing in the safe parser', () => {
     expect(tryParseChord('Cblah')).toBeNull();

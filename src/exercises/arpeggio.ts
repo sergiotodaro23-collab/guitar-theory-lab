@@ -10,8 +10,11 @@ import type { Chord } from '../theory';
 import { ticksPerBeat, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
 
 export type ArpDirection = 'up' | 'down' | 'updown' | 'downup';
-/** On a progression: each chord starts its pattern again, or picks up from the nearest note. */
-export type ArpLink = 'restart' | 'connect';
+/**
+ * On a progression: each chord starts its pattern again, picks up from the
+ * nearest note, or lands on a chosen chord tone on the downbeat ("target").
+ */
+export type ArpLink = 'restart' | 'connect' | 'target';
 
 /** Hand position: the window covers this many frets above its lowest one. */
 export const ARP_SPAN = 4;
@@ -80,6 +83,12 @@ export interface ProgressionArpeggioOptions {
   readonly spec: ArpeggioSpec;
   readonly notesPerBeat: Subdivision;
   readonly link: ArpLink;
+  /** The chord's notes to move through; defaults to the hand position at `low`. */
+  readonly notesOf?: (chord: Chord) => readonly FretNote[];
+  /** A fixed route for each chord (octaves, sweep, skip): played from the top of the chord, as "restart". */
+  readonly sequenceOf?: (chord: Chord) => readonly FretNote[];
+  /** With "target": the tone each chord lands on (0 root, 1 third, 2 fifth, 3 seventh). */
+  readonly target?: number;
 }
 
 /** The note of `notes` nearest to a pitch; on a tie, the one in the direction of travel. */
@@ -97,6 +106,15 @@ function nearest(notes: readonly FretNote[], midi: number, direction: number): n
   return best;
 }
 
+/** The nearest note that is the chord's `tone` (by index): the target of a chord change. */
+function nearestTone(chord: Chord, notes: readonly FretNote[], midi: number, tone: number, direction: number): number {
+  const pc = chord.tones[Math.min(Math.max(0, tone), chord.tones.length - 1)]?.pc;
+  const candidates = notes.map((n, i) => ({ n, i })).filter(({ n }) => n.pc === pc);
+  if (candidates.length === 0) return nearest(notes, midi, direction);
+  const best = nearest(candidates.map((c) => c.n), midi, direction);
+  return candidates[best]?.i ?? 0;
+}
+
 /**
  * Arpeggios over a progression, on the shared grid. With "connect" the line
  * never jumps at a chord change: it moves to the new chord's nearest tone,
@@ -112,9 +130,15 @@ export function progressionArpeggioTrack(o: ProgressionArpeggioOptions): Omit<Tr
   let direction = o.spec.direction === 'down' || o.spec.direction === 'downup' ? -1 : 1;
 
   for (const span of o.spans) {
-    const notes = arpeggioNotes(span.chord, o.low);
-    if (notes.length === 0) continue;
+    const notes = o.notesOf ? o.notesOf(span.chord) : arpeggioNotes(span.chord, o.low);
     const count = Math.floor(span.lengthTicks / step);
+    if (o.sequenceOf) {
+      const sequence = o.sequenceOf(span.chord);
+      for (let i = 0; i < count && sequence.length > 0; i += 1) push(span.tick + i * step, sequence[i % sequence.length] as FretNote);
+      previous = sequence[(count - 1) % Math.max(1, sequence.length)] ?? previous;
+      continue;
+    }
+    if (notes.length === 0) continue;
 
     if (o.link === 'restart') {
       const sequence = arpeggioSequence(span.chord, notes, o.spec);
@@ -125,7 +149,9 @@ export function progressionArpeggioTrack(o: ProgressionArpeggioOptions): Omit<Tr
 
     let index = previous === null
       ? (direction > 0 ? startIndex(span.chord, notes, o.spec.start) : notes.length - 1)
-      : nearest(notes, previous.midi, direction);
+      : o.link === 'target'
+        ? nearestTone(span.chord, notes, previous.midi, o.target ?? 0, direction)
+        : nearest(notes, previous.midi, direction);
     for (let i = 0; i < count; i += 1) {
       if (i > 0) {
         if (index + direction < 0 || index + direction >= notes.length) direction = -direction;

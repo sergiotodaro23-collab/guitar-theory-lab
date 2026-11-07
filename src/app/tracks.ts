@@ -1,10 +1,10 @@
 /** Translate settings into the timeline tracks each mode needs. Pure. */
-import { arpeggioNotes, arpeggioSequence, exerciseTrack, progressionArpeggioTrack, routineTrack } from '../exercises';
+import { exerciseTrack, progressionArpeggioTrack, routineTrack } from '../exercises';
 import { bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
-import { tryParseChord } from '../theory';
+import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
 import { ticksPerBeat, type Track } from '../timeline';
-import { arpeggioSpecOf, currentExerciseSequence, meterOf, type Settings } from './settings';
+import { arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, meterOf, type Settings } from './settings';
 
 export type TrackSpec = Omit<Track, 'originTick'>;
 
@@ -51,14 +51,17 @@ function arpeggioTracks(s: Settings): ModeTracks {
   const meter = meterOf(s);
   const spec = arpeggioSpecOf(s);
   if (s.arpSource === 'chord') {
-    const chord = tryParseChord(s.arpSymbol);
-    const sequence = chord ? arpeggioSequence(chord, arpeggioNotes(chord, s.arpLow), spec) : [];
+    const sequence = arpeggioPlanOf(tryParseChord(s.arpSymbol), s)?.sequence ?? [];
     return { exercise: sequence.length ? exerciseTrack(sequence, meter, s.arpNotesPerBeat) : null, chords: null, comp: null, drums: null, bass: null, endTick: null };
   }
   if (s.progression.chords.length === 0) return { exercise: null, chords: null, comp: null, drums: null, bass: null, endTick: null };
   const lengthTicks = progressionLength(s.progression, meter);
+  const route = s.arpShape === 'octaves' || s.arpShape === 'sweep' || s.arpShape === 'skip';
   const exercise = progressionArpeggioTrack({
     spans: chordSpans(s.progression, meter), lengthTicks, loop: true, meter, low: s.arpLow, spec, notesPerBeat: s.arpNotesPerBeat, link: s.arpLink,
+    target: s.arpTarget,
+    notesOf: (chord) => arpeggioPlanOf(chord, s)?.notes ?? [],
+    ...(route ? { sequenceOf: (chord: Chord) => arpeggioPlanOf(chord, s)?.sequence ?? [] } : {}),
   });
   return {
     exercise: exercise.events.length ? exercise : null,

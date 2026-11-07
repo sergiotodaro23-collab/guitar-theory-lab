@@ -4,7 +4,7 @@ import { engine } from '../app/engine';
 import { genreSettings, sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
 import { presetRepository, useApp, usePlayhead } from '../app/store';
 import { CAGED_FORMS } from '../fretboard';
-import { ARP_SPAN, INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
+import { INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
 import { AVOID_PROFILES, guideTones, type AvoidProfile } from '../harmony';
 import {
   COMP_PATTERNS, GENRES, PROGRESSION_TEMPLATES, addChord, genreOf, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord, withChord,
@@ -16,6 +16,7 @@ import { voicingKey } from '../fretboard';
 import { ChordDiagram } from '../viz/ChordDiagram';
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
+import { ArpShapeControls } from './ArpShapePanel';
 
 export const tonicOptions = TONICS.map((t) => ({ value: t, label: t }));
 export const scaleOptions = SCALE_IDS.map((id) => ({ value: id, label: SCALES[id].name }));
@@ -494,10 +495,21 @@ export function ArpeggioPanel() {
             <Segmented
               label="Collegamento tra arpeggi"
               value={s.arpLink}
-              options={[{ value: 'connect', label: 'Collega (nota più vicina)' }, { value: 'restart', label: 'Riparti dal grado scelto' }]}
+              options={[{ value: 'connect', label: 'Collega (nota più vicina)' }, { value: 'target', label: 'Arriva su un grado' }, { value: 'restart', label: 'Riparti dal grado scelto' }]}
               onChange={(arpLink) => update({ arpLink })}
             />
           </Field>
+          {s.arpLink === 'target' ? (
+            <Field label="Sul battere del cambio" hint="Ogni accordo entra sul grado scelto, il più vicino all’ultima nota: il target sul primo movimento.">
+              <Select<number>
+                label="Grado di arrivo al cambio di accordo"
+                testId="arp-target"
+                value={s.arpTarget}
+                options={ARP_START_NAMES.slice(0, 4).map((label, i) => ({ value: i, label }))}
+                onChange={(arpTarget) => update({ arpTarget })}
+              />
+            </Field>
+          ) : null}
           {s.arpLink === 'connect' ? <p className="field-hint">La linea non salta: ogni accordo parte dalla sua nota più vicina all’ultima suonata, poi prosegue e cambia verso ai bordi della posizione.</p> : null}
           <Toggle checked={s.compOn} onChange={(compOn) => update({ compOn })}>Suona gli accordi</Toggle>
         </>
@@ -521,9 +533,7 @@ export function ArpeggioPanel() {
           ) : null}
         </>
       )}
-      <Field label={`Posizione: tasti ${s.arpLow}–${s.arpLow + ARP_SPAN}`}>
-        <input className="range" type="range" min={0} max={24 - ARP_SPAN} step={1} value={s.arpLow} data-testid="arp-low" aria-label="Tasto più basso della posizione" onChange={(e) => update({ arpLow: Number(e.target.value) })} />
-      </Field>
+      <ArpShapeControls />
       <div className="row">
         <Field label="Parti da">
           <Select<number>

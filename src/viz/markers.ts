@@ -2,7 +2,7 @@
  * Visualization model: what to draw on the fretboard. Pure, so the rules that
  * decide what a guitarist sees are tested without a browser.
  */
-import { allFretNotes, fingerPosition, DEFAULT_FRETS, type FretNote, type FretPosition } from '../fretboard';
+import { allFretNotes, fingerPosition, DEFAULT_FRETS, type FingeredNote, type FretNote, type FretPosition } from '../fretboard';
 import { classifyTone, commonTones, guideTones, resolveTone, targetingPath, type AvoidProfile, type ToneFunction, type ToneRole } from '../harmony';
 import { chromaticName, mod, type Chord, type Scale } from '../theory';
 
@@ -54,6 +54,10 @@ export interface MarkerInput {
   /** A chord shape to outline on the neck; its notes are drawn even outside the position. */
   readonly voicing?: readonly FretPosition[] | null;
   readonly wholeNeck: boolean;
+  /** Draw only `notes` (plus overlays): an arpeggio route, not every chord tone in its frets. */
+  readonly exact?: boolean;
+  /** Fingers decided by the engine for these notes (a route that shifts position). */
+  readonly fingers?: readonly FingeredNote[] | null;
 }
 
 export interface MarkerLayer {
@@ -96,7 +100,7 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
   // Chord tones outside the scale and notes of overlaid scales join what is drawn.
   const chordPcs = new Set(chord?.tones.map((t) => t.pc) ?? []);
   const drawn = new Map<string, FretNote>(notes.map((n) => [key(n), n]));
-  for (const note of inRegion) {
+  for (const note of input.exact ? [] : inRegion) {
     if (chordPcs.has(note.pc) && !drawn.has(key(note))) drawn.set(key(note), note);
   }
   overlays.forEach((overlay, i) => {
@@ -114,7 +118,7 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
       if (!o.wholeNeck && (note.fret < low || note.fret > high)) return [];
       return [o.index];
     });
-  const fingers = new Map(fingerPosition(notes).map((n) => [key(n), n.finger]));
+  const fingers = new Map((input.fingers ?? fingerPosition(notes)).map((n) => [key(n), n.finger]));
 
   const guidePcs = new Set(chord ? guideTones(chord).map((t) => t.pc) : []);
   const common = chord && nextChord ? commonTones(chord, nextChord) : [];

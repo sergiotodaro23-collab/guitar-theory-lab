@@ -95,4 +95,22 @@ describe('arpeggios over a progression', () => {
     // Third of each chord: F, B, E.
     expect([0, 8, 16].map((i) => pcName((track.events[i]?.payload.midi ?? 0) % 12))).toEqual(['F', 'B', 'E']);
   });
+
+  it('target: every chord lands on its third on the downbeat, the nearest one', () => {
+    const track = progressionArpeggioTrack({ ...base, link: 'target', target: 1 });
+    // Third of Dm7 at the start (first chord starts from the chosen tone), then B on G7, E on Cmaj7.
+    expect([8, 16].map((i) => pcName((track.events[i]?.payload.midi ?? 0) % 12))).toEqual(['B', 'E']);
+    for (const change of [8, 16]) {
+      const before = track.events[change - 1]?.payload.midi ?? 0;
+      const after = track.events[change]?.payload.midi ?? 99;
+      expect(Math.abs(after - before)).toBeLessThanOrEqual(7);
+    }
+  });
+
+  it('a fixed route per chord plays that route from the downbeat', () => {
+    const route = (c: (typeof chords)[number]) => arpeggioNotes(c, 5).slice(0, 3);
+    const track = progressionArpeggioTrack({ ...base, link: 'connect', sequenceOf: route });
+    expect(track.events[8]?.payload.midi).toBe(route(chords[1] as (typeof chords)[number])[0]?.midi);
+  });
 });
+

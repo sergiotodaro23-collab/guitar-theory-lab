@@ -49,7 +49,7 @@ class Engine {
             tick: event.tick,
             time,
             ...(payload.type === 'chord' ? { chord: payload.chordIndex } : {}),
-            ...(payload.type === 'note' ? { note: payload.index } : {}),
+            ...(payload.type === 'note' ? { note: payload.index, midi: payload.midi } : {}),
             ...(payload.type === 'drum' ? { voice: payload.voice } : {}),
             ...(payload.type === 'bass' ? { midi: payload.midi } : {}),
           });

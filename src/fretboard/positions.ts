@@ -45,6 +45,19 @@ const CAGED_WINDOWS: Readonly<Record<CagedForm, { rootString: number; low: numbe
   D: { rootString: 2, low: -1, high: 3 },
 };
 
+/**
+ * The fret window of a CAGED form built on a given root (a chord's, not a
+ * parent key's): the same anchors as the scale shapes, moved up an octave
+ * when the window would fall below the first fret.
+ */
+export function cagedWindow(rootPc: number, form: CagedForm, tuning = STANDARD_TUNING): { readonly low: number; readonly high: number; readonly rootString: number; readonly rootFret: number } {
+  const window = CAGED_WINDOWS[form];
+  const open = tuning[window.rootString] as number;
+  let rootFret = mod(rootPc - mod(open, 12), 12);
+  while (rootFret + window.low < 1) rootFret += 12;
+  return { low: rootFret + window.low, high: rootFret + window.high, rootString: window.rootString, rootFret };
+}
+
 export interface ScalePosition {
   readonly label: string;
   readonly notes: readonly FretNote[];

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { engine } from '../app/engine';
-import { arpeggioBoardNotes, boardContext } from '../app/settings';
+import { arpeggioPlanOf, boardContext } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { AVOID_PROFILES, classifyTone, functionsAcross } from '../harmony';
 import { parsedChords } from '../jam';
@@ -112,7 +112,10 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
   }, [settings.mode, settings.arpSource, settings.chordViewsOn, settings.chordViews, settings.progression, chordIndex]);
   const context = useMemo(() => {
     // Arpeggios Lab draws the chord tones of the hand position, over the current scale's spelling.
-    if (settings.mode === 'arpeggio') return { ...boardContext(settings, null), notes: arpeggioBoardNotes(chord, settings), wholeNeck: false };
+    if (settings.mode === 'arpeggio') {
+      const plan = arpeggioPlanOf(chord, settings);
+      return { ...boardContext(settings, null), notes: plan?.notes ?? [], wholeNeck: false, exact: plan?.route ?? false, fingers: plan?.fingers ?? null };
+    }
     if (view && chord) return { scale: viewScale(view), notes: viewNotes(view, chord), wholeNeck: view.positionType === 'neck' };
     return boardContext(settings, phaseIndex);
   }, [settings, phaseIndex, chord, view]);
@@ -149,6 +152,8 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
     overlays,
     voicing,
     wholeNeck: context.wholeNeck,
+    exact: 'exact' in context ? context.exact : false,
+    fingers: 'fingers' in context ? context.fingers : null,
   }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, overlays, voicing, view]);
 
   const onPick = useCallback((marker: Marker) => {

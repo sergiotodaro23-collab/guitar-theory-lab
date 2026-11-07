@@ -1,6 +1,6 @@
 /** Everything the user can configure and save. Pure and framework-free. */
 import { CAGED_FORMS, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
-import { ARP_SPAN, ROUTINE_TEMPLATES, arpeggioNotes, generateSequence, parseCustomPattern, resolvePhase, sanitizeRoutine, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec } from '../exercises';
+import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
 import type { AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
@@ -120,6 +120,15 @@ export interface ArpeggioSettings {
   readonly arpCustomText: string;
   readonly arpLink: ArpLink;
   readonly arpNotesPerBeat: Subdivision;
+  /** Shape on the neck (D-27): hand position, CAGED form, octaves, sweep, string skipping. */
+  readonly arpShape: ArpShape;
+  readonly arpForm: CagedForm;
+  readonly arpOctaves: ArpOctaves;
+  readonly arpStrings: SweepStrings;
+  /** Way back down for up-and-down runs: the same places, or another route. */
+  readonly arpReturn: ArpReturn;
+  /** On a progression, "target": each chord starts on this tone (0 root, 1 third…). */
+  readonly arpTarget: number;
 }
 
 /** Two permanent looks over the same state: Semplificata (the console) and Studio (the workbench). */
@@ -215,6 +224,12 @@ export const DEFAULT_SETTINGS: Settings = {
   arpCustomText: '1 3 2 4',
   arpLink: 'connect',
   arpNotesPerBeat: 2,
+  arpShape: 'window',
+  arpForm: 'E',
+  arpOctaves: 2,
+  arpStrings: 5,
+  arpReturn: 'same',
+  arpTarget: 1,
 };
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -309,8 +324,14 @@ export function sanitizeSettings(raw: unknown): Settings {
     arpStart: typeof r.arpStart === 'number' ? clamp(Math.round(r.arpStart), 0, 5) : d.arpStart,
     arpCustomOn: typeof r.arpCustomOn === 'boolean' ? r.arpCustomOn : d.arpCustomOn,
     arpCustomText: typeof r.arpCustomText === 'string' ? r.arpCustomText.slice(0, 120) : d.arpCustomText,
-    arpLink: oneOf(r.arpLink, ['restart', 'connect'] as const, d.arpLink),
+    arpLink: oneOf(r.arpLink, ['restart', 'connect', 'target'] as const, d.arpLink),
     arpNotesPerBeat: oneOf(r.arpNotesPerBeat, [1, 2, 3, 4] as const, d.arpNotesPerBeat),
+    arpShape: oneOf(r.arpShape, ARP_SHAPES, d.arpShape),
+    arpForm: oneOf(r.arpForm, CAGED_FORMS, d.arpForm),
+    arpOctaves: oneOf(r.arpOctaves, [1, 2, 3] as const, d.arpOctaves),
+    arpStrings: oneOf(r.arpStrings, [3, 4, 5, 6] as const, d.arpStrings),
+    arpReturn: oneOf(r.arpReturn, ['same', 'other'] as const, d.arpReturn),
+    arpTarget: typeof r.arpTarget === 'number' ? clamp(Math.round(r.arpTarget), 0, 5) : d.arpTarget,
   };
 }
 
@@ -353,9 +374,24 @@ export const arpeggioSpecOf = (s: ArpeggioSettings): ArpeggioSpec => ({
   customPattern: s.arpCustomOn ? parseCustomPattern(s.arpCustomText) : null,
 });
 
-/** Chord tones in the arpeggio hand position, for the board. */
+export const shapeChoiceOf = (s: ArpeggioSettings): ShapeChoice => ({
+  shape: s.arpShape, low: s.arpLow, form: s.arpForm, octaves: s.arpOctaves, strings: s.arpStrings, ret: s.arpReturn,
+});
+
+/**
+ * One chord's arpeggio plan. On a progression a CAGED shape picks, for each
+ * chord, the form nearest the chosen area of the neck, so the hand stays put.
+ */
+export function arpeggioPlanOf(chord: Chord | null, s: ArpeggioSettings): ArpPlan | null {
+  if (!chord) return null;
+  const choice = shapeChoiceOf(s);
+  const form = s.arpSource === 'progression' && s.arpShape === 'caged' ? nearestCagedForm(chord, s.arpLow + 2) : s.arpForm;
+  return arpeggioPlan(chord, { ...choice, form }, arpeggioSpecOf(s));
+}
+
+/** What the board draws for the arpeggio. */
 export const arpeggioBoardNotes = (chord: Chord | null, s: ArpeggioSettings): readonly FretNote[] =>
-  chord ? arpeggioNotes(chord, s.arpLow) : [];
+  arpeggioPlanOf(chord, s)?.notes ?? [];
 
 /** What the board shows: in a routine, the shape and scale of the given phase. */
 export function boardContext(s: StudySettings, phaseIndex: number | null): { scale: Scale; notes: readonly FretNote[]; wholeNeck: boolean } {
