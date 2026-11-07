@@ -154,7 +154,8 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
     return { ...lastLive.current, intensity: 0 };
   }, [liveOn, livePitch, layer.markers, settings.tunerA4]);
   const shownMarkers = useMemo(() => (showAids ? layer.markers : []), [showAids, layer.markers]);
-  const played = active !== null;
+  // The played-note entry stays while an exercise can play: it must not blink with each note (D-24).
+  const played = active !== null || settings.exerciseOn || settings.mode === 'arpeggio';
   // While the input is on, the legend keeps both live entries: notes coming and going never resize it.
   const liveLikely = live !== null;
   const liveOthers = live !== null;

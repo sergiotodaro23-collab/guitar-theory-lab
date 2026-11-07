@@ -62,7 +62,7 @@ function TransportPlate() {
         </div>
       </div>
       <button type="button" className="tap" onClick={tap}>Tap</button>
-      <Knob label="Tempo" value={bpm} min={BPM_MIN} max={BPM_MAX} step={1} format={(v) => `${v} BPM`} onChange={(v) => update({ bpm: v })} testId="knob-bpm" />
+      <Knob label="Tempo" value={bpm} min={BPM_MIN} max={BPM_MAX} step={1} format={(v) => `${v} BPM`} onChange={(v) => update({ bpm: v })} testId="knob-bpm" className="knob-tempo" />
       <Knob label="Swing" value={swing} min={0} max={0.5} step={0.01} format={(v) => `${Math.round(v * 200)}%`} onChange={(v) => update({ swing: v })} testId="knob-swing" />
       <div className="ws-time">
         <span className="ws-engraved">Metrica</span>
@@ -154,33 +154,42 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
           <ModeNav />
           <AppearanceToggle studioAllowed={studioAllowed} current="studio" />
         </header>
-        <MixerPlate />
         <TransportPlate />
         <main className="ws-plate ws-neck" aria-label="Strumento">
           <Screws />
           <div className="ws-neck-toolbar"><LabelModeSelector /></div>
           <Board legendHost={legendHost} boardImage={maple} />
         </main>
-        <Notes mode={mode} />
-        <aside className="ws-side">
-          <TutorPhone />
-        </aside>
-        <aside className="ws-aside">
-          <div className="ws-note ws-legend-note ws-tape" data-testid="note-legend">
-            <span className="ws-fastener" aria-hidden="true" />
-            <h2 className="ws-hand">Legenda</h2>
-            <div ref={setLegendHost} />
-          </div>
-          <section className="ws-plate ws-input" aria-label="Ingresso chitarra">
+        {/*
+          On a desktop window the head, transport and neck stay put; these two
+          columns scroll on their own (D-24). In smaller windows they dissolve
+          into the page grid (display: contents) and the page scrolls.
+        */}
+        <div className="ws-scroll" data-testid="scroll-panels">
+          <Notes mode={mode} />
+          <MixerPlate />
+          <section className="ws-plate ws-drawer" aria-label="Preset">
             <Screws />
-            <InputPanels />
+            <PresetsPanel />
           </section>
-        </aside>
-        <section className="ws-plate ws-drawer" aria-label="Preset">
-          <Screws />
-          <PresetsPanel />
-        </section>
-        <AppFooter />
+          <AppFooter />
+        </div>
+        <div className="ws-right" data-testid="scroll-side">
+          <aside className="ws-side">
+            <TutorPhone />
+          </aside>
+          <aside className="ws-aside">
+            <div className="ws-note ws-legend-note ws-tape" data-testid="note-legend">
+              <span className="ws-fastener" aria-hidden="true" />
+              <h2 className="ws-hand">Legenda</h2>
+              <div ref={setLegendHost} />
+            </div>
+            <section className="ws-plate ws-input" aria-label="Ingresso chitarra">
+              <Screws />
+              <InputPanels />
+            </section>
+          </aside>
+        </div>
       </div>
     </div>
       </MixerShown.Provider>
