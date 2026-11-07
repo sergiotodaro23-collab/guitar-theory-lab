@@ -17,8 +17,8 @@ import { ChordDiagram } from '../viz/ChordDiagram';
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
 
-const tonicOptions = TONICS.map((t) => ({ value: t, label: t }));
-const scaleOptions = SCALE_IDS.map((id) => ({ value: id, label: SCALES[id].name }));
+export const tonicOptions = TONICS.map((t) => ({ value: t, label: t }));
+export const scaleOptions = SCALE_IDS.map((id) => ({ value: id, label: SCALES[id].name }));
 const suffixOptions = CHORD_SUFFIXES.map((s) => ({ value: s, label: s === '' ? 'maggiore' : s }));
 
 function LayerItem({ layer, index, count, main }: {
@@ -600,7 +600,7 @@ export function ChordStrip() {
   );
 }
 
-const FOCUS_OPTIONS: readonly { value: HarmonyFocus; label: string; help: string }[] = [
+export const FOCUS_OPTIONS: readonly { value: HarmonyFocus; label: string; help: string }[] = [
   { value: 'all', label: 'Tutte le funzioni', help: 'Ogni nota porta la sua funzione sull’accordo corrente.' },
   { value: 'guide', label: 'Guide tones', help: 'Terze e settime, con le frecce verso il prossimo accordo.' },
   { value: 'common', label: 'Note comuni', help: 'Le note che restano ferme nel cambio, con le due funzioni.' },
