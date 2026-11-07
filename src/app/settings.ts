@@ -6,7 +6,7 @@ import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
 import { SENSITIVITIES, TUNINGS, sanitizeProfiles, type LiveProfile, type Sensitivity } from '../pitch';
-import { COMP_PATTERNS, DEFAULT_KIT, GENRES, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
+import { COMP_PATTERNS, DEFAULT_KIT, GENRES, sanitizeSections, type Section, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
@@ -100,6 +100,11 @@ export interface HarmonySettings {
   readonly bassPattern: number;
   readonly volBass: number;
   /** Jam timbres (D-32): drum kit, bass and comping sounds. */
+  /** Song form for Jam Studio (D-33): off plays the progression in a loop. */
+  readonly arrangementOn: boolean;
+  readonly arrangement: readonly Section[];
+  /** One channel alone ('' none): the others fall silent, the guitar monitor is not touched. */
+  readonly soloChannel: MixChannel | '';
   readonly drumSound: DrumKitSound;
   readonly bassTimbre: BassTimbre;
   readonly compTimbre: CompTimbre;
@@ -224,6 +229,9 @@ export const DEFAULT_SETTINGS: Settings = {
   bassOn: true,
   bassPattern: 0,
   volBass: 0.7,
+  arrangementOn: false,
+  arrangement: [],
+  soloChannel: '',
   drumSound: 'acoustic',
   bassTimbre: 'finger',
   compTimbre: 'keys',
@@ -336,6 +344,9 @@ export function sanitizeSettings(raw: unknown): Settings {
     bassOn: typeof r.bassOn === 'boolean' ? r.bassOn : d.bassOn,
     bassPattern: oneOf(r.bassPattern, [0, 1, 2, 3], d.bassPattern),
     volBass: number01(r.volBass, d.volBass),
+    arrangementOn: typeof r.arrangementOn === 'boolean' ? r.arrangementOn : d.arrangementOn,
+    arrangement: sanitizeSections(r.arrangement),
+    soloChannel: oneOf(r.soloChannel, ['', 'click', 'notes', 'comp', 'bass', 'drums'] as const, d.soloChannel),
     drumSound: oneOf(r.drumSound, Object.keys(DRUM_KIT_SOUNDS) as DrumKitSound[], d.drumSound),
     bassTimbre: oneOf(r.bassTimbre, Object.keys(BASS_TIMBRES) as BassTimbre[], d.bassTimbre),
     compTimbre: oneOf(r.compTimbre, Object.keys(COMP_TIMBRES) as CompTimbre[], d.compTimbre),
@@ -448,6 +459,7 @@ export const MIX_CHANNELS: readonly MixChannel[] = ['click', 'notes', 'comp', 'b
 
 /** The level a channel actually plays at: its fader, or silence while muted. */
 export function channelVolume(s: Settings, channel: MixChannel): number {
+  if (s.soloChannel && s.soloChannel !== channel) return 0;
   switch (channel) {
     case 'click': return s.muteClick ? 0 : s.volClick;
     case 'notes': return s.muteNotes ? 0 : s.volNotes;

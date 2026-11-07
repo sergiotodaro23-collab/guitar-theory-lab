@@ -597,3 +597,8 @@ button, select, input { font: inherit; color: inherit; }
 .calibration-result { min-height: 1.4em; }
 .text-input.narrow { width: 6em; }
 @media (max-width: 599px) { .calibration-step { grid-template-columns: 1fr; } }
+
+/* ---- Jam arrangement ---- */
+.arrangement-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.arrangement-item { border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px; }
+.arrangement-item.is-now { border-color: var(--hot); box-shadow: 0 0 0 1px var(--hot); }

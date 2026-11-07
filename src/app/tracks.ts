@@ -2,7 +2,7 @@
 import { exerciseTrack, generateSequence, progressionArpeggioTrack, progressionExerciseTrack, routineTrack } from '../exercises';
 import type { FretNote } from '../fretboard';
 import { chordAsScale, viewNotes, viewScale } from './chordViews';
-import { bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
+import { arrangementTracks, bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
 import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
 import { ticksPerBeat, type Track } from '../timeline';
@@ -42,6 +42,24 @@ export function buildTracks(s: Settings): ModeTracks {
   } else if (s.exerciseOn) {
     const sequence = currentExerciseSequence(s);
     if (sequence.length > 0) exercise = exerciseTrack(sequence, meter, s.notesPerBeat);
+  }
+  // A song form: the band follows the sections; the exercise keeps its own loop.
+  if (s.mode === 'jam' && auto && s.arrangementOn && s.arrangement.length > 0) {
+    const genre = genreOf(s.jamGenre);
+    const song = arrangementTracks({
+      progression: s.progression, meter, kit: s.drumKit, compPattern: s.compPattern,
+      bass: genre.bass[s.bassPattern] ?? genre.bass[0], loop,
+      // The band switches still rule: a part off is off in every section.
+      sections: s.arrangement.map((x) => ({ ...x, drums: x.drums && s.drumOn, bass: x.bass && s.bassOn, comp: x.comp && s.compOn })),
+    });
+    return {
+      exercise,
+      chords: song.chords,
+      comp: song.comp,
+      bass: song.bass,
+      drums: song.drums,
+      endTick: loop ? null : song.lengthTicks,
+    };
   }
   return {
     exercise,
