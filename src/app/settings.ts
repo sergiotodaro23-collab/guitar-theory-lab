@@ -9,6 +9,7 @@ import { COMP_PATTERNS, DEFAULT_KIT, GENRES, PROGRESSION_TEMPLATES, instantiateT
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
+import { sanitizeChordViews, type ChordViews } from './chordViews';
 import { clampActive, sanitizeChordLayers, type ChordLayer } from './chordLayers';
 
 export type AppMode = 'fretboard' | 'harmony' | 'arpeggio' | 'jam';
@@ -60,6 +61,9 @@ export interface StudySettings {
 
 export interface HarmonySettings {
   readonly progression: Progression;
+  /** Per-chord views (D-26), keyed by progression chord id, and the switch that applies them. */
+  readonly chordViewsOn: boolean;
+  readonly chordViews: ChordViews;
   readonly loop: boolean;
   readonly changeMode: ChangeMode;
   readonly quantize: 'beat' | 'bar';
@@ -165,6 +169,8 @@ export const DEFAULT_SETTINGS: Settings = {
   subdivision: 1,
   swing: 0,
   progression: instantiateTemplate(firstTemplate, firstTemplate.defaultKey),
+  chordViewsOn: true,
+  chordViews: {},
   loop: true,
   changeMode: 'auto',
   quantize: 'beat',
@@ -259,6 +265,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     subdivision: oneOf(r.subdivision, [1, 2, 3, 4] as const, d.subdivision),
     swing: typeof r.swing === 'number' && Number.isFinite(r.swing) ? clamp(r.swing, 0, 0.5) : d.swing,
     progression: validProgression,
+    chordViewsOn: typeof r.chordViewsOn === 'boolean' ? r.chordViewsOn : d.chordViewsOn,
+    chordViews: sanitizeChordViews(r.chordViews, validProgression.chords.map((c) => c.id)),
     loop: typeof r.loop === 'boolean' ? r.loop : d.loop,
     changeMode: oneOf(r.changeMode, ['auto', 'manual'] as const, d.changeMode),
     quantize: oneOf(r.quantize, ['beat', 'bar'] as const, d.quantize),

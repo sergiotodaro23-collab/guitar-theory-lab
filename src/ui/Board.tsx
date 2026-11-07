@@ -13,6 +13,7 @@ import { useLive } from '../audio/liveInput';
 import { livePositions, noteOf } from '../pitch';
 import type { FretPosition } from '../fretboard';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
+import { MAX_VISIBLE_OVERLAYS, viewForChord, viewNotes, viewOverlays, viewScale } from '../app/chordViews';
 import { buildMarkerLayer, type Marker } from '../viz/markers';
 
 export function useHarmonyContext() {
@@ -54,9 +55,16 @@ export function layerStylesOf(layers: readonly ScaleLayer[]): readonly LayerStyl
   });
 }
 
+/** An overlay as the legend lists it: colour, name, and which corner its pip takes. */
+interface LegendOverlay {
+  readonly id: string;
+  readonly color: string;
+  readonly name: string;
+  readonly pip: number;
+}
+
 /** Only what is drawn: the entries come from the markers on the neck, with shapes as well as colours. */
-function Legend({ entries, layers }: { readonly entries: readonly LegendEntry[]; readonly layers: readonly ScaleLayer[] }) {
-  const styles = layerStylesOf(layers);
+function Legend({ entries, overlays }: { readonly entries: readonly LegendEntry[]; readonly overlays: readonly LegendOverlay[] }) {
   return (
     <ul className="legend" aria-label="Legenda" data-testid="legend">
       {entries.map((entry) => (
@@ -65,15 +73,15 @@ function Legend({ entries, layers }: { readonly entries: readonly LegendEntry[];
           {entry.label}
         </li>
       ))}
-      {layers.map((layer, i) => (layer.visible ? (
-        <li key={layer.id} className={`legend-item legend-layer layer-${layer.color}`} data-testid="legend-layer">
+      {overlays.map((o) => (
+        <li key={o.id} className={`legend-item legend-layer layer-${o.color}`} data-testid="legend-layer">
           <svg className="legend-pip" viewBox="0 0 20 20" aria-hidden="true">
             <circle className="legend-pip-ring" cx="10" cy="10" r="6.5" />
-            <circle className={`pip layer-${layer.color}`} cx={10 + (PIP_DIRS[i]?.[0] ?? 1) * 5.5} cy={10 + (PIP_DIRS[i]?.[1] ?? -1) * 5.5} r="3.2" />
+            <circle className={`pip layer-${o.color}`} cx={10 + (PIP_DIRS[o.pip]?.[0] ?? 1) * 5.5} cy={10 + (PIP_DIRS[o.pip]?.[1] ?? -1) * 5.5} r="3.2" />
           </svg>
-          {styles[i]?.name} <span className="muted">(punto {PIP_PLACES[i]})</span>
+          {o.name} <span className="muted">(punto {PIP_PLACES[o.pip]})</span>
         </li>
-      ) : null))}
+      ))}
     </ul>
   );
 }
@@ -95,16 +103,37 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
   const playheadPhase = usePlayhead((p) => p.phase);
   const selectedPhase = useApp((s) => s.selectedPhase);
   const phaseIndex = playheadPhase ?? selectedPhase;
-  const context = useMemo(() => (settings.mode === 'arpeggio'
+  // The playing (or chosen) chord's own view, when it has one (D-26).
+  const view = useMemo(() => {
+    const onProgression = settings.mode === 'harmony' || settings.mode === 'jam' || (settings.mode === 'arpeggio' && settings.arpSource === 'progression');
+    return settings.chordViewsOn && onProgression
+      ? viewForChord(settings.chordViews, settings.progression.chords.map((c) => c.id), chordIndex)
+      : null;
+  }, [settings.mode, settings.arpSource, settings.chordViewsOn, settings.chordViews, settings.progression, chordIndex]);
+  const context = useMemo(() => {
     // Arpeggios Lab draws the chord tones of the hand position, over the current scale's spelling.
-    ? { ...boardContext(settings, null), notes: arpeggioBoardNotes(chord, settings), wholeNeck: false }
-    : boardContext(settings, phaseIndex)), [settings, phaseIndex, chord]);
+    if (settings.mode === 'arpeggio') return { ...boardContext(settings, null), notes: arpeggioBoardNotes(chord, settings), wholeNeck: false };
+    if (view && chord) return { scale: viewScale(view), notes: viewNotes(view, chord), wholeNeck: view.positionType === 'neck' };
+    return boardContext(settings, phaseIndex);
+  }, [settings, phaseIndex, chord, view]);
   const { scale } = context;
-  const overlays = useMemo(
-    () => visibleLayers(settings.scaleLayers).map((shown) => ({ scale: shown.scale, index: shown.index, wholeNeck: shown.layer.region === 'neck' })),
-    [settings.scaleLayers],
-  );
-  const layerStyles = useMemo(() => layerStylesOf(settings.scaleLayers), [settings.scaleLayers]);
+  // Overlays: the chord view's (first four visible), else the general extra scales.
+  const shownOverlays = useMemo((): readonly (LegendOverlay & { readonly scale: Scale; readonly wholeNeck: boolean; readonly opacity: number; readonly index: number })[] => {
+    if (view) {
+      return viewOverlays(view).filter((o) => o.visible).slice(0, MAX_VISIBLE_OVERLAYS)
+        .map((o, i) => ({ id: o.id, color: o.color, name: o.name, pip: i, index: i, scale: o.scale, wholeNeck: o.wholeNeck, opacity: o.opacity }));
+    }
+    const styles = layerStylesOf(settings.scaleLayers);
+    return visibleLayers(settings.scaleLayers).map((shown) => ({
+      id: shown.layer.id, color: shown.layer.color, name: styles[shown.index]?.name ?? '', pip: shown.index, index: shown.index,
+      scale: shown.scale, wholeNeck: shown.layer.region === 'neck', opacity: shown.layer.opacity,
+    }));
+  }, [view, settings.scaleLayers]);
+  const overlays = useMemo(() => shownOverlays.map((o) => ({ scale: o.scale, index: o.index, wholeNeck: o.wholeNeck })), [shownOverlays]);
+  const layerStyles = useMemo(() => {
+    if (!view) return layerStylesOf(settings.scaleLayers);
+    return shownOverlays.map((o) => ({ color: o.color as LayerStyle['color'], opacity: o.opacity, name: o.name }));
+  }, [view, settings.scaleLayers, shownOverlays]);
 
   const layer = useMemo(() => buildMarkerLayer({
     notes: context.notes,
@@ -113,14 +142,14 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
     nextChord,
     chords,
     chordIndex,
-    focus: settings.mode === 'harmony' ? settings.focus : settings.mode === 'jam' ? settings.focus : 'all',
+    focus: view && settings.mode !== 'arpeggio' ? view.focus : settings.mode === 'harmony' || settings.mode === 'jam' ? settings.focus : 'all',
     profile: settings.avoidProfile,
     labelMode: settings.labelMode,
     pinnedPc,
     overlays,
     voicing,
     wholeNeck: context.wholeNeck,
-  }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, overlays, voicing]);
+  }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, overlays, voicing, view]);
 
   const onPick = useCallback((marker: Marker) => {
     setPinned(useApp.getState().pinnedPc === marker.pc ? null : marker.pc);
@@ -164,7 +193,7 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
     [shownMarkers, played, liveLikely, liveOthers],
   );
   const legend = showAids
-    ? <Legend entries={entries} layers={settings.scaleLayers} />
+    ? <Legend entries={entries} overlays={shownOverlays} />
     : <p className="aids-off">Aiuti nascosti: suona a orecchio, l’accordo resta in alto.</p>;
 
   return (

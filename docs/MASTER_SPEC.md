@@ -26,7 +26,7 @@ Quattro workspace: **Fretboard Lab**, **Harmony Lab**, **Arpeggios Lab**, **Jam 
 - Fino a 8 accordi: accordo principale + `+ Aggiungi accordo`; visibilità e selezione indipendenti; riusabili in progressioni, esercizi e Jam.
 - Niente toggle statici numerati (S1–S5, 1–8).
 - Sovrapposizioni leggibili anche quando le scale condividono note: forme e contorni distinti, non solo piccoli punti colorati, senza nascondere il nome della nota.
-- **Configurazione per singolo accordo della progressione**: ogni accordo porta le sue scale, arpeggi, layer, colori, forme, visibilità, posizioni e intervalli di tasti, target e guide tones, comportamento in riproduzione (es. ii–V–I: Dm7 solo arpeggio, G7 misolidio più un layer, Cmaj7 arpeggio e guide tones). La tastiera cambia con l'accordo attivo, in manuale e in automatico. Un solo modello dati per Harmony, Arpeggios e Jam, salvabile e riutilizzabile; per configurazione al massimo 5 scale e 8 layer, non tutti visibili per forza.
+- **Configurazione per singolo accordo della progressione** (in gran parte realizzata, D-26): ogni accordo porta le sue scale, arpeggi, layer, colori, forme, visibilità, posizioni e intervalli di tasti, target e guide tones, comportamento in riproduzione (es. ii–V–I: Dm7 solo arpeggio, G7 misolidio più un layer, Cmaj7 arpeggio e guide tones). La tastiera cambia con l'accordo attivo, in manuale e in automatico. Un solo modello dati per Harmony, Arpeggios e Jam, salvabile e riutilizzabile; per configurazione al massimo 5 scale e 8 layer, non tutti visibili per forza.
 
 ## 4. Exercise Engine
 

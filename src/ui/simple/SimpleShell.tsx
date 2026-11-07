@@ -11,6 +11,7 @@ import { useApp, usePlayhead } from '../../app/store';
 import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
 import { DrumPanel } from '../DrumMachine';
+import { ChordViewPanel } from '../ChordViewPanel';
 import { InputPanels } from '../LivePanels';
 import { Board } from '../Board';
 import {
@@ -85,15 +86,16 @@ function tabsFor(mode: AppMode): readonly DeckTab[] {
   const exercise: DeckTab = { id: 'exercise', label: 'Esercizio', content: <ExercisePanel /> };
   const presets: DeckTab = { id: 'presets', label: 'Preset', content: <PresetsPanel /> };
   const input: DeckTab = { id: 'input', label: 'Ingresso', content: <InputPanels /> };
+  const views: DeckTab = { id: 'views', label: 'Per accordo', content: <ChordViewPanel /> };
   switch (mode) {
     case 'fretboard':
       return [scale, { id: 'chords', label: 'Accordi', content: <ChordsPanel /> }, exercise, input, presets];
     case 'harmony':
-      return [{ id: 'harmony', label: 'Progressione', content: <HarmonyPanel /> }, scale, exercise, input, presets];
+      return [{ id: 'harmony', label: 'Progressione', content: <HarmonyPanel /> }, views, scale, exercise, input, presets];
     case 'arpeggio':
-      return [{ id: 'arpeggio', label: 'Arpeggi', content: <ArpeggioPanel /> }, scale, input, presets];
+      return [{ id: 'arpeggio', label: 'Arpeggi', content: <ArpeggioPanel /> }, views, scale, input, presets];
     case 'jam':
-      return [{ id: 'jam', label: 'Jam', content: <JamPanels /> }, { id: 'drums', label: 'Batteria', content: <DrumPanel /> }, scale, exercise, input, presets];
+      return [{ id: 'jam', label: 'Jam', content: <JamPanels /> }, views, { id: 'drums', label: 'Batteria', content: <DrumPanel /> }, scale, exercise, input, presets];
   }
 }
 

@@ -12,6 +12,7 @@ import { useApp, usePlayhead } from '../../app/store';
 import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
 import { DrumPanel } from '../DrumMachine';
+import { ChordViewPanel } from '../ChordViewPanel';
 import { InputPanels } from '../LivePanels';
 import { Board } from '../Board';
 import { Fader, GuitarChannel, Knob, MasterFader, OutputMeter } from '../hardware';
@@ -127,16 +128,17 @@ function Note({ id, fastener, wide = false, full = false, children }: { readonly
 function Notes({ mode }: { readonly mode: AppMode }) {
   const scale = <Note id="scale" fastener="tape" key="scale"><ScalePanel showLabels={false} /></Note>;
   const exercise = <Note id="exercise" fastener="pin" key="exercise"><ExercisePanel /></Note>;
+  const views = <Note id="views" fastener="tape" key="views"><ChordViewPanel /></Note>;
   const notes = (() => {
     switch (mode) {
       case 'fretboard':
         return [scale, <Note id="chords" fastener="pin" key="chords"><ChordsPanel /></Note>, exercise];
       case 'harmony':
-        return [<Note id="harmony" fastener="tape" key="harmony"><HarmonyPanel /></Note>, scale, exercise];
+        return [<Note id="harmony" fastener="tape" key="harmony"><HarmonyPanel /></Note>, views, scale, exercise];
       case 'arpeggio':
-        return [<Note id="arpeggio" fastener="pin" wide key="arpeggio"><ArpeggioPanel /></Note>, scale];
+        return [<Note id="arpeggio" fastener="pin" wide key="arpeggio"><ArpeggioPanel /></Note>, scale, views];
       case 'jam':
-        return [<Note id="jam" fastener="tape" key="jam"><JamPanels /></Note>, scale, exercise, <Note id="drums" fastener="pin" full key="drums"><DrumPanel /></Note>];
+        return [<Note id="jam" fastener="tape" key="jam"><JamPanels /></Note>, views, scale, exercise, <Note id="drums" fastener="pin" full key="drums"><DrumPanel /></Note>];
     }
   })();
   return <div className="ws-notes" data-mode={mode}>{notes}</div>;
