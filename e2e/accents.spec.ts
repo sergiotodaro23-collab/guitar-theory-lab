@@ -82,3 +82,24 @@ test('on a phone the 16 steps sit in two rows of eight, all visible', async ({ p
   for (const i of [0, 15]) await expect(step(page, i)).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });
+
+// Fonts are not bundled: a wider system font can push the key to a second
+// row. The panel must still open inside the window and keep its place when
+// the pattern turns personal (the failure seen on the CI runner).
+for (const look of ['Studio', 'Semplificata'] as const) {
+  test(`${look}: with a wide system font the panel stays in the window`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await open(page);
+    await page.addStyleTag({ content: "*, :root { font-family: 'DejaVu Sans', 'Verdana', sans-serif !important; --display: 'DejaVu Sans', 'Verdana', sans-serif; --plate-font: 'DejaVu Sans', 'Verdana', sans-serif; }" });
+    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    const key = await page.getByTestId('accent-toggle').boundingBox();
+    await page.getByTestId('accent-toggle').click();
+    for (const i of [0, 3, 15]) await expect(step(page, i)).toBeInViewport({ ratio: 1 });
+    const before = await step(page, 1).boundingBox();
+    await step(page, 1).click();
+    await step(page, 1).click();
+    await expect(step(page, 1)).toHaveAttribute('data-level', '0');
+    expect(await step(page, 1).boundingBox()).toEqual(before);
+    expect((await page.getByTestId('accent-toggle').boundingBox())?.width).toBe(key?.width);
+  });
+}
