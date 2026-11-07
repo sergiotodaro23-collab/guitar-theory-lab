@@ -43,6 +43,25 @@ export class WebAudioSink {
     return this.master;
   }
 
+  setMaster(value: number): void {
+    this.master.gain.setTargetAtTime(value, this.ctx.currentTime, 0.01);
+  }
+
+  /** A short A4 beep straight to the master: checks the output path without any channel. */
+  testTone(): void {
+    const time = this.ctx.currentTime + 0.02;
+    const osc = this.ctx.createOscillator();
+    const env = this.ctx.createGain();
+    osc.frequency.value = 440;
+    env.gain.setValueAtTime(0, time);
+    env.gain.linearRampToValueAtTime(0.3, time + 0.01);
+    env.gain.setValueAtTime(0.3, time + 0.4);
+    env.gain.linearRampToValueAtTime(0, time + 0.45);
+    osc.connect(env).connect(this.master);
+    osc.start(time);
+    osc.stop(time + 0.5);
+  }
+
   setVolume(bus: AudioBus, value: number): void {
     this.buses[bus].gain.setTargetAtTime(value, this.ctx.currentTime, 0.01);
   }

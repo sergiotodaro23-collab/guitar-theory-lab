@@ -155,9 +155,9 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
   }, [liveOn, livePitch, layer.markers, settings.tunerA4]);
   const shownMarkers = useMemo(() => (showAids ? layer.markers : []), [showAids, layer.markers]);
   const played = active !== null;
-  const liveShown = live !== null && live.intensity > 0;
-  const liveLikely = liveShown && live.likely !== null;
-  const liveOthers = liveShown && live.all.length > (live.likely ? 1 : 0);
+  // While the input is on, the legend keeps both live entries: notes coming and going never resize it.
+  const liveLikely = live !== null;
+  const liveOthers = live !== null;
   const entries = useMemo(
     () => legendEntries(shownMarkers, { played, live: { likely: liveLikely, others: liveOthers } }),
     [shownMarkers, played, liveLikely, liveOthers],

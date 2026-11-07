@@ -10,6 +10,18 @@ import { detectPitch, PitchTracker, type TrackedPitch } from '../pitch';
 import { workerTimer } from './webAudioSink';
 
 export type LiveState = 'off' | 'starting' | 'on' | 'error';
+/** Which input channel carries the guitar. Many USB interfaces put the instrument input on channel 2. */
+export type InputChannel = 'mix' | 'left' | 'right';
+
+export interface LiveDiagnostics {
+  readonly contextState: string;
+  readonly sampleRate: number;
+  readonly baseLatency: number | null;
+  readonly outputLatency: number | null;
+  readonly deviceLabel: string;
+  readonly inputChannels: number | null;
+  readonly trackSampleRate: number | null;
+}
 
 export interface LiveSnapshot {
   readonly state: LiveState;
@@ -21,10 +33,11 @@ export interface LiveSnapshot {
   readonly clipping: boolean;
   readonly pitch: TrackedPitch | null;
   readonly monitorOn: boolean;
+  readonly diagnostics: LiveDiagnostics | null;
 }
 
 export const useLive = create<LiveSnapshot>(() => ({
-  state: 'off', error: null, devices: [], deviceId: '', level: 0, clipping: false, pitch: null, monitorOn: false,
+  state: 'off', error: null, devices: [], deviceId: '', level: 0, clipping: false, pitch: null, monitorOn: false, diagnostics: null,
 }));
 
 /** Readable Italian messages for what getUserMedia can throw. */
@@ -42,6 +55,8 @@ export function inputErrorMessage(error: unknown): string {
       return 'Il dispositivo scelto non è più disponibile. Scegline un altro.';
     case 'NoMediaDevices':
       return 'Questo browser non dà accesso all’ingresso audio (serve una pagina HTTPS o localhost).';
+    case 'AudioSuspended':
+      return 'L’audio del browser è sospeso. Premi Avvia (il trasporto) o fai clic nella pagina, poi riavvia l’ingresso.';
     default:
       return 'Non riesco ad aprire l’ingresso audio.';
   }
@@ -52,6 +67,9 @@ const FRAME = 2048;
 class LiveInput {
   private stream: MediaStream | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
+  private splitter: ChannelSplitterNode | null = null;
+  /** Mono guitar signal: the chosen channel, or both averaged. */
+  private mono: GainNode | null = null;
   private gain: GainNode | null = null;
   private analyser: AnalyserNode | null = null;
   private monitor: GainNode | null = null;
@@ -62,7 +80,7 @@ class LiveInput {
   private inputGain = 1;
   private monitorLevel = 0.6;
 
-  async start(out: () => { ctx: AudioContext; destination: AudioNode }, deviceId: string): Promise<void> {
+  async start(out: () => { ctx: AudioContext; destination: AudioNode }, deviceId: string, channel: InputChannel = 'mix'): Promise<void> {
     this.stop();
     useLive.setState({ state: 'starting', error: null });
     try {
@@ -74,13 +92,21 @@ class LiveInput {
       const { ctx, destination } = out();
       if (ctx.state !== 'running') await ctx.resume();
       this.source = ctx.createMediaStreamSource(this.stream);
+      // Everything after this point is mono: the guitar plays in both ears of the monitor.
+      this.mono = ctx.createGain();
+      this.mono.channelCount = 1;
+      this.mono.channelCountMode = 'explicit';
+      this.mono.channelInterpretation = 'speakers';
+      this.splitter = ctx.createChannelSplitter(2);
+      this.source.connect(this.splitter);
+      this.route(channel);
       this.gain = ctx.createGain();
       this.gain.gain.value = this.inputGain;
       this.analyser = ctx.createAnalyser();
       this.analyser.fftSize = FRAME;
       this.monitor = ctx.createGain();
       this.monitor.gain.value = 0;
-      this.source.connect(this.gain);
+      this.mono.connect(this.gain);
       this.gain.connect(this.analyser);
       this.gain.connect(this.monitor).connect(destination);
       const sampleRate = ctx.sampleRate;
@@ -90,7 +116,18 @@ class LiveInput {
         .map((d, i) => ({ id: d.deviceId, label: d.label || `Ingresso ${i + 1}` }));
       const track = this.stream.getAudioTracks()[0];
       track?.addEventListener('ended', () => this.fail(Object.assign(new Error('ended'), { name: 'NotReadableError' })));
-      useLive.setState({ state: 'on', devices, deviceId: track?.getSettings().deviceId ?? deviceId, monitorOn: false });
+      const settings = track?.getSettings();
+      const diagnostics: LiveDiagnostics = {
+        contextState: ctx.state,
+        sampleRate: ctx.sampleRate,
+        baseLatency: typeof ctx.baseLatency === 'number' ? ctx.baseLatency : null,
+        outputLatency: typeof ctx.outputLatency === 'number' ? ctx.outputLatency : null,
+        deviceLabel: track?.label ?? '',
+        inputChannels: settings?.channelCount ?? null,
+        trackSampleRate: settings?.sampleRate ?? null,
+      };
+      if (ctx.state !== 'running') throw Object.assign(new Error('suspended'), { name: 'AudioSuspended' });
+      useLive.setState({ state: 'on', devices, deviceId: settings?.deviceId ?? deviceId, monitorOn: false, diagnostics });
     } catch (error) {
       this.fail(error);
     }
@@ -100,11 +137,24 @@ class LiveInput {
     this.stopTimer?.();
     this.stopTimer = null;
     this.stream?.getTracks().forEach((t) => t.stop());
-    for (const node of [this.source, this.gain, this.analyser, this.monitor]) node?.disconnect();
+    for (const node of [this.source, this.splitter, this.mono, this.gain, this.analyser, this.monitor]) node?.disconnect();
     this.stream = null;
-    this.source = this.gain = this.analyser = this.monitor = null;
+    this.source = this.splitter = this.mono = this.gain = this.analyser = this.monitor = null;
     this.tracker.reset();
     useLive.setState({ state: 'off', level: 0, clipping: false, pitch: null, monitorOn: false });
+  }
+
+  /** Pick the channel the guitar is on; 'mix' averages both (a mono device is the same either way). */
+  route(channel: InputChannel): void {
+    if (!this.splitter || !this.mono || !this.source) return;
+    this.splitter.disconnect();
+    this.source.disconnect();
+    if (channel === 'mix') {
+      this.source.connect(this.mono);
+    } else {
+      this.source.connect(this.splitter);
+      this.splitter.connect(this.mono, channel === 'left' ? 0 : 1);
+    }
   }
 
   setGain(value: number): void {

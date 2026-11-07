@@ -614,3 +614,9 @@
 :root[data-theme='studio'] .tuner-tick { stroke: #c98b33; }
 :root[data-theme='studio'] .tuner-hub { fill: var(--amber); }
 :root[data-theme='studio'] .ws-input .row { flex-wrap: wrap; }
+
+/* Mixer with guitar and master: channels wrap to a second row on the plate. */
+.ws-channels { flex-wrap: wrap; row-gap: 14px; justify-content: flex-start; }
+.ws-master { border-left: 1px solid rgba(0, 0, 0, 0.5); padding-left: 6px; display: flex; align-items: flex-end; gap: 6px; }
+:root[data-theme='studio'] .ws-mute:disabled { opacity: 0.45; cursor: not-allowed; }
+:root[data-theme='studio'] .ws-input .live-message.is-error { color: #ffb3aa; }

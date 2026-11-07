@@ -17,7 +17,7 @@ import {
   AppearanceToggle, BeatLights, BpmInput, ClickSelect, CurrentChord, MeterSelect, ModeNav, Nameplate, PlayControls, useTap,
 } from '../Transport';
 import { ArpeggioPanel, ChordsPanel, ExercisePanel, HarmonyPanel, JamPanels, LabelModeSelector, MixerShown, PresetsPanel, ScalePanel } from '../panels';
-import { Fader, Knob, OutputMeter } from '../hardware';
+import { Fader, GuitarChannel, Knob, MasterFader, OutputMeter } from '../hardware';
 
 function BarCounter() {
   const bar = usePlayhead((p) => p.bar);
@@ -153,6 +153,8 @@ function Mixer() {
         <Fader label="Accordi" value={s.volComp} onChange={(volComp) => update({ volComp })} testId="fader-comp" />
         <Fader label="Basso" value={s.volBass} onChange={(volBass) => update({ volBass })} testId="fader-bass" />
         <Fader label="Batteria" value={s.volDrums} onChange={(volDrums) => update({ volDrums })} testId="fader-drums" />
+        <GuitarChannel keyClass="cs-listen" />
+        <MasterFader />
         <OutputMeter />
       </div>
     </section>

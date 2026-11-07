@@ -33,10 +33,35 @@ export const fakeMic = (file: string) => ({
 
 export const openInput = async (page: Page, look: 'Studio' | 'Semplificata') => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
+  await page.goto('/?debug=1');
   await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
   if (look === 'Semplificata') await page.getByRole('tab', { name: 'Ingresso' }).click();
   await page.getByTestId('live-toggle').click();
   await expect(page.getByTestId('live-status')).toHaveText('Ingresso attivo');
 };
 export const centsShown = async (page: Page) => Number(((await page.getByTestId('tuner-cents').textContent()) ?? '').replace(' cent', ''));
+
+/** A WAV of notes and silences, e.g. [[110, 0.6], [0, 0.4], [329.63, 0.6]]: a player picking and stopping. */
+export function wavSequence(path: string, parts: readonly (readonly [number, number])[]): string {
+  const samples: number[] = [];
+  for (const [frequency, seconds] of parts) {
+    const n = Math.round(SR * seconds);
+    for (let i = 0; i < n; i += 1) {
+      let v = 0;
+      if (frequency > 0) for (let h = 1; h <= 5; h += 1) v += Math.sin((2 * Math.PI * frequency * h * i) / SR) / h;
+      // Short fades at both ends, like a pick attack and a damped string.
+      const fade = Math.min(1, i / 240, (n - i) / 240);
+      samples.push(v * 0.25 * fade / 1.5);
+    }
+  }
+  const data = Buffer.alloc(44 + samples.length * 2);
+  data.write('RIFF', 0); data.writeUInt32LE(36 + samples.length * 2, 4); data.write('WAVE', 8);
+  data.write('fmt ', 12); data.writeUInt32LE(16, 16); data.writeUInt16LE(1, 20); data.writeUInt16LE(1, 22);
+  data.writeUInt32LE(SR, 24); data.writeUInt32LE(SR * 2, 28); data.writeUInt16LE(2, 32); data.writeUInt16LE(16, 34);
+  data.write('data', 36); data.writeUInt32LE(samples.length * 2, 40);
+  samples.forEach((v, i) => data.writeInt16LE(Math.round(v * 32767), 44 + i * 2));
+  mkdirSync(resolve('test-results/audio'), { recursive: true });
+  const file = resolve('test-results/audio', path);
+  writeFileSync(file, data);
+  return file;
+}

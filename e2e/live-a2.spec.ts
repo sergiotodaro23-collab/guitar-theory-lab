@@ -19,7 +19,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await expect(page.locator('.live-possible, .live-likely')).toHaveCount(2);
     await expect(page.getByTestId('legend').locator('[data-kind^="live"]').first()).toBeVisible();
     // Never monitoring by itself.
-    await expect(page.getByRole('checkbox', { name: /Ascolta la chitarra/ })).not.toBeChecked();
+    await expect(page.getByTestId('monitor-toggle')).toHaveAttribute('aria-pressed', 'false');
     await expect(page.getByTestId('live-level')).not.toHaveAttribute('aria-valuenow', '0');
     await page.getByTestId('live-toggle').click();
     await expect(page.getByTestId('live-status')).toHaveText('Ingresso spento');

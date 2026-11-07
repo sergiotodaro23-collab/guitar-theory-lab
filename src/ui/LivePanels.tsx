@@ -8,32 +8,50 @@ import { engine } from '../app/engine';
 import { useApp, usePlayhead } from '../app/store';
 import { liveInput, useLive } from '../audio/liveInput';
 import { IN_TUNE_CENTS, MIN_CONFIDENCE, STRING_NAMES, TUNINGS, livePositions, noteOf, positionsOf, tunerReading } from '../pitch';
-import { Field, Panel, Select, Toggle } from './controls';
+import { Field, Panel, Segmented, Select, Toggle } from './controls';
 
 const pct = (value: number) => `${Math.round(value * 100)}%`;
 const place = (p: { string: number; fret: number }) => `${STRING_NAMES[p.string]} corda, ${p.fret === 0 ? 'a vuoto' : `${p.fret}° tasto`}`;
 const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const nameOfMidi = (midi: number) => `${NAMES[((midi % 12) + 12) % 12]}${Math.floor(midi / 12) - 1}`;
 
-/** Start, device, gain, level, monitoring: shared by Live Monitor and Tuner. */
+const CHANNEL_OPTIONS = [
+  { value: 'mix' as const, label: 'Entrambi' },
+  { value: 'left' as const, label: 'Canale 1' },
+  { value: 'right' as const, label: 'Canale 2' },
+];
+
+/** Start the input with the saved device, channel and gain. */
+export function startInput(deviceId?: string): void {
+  const s = useApp.getState().settings;
+  void liveInput.start(() => engine.audioOut(), deviceId ?? s.inputDeviceId, s.inputChannel).then(() => liveInput.setGain(useApp.getState().settings.inputGain));
+}
+
+/** The one line under the input: error, clipping, weak signal or all clear. Always the same height. */
+function InputMessage() {
+  const live = useLive();
+  if (live.error) return <p className="live-message is-error" role="alert" data-testid="live-error">{live.error}</p>;
+  if (live.clipping) return <p className="live-message is-warn" role="status" data-testid="live-clip">Segnale saturo: abbassa il gain.</p>;
+  if (live.state === 'on' && live.level < 0.01) return <p className="live-message" role="status" data-testid="live-weak">Segnale debole o assente: suona una corda o alza il gain.</p>;
+  return <p className="live-message" role="status">{live.state === 'on' ? 'Segnale presente.' : 'L’ingresso è spento: nessun dato dal microfono.'}</p>;
+}
+
+/** Start, device, channel, gain, level, monitoring: shared by Live Monitor and Tuner. */
 export function InputControls() {
   const live = useLive();
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const on = live.state === 'on';
-  const start = (deviceId: string) => {
-    void liveInput.start(() => engine.audioOut(), deviceId).then(() => liveInput.setGain(useApp.getState().settings.inputGain));
-  };
   return (
     <div className="live-input" data-testid="live-input">
-      <div className="row">
+      <div className="row live-start">
         <button
           type="button"
           className={`btn ${on ? '' : 'btn-accent'}`}
           data-testid="live-toggle"
           aria-pressed={on}
           disabled={live.state === 'starting'}
-          onClick={() => (on ? liveInput.stop() : start(s.inputDeviceId))}
+          onClick={() => (on ? liveInput.stop() : startInput())}
         >
           {on ? 'Ferma l’ingresso' : live.state === 'starting' ? 'Apertura…' : 'Avvia l’ingresso'}
         </button>
@@ -41,37 +59,86 @@ export function InputControls() {
           {on ? 'Ingresso attivo' : live.state === 'error' ? 'Errore' : 'Ingresso spento'}
         </span>
       </div>
-      {live.error ? <p className="issue" role="alert" data-testid="live-error">{live.error}</p> : null}
-      {on && live.devices.length > 0 ? (
-        <Field label="Dispositivo">
-          <Select
-            label="Dispositivo d’ingresso"
-            testId="live-device"
-            value={live.deviceId}
-            options={live.devices.map((d) => ({ value: d.id, label: d.label }))}
-            onChange={(id) => { update({ inputDeviceId: id }); start(id); }}
-          />
-        </Field>
-      ) : null}
+      <InputMessage />
+      <Field label="Dispositivo">
+        <Select
+          label="Dispositivo d’ingresso"
+          testId="live-device"
+          value={on ? live.deviceId : ''}
+          options={on && live.devices.length > 0 ? live.devices.map((d) => ({ value: d.id, label: d.label })) : [{ value: '', label: 'Avvia l’ingresso per vedere i dispositivi' }]}
+          onChange={(id) => { update({ inputDeviceId: id }); startInput(id); }}
+        />
+      </Field>
+      <Field label="Canale della chitarra" group>
+        <Segmented
+          label="Canale della chitarra"
+          value={s.inputChannel}
+          options={CHANNEL_OPTIONS}
+          onChange={(inputChannel) => { update({ inputChannel }); liveInput.route(inputChannel); }}
+        />
+      </Field>
       <Field label={`Gain d’ingresso: ${pct(s.inputGain)}`}>
         <input className="range" type="range" min={0} max={4} step={0.05} value={s.inputGain} aria-label="Gain d’ingresso"
           onChange={(e) => { const inputGain = Number(e.target.value); update({ inputGain }); liveInput.setGain(inputGain); }} />
       </Field>
       <div className="live-level" role="meter" aria-label="Livello d’ingresso" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1, live.level / 0.5) * 100)} data-testid="live-level">
-        <span className="live-level-bar" style={{ width: pct(Math.min(1, live.level / 0.5)) }} />
+        <span className="live-level-bar" style={{ transform: `scaleX(${Math.min(1, live.level / 0.5)})` }} />
       </div>
-      {live.clipping ? <p className="issue" data-testid="live-clip">Segnale saturo: abbassa il gain.</p> : null}
-      {on && live.level < 0.01 ? <p className="field-hint" data-testid="live-weak">Segnale debole o assente: suona una corda o alza il gain.</p> : null}
-      <Toggle checked={live.monitorOn} onChange={(monitor) => liveInput.setMonitor(monitor && on, s.monitorVol)}>
-        Ascolta la chitarra (usa le cuffie: con le casse può fischiare)
-      </Toggle>
-      {live.monitorOn ? (
-        <Field label={`Volume dell’ascolto: ${pct(s.monitorVol)}`}>
-          <input className="range" type="range" min={0} max={1} step={0.01} value={s.monitorVol} aria-label="Volume dell’ascolto"
-            onChange={(e) => { const monitorVol = Number(e.target.value); update({ monitorVol }); liveInput.setMonitor(true, monitorVol); }} />
-        </Field>
-      ) : null}
+      <MonitorControls />
+      <InputDiagnostics />
     </div>
+  );
+}
+
+/** Hearing the guitar: off at every start, on only by choice, with its own level. */
+export function MonitorControls() {
+  const live = useLive();
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  const on = live.state === 'on';
+  return (
+    <div className="live-monitor">
+      <button
+        type="button"
+        className="btn live-listen"
+        data-testid="monitor-toggle"
+        aria-pressed={live.monitorOn}
+        disabled={!on}
+        onClick={() => liveInput.setMonitor(!live.monitorOn, s.monitorVol)}
+      >
+        {live.monitorOn ? 'Ascolto acceso' : 'Ascolta la chitarra'}
+      </button>
+      <p className="field-hint live-monitor-hint">Usa le cuffie: con le casse il microfono riprende l’uscita e fischia. Se la scheda audio ha l’ascolto diretto, puoi usare quello e lasciare spento questo.</p>
+      <Field label={`Volume della chitarra: ${pct(s.monitorVol)}`}>
+        <input className="range" type="range" min={0} max={1} step={0.01} value={s.monitorVol} aria-label="Volume della chitarra" data-testid="monitor-volume"
+          onChange={(e) => { const monitorVol = Number(e.target.value); update({ monitorVol }); if (live.monitorOn) liveInput.setMonitor(true, monitorVol); }} />
+      </Field>
+    </div>
+  );
+}
+
+/** What the browser reports about the audio path, and a beep to test the output. Nothing here is estimated. */
+function InputDiagnostics() {
+  const d = useLive((l) => l.diagnostics);
+  const on = useLive((l) => l.state === 'on');
+  const ms = (v: number | null) => (v === null ? 'non disponibile' : `${(v * 1000).toFixed(1)} ms`);
+  return (
+    <details className="live-diagnostics" data-testid="live-diagnostics">
+      <summary>Diagnostica audio</summary>
+      <button type="button" className="btn" data-testid="test-tone" onClick={() => engine.testTone()}>Suono di prova (La 440 Hz)</button>
+      <p className="field-hint">Se non senti il suono di prova, il problema è nell’uscita: dispositivo di uscita del sistema, volume, cuffie collegate alla scheda giusta.</p>
+      {on && d ? (
+        <dl className="diag-list">
+          <dt>Stato dell’audio</dt><dd>{d.contextState === 'running' ? 'attivo' : d.contextState}</dd>
+          <dt>Frequenza di campionamento</dt><dd>{d.sampleRate} Hz{d.trackSampleRate && d.trackSampleRate !== d.sampleRate ? ` (ingresso ${d.trackSampleRate} Hz, ricampionato)` : ''}</dd>
+          <dt>Dispositivo</dt><dd>{d.deviceLabel || 'senza nome'}</dd>
+          <dt>Canali d’ingresso</dt><dd>{d.inputChannels ?? 'non dichiarati'}</dd>
+          <dt>Latenza di base dichiarata</dt><dd>{ms(d.baseLatency)}</dd>
+          <dt>Latenza d’uscita dichiarata</dt><dd>{ms(d.outputLatency)}</dd>
+        </dl>
+      ) : <p className="field-hint">Avvia l’ingresso per leggere i dati del dispositivo.</p>}
+      <p className="field-hint">I valori di latenza sono quelli dichiarati dal browser: la latenza d’ingresso non è misurabile da qui.</p>
+    </details>
   );
 }
 
@@ -96,16 +163,15 @@ export function LiveMonitorPanel() {
         <span className="live-detail" data-testid="live-frequency">{pitch ? `${pitch.frequency.toFixed(1)} Hz` : on ? 'In ascolto…' : 'Avvia l’ingresso'}</span>
         <span className="live-detail" data-testid="live-confidence">{pitch ? `Affidabilità ${pct(pitch.confidence)}${pitch.stable ? ', stabile' : ''}` : `Mostra le note sopra ${pct(MIN_CONFIDENCE)} di affidabilità`}</span>
       </div>
-      {note && where ? (
-        <p className="field-hint" data-testid="live-positions">
-          Un segnale solo dà l’altezza, non la corda: {nameOfMidi(note.midi)} si suona in {where.all.length} {where.all.length === 1 ? 'punto' : 'punti'} ({positionsOf(note.midi).map(place).join('; ')}). Sulla tastiera il punto pieno è il più probabile secondo ciò che mostra.
-        </p>
-      ) : null}
-      {feedback ? (
-        <p className={`live-feedback is-${feedback}`} data-testid="live-feedback">
-          {feedback === 'giusto' ? 'Giusto' : feedback === 'ottava' ? `Nota giusta, ottava diversa (attesa ${nameOfMidi(expected?.midi ?? 0)})` : `Attesa ${nameOfMidi(expected?.midi ?? 0)}`}
-        </p>
-      ) : null}
+      {/* Fixed boxes: a note coming and going never moves what is below. */}
+      <p className="field-hint live-positions" data-testid="live-positions" title={note ? positionsOf(note.midi).map(place).join('; ') : undefined}>
+        {note && where
+          ? `${nameOfMidi(note.midi)} si suona in ${where.all.length} ${where.all.length === 1 ? 'punto' : 'punti'}: ${positionsOf(note.midi).map(place).join('; ')}.`
+          : 'Un segnale solo dà l’altezza, non la corda: la tastiera mostra tutte le posizioni possibili e piena la più probabile, che resta una stima.'}
+      </p>
+      <p className={`live-feedback ${feedback ? `is-${feedback}` : ''}`} data-testid="live-feedback">
+        {feedback === 'giusto' ? 'Giusto' : feedback === 'ottava' ? `Nota giusta, ottava diversa (attesa ${nameOfMidi(expected?.midi ?? 0)})` : feedback === 'diverso' ? `Attesa ${nameOfMidi(expected?.midi ?? 0)}` : ' '}
+      </p>
       <Toggle checked={s.liveOnBoard} onChange={(liveOnBoard) => update({ liveOnBoard })}>Mostra la nota rilevata sulla tastiera</Toggle>
     </Panel>
   );

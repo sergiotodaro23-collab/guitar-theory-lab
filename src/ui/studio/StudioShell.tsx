@@ -14,7 +14,7 @@ import { AppFooter } from '../AppFooter';
 import { DrumPanel } from '../DrumMachine';
 import { InputPanels } from '../LivePanels';
 import { Board } from '../Board';
-import { Fader, Knob, OutputMeter } from '../hardware';
+import { Fader, GuitarChannel, Knob, MasterFader, OutputMeter } from '../hardware';
 import {
   AppearanceToggle, BeatLights, BpmInput, ClickSelect, CurrentChord, MeterSelect, ModeNav, Nameplate, PlayControls, useTap,
 } from '../Transport';
@@ -99,7 +99,11 @@ function MixerPlate() {
             </button>
           </div>
         ))}
-        <OutputMeter />
+        <GuitarChannel keyClass="ws-mute" />
+        <div className="ws-channel ws-master">
+          <MasterFader />
+          <OutputMeter />
+        </div>
       </div>
     </section>
   );

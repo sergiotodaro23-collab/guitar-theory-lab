@@ -95,6 +95,9 @@ export interface HarmonySettings {
   readonly tunerA4: number;
   readonly tunerTuning: string;
   readonly liveOnBoard: boolean;
+  readonly inputChannel: 'mix' | 'left' | 'right';
+  /** Master output level, after every channel including the guitar monitor. */
+  readonly volMaster: number;
   /** Click accents, 16 steps from the downbeat; null follows the meter (D-18). */
   readonly clickAccents: readonly AccentLevel[] | null;
   readonly clickSound: ClickSound;
@@ -193,6 +196,8 @@ export const DEFAULT_SETTINGS: Settings = {
   tunerA4: 440,
   tunerTuning: 'standard',
   liveOnBoard: true,
+  inputChannel: 'mix',
+  volMaster: 0.85,
   clickAccents: null,
   clickSound: 'beep',
   arpSource: 'chord',
@@ -285,6 +290,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     tunerA4: typeof r.tunerA4 === 'number' && r.tunerA4 >= 415 && r.tunerA4 <= 466 ? Math.round(r.tunerA4) : d.tunerA4,
     tunerTuning: oneOf(r.tunerTuning, TUNINGS.map((t) => t.id), d.tunerTuning),
     liveOnBoard: typeof r.liveOnBoard === 'boolean' ? r.liveOnBoard : d.liveOnBoard,
+    inputChannel: oneOf(r.inputChannel, ['mix', 'left', 'right'] as const, d.inputChannel),
+    volMaster: number01(r.volMaster, d.volMaster),
     clickAccents: sanitizeAccents(r.clickAccents),
     clickSound: oneOf(r.clickSound, CLICK_SOUNDS.map((c) => c.value), d.clickSound),
     arpSource: oneOf(r.arpSource, ['chord', 'progression'] as const, d.arpSource),
