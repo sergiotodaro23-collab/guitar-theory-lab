@@ -178,11 +178,14 @@ export function SimpleShell({ studioAllowed }: { readonly studioAllowed: boolean
           </div>
           <Board />
         </section>
-        <div className="cs-lower">
-          <Deck />
-          <Mixer />
+        {/* On a desktop window header, transport and neck stay put and this scrolls (D-24). */}
+        <div className="cs-scroll" data-testid="scroll-panels">
+          <div className="cs-lower">
+            <Deck />
+            <Mixer />
+          </div>
+          <AppFooter />
         </div>
-        <AppFooter />
       </main>
     </div>
       </MixerShown.Provider>

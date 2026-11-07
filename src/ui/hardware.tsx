@@ -17,11 +17,12 @@ interface KnobProps {
   readonly onChange: (value: number) => void;
   readonly format: (value: number) => string;
   readonly testId?: string;
+  readonly className?: string;
 }
 
 const SWEEP = 270;
 
-export function Knob({ label, value, min, max, step, onChange, format, testId }: KnobProps) {
+export function Knob({ label, value, min, max, step, onChange, format, testId, className }: KnobProps) {
   const drag = useRef<{ y: number; value: number } | null>(null);
   const clamp = (v: number) => Math.min(max, Math.max(min, Math.round(v / step) * step));
   const set = (v: number) => {
@@ -62,7 +63,7 @@ export function Knob({ label, value, min, max, step, onChange, format, testId }:
   };
 
   return (
-    <div className="knob">
+    <div className={`knob ${className ?? ''}`}>
       <div
         className="knob-dial"
         role="slider"

@@ -2,6 +2,8 @@
 
 Procedura per quando la chitarra non si sente, non viene rilevata o arriva in ritardo. Verificata in e2e solo con un microfono simulato (file WAV): **nessuna prova con hardware reale è ancora registrata** in `docs/QA_REPORT.md`.
 
+Nota (D-25): l'ascolto riproduce il segnale **pulito** (DI) della chitarra. Un suono senza amplificatore non è un guasto: amp modeling, cabinet ed effetti sono funzioni future (P4-01, P4-02).
+
 ## Come scorre il segnale
 
 ```

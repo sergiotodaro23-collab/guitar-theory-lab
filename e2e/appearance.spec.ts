@@ -192,8 +192,10 @@ test('the legend lists only what the neck shows', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await open(page);
   const legend = page.getByTestId('note-legend').getByTestId('legend');
-  await expect(legend.locator('[data-kind]')).toHaveCount(2);
+  // Tonic, scale, and the played-note entry that stays while the exercise is on.
+  await expect(legend.locator('[data-kind]')).toHaveCount(3);
   await expect(legend.locator('[data-kind="root"]')).toBeVisible();
+  await expect(legend.locator('[data-kind="played"]')).toBeVisible();
   await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
   await expect(legend.locator('[data-kind="root"]')).toHaveCount(0);
   await expect(legend.locator('[data-kind="guide"]')).toBeVisible();

@@ -620,3 +620,120 @@
 .ws-master { border-left: 1px solid rgba(0, 0, 0, 0.5); padding-left: 6px; display: flex; align-items: flex-end; gap: 6px; }
 :root[data-theme='studio'] .ws-mute:disabled { opacity: 0.45; cursor: not-allowed; }
 :root[data-theme='studio'] .ws-input .live-message.is-error { color: #ffb3aa; }
+
+/*
+ * ---- Desktop window (D-24): head, transport and neck stay put. The centre
+ * column scrolls the mixer, the notes and the presets (from 1200 × 720); the right column the
+ * phone, legend and guitar input. In smaller windows the two scrolling
+ * wrappers dissolve (display: contents) and the page grid above applies.
+ */
+.ws-scroll, .ws-right { display: contents; }
+:root[data-theme='studio'] .ws-transport .accent-pop { background: #2e3136 url('./assets/steel.webp') repeat; background-size: 512px 256px; border: 1px solid #111214; }
+:root[data-theme='studio'] .ws-transport .accent-pop .accent-grid { background: rgba(5, 5, 6, 0.45); }
+:root[data-theme='studio'] .accent-toggle { border-style: solid; border-width: 10px; border-image: url('./assets/key.webp') 40 fill / 10px stretch; background: none; color: #ece6da; font: 600 17px/1 var(--plate-font); min-height: 58px; padding: 2px 14px 4px; border-radius: 0; }
+:root[data-theme='studio'] .accent-toggle[aria-expanded='true'] { border-image-source: url('./assets/key-lit.webp'); color: #1e0f02; }
+@media (min-width: 1200px) and (min-height: 720px) {
+  :root[data-theme='studio'] body { overflow: hidden; }
+  .ws-bench { height: 100dvh; padding: 10px 14px 0; overflow: hidden; }
+  .ws-rig {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'head head'
+      'trans right'
+      'neck right'
+      'scroll right';
+    gap: 10px 14px;
+    align-items: stretch;
+  }
+  .ws-head { gap: 14px; }
+  .ws-sticker { width: 250px; }
+  :root[data-theme='studio'] .ws-sticker .nameplate-title { font-size: 22px; }
+  :root[data-theme='studio'] .ws-sticker .nameplate-byline { font-size: 12px; }
+  .ws-head .mode-nav .segment { font-size: 17px; min-height: 46px; }
+  .ws-transport { padding: 12px 22px; gap: 10px 16px; align-self: start; }
+  :root[data-theme='studio'] .knob-dial { width: 64px; height: 64px; }
+  :root[data-theme='studio'] .knob-face { inset: 10px; }
+  .ws-neck { align-self: start; padding: 10px 16px 8px; }
+  .ws-scroll {
+    grid-area: scroll;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding: 6px 4px 14px;
+  }
+  .ws-right {
+    grid-area: right;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: 14px;
+  }
+  .ws-side, .ws-aside { width: 100%; }
+  /* The mixer lies flat across the scrolling column: every channel in one row. */
+  .ws-mixer { align-self: stretch; }
+  .ws-channels { flex-wrap: nowrap; justify-content: flex-start; gap: 18px; }
+  .ws-notes { padding-top: 10px; }
+}
+@media (min-width: 1200px) and (min-height: 720px) {
+  .ws-rig { grid-template-columns: minmax(0, 1fr) 264px; }
+  /* The phone keeps its proportions, a little smaller: the neck gets the width. */
+  .ws-phone { zoom: 0.86; }
+  .ws-legend-note, .ws-input { width: 100%; }
+  .ws-transport { flex-wrap: nowrap; }
+  .ws-lcd { flex: 1 1 200px; min-width: 190px; }
+  :root[data-theme='studio'] .ws-lcd .now-chord { font-size: 30px; }
+  :root[data-theme='studio'] .ws-rig .play { min-width: 96px; min-height: 52px; }
+  :root[data-theme='studio'] .ws-rig .stop, :root[data-theme='studio'] .ws-rig .tap, :root[data-theme='studio'] .accent-toggle { min-height: 52px; }
+  :root[data-theme='studio'] .knob { min-width: 64px; }
+  :root[data-theme='studio'] .knob-dial { width: 56px; height: 56px; }
+  :root[data-theme='studio'] .knob-face { inset: 9px; }
+  .ws-time { flex: none; }
+  :root[data-theme='studio'] .ws-time .select { min-width: 0; width: 132px; }
+  :root[data-theme='studio'] .fretboard { min-width: 900px; }
+  .ws-neck-toolbar { margin-bottom: 4px; }
+}
+@media (min-width: 1200px) and (min-height: 720px) {
+  :root[data-theme='studio'] .ws-lcd .lcd-sub { flex-wrap: nowrap; gap: 10px; }
+  .ws-lcd { flex: 1 1 280px; min-width: 270px; }
+  :root[data-theme='studio'] .ws-time .select { width: 118px; }
+  .ws-transport { gap: 10px 12px; }
+}
+/* Narrower desktop windows: the tempo knob repeats the BPM field and its ± keys, so it gives way. */
+@media (min-width: 1200px) and (max-width: 1399px) and (min-height: 720px) {
+  :root[data-theme='studio'] .ws-transport .knob-tempo { display: none; }
+}
+@media (min-width: 1200px) and (min-height: 720px) {
+  /* Avvia, Pausa, Riprendi: one width, so the LCD next to it never moves. */
+  :root[data-theme='studio'] .ws-rig .play { width: 112px; min-width: 112px; }
+}
+@media (min-width: 1200px) and (max-width: 1399px) and (min-height: 720px) {
+  /* The selects carry their own accessible names; the engraved captions give way. */
+  .ws-time { grid-template-columns: auto; }
+  .ws-time .ws-engraved { display: none; }
+  .ws-lcd { flex-basis: 240px; min-width: 230px; }
+}
+@media (min-width: 1200px) and (min-height: 720px) {
+  /* LCD in two tidy rows: chord and beat lights, then bar counter and tempo. */
+  .ws-lcd { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'main lights' 'counter bpm'; align-items: center; gap: 4px 10px; flex: 0 1 280px; min-width: 250px; }
+  .ws-lcd .lcd-sub { display: contents; }
+  .ws-lcd .lcd-main { grid-area: main; min-width: 0; overflow: hidden; }
+  .ws-lcd .lcd-counter { grid-area: counter; }
+  .ws-lcd .lcd-bpm { grid-area: bpm; }
+  .ws-lcd .beat-lights { grid-area: lights; }
+}
+@media (min-width: 1200px) and (min-height: 720px) {
+  :root[data-theme='studio'] .ws-lcd .now-playing { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+}
+@media (min-width: 1400px) and (min-height: 720px) {
+  :root[data-theme='studio'] .ws-time .select { width: 150px; }
+}

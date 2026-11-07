@@ -4,14 +4,14 @@
  * level and wraps to silent; arrows up and down set it, left and right move.
  * Steps past the end of the bar are shown but disabled.
  */
-import { useRef, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { CLICK_SOUNDS } from '../audio/clickSounds';
 import { meterOf } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { ACCENT_NAMES, ACCENT_STEPS, clicksPerBar, meterAccents, nextAccent, type AccentLevel } from '../timeline';
 import { Select } from './controls';
 
-export function AccentGrid() {
+function AccentGridPanel() {
   const settings = useApp((s) => s.settings);
   const update = useApp((s) => s.update);
   const state = usePlayhead((p) => p.state);
@@ -73,6 +73,45 @@ export function AccentGrid() {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/**
+ * The grid opens from a key in the transport and floats over the page, so
+ * the transport stays one compact row and the neck never moves (D-24).
+ * Escape, the key again or a click outside the transport closes it.
+ */
+export function AccentGrid() {
+  const [open, setOpen] = useState(false);
+  const custom = useApp((s) => s.settings.clickAccents !== null);
+  const box = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    // Working the transport (metre, click, play) keeps it open: the grid follows the metre live.
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Element | null;
+      if (box.current?.contains(target) || target?.closest('.cs-transport, .ws-transport')) return;
+      setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onDown);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onDown);
+    };
+  }, [open]);
+  return (
+    <div className="accent-control" ref={box}>
+      <button type="button" className="accent-toggle" aria-expanded={open} aria-controls="accent-pop" data-testid="accent-toggle" onClick={() => setOpen(!open)}>
+        Accenti{custom ? ' ·' : ''}
+      </button>
+      {open ? (
+        <div className="accent-pop" id="accent-pop">
+          <AccentGridPanel />
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -17,6 +17,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await page.setViewportSize({ width: 1280, height: 800 });
     const errors = await open(page);
     await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await page.getByTestId('accent-toggle').click();
     const grid = page.getByTestId('accent-grid');
     await expect(grid.getByRole('button', { name: /^Passo/ })).toHaveCount(16);
 
@@ -72,6 +73,7 @@ test('on a phone the 16 steps sit in two rows of eight, all visible', async ({ p
   await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
   await page.getByTestId('time-more-toggle').click();
+  await page.getByTestId('accent-toggle').click();
   const first = await step(page, 0).boundingBox();
   const eighth = await step(page, 7).boundingBox();
   const ninth = await step(page, 8).boundingBox();
