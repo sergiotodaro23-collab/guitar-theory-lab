@@ -168,7 +168,23 @@ export interface CompPayload {
   readonly velocity: number;
 }
 
-export type TrackPayload = NotePayload | ChordChangePayload | CompPayload;
+/** One drum hit; the voice names a kit piece of the jam drum machine. */
+export interface DrumPayload {
+  readonly type: 'drum';
+  readonly voice: string;
+  /** 0–1. */
+  readonly velocity: number;
+}
+
+/** One note of the jam bass line. */
+export interface BassPayload {
+  readonly type: 'bass';
+  readonly midi: number;
+  readonly durationTicks: number;
+  readonly velocity: number;
+}
+
+export type TrackPayload = NotePayload | ChordChangePayload | CompPayload | DrumPayload | BassPayload;
 
 export interface TrackEvent<P extends TrackPayload = TrackPayload> {
   /** Offset inside the track. */
