@@ -56,7 +56,7 @@
   max-width: 1640px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 290px minmax(0, 1fr) 300px;
+  grid-template-columns: 340px minmax(0, 1fr) 300px;
   grid-template-areas:
     'head head head'
     'mixer trans side'
@@ -535,7 +535,7 @@
 /* ---- Smaller screens: the same parts, reflowed ---- */
 @media (max-width: 1240px) {
   .ws-rig {
-    grid-template-columns: 290px minmax(0, 1fr);
+    grid-template-columns: 340px minmax(0, 1fr);
     grid-template-areas:
       'head head'
       'mixer trans'
@@ -589,3 +589,9 @@
 :root[data-theme='studio'] .ws-note .drum-step.step-2 { background: #9a4a00; border: 2px solid #2a2017; }
 :root[data-theme='studio'] .ws-note .drum-step.is-beat { border-left-color: #2a2017; }
 :root[data-theme='studio'] .ws-note .drum-step.is-now { outline-color: #1d7a35; }
+
+/* Five channels and the meter inside the plate. */
+.ws-channels { gap: 2px; }
+:root[data-theme='studio'] .ws-mixer .ws-mute { font-size: 12px; padding: 0 2px 2px; letter-spacing: 0.04em; min-width: 0; }
+:root[data-theme='studio'] .ws-mixer .fader-label { font-size: 12px; letter-spacing: 0.02em; }
+:root[data-theme='studio'] .ws-mixer .fader-slot { width: 36px; }

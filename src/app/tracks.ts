@@ -1,6 +1,6 @@
 /** Translate settings into the timeline tracks each mode needs. Pure. */
 import { arpeggioNotes, arpeggioSequence, exerciseTrack, progressionArpeggioTrack, routineTrack } from '../exercises';
-import { chordSpans, chordTrack, compTrack, drumTrack, progressionLength, parsedChords } from '../jam';
+import { bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
 import { tryParseChord } from '../theory';
 import { guideTones } from '../harmony';
 import { ticksPerBeat, type Track } from '../timeline';
@@ -14,6 +14,7 @@ export interface ModeTracks {
   readonly comp: TrackSpec | null;
   /** Jam Studio only. */
   readonly drums: TrackSpec | null;
+  readonly bass: TrackSpec | null;
   /** Ticks after the chord track starts where a non-looping progression ends. */
   readonly endTick: number | null;
 }
@@ -26,6 +27,7 @@ export function buildTracks(s: Settings): ModeTracks {
   const hasProgression = s.progression.chords.length > 0;
   const loop = s.mode === 'jam' ? s.loop : true;
   const auto = inHarmony && !manual && hasProgression;
+  const bassPlays = s.mode === 'jam' && auto && s.bassOn;
 
   let exercise: TrackSpec | null = null;
   if (s.exerciseOn && s.exerciseMode === 'routine') {
@@ -37,7 +39,8 @@ export function buildTracks(s: Settings): ModeTracks {
   return {
     exercise,
     chords: auto ? chordTrack(s.progression, meter, loop) : null,
-    comp: auto && s.compOn ? compTrack(s.progression, meter, s.compPattern, loop) : null,
+    comp: auto && s.compOn ? compTrack(s.progression, meter, s.compPattern, loop, bassPlays) : null,
+    bass: bassPlays ? bassTrack(s.progression, meter, genreOf(s.jamGenre).bass[s.bassPattern] ?? genreOf(s.jamGenre).bass[0], loop) : null,
     drums: s.mode === 'jam' && s.drumOn ? drumTrack(s.drumKit, s.drumPattern, meter, s.drumFillEvery) : null,
     endTick: s.mode === 'jam' && !s.loop && hasProgression ? progressionLength(s.progression, meter) : null,
   };
@@ -50,9 +53,9 @@ function arpeggioTracks(s: Settings): ModeTracks {
   if (s.arpSource === 'chord') {
     const chord = tryParseChord(s.arpSymbol);
     const sequence = chord ? arpeggioSequence(chord, arpeggioNotes(chord, s.arpLow), spec) : [];
-    return { exercise: sequence.length ? exerciseTrack(sequence, meter, s.arpNotesPerBeat) : null, chords: null, comp: null, drums: null, endTick: null };
+    return { exercise: sequence.length ? exerciseTrack(sequence, meter, s.arpNotesPerBeat) : null, chords: null, comp: null, drums: null, bass: null, endTick: null };
   }
-  if (s.progression.chords.length === 0) return { exercise: null, chords: null, comp: null, drums: null, endTick: null };
+  if (s.progression.chords.length === 0) return { exercise: null, chords: null, comp: null, drums: null, bass: null, endTick: null };
   const lengthTicks = progressionLength(s.progression, meter);
   const exercise = progressionArpeggioTrack({
     spans: chordSpans(s.progression, meter), lengthTicks, loop: true, meter, low: s.arpLow, spec, notesPerBeat: s.arpNotesPerBeat, link: s.arpLink,
@@ -62,6 +65,7 @@ function arpeggioTracks(s: Settings): ModeTracks {
     chords: chordTrack(s.progression, meter, true),
     comp: s.compOn ? compTrack(s.progression, meter, s.compPattern, true) : null,
     drums: null,
+    bass: null,
     endTick: null,
   };
 }

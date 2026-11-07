@@ -149,6 +149,7 @@ function Mixer() {
         <Fader label="Click" value={s.volClick} onChange={(volClick) => update({ volClick })} testId="fader-click" />
         <Fader label="Note" value={s.volNotes} onChange={(volNotes) => update({ volNotes })} testId="fader-notes" />
         <Fader label="Accordi" value={s.volComp} onChange={(volComp) => update({ volComp })} testId="fader-comp" />
+        <Fader label="Basso" value={s.volBass} onChange={(volBass) => update({ volBass })} testId="fader-bass" />
         <Fader label="Batteria" value={s.volDrums} onChange={(volDrums) => update({ volDrums })} testId="fader-drums" />
         <OutputMeter />
       </div>

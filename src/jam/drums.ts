@@ -31,7 +31,7 @@ export interface DrumKit {
 export const steps = (text: string): readonly DrumStep[] =>
   Array.from({ length: DRUM_STEPS }, (_, i) => (text[i] === 'X' ? 2 : text[i] === 'x' ? 1 : 0));
 
-const pattern = (rows: Partial<Record<DrumVoice, string>>): DrumPattern => ({
+export const pattern = (rows: Partial<Record<DrumVoice, string>>): DrumPattern => ({
   kick: steps(rows.kick ?? ''), snare: steps(rows.snare ?? ''), hat: steps(rows.hat ?? ''),
   open: steps(rows.open ?? ''), clap: steps(rows.clap ?? ''), tom: steps(rows.tom ?? ''),
 });

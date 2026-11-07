@@ -176,7 +176,15 @@ export interface DrumPayload {
   readonly velocity: number;
 }
 
-export type TrackPayload = NotePayload | ChordChangePayload | CompPayload | DrumPayload;
+/** One note of the jam bass line. */
+export interface BassPayload {
+  readonly type: 'bass';
+  readonly midi: number;
+  readonly durationTicks: number;
+  readonly velocity: number;
+}
+
+export type TrackPayload = NotePayload | ChordChangePayload | CompPayload | DrumPayload | BassPayload;
 
 export interface TrackEvent<P extends TrackPayload = TrackPayload> {
   /** Offset inside the track. */

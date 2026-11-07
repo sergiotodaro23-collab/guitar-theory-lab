@@ -1,13 +1,13 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { STUDY_PRESETS } from '../app/builtins';
 import { engine } from '../app/engine';
-import { sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
+import { genreSettings, sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
 import { presetRepository, useApp, usePlayhead } from '../app/store';
 import { CAGED_FORMS } from '../fretboard';
 import { ARP_SPAN, INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
 import { AVOID_PROFILES, guideTones, type AvoidProfile } from '../harmony';
 import {
-  COMP_PATTERNS, PROGRESSION_TEMPLATES, addChord, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord, withChord,
+  COMP_PATTERNS, GENRES, PROGRESSION_TEMPLATES, addChord, genreOf, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord, withChord,
   type CompPattern, type Progression, type ChordDuration,
 } from '../jam';
 import { CHORD_SUFFIXES, INVERSION_NAMES, SCALES, SCALE_IDS, TONICS, parseChord, tryParseChord, buildScale, compareScales, withBass, parseNote, pitchClass, type Chord, type Scale, type ScaleId } from '../theory';
@@ -749,7 +749,23 @@ export function JamPanels() {
           <Toggle checked={s.loop} onChange={(loop) => update({ loop })}>Ripeti in loop</Toggle>
         </div>
       </Panel>
-      <Panel title="Accompagnamento">
+      <Panel title="Band">
+        <Field label="Genere" hint={`Imposta batteria, basso, ritmo degli accordi e swing. Tempo tipico: ${genreOf(s.jamGenre).bpm} BPM.`}>
+          <Select label="Genere" testId="jam-genre" value={s.jamGenre} options={GENRES.map((g) => ({ value: g.id, label: g.label }))} onChange={(id) => update(genreSettings(id))} />
+        </Field>
+        <button type="button" className="btn" disabled={s.bpm === genreOf(s.jamGenre).bpm} onClick={() => update({ bpm: genreOf(s.jamGenre).bpm })}>
+          Usa {genreOf(s.jamGenre).bpm} BPM
+        </button>
+        <Toggle checked={s.bassOn} onChange={(bassOn) => update({ bassOn })}>Suona il basso</Toggle>
+        <Field label="Linea di basso">
+          <Select<number>
+            label="Linea di basso"
+            testId="bass-pattern"
+            value={s.bassPattern}
+            options={genreOf(s.jamGenre).bass.map((b, i) => ({ value: i, label: b.name }))}
+            onChange={(bassPattern) => update({ bassPattern })}
+          />
+        </Field>
         <Toggle checked={s.compOn} onChange={(compOn) => update({ compOn })}>Suona gli accordi</Toggle>
         <Field label="Ritmo">
           <Select<CompPattern>
@@ -775,7 +791,7 @@ export function JamPanels() {
 
 /** What a saved study preset keeps: everything except the mixer and mode-free UI state. */
 /** Mixer levels and the visual theme belong to the person, not to a study preset. */
-const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'volDrums', 'muteDrums', 'look', 'tutorMode', 'tutorMinimized']);
+const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'volDrums', 'muteDrums', 'volBass', 'muteBass', 'look', 'tutorMode', 'tutorMinimized']);
 const pickStudy = (s: Settings): Partial<Settings> =>
   Object.fromEntries(Object.entries(s).filter(([key]) => !MIXER_KEYS.has(key))) as Partial<Settings>;
 

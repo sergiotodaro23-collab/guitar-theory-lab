@@ -13,7 +13,7 @@ import { BPM_MAX, BPM_MIN, MIX_CHANNELS, channelVolume, meterOf, type Settings }
 import { useApp, usePlayhead, type Playhead } from './store';
 
 export interface DebugLog {
-  scheduled: { kind: string; tick: number; time: number; chord?: number; note?: number; step?: number; level?: number; voice?: string }[];
+  scheduled: { kind: string; tick: number; time: number; chord?: number; note?: number; step?: number; level?: number; voice?: string; midi?: number }[];
   shown: { kind: 'beat' | 'note' | 'chord'; tick: number; value: number; time: number; scheduled: number }[];
 }
 
@@ -51,6 +51,7 @@ class Engine {
             ...(payload.type === 'chord' ? { chord: payload.chordIndex } : {}),
             ...(payload.type === 'note' ? { note: payload.index } : {}),
             ...(payload.type === 'drum' ? { voice: payload.voice } : {}),
+            ...(payload.type === 'bass' ? { midi: payload.midi } : {}),
           });
         }
       },
@@ -100,7 +101,7 @@ class Engine {
   /** With `meterChanged`, every track restarts on the bar line where the new meter begins. */
   private syncTracks(s: Settings, meterChanged = false): void {
     const tracks: ModeTracks = buildTracks(s);
-    const apply = (id: 'exercise' | 'chords' | 'comp' | 'drums', atBar: boolean) => {
+    const apply = (id: 'exercise' | 'chords' | 'comp' | 'bass' | 'drums', atBar: boolean) => {
       const spec = tracks[id];
       const signature = spec ? sig([spec.lengthTicks, spec.loop, spec.events]) : '';
       if (this.trackSigs[id] === signature) return;
@@ -112,6 +113,7 @@ class Engine {
     apply('exercise', true);
     apply('chords', meterChanged);
     apply('comp', meterChanged);
+    apply('bass', meterChanged);
     // A new drum pattern, fill or edit comes in on the next bar line, like a drummer would.
     apply('drums', true);
     this.scheduler.setEnd(tracks.endTick, tracks.endTick === null ? null : () => this.stop(), 'chords');

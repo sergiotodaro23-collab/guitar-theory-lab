@@ -146,7 +146,8 @@ export function voiceChord(chord: Chord, previous?: readonly number[]): readonly
   return [bass, ...[...new Set(clamped)].sort((a, b) => a - b)];
 }
 
-export function compTrack(p: Progression, meter: Meter, pattern: CompPattern, loop: boolean): Omit<Track<CompPayload>, 'originTick'> {
+/** With `bassLine`, the bass player has the low notes: the comp leaves its bass out. */
+export function compTrack(p: Progression, meter: Meter, pattern: CompPattern, loop: boolean, bassLine = false): Omit<Track<CompPayload>, 'originTick'> {
   const beat = ticksPerBeat(meter);
   const bar = ticksPerBar(meter);
   const patternTicks = patternBeats(pattern, meter.beatsPerBar).map((b) => b * beat);
@@ -169,7 +170,7 @@ export function compTrack(p: Progression, meter: Meter, pattern: CompPattern, lo
         tick,
         payload: {
           type: 'comp',
-          midis: voicing as readonly number[],
+          midis: bassLine ? (voicing as readonly number[]).slice(1) : (voicing as readonly number[]),
           durationTicks: Math.max(beat / 4, (next - tick) * 0.92),
           velocity: tick % bar === 0 ? 0.8 : 0.62,
         },

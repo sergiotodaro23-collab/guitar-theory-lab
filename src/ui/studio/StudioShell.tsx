@@ -74,10 +74,11 @@ function TransportPlate() {
   );
 }
 
-const CHANNELS: readonly { channel: MixChannel; label: string; vol: 'volClick' | 'volNotes' | 'volComp' | 'volDrums'; mute: 'muteClick' | 'muteNotes' | 'muteComp' | 'muteDrums' }[] = [
+const CHANNELS: readonly { channel: MixChannel; label: string; vol: 'volClick' | 'volNotes' | 'volComp' | 'volBass' | 'volDrums'; mute: 'muteClick' | 'muteNotes' | 'muteComp' | 'muteBass' | 'muteDrums' }[] = [
   { channel: 'click', label: 'Click', vol: 'volClick', mute: 'muteClick' },
   { channel: 'notes', label: 'Note', vol: 'volNotes', mute: 'muteNotes' },
   { channel: 'comp', label: 'Accordi', vol: 'volComp', mute: 'muteComp' },
+  { channel: 'bass', label: 'Basso', vol: 'volBass', mute: 'muteBass' },
   { channel: 'drums', label: 'Batteria', vol: 'volDrums', mute: 'muteDrums' },
 ];
 

@@ -7,7 +7,7 @@ import type { AccentLevel, ScheduledTrackEvent } from '../timeline';
 import { clickRecipe, type ClickSound } from './clickSounds';
 import { drumRecipe } from './drumSounds';
 
-export type AudioBus = 'click' | 'notes' | 'comp' | 'drums';
+export type AudioBus = 'click' | 'notes' | 'comp' | 'bass' | 'drums';
 
 interface Voice {
   readonly start: number;
@@ -35,7 +35,7 @@ export class WebAudioSink {
       gain.connect(this.master);
       return gain;
     };
-    this.buses = { click: bus(), notes: bus(), comp: bus(), drums: bus() };
+    this.buses = { click: bus(), notes: bus(), comp: bus(), bass: bus(), drums: bus() };
   }
 
   setVolume(bus: AudioBus, value: number): void {
@@ -52,6 +52,8 @@ export class WebAudioSink {
     const { payload } = event;
     if (payload.type === 'drum') {
       this.drum(payload.voice, payload.velocity, time);
+    } else if (payload.type === 'bass') {
+      this.bassNote(payload.midi, payload.durationTicks * this.secondsPerTick(), payload.velocity, time);
     } else if (payload.type === 'note') {
       this.pluck(payload.midi, time);
     } else if (payload.type === 'comp') {
@@ -118,6 +120,44 @@ export class WebAudioSink {
         this.voices = this.voices.filter((v) => v !== voiceEntry);
       };
     }
+  }
+
+  /** A plucked electric bass: saw and sine through a closing low-pass filter. */
+  bassNote(midi: number, duration: number, velocity: number, time: number): void {
+    const frequency = midiToHz(midi);
+    const end = time + duration + 0.06;
+    const out = this.ctx.createGain();
+    out.gain.setValueAtTime(0, time);
+    out.gain.linearRampToValueAtTime(0.55 * velocity, time + 0.006);
+    out.gain.setTargetAtTime(0.32 * velocity, time + 0.02, 0.12);
+    out.gain.setValueAtTime(0.32 * velocity, time + duration);
+    out.gain.linearRampToValueAtTime(0, end);
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.Q.value = 2;
+    filter.frequency.setValueAtTime(1400, time);
+    filter.frequency.exponentialRampToValueAtTime(380, time + 0.25);
+    filter.connect(out).connect(this.buses.bass);
+    const saw = this.ctx.createOscillator();
+    saw.type = 'sawtooth';
+    saw.frequency.value = frequency;
+    const sine = this.ctx.createOscillator();
+    sine.type = 'sine';
+    sine.frequency.value = frequency;
+    const sub = this.ctx.createGain();
+    sub.gain.value = 0.8;
+    saw.connect(filter);
+    sine.connect(sub).connect(out);
+    for (const osc of [saw, sine]) {
+      osc.start(time);
+      osc.stop(end);
+    }
+    const voiceEntry: Voice = { start: time, end, gain: out, sources: [saw, sine] };
+    this.voices.push(voiceEntry);
+    saw.onended = () => {
+      out.disconnect();
+      this.voices = this.voices.filter((v) => v !== voiceEntry);
+    };
   }
 
   private noise: AudioBuffer | null = null;
