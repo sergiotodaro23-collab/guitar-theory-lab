@@ -469,6 +469,20 @@ describe('scheduler', () => {
     expect(hits.filter((h) => h.kind === 'manual')).toEqual([]);
   });
 
+  it('two quick picks before the change point: only the last one plays', () => {
+    const { scheduler, timer, hits } = rig(120);
+    scheduler.play();
+    timer.advance(0.5);
+    const tick = scheduler.nextQuantizedTick('bar');
+    scheduler.scheduleOneShot('manual', tick, { type: 'chord', chordIndex: 1 });
+    scheduler.scheduleOneShot('comp', tick, { type: 'comp', midis: [40], durationTicks: 100, velocity: 1 });
+    scheduler.scheduleOneShot('manual', tick, { type: 'chord', chordIndex: 2 });
+    scheduler.scheduleOneShot('comp', tick, { type: 'comp', midis: [45], durationTicks: 100, velocity: 1 });
+    timer.advance(3);
+    expect(hits.filter((h) => h.kind === 'manual')).toHaveLength(1);
+    expect(hits.filter((h) => h.kind === 'comp')).toHaveLength(1);
+  });
+
   it('quantizes manual changes to material not yet scheduled', () => {
     const { scheduler, timer } = rig(120);
     scheduler.play();

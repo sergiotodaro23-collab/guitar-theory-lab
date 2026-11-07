@@ -85,6 +85,7 @@ class Engine {
 
   private applyVolumes(s: Settings): void {
     for (const channel of MIX_CHANNELS) this.audio?.setVolume(channel, channelVolume(s, channel));
+    this.audio?.setMaster(s.volMaster);
   }
 
   /** Which drum step is sounding: the sixteenth of the drum track's bar, wrapped to the 16-step grid. */
@@ -129,7 +130,7 @@ class Engine {
     if (s.bpm !== previous.bpm) this.scheduler.setBpm(s.bpm);
     if (s.subdivision !== previous.subdivision) this.scheduler.setSubdivision(s.subdivision);
     if (s.swing !== previous.swing) this.scheduler.setSwing(s.swing);
-    if (MIX_CHANNELS.some((c) => channelVolume(s, c) !== channelVolume(previous, c))) this.applyVolumes(s);
+    if (s.volMaster !== previous.volMaster || MIX_CHANNELS.some((c) => channelVolume(s, c) !== channelVolume(previous, c))) this.applyVolumes(s);
     this.syncTracks(s, meterChanged);
     if (s.mode !== previous.mode || s.changeMode !== previous.changeMode) this.manualChanges = [];
     if (this.scheduler.transportState !== 'playing') this.publish();
@@ -177,17 +178,26 @@ class Engine {
     const { settings, selectedChord } = useApp.getState();
     const count = settings.progression.chords.length;
     if (count === 0) return;
-    const current = this.scheduler.transportState === 'stopped' ? selectedChord : this.chordIndexAt(this.scheduler.positionNow()) ?? selectedChord;
+    // A change already queued for the next beat or bar counts: N N moves two chords, not one.
+    const pending = this.manualChanges.filter((c) => c.tick > this.scheduler.positionNow()).at(-1);
+    const current = this.scheduler.transportState === 'stopped'
+      ? selectedChord
+      : pending?.chordIndex ?? this.chordIndexAt(this.scheduler.positionNow()) ?? selectedChord;
     this.setChord((current + delta + count) % count);
   }
 
   setChord(index: number): void {
     const { settings, setSelectedChord } = useApp.getState();
     const state = this.scheduler.transportState;
-    setSelectedChord(index);
     const manual = settings.mode === 'harmony' && settings.changeMode === 'manual';
+    // With automatic changes the progression drives the chord while playing: a pick would only
+    // move the hidden selection and surface after stop, so it is ignored.
+    if (state === 'playing' && !manual) return;
+    setSelectedChord(index);
     if (state === 'playing' && manual) {
       const tick = this.scheduler.nextQuantizedTick(settings.quantize);
+      // A newer pick replaces one still waiting: only the last choice lands.
+      this.manualChanges = this.manualChanges.filter((c) => c.tick < tick);
       this.manualChanges.push({ tick, chordIndex: index });
       this.scheduler.scheduleOneShot('manual', tick, { type: 'chord', chordIndex: index });
       this.queueManualComp(settings, index, tick);
@@ -313,6 +323,12 @@ class Engine {
   audioOut(): { ctx: AudioContext; destination: AudioNode } {
     const ctx = this.ensureAudio();
     return { ctx, destination: (this.audio as WebAudioSink).monitorInput };
+  }
+
+  /** Plays a test beep through the master, ignoring channel faders and mutes. */
+  testTone(): void {
+    const ctx = this.ensureAudio();
+    void ctx.resume().then(() => this.audio?.testTone());
   }
 
   outputLevel(): number {
