@@ -1,13 +1,13 @@
 # Stato del progetto
 
-Versione 0.1.0 (package.json). Ultimo aggiornamento: 7 novembre 2026, branch `claude/serene-hopper-ubi687` (ripartito da `main` dopo la PR #6). Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
+Versione 0.1.0 (package.json). Ultimo aggiornamento: 7 novembre 2026, branch `claude/serene-hopper-ubi687` (ripartito da `main` dopo la PR #7). Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 314 test unitari.
-- `npm run test:e2e`: verde, 67 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 331 test unitari.
+- `npm run test:e2e`: verde, 70 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -23,6 +23,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 - **Accordi multipli**: fino a 8 accordi con builder (fondamentale, qualità, basso), slash chord e rivolti, forme eseguibili cercate sul manico e contornate sulla tastiera, diagrammi, invio a Harmony Lab come progressione.
 - **Scale multiple**: fino a 5 scale (principale + 4) con `+ Aggiungi scala`, visibilità, colore, opacità, zona, riordino e confronto delle note.
 - **Jam Studio**: step sequencer (D-19), otto generi e basso generato (D-20), mixer con Click, Note, Accordi, Basso, Batteria, Chitarra, Master e mute.
+- **Vista per accordo** (D-26): ogni accordo della progressione può avere la sua tastiera (arpeggio o scala, forma, focus, scale e arpeggi sovrapposti), che cambia con l'accordo in manuale e in automatico; condivisa da Harmony, Jam e Arpeggios.
 - **Layout desktop** (D-24): da 1200 × 720 trasporto e tastiera fissi, pannelli e colonna destra con scorrimento proprio; Click/Accenti in un pannello sovrapposto.
 - **Ingresso chitarra, Live Monitor, accordatore** (D-21, D-22): canale d'ingresso, gain, ascolto solo manuale, diagnostica e suono di prova, nota rilevata sulla tastiera come stima, accordatore con modalità cromatica. Layout fermo durante il rilevamento.
 - Targhetta con versione reale e autore.
@@ -48,4 +49,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-In attesa del merge della PR P0-14. Poi P1-14 configurazione per accordo, P1-12c arpeggi avanzati, P3-06 groove, Live Monitor 2.0. Dettagli in `docs/ROADMAP.md`.
+In attesa del merge della PR P1-14. Poi P1-12c arpeggi avanzati, P3-06 groove, completamenti di P1-14, Live Monitor 2.0. Dettagli in `docs/ROADMAP.md`.

@@ -55,6 +55,10 @@ Le avoid notes non sono una verità assoluta. `AvoidProfile` sceglie la tradizio
 - Layout desktop (D-24): da 1200 × 720 le shell fissano intestazione, trasporto e tastiera; lo scorrimento sta in `[data-testid="scroll-panels"]` (e `scroll-side` in Studio). Tutto in CSS (`simple/simple.css`, `studio/studio.css`); sotto soglia i contenitori di Studio sono `display: contents`.
 - Ingresso audio: `src/audio/liveInput.ts` (catena, stato in `useLive`), analisi pura in `src/pitch/`.
 
+## Vista per accordo
+
+`src/app/chordViews.ts` (puro): `ChordView` per id dell'accordo della progressione, `viewNotes` (arpeggio nella forma o scala), `viewOverlays` (scale aggiunte e arpeggi come scale di toni dell'accordo), `viewForChord`. `Board.tsx` sceglie la vista dell'accordo corrente (`useHarmonyContext`) e la passa a `buildMarkerLayer` come note, scala, focus e sovrapposizioni; `ChordViewPanel.tsx` la modifica.
+
 ## Timeline condivisa
 
 - Tempo in tick da inizio riproduzione, 480 PPQ. Il BPM conta l'unità della metrica: in 6/8 conta gli ottavi.
