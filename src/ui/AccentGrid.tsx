@@ -105,7 +105,7 @@ export function AccentGrid() {
   return (
     <div className="accent-control" ref={box}>
       <button type="button" className="accent-toggle" aria-expanded={open} aria-controls="accent-pop" data-testid="accent-toggle" onClick={() => setOpen(!open)}>
-        Accenti{custom ? ' ·' : ''}
+        Accenti<span className="accent-mark" aria-hidden="true">{custom ? '·' : ''}</span>
       </button>
       {open ? (
         <div className="accent-pop" id="accent-pop">

@@ -7,7 +7,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 ## Verificato in questa sessione
 
 - `npm run check`: verde, 331 test unitari.
-- `npm run test:e2e`: verde, 70 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
+- `npm run test:e2e`: verde, 72 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
