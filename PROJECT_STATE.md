@@ -6,8 +6,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 294 test unitari.
-- `npm run test:e2e`: verde, 45 casi su Chromium headless (`e2e/app.spec.ts`, `e2e/appearance.spec.ts`, `e2e/accents.spec.ts`, `e2e/drums.spec.ts`, `e2e/genres.spec.ts`; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 313 test unitari.
+- `npm run test:e2e`: verde, 50 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -29,7 +29,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 - Aspetto **Studio** (banco da lavoro, predefinito su tablet e computer, materiali da validare) e **Semplificata** (console, unica su smartphone verticale). Due layout sullo stesso stato, vedi D-16 e D-17. Asset rigenerabili con `python3 tools/studio-assets/render.py`.
 - Solo accordatura standard; nessuna vista per mancini.
-- Nessun input audio (pitch, monitor, tuner).
+- Ingresso chitarra, Live Monitor e accordatore verificati solo con segnali sintetici: mai provati con una chitarra e un'interfaccia reali.
 - Firefox e WebKit non testati (browser assenti nell'ambiente).
 - Vulnerabilità solo nelle dipendenze di sviluppo (Vitest 3), vedi QA.
 
@@ -43,4 +43,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-P3-04 pitch detection, Live Monitor e Tuner. Dettagli in `docs/ROADMAP.md`.
+prove dell'ingresso con hardware reale (P3-04), poi amp modeling (studio di fattibilità). Dettagli in `docs/ROADMAP.md`.

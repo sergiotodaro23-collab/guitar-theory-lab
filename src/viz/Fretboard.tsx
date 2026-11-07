@@ -183,6 +183,8 @@ export interface FretboardProps {
   readonly active: ActiveNote | null;
   readonly trail: readonly FretPosition[];
   readonly layerStyles?: readonly LayerStyle[];
+  /** Detected pitch from the guitar input: every place it can be, the likely one, and how loud (fades with the level). */
+  readonly live?: { readonly all: readonly FretPosition[]; readonly likely: FretPosition | null; readonly intensity: number } | null;
   /** A rendered wood surface for the board (Studio); null keeps the flat fill. */
   readonly boardImage?: string | null;
   readonly onPick: (marker: Marker) => void;
@@ -190,7 +192,7 @@ export interface FretboardProps {
 
 const NO_LAYERS: readonly LayerStyle[] = [];
 
-export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAYERS, boardImage = null, onPick }: FretboardProps) {
+export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAYERS, boardImage = null, live = null, onPick }: FretboardProps) {
   const scroller = useRef<HTMLDivElement>(null);
   const lowestFret = markers.length > 0 ? Math.min(...markers.map((m) => m.fret)) : 0;
   const [view, setView] = useState<{ low: number; high: number; scrolls: boolean }>({ low: 0, high: DEFAULT_FRETS, scrolls: false });
@@ -283,6 +285,15 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
         {trail.map((note, i) => (
           <circle key={i} className="trail" style={{ opacity: 0.55 - i * 0.16 }} cx={noteX(note.fret)} cy={stringY(note.string)} r={RADIUS + 3} />
         ))}
+        {live ? (
+          <g className="live-layer" data-testid="live-layer" style={{ opacity: Math.max(0, Math.min(1, live.intensity)) }}>
+            {live.all.map((p) => (
+              live.likely && p.string === live.likely.string && p.fret === live.likely.fret ? null
+                : <circle key={`${p.string}-${p.fret}`} className="live-possible" data-string={p.string} data-fret={p.fret} cx={noteX(p.fret)} cy={stringY(p.string)} r={RADIUS + 4} />
+            ))}
+            {live.likely ? <circle className="live-likely" data-testid="live-likely" data-string={live.likely.string} data-fret={live.likely.fret} cx={noteX(live.likely.fret)} cy={stringY(live.likely.string)} r={RADIUS + 1} /> : null}
+          </g>
+        ) : null}
         {active ? (
           <g className="active-note" data-active-string={active.string} data-active-fret={active.fret} data-active-label={active.label}>
             <circle className="active-halo" cx={noteX(active.fret)} cy={stringY(active.string)} r={RADIUS + 7} />

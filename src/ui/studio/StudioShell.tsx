@@ -12,6 +12,7 @@ import { useApp, usePlayhead } from '../../app/store';
 import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
 import { DrumPanel } from '../DrumMachine';
+import { InputPanels } from '../LivePanels';
 import { Board } from '../Board';
 import { Fader, Knob, OutputMeter } from '../hardware';
 import {
@@ -159,11 +160,17 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
         <Notes mode={mode} />
         <aside className="ws-side">
           <TutorPhone />
+        </aside>
+        <aside className="ws-aside">
           <div className="ws-note ws-legend-note ws-tape" data-testid="note-legend">
             <span className="ws-fastener" aria-hidden="true" />
             <h2 className="ws-hand">Legenda</h2>
             <div ref={setLegendHost} />
           </div>
+          <section className="ws-plate ws-input" aria-label="Ingresso chitarra">
+            <Screws />
+            <InputPanels />
+          </section>
         </aside>
         <section className="ws-plate ws-drawer" aria-label="Preset">
           <Screws />

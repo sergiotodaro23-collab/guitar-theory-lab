@@ -61,7 +61,7 @@
     'head head head'
     'mixer trans side'
     'neck neck side'
-    'notes notes side'
+    'notes notes aside'
     'drawer drawer drawer'
     'foot foot foot';
   gap: 14px 16px;
@@ -73,6 +73,7 @@
 .ws-neck { grid-area: neck; }
 .ws-notes { grid-area: notes; }
 .ws-side { grid-area: side; }
+.ws-aside { grid-area: aside; display: flex; flex-direction: column; align-items: center; gap: 26px; }
 .ws-drawer { grid-area: drawer; }
 .ws-rig > .foot { grid-area: foot; color: #d8cbb6; text-shadow: 0 1px 2px #000; }
 :root[data-theme='studio'] .foot a { color: var(--amber); }
@@ -542,17 +543,19 @@
       'neck neck'
       'notes notes'
       'side side'
+      'aside aside'
       'drawer drawer'
       'foot foot';
   }
-  .ws-side { flex-direction: row; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .ws-side, .ws-aside { flex-direction: row; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .ws-input { width: 300px; }
   .ws-legend-note { width: 300px; }
 }
 @media (max-width: 900px) {
   .ws-bench { padding: 12px 10px 8px; }
   .ws-rig {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'head' 'trans' 'mixer' 'neck' 'notes' 'side' 'drawer' 'foot';
+    grid-template-areas: 'head' 'trans' 'mixer' 'neck' 'notes' 'side' 'aside' 'drawer' 'foot';
   }
   .ws-head { gap: 12px; }
   .ws-sticker { width: 280px; }
@@ -595,3 +598,19 @@
 :root[data-theme='studio'] .ws-mixer .ws-mute { font-size: 12px; padding: 0 2px 2px; letter-spacing: 0.04em; min-width: 0; }
 :root[data-theme='studio'] .ws-mixer .fader-label { font-size: 12px; letter-spacing: 0.02em; }
 :root[data-theme='studio'] .ws-mixer .fader-slot { width: 36px; }
+
+/* The guitar input plate, under the legend: a stage tuner on steel. */
+.ws-input { width: 100%; padding: 18px 16px; display: grid; gap: 14px; }
+:root[data-theme='studio'] .ws-input .panel { background: transparent; padding: 0; }
+:root[data-theme='studio'] .ws-input .panel-title { font: 600 15px/1 var(--plate-font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--engrave); }
+:root[data-theme='studio'] .ws-input .field-label, :root[data-theme='studio'] .ws-input .field-hint, :root[data-theme='studio'] .ws-input .live-detail, :root[data-theme='studio'] .ws-input .live-status, :root[data-theme='studio'] .ws-input .toggle { color: var(--silk); }
+:root[data-theme='studio'] .ws-input .select, :root[data-theme='studio'] .ws-input .text-input { background: #120d07; color: var(--amber); border: 1px solid #000; border-radius: 5px; font: 600 14px/1.2 var(--plate-font); min-height: 34px; max-width: 100%; }
+:root[data-theme='studio'] .ws-input .btn { border-style: solid; border-width: 10px; border-image: url('./assets/key.webp') 40 fill / 10px stretch; background: none; color: #ece6da; padding: 0 8px 2px; font: 600 15px/1 var(--plate-font); }
+:root[data-theme='studio'] .ws-input .btn[aria-pressed='true'] { border-image-source: url('./assets/key-lit.webp'); color: #1e0f02; }
+:root[data-theme='studio'] .ws-input .live-note { color: var(--amber); font-family: var(--plate-font); text-shadow: 0 0 8px rgba(255, 179, 71, 0.45); }
+:root[data-theme='studio'] .tuner-display { background: radial-gradient(ellipse at 30% 0%, #2c1d08, var(--lcd-bg) 72%); border: 2px solid #050403; box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.95); }
+:root[data-theme='studio'] .tuner-string, :root[data-theme='studio'] .tuner-cents, :root[data-theme='studio'] .tuner-heard { color: var(--amber); font-family: var(--plate-font); }
+:root[data-theme='studio'] .tuner-scale { stroke: #6b4a17; }
+:root[data-theme='studio'] .tuner-tick { stroke: #c98b33; }
+:root[data-theme='studio'] .tuner-hub { fill: var(--amber); }
+:root[data-theme='studio'] .ws-input .row { flex-wrap: wrap; }

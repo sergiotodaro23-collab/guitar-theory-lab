@@ -309,6 +309,12 @@ class Engine {
   }
 
   /** Root-mean-square level at the output, for checking that sound really comes out. */
+  /** The shared audio context and an input that reaches the speakers: for the guitar monitor. */
+  audioOut(): { ctx: AudioContext; destination: AudioNode } {
+    const ctx = this.ensureAudio();
+    return { ctx, destination: (this.audio as WebAudioSink).monitorInput };
+  }
+
   outputLevel(): number {
     const analyser = this.audio?.analyser;
     if (!analyser) return 0;

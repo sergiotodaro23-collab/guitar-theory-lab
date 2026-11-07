@@ -38,6 +38,11 @@ export class WebAudioSink {
     this.buses = { click: bus(), notes: bus(), comp: bus(), bass: bus(), drums: bus() };
   }
 
+  /** Where the guitar monitor connects: after the buses, before the limiter. */
+  get monitorInput(): AudioNode {
+    return this.master;
+  }
+
   setVolume(bus: AudioBus, value: number): void {
     this.buses[bus].gain.setTargetAtTime(value, this.ctx.currentTime, 0.01);
   }

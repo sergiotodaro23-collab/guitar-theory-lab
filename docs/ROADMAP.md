@@ -64,8 +64,8 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P3-01 | Jam multitraccia (batteria, basso, armonia), mute/solo | PARTIAL | — | jam, audio | Batteria (D-19), basso dalla progressione (D-20) e comping come tracce separate con fader e mute. Mancano solo, drone e strumenti armonici alternativi. |
 | P3-02 | Drum step sequencer Simple (16 step, A–D, fill) | IMPLEMENTED | — | jam, ui, audio | D-19: 6 pezzi × 16 passi con accento, pattern A–D, fill ogni 2/4/8 battute, cambi alla stanghetta successiva, passo corrente evidenziato, tastiera, 2×8 su telefono, kit sintetizzato, canale Batteria con mute. Livello Advanced (velocity, ghost, probabilità, 32/64 passi, piano roll) non ancora fatto. |
 | P3-03 | Generi e almeno 4 pattern per strumento | IMPLEMENTED | P3-01 | jam | D-20: 8 generi × 4 groove di batteria + fill, 4 linee di basso, ritmo degli accordi e swing; tempo suggerito. Pattern scritti per 4/4. |
-| P3-04 | Pitch detection, Live Monitor, Tuner | MISSING | — | nuovo `pitch` | YIN/MPM in AudioWorklet; test sintetici con sinusoidi e campioni registrati; distinzione pitch / posizioni possibili. |
-| P3-05 | Catena audio con gain separati e master | PARTIAL | — | audio | Bus click/note/comp/basso/batteria presenti; manca input chitarra. |
+| P3-04 | Pitch detection, Live Monitor, Tuner | PARTIAL | — | `pitch`, audio, ui | D-21: YIN puro con test sintetici; ingresso con permessi, dispositivi, errori, gain, livello, saturazione; ascolto solo manuale; Live Monitor con nota, frequenza, affidabilità, posizioni possibili e probabile sulla tastiera, riscontro sull'esercizio; accordatore con La configurabile, cinque accordature, modalità cromatica. e2e con un file WAV come microfono finto. Mancano AudioWorklet, calibrazione della latenza e prove con chitarra e interfacce reali. |
+| P3-05 | Catena audio con gain separati e master | PARTIAL | — | audio | Bus click/note/comp/basso/batteria, ingresso chitarra con gain e ascolto separato (D-21). Mancano master e amp modeling. |
 
 ## P4 — Avanzate
 
@@ -87,5 +87,5 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P3-04** pitch detection, Live Monitor e Tuner (primo ingresso audio: permessi, dispositivi, segnale DI).
+1. **P3-04** prove con chitarra reale e calibrazione della latenza (serve il proprietario con l'hardware); poi AudioWorklet.
 2. **P2-02** revisione del proprietario sui materiali di Studio, rimandata dal proprietario a dopo il completamento delle funzioni (screenshot in `test-results/visual/`).

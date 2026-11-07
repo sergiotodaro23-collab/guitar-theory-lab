@@ -4,7 +4,7 @@
  */
 import type { Marker, MarkerRole } from './markers';
 
-export type LegendKind = MarkerRole | 'guide' | 'voicing' | 'target-now' | 'target-next' | 'played';
+export type LegendKind = MarkerRole | 'guide' | 'voicing' | 'target-now' | 'target-next' | 'played' | 'live-likely' | 'live-possible';
 
 export interface LegendEntry {
   readonly kind: LegendKind;
@@ -24,9 +24,11 @@ const ORDER: readonly LegendEntry[] = [
   { kind: 'target-now', label: 'Target ora' },
   { kind: 'target-next', label: 'Target sul prossimo accordo' },
   { kind: 'played', label: "Nota suonata dall'esercizio" },
+  { kind: 'live-likely', label: 'Nota rilevata (posizione probabile)' },
+  { kind: 'live-possible', label: 'Nota rilevata: altre posizioni possibili' },
 ];
 
-export function legendEntries(markers: readonly Marker[], options: { readonly played: boolean }): readonly LegendEntry[] {
+export function legendEntries(markers: readonly Marker[], options: { readonly played: boolean; readonly live?: { readonly likely: boolean; readonly others: boolean } }): readonly LegendEntry[] {
   const present = new Set<LegendKind>();
   for (const m of markers) {
     present.add(m.role === 'chord-tone' && m.isGuide ? 'guide' : m.role);
@@ -35,5 +37,7 @@ export function legendEntries(markers: readonly Marker[], options: { readonly pl
     if (m.target === 'next') present.add('target-next');
   }
   if (options.played) present.add('played');
+  if (options.live?.likely) present.add('live-likely');
+  if (options.live?.others) present.add('live-possible');
   return ORDER.filter((entry) => present.has(entry.kind));
 }
