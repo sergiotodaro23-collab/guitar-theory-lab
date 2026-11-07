@@ -451,3 +451,29 @@ button, select, input { font: inherit; color: inherit; }
   .accent-steps { grid-template-columns: repeat(8, minmax(0, 1fr)); }
   .accent-step:nth-child(4n + 1) { margin-left: 0; }
 }
+
+/* ---- Jam drum step sequencer: two halves of 8 steps, side by side or stacked ---- */
+.drum-controls { align-items: flex-end; gap: 12px 18px; }
+.drum-grid { display: flex; gap: 16px; }
+.drum-half { flex: 1; display: grid; gap: 4px; min-width: 0; }
+.drum-row { display: grid; grid-template-columns: 112px repeat(8, minmax(0, 1fr)); gap: 4px; align-items: center; }
+.drum-half + .drum-half .drum-row { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+.drum-half + .drum-half .drum-voice { display: none; }
+.drum-voice { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.drum-step { min-height: 34px; min-width: 0; padding: 0; border: 1px solid var(--edge); border-radius: 3px; background: var(--deck-raised); cursor: pointer; }
+.drum-step.is-beat { border-left: 3px solid var(--muted); }
+/* On fills half the key, accent fills it all with a light rim: readable without colour. */
+.drum-step.step-1 { background: linear-gradient(to top, #c9781a 55%, var(--deck-raised) 55%); }
+.drum-step.step-2 { background: #ffb347; border: 2px solid #fff1d6; }
+.drum-step.is-now { outline: 2px solid #5dff7e; outline-offset: -1px; }
+.drum-step:disabled { opacity: 0.25; cursor: not-allowed; }
+@media (max-width: 900px) {
+  .drum-grid { flex-direction: column; gap: 10px; }
+  .drum-half + .drum-half .drum-row { grid-template-columns: 112px repeat(8, minmax(0, 1fr)); }
+  .drum-half + .drum-half .drum-voice { display: block; }
+}
+@media (max-width: 599px) {
+  .drum-row, .drum-half + .drum-half .drum-row { grid-template-columns: 78px repeat(8, minmax(0, 1fr)); gap: 3px; }
+  .drum-voice { font-size: 12px; }
+  .drum-step { min-height: 36px; }
+}

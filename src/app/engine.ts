@@ -4,15 +4,16 @@
  */
 import { WebAudioSink, workerTimer } from '../audio/webAudioSink';
 import {
-  PPQ, TimelineScheduler, accentLevel, barBeatAt, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
+  PPQ, TimelineScheduler, accentLevel, barBeatAt, ticksPerBar, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
   type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink,
 } from '../timeline';
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
-import { BPM_MAX, BPM_MIN, channelVolume, meterOf, type Settings } from './settings';
+import { stepAt } from '../jam';
+import { BPM_MAX, BPM_MIN, MIX_CHANNELS, channelVolume, meterOf, type Settings } from './settings';
 import { useApp, usePlayhead, type Playhead } from './store';
 
 export interface DebugLog {
-  scheduled: { kind: string; tick: number; time: number; chord?: number; note?: number; step?: number; level?: number }[];
+  scheduled: { kind: string; tick: number; time: number; chord?: number; note?: number; step?: number; level?: number; voice?: string }[];
   shown: { kind: 'beat' | 'note' | 'chord'; tick: number; value: number; time: number; scheduled: number }[];
 }
 
@@ -49,6 +50,7 @@ class Engine {
             time,
             ...(payload.type === 'chord' ? { chord: payload.chordIndex } : {}),
             ...(payload.type === 'note' ? { note: payload.index } : {}),
+            ...(payload.type === 'drum' ? { voice: payload.voice } : {}),
           });
         }
       },
@@ -81,13 +83,24 @@ class Engine {
   }
 
   private applyVolumes(s: Settings): void {
-    for (const channel of ['click', 'notes', 'comp'] as const) this.audio?.setVolume(channel, channelVolume(s, channel));
+    for (const channel of MIX_CHANNELS) this.audio?.setVolume(channel, channelVolume(s, channel));
+  }
+
+  /** Which drum step is sounding: the sixteenth of the drum track's bar, wrapped to the 16-step grid. */
+  private drumPositionAt(tick: number, started: boolean): { drumStep: number | null; drumFill: boolean } {
+    const track = started ? this.scheduler.trackAt('drums', tick) : undefined;
+    if (!track || tick < track.originTick || track.lengthTicks <= 0) return { drumStep: null, drumFill: false };
+    const local = (tick - track.originTick) % track.lengthTicks;
+    const bar = ticksPerBar(segmentAt(this.scheduler.timeConfig, tick).meter);
+    const s = useApp.getState().settings;
+    const fill = s.drumFillEvery > 0 && Math.floor(local / bar) === Math.round(track.lengthTicks / bar) - 1;
+    return { drumStep: stepAt(Math.floor((local % bar) / (PPQ / 4))), drumFill: fill };
   }
 
   /** With `meterChanged`, every track restarts on the bar line where the new meter begins. */
   private syncTracks(s: Settings, meterChanged = false): void {
     const tracks: ModeTracks = buildTracks(s);
-    const apply = (id: 'exercise' | 'chords' | 'comp', atBar: boolean) => {
+    const apply = (id: 'exercise' | 'chords' | 'comp' | 'drums', atBar: boolean) => {
       const spec = tracks[id];
       const signature = spec ? sig([spec.lengthTicks, spec.loop, spec.events]) : '';
       if (this.trackSigs[id] === signature) return;
@@ -99,6 +112,8 @@ class Engine {
     apply('exercise', true);
     apply('chords', meterChanged);
     apply('comp', meterChanged);
+    // A new drum pattern, fill or edit comes in on the next bar line, like a drummer would.
+    apply('drums', true);
     this.scheduler.setEnd(tracks.endTick, tracks.endTick === null ? null : () => this.stop(), 'chords');
   }
 
@@ -112,7 +127,7 @@ class Engine {
     if (s.bpm !== previous.bpm) this.scheduler.setBpm(s.bpm);
     if (s.subdivision !== previous.subdivision) this.scheduler.setSubdivision(s.subdivision);
     if (s.swing !== previous.swing) this.scheduler.setSwing(s.swing);
-    if ((['click', 'notes', 'comp'] as const).some((c) => channelVolume(s, c) !== channelVolume(previous, c))) this.applyVolumes(s);
+    if (MIX_CHANNELS.some((c) => channelVolume(s, c) !== channelVolume(previous, c))) this.applyVolumes(s);
     this.syncTracks(s, meterChanged);
     if (s.mode !== previous.mode || s.changeMode !== previous.changeMode) this.manualChanges = [];
     if (this.scheduler.transportState !== 'playing') this.publish();
@@ -263,11 +278,12 @@ class Engine {
       phase,
       note,
       trail,
+      ...this.drumPositionAt(tick, state !== 'stopped'),
     };
     const current = usePlayhead.getState();
     const changed = current.state !== next.state || current.bar !== next.bar || current.beat !== next.beat
       || current.subdivision !== next.subdivision || current.chordIndex !== next.chordIndex || current.phase !== next.phase || current.beatsPerBar !== next.beatsPerBar
-      || current.note?.index !== next.note?.index;
+      || current.note?.index !== next.note?.index || current.drumStep !== next.drumStep || current.drumFill !== next.drumFill;
     if (!changed) return;
     if (this.debug && this.ctx && state === 'playing') {
       const segment = segmentAt(this.scheduler.timeConfig, tick);

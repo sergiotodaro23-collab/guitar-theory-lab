@@ -66,8 +66,11 @@ export interface Playhead {
   readonly phase: number | null;
   readonly note: { readonly string: number; readonly fret: number; readonly midi: number; readonly index: number } | null;
   readonly trail: readonly { readonly string: number; readonly fret: number }[];
+  /** Drum step sounding now (0–15) and whether that bar is the fill; null when no drums play. */
+  readonly drumStep: number | null;
+  readonly drumFill: boolean;
 }
 
 export const usePlayhead = create<Playhead>(() => ({
-  state: 'stopped', bar: 0, beat: 0, subdivision: 0, chordIndex: null, beatsPerBar: 4, phase: null, note: null, trail: [],
+  state: 'stopped', bar: 0, beat: 0, subdivision: 0, chordIndex: null, beatsPerBar: 4, phase: null, note: null, trail: [], drumStep: null, drumFill: false,
 }));

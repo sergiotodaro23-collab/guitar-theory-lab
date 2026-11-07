@@ -11,6 +11,7 @@ import { BPM_MAX, BPM_MIN, type AppMode, type MixChannel } from '../../app/setti
 import { useApp, usePlayhead } from '../../app/store';
 import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
+import { DrumPanel } from '../DrumMachine';
 import { Board } from '../Board';
 import { Fader, Knob, OutputMeter } from '../hardware';
 import {
@@ -73,10 +74,11 @@ function TransportPlate() {
   );
 }
 
-const CHANNELS: readonly { channel: MixChannel; label: string; vol: 'volClick' | 'volNotes' | 'volComp'; mute: 'muteClick' | 'muteNotes' | 'muteComp' }[] = [
+const CHANNELS: readonly { channel: MixChannel; label: string; vol: 'volClick' | 'volNotes' | 'volComp' | 'volDrums'; mute: 'muteClick' | 'muteNotes' | 'muteComp' | 'muteDrums' }[] = [
   { channel: 'click', label: 'Click', vol: 'volClick', mute: 'muteClick' },
   { channel: 'notes', label: 'Note', vol: 'volNotes', mute: 'muteNotes' },
   { channel: 'comp', label: 'Accordi', vol: 'volComp', mute: 'muteComp' },
+  { channel: 'drums', label: 'Batteria', vol: 'volDrums', mute: 'muteDrums' },
 ];
 
 function MixerPlate() {
@@ -102,10 +104,10 @@ function MixerPlate() {
 }
 
 /** A sheet of paper held by tape or a pin; the user can open it wide when a panel needs room. */
-function Note({ id, fastener, wide = false, children }: { readonly id: string; readonly fastener: 'tape' | 'pin'; readonly wide?: boolean; readonly children: ReactNode }) {
+function Note({ id, fastener, wide = false, full = false, children }: { readonly id: string; readonly fastener: 'tape' | 'pin'; readonly wide?: boolean; readonly full?: boolean; readonly children: ReactNode }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className={`ws-note ws-${fastener} ${wide ? 'is-wide' : ''} ${expanded ? 'is-expanded' : ''}`} data-testid={`note-${id}`}>
+    <div className={`ws-note ws-${fastener} ${wide ? 'is-wide' : ''} ${full ? 'is-full' : ''} ${expanded ? 'is-expanded' : ''}`} data-testid={`note-${id}`}>
       <span className="ws-fastener" aria-hidden="true" />
       <button type="button" className="ws-note-expand" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
         {expanded ? 'Riduci' : 'Espandi'}
@@ -128,7 +130,7 @@ function Notes({ mode }: { readonly mode: AppMode }) {
       case 'arpeggio':
         return [<Note id="arpeggio" fastener="pin" wide key="arpeggio"><ArpeggioPanel /></Note>, scale];
       case 'jam':
-        return [<Note id="jam" fastener="tape" key="jam"><JamPanels /></Note>, scale, exercise];
+        return [<Note id="jam" fastener="tape" key="jam"><JamPanels /></Note>, scale, exercise, <Note id="drums" fastener="pin" full key="drums"><DrumPanel /></Note>];
     }
   })();
   return <div className="ws-notes" data-mode={mode}>{notes}</div>;

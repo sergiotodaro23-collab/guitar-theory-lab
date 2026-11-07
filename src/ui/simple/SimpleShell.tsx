@@ -10,6 +10,7 @@ import { BPM_MAX, BPM_MIN, type AppMode } from '../../app/settings';
 import { useApp, usePlayhead } from '../../app/store';
 import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
+import { DrumPanel } from '../DrumMachine';
 import { Board } from '../Board';
 import {
   AppearanceToggle, BeatLights, BpmInput, ClickSelect, CurrentChord, MeterSelect, ModeNav, Nameplate, PlayControls, useTap,
@@ -90,7 +91,7 @@ function tabsFor(mode: AppMode): readonly DeckTab[] {
     case 'arpeggio':
       return [{ id: 'arpeggio', label: 'Arpeggi', content: <ArpeggioPanel /> }, scale, presets];
     case 'jam':
-      return [{ id: 'jam', label: 'Jam', content: <JamPanels /> }, scale, exercise, presets];
+      return [{ id: 'jam', label: 'Jam', content: <JamPanels /> }, { id: 'drums', label: 'Batteria', content: <DrumPanel /> }, scale, exercise, presets];
   }
 }
 
@@ -148,6 +149,7 @@ function Mixer() {
         <Fader label="Click" value={s.volClick} onChange={(volClick) => update({ volClick })} testId="fader-click" />
         <Fader label="Note" value={s.volNotes} onChange={(volNotes) => update({ volNotes })} testId="fader-notes" />
         <Fader label="Accordi" value={s.volComp} onChange={(volComp) => update({ volComp })} testId="fader-comp" />
+        <Fader label="Batteria" value={s.volDrums} onChange={(volDrums) => update({ volDrums })} testId="fader-drums" />
         <OutputMeter />
       </div>
     </section>

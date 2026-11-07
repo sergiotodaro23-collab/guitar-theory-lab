@@ -5,14 +5,15 @@
 import { midiToHz } from '../theory';
 import type { AccentLevel, ScheduledTrackEvent } from '../timeline';
 import { clickRecipe, type ClickSound } from './clickSounds';
+import { drumRecipe } from './drumSounds';
 
-export type AudioBus = 'click' | 'notes' | 'comp';
+export type AudioBus = 'click' | 'notes' | 'comp' | 'drums';
 
 interface Voice {
   readonly start: number;
   readonly end: number;
   readonly gain: GainNode;
-  readonly sources: readonly OscillatorNode[];
+  readonly sources: readonly AudioScheduledSourceNode[];
 }
 
 /** The engine's timeline sink forwards here, after deciding each click's accent. */
@@ -34,7 +35,7 @@ export class WebAudioSink {
       gain.connect(this.master);
       return gain;
     };
-    this.buses = { click: bus(), notes: bus(), comp: bus() };
+    this.buses = { click: bus(), notes: bus(), comp: bus(), drums: bus() };
   }
 
   setVolume(bus: AudioBus, value: number): void {
@@ -49,7 +50,9 @@ export class WebAudioSink {
 
   trackEvent(event: ScheduledTrackEvent, time: number): void {
     const { payload } = event;
-    if (payload.type === 'note') {
+    if (payload.type === 'drum') {
+      this.drum(payload.voice, payload.velocity, time);
+    } else if (payload.type === 'note') {
       this.pluck(payload.midi, time);
     } else if (payload.type === 'comp') {
       const duration = payload.durationTicks * this.secondsPerTick();
@@ -62,6 +65,77 @@ export class WebAudioSink {
         ]);
       });
     }
+  }
+
+  /** One hit of the jam drum kit: a gliding tone and/or a filtered noise burst. */
+  drum(voice: string, velocity: number, time: number): void {
+    const recipe = drumRecipe(voice);
+    if (!recipe || velocity <= 0) return;
+    const { tone, noise } = recipe;
+    const length = Math.max(tone?.decay ?? 0, noise?.decay ?? 0) + (recipe.bursts.at(-1) ?? 0) + 0.03;
+    const end = time + length;
+    const out = this.ctx.createGain();
+    out.gain.value = velocity * 0.8;
+    out.connect(this.buses.drums);
+    const sources: AudioScheduledSourceNode[] = [];
+    if (tone) {
+      const osc = this.ctx.createOscillator();
+      osc.type = tone.type;
+      osc.frequency.setValueAtTime(tone.from, time);
+      osc.frequency.exponentialRampToValueAtTime(tone.to, time + tone.decay * 0.6);
+      const env = this.ctx.createGain();
+      env.gain.setValueAtTime(tone.level, time);
+      env.gain.exponentialRampToValueAtTime(0.0008, time + tone.decay);
+      osc.connect(env).connect(out);
+      osc.start(time);
+      osc.stop(end);
+      sources.push(osc);
+    }
+    if (noise) {
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = noise.filter;
+      filter.frequency.value = noise.frequency;
+      filter.Q.value = noise.q;
+      const env = this.ctx.createGain();
+      env.gain.setValueAtTime(0, time);
+      for (const at of recipe.bursts) {
+        env.gain.setValueAtTime(noise.level, time + at);
+        env.gain.exponentialRampToValueAtTime(0.0008, time + at + (at === recipe.bursts.at(-1) ? noise.decay : 0.009));
+      }
+      const source = this.ctx.createBufferSource();
+      source.buffer = this.noiseBuffer();
+      source.connect(filter).connect(env).connect(out);
+      source.start(time);
+      source.stop(end);
+      sources.push(source);
+    }
+    const voiceEntry: Voice = { start: time, end, gain: out, sources };
+    this.voices.push(voiceEntry);
+    const last = sources[0];
+    if (last) {
+      last.onended = () => {
+        out.disconnect();
+        this.voices = this.voices.filter((v) => v !== voiceEntry);
+      };
+    }
+  }
+
+  private noise: AudioBuffer | null = null;
+
+  /** One second of white noise, made once and reused by every hit. */
+  private noiseBuffer(): AudioBuffer {
+    if (!this.noise) {
+      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let seed = 1;
+      for (let i = 0; i < data.length; i += 1) {
+        // A small deterministic generator: the same noise every session.
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        data[i] = seed / 2147483648 - 1;
+      }
+      this.noise = buffer;
+    }
+    return this.noise;
   }
 
   pluck(midi: number, time: number): void {

@@ -56,7 +56,7 @@
   max-width: 1640px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr) 300px;
+  grid-template-columns: 290px minmax(0, 1fr) 300px;
   grid-template-areas:
     'head head head'
     'mixer trans side'
@@ -359,6 +359,7 @@
 .ws-tape .ws-fastener { top: -14px; left: calc(50% - 50px); width: 100px; height: 32px; background: url('./assets/tape.webp') center / 100% 100% no-repeat; transform: rotate(-2deg); }
 .ws-pin .ws-fastener { top: -6px; left: calc(50% - 16px); width: 32px; height: 32px; background: url('./assets/pin.webp') center / contain no-repeat; }
 .ws-note.is-wide { grid-column: span 2; }
+.ws-note.is-full { grid-column: 1 / -1; }
 .ws-note.is-expanded { grid-column: 1 / -1; }
 .ws-note-expand {
   position: absolute;
@@ -534,7 +535,7 @@
 /* ---- Smaller screens: the same parts, reflowed ---- */
 @media (max-width: 1240px) {
   .ws-rig {
-    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-columns: 290px minmax(0, 1fr);
     grid-template-areas:
       'head head'
       'mixer trans'
@@ -581,3 +582,10 @@
 :root[data-theme='studio'] .accent-step { border-style: solid; border-width: 8px; border-image: url('./assets/key.webp') 40 fill / 8px stretch; background: none; border-radius: 0; min-height: 50px; }
 :root[data-theme='studio'] .accent-step.is-now { outline: 2px solid #5dff7e; outline-offset: 0; }
 :root[data-theme='studio'] .accent-num { color: var(--engrave); font-family: var(--plate-font); font-size: 12px; }
+
+:root[data-theme='studio'] .ws-note .drum-voice { color: var(--paper-ink); font-weight: 700; }
+:root[data-theme='studio'] .ws-note .drum-step { border-color: #a8916c; }
+:root[data-theme='studio'] .ws-note .drum-step.step-1 { background: linear-gradient(to top, #9a4a00 55%, rgba(255, 255, 255, 0.55) 55%); }
+:root[data-theme='studio'] .ws-note .drum-step.step-2 { background: #9a4a00; border: 2px solid #2a2017; }
+:root[data-theme='studio'] .ws-note .drum-step.is-beat { border-left-color: #2a2017; }
+:root[data-theme='studio'] .ws-note .drum-step.is-now { outline-color: #1d7a35; }

@@ -4,7 +4,7 @@ import { ARP_SPAN, ROUTINE_TEMPLATES, arpeggioNotes, generateSequence, parseCust
 import type { AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
-import { COMP_PATTERNS, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, type CompPattern, type Progression } from '../jam';
+import { COMP_PATTERNS, DEFAULT_KIT, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
@@ -74,6 +74,13 @@ export interface HarmonySettings {
   readonly muteClick: boolean;
   readonly muteNotes: boolean;
   readonly muteComp: boolean;
+  /** Jam Studio drum machine (D-19): on/off, the kit, the playing pattern, a fill every N bars (0 never). */
+  readonly drumOn: boolean;
+  readonly drumKit: DrumKit;
+  readonly drumPattern: number;
+  readonly drumFillEvery: 0 | 2 | 4 | 8;
+  readonly volDrums: number;
+  readonly muteDrums: boolean;
   /** Click accents, 16 steps from the downbeat; null follows the meter (D-18). */
   readonly clickAccents: readonly AccentLevel[] | null;
   readonly clickSound: ClickSound;
@@ -155,6 +162,12 @@ export const DEFAULT_SETTINGS: Settings = {
   muteClick: false,
   muteNotes: false,
   muteComp: false,
+  drumOn: true,
+  drumKit: DEFAULT_KIT,
+  drumPattern: 0,
+  drumFillEvery: 4,
+  volDrums: 0.7,
+  muteDrums: false,
   clickAccents: null,
   clickSound: 'beep',
   arpSource: 'chord',
@@ -230,6 +243,12 @@ export function sanitizeSettings(raw: unknown): Settings {
     muteClick: r.muteClick === true,
     muteNotes: r.muteNotes === true,
     muteComp: r.muteComp === true,
+    drumOn: typeof r.drumOn === 'boolean' ? r.drumOn : d.drumOn,
+    drumKit: sanitizeKit(r.drumKit),
+    drumPattern: oneOf(r.drumPattern, [0, 1, 2, 3], d.drumPattern),
+    drumFillEvery: oneOf(r.drumFillEvery, [0, 2, 4, 8] as const, d.drumFillEvery),
+    volDrums: number01(r.volDrums, d.volDrums),
+    muteDrums: r.muteDrums === true,
     clickAccents: sanitizeAccents(r.clickAccents),
     clickSound: oneOf(r.clickSound, CLICK_SOUNDS.map((c) => c.value), d.clickSound),
     arpSource: oneOf(r.arpSource, ['chord', 'progression'] as const, d.arpSource),
@@ -301,7 +320,8 @@ export function boardContext(s: StudySettings, phaseIndex: number | null): { sca
 
 export const meterOf = (s: Pick<StudySettings, 'meterId'>): Meter => METERS[s.meterId] ?? { beatsPerBar: 4, beatUnit: 4 };
 
-export type MixChannel = 'click' | 'notes' | 'comp';
+export type MixChannel = 'click' | 'notes' | 'comp' | 'drums';
+export const MIX_CHANNELS: readonly MixChannel[] = ['click', 'notes', 'comp', 'drums'];
 
 /** The level a channel actually plays at: its fader, or silence while muted. */
 export function channelVolume(s: Settings, channel: MixChannel): number {
@@ -309,5 +329,6 @@ export function channelVolume(s: Settings, channel: MixChannel): number {
     case 'click': return s.muteClick ? 0 : s.volClick;
     case 'notes': return s.muteNotes ? 0 : s.volNotes;
     case 'comp': return s.muteComp ? 0 : s.volComp;
+    case 'drums': return s.muteDrums ? 0 : s.volDrums;
   }
 }

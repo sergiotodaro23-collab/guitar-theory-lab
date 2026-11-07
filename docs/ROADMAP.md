@@ -52,7 +52,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P2-04 | Legenda grande, adattiva, in basso a destra | IMPLEMENTED | — | ui | Solo le categorie presenti (tonica, scala, guide tone, accordo, tensione, avoid, esterna, scale aggiunte, forma, target, nota suonata), con forme oltre ai colori. In Studio sul post-it sotto il telefono. Note rilevate quando esisterà il Live Monitor. |
 | P2-05 | Barra etichette con "Intervalli" e layer indipendenti | PARTIAL | — | viz, ui | Etichette presenti tranne intervalli; layer non separati. |
 | P2-06 | Pannelli comprimibili, modalità Studio/Workbench/Focus | MISSING | — | ui | |
-| P2-07 | Mixer laterale | PARTIAL | P2-02 | ui, audio | Fader Click, Note, Accordi, Mute per canale, meter d'uscita reale. Mancano master, monitor chitarra e gain (dipendono dall'ingresso audio, non implementato). |
+| P2-07 | Mixer laterale | PARTIAL | P2-02 | ui, audio | Fader Click, Note, Accordi, Batteria, Mute per canale, meter d'uscita reale. Mancano master, monitor chitarra e gain (dipendono dall'ingresso audio, non implementato). |
 | P2-08 | Transport: stop/pausa, Click/Accenti 16 indicatori, timbri click | IMPLEMENTED | P0-07 | ui, timeline, audio | D-18: griglia di 16 passi a quattro livelli (2×8 su telefono), pattern dalla metrica o personale, tastiera, passo corrente evidenziato; 4 timbri sintetizzati. Test unitari sul modello e e2e sugli eventi programmati. |
 | P2-09 | Tutor pixel-art nel telefono | PARTIAL | P2-02 | ui, `tutor` | D-17: regole locali con test, sprite originale con sei espressioni, modalità Silenzioso/Contesto/Tutor, riducibile. Da fare: riposizionamento libero, più regole (esercizi, errori live). |
 | P2-10 | Quattro workspace in navigazione | IMPLEMENTED | P1-12 | ui | Fretboard, Harmony, Arpeggios, Jam; lo stato musicale resta condiviso. |
@@ -62,10 +62,10 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | ID | Requisito | Stato | Dip. | Moduli | Note |
 |----|-----------|-------|------|--------|------|
 | P3-01 | Jam multitraccia (batteria, basso, armonia), mute/solo | PARTIAL | — | jam, audio | Oggi: comping sintetizzato con 6 pattern, una traccia. |
-| P3-02 | Drum step sequencer Simple (16 step, A–D, fill) | MISSING | P3-01 | jam, ui | Campioni sintetizzati o con licenza compatibile. |
+| P3-02 | Drum step sequencer Simple (16 step, A–D, fill) | IMPLEMENTED | — | jam, ui, audio | D-19: 6 pezzi × 16 passi con accento, pattern A–D, fill ogni 2/4/8 battute, cambi alla stanghetta successiva, passo corrente evidenziato, tastiera, 2×8 su telefono, kit sintetizzato, canale Batteria con mute. Livello Advanced (velocity, ghost, probabilità, 32/64 passi, piano roll) non ancora fatto. |
 | P3-03 | Generi e almeno 4 pattern per strumento | MISSING | P3-01 | jam | |
 | P3-04 | Pitch detection, Live Monitor, Tuner | MISSING | — | nuovo `pitch` | YIN/MPM in AudioWorklet; test sintetici con sinusoidi e campioni registrati; distinzione pitch / posizioni possibili. |
-| P3-05 | Catena audio con gain separati e master | PARTIAL | — | audio | Bus click/note/comp presenti; manca input chitarra. |
+| P3-05 | Catena audio con gain separati e master | PARTIAL | — | audio | Bus click/note/comp/batteria presenti; manca input chitarra. |
 
 ## P4 — Avanzate
 
@@ -87,5 +87,5 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P3-02** step sequencer Simple in Jam Studio.
+1. **P3-01 / P3-03** basso e generi: pattern di batteria per genere (rock, blues, jazz, funk, fusion, metal, latin, ambient) e una linea di basso dalla progressione.
 2. **P2-02** revisione del proprietario sui materiali di Studio, rimandata dal proprietario a dopo il completamento delle funzioni (screenshot in `test-results/visual/`).

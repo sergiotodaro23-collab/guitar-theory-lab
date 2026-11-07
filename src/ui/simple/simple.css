@@ -291,7 +291,7 @@
 :root[data-theme='simple'] .fn-item { background: #24272c; }
 
 /* ---- Deck: tab rail, module area, mixer ---- */
-.cs-lower { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 8px; margin-top: 8px; align-items: start; }
+.cs-lower { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 8px; margin-top: 8px; align-items: start; }
 .cs-deck { display: grid; grid-template-columns: 170px minmax(0, 1fr); min-height: 380px; overflow: hidden; }
 .cs-tabs { display: flex; flex-direction: column; gap: 4px; padding: 10px; background: #18191c; border-right: 1px solid #0b0c0d; }
 .cs-tab {
@@ -450,3 +450,4 @@
   .cs-lower { margin-top: 6px; }
   .cs-module { padding: 8px; }
 }
+:root[data-theme='simple'] .legend-played .legend-swatch { background: var(--amber); box-shadow: 0 0 6px var(--amber); }

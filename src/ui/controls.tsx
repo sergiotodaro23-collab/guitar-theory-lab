@@ -1,6 +1,20 @@
 import type { ReactNode } from 'react';
 
-export function Field({ label, children, hint }: { readonly label: string; readonly children: ReactNode; readonly hint?: string | undefined }) {
+/**
+ * A labelled control. With `group`, the label names a group of buttons
+ * instead of wrapping them: a <label> around several buttons would lend its
+ * text to the first one only.
+ */
+export function Field({ label, children, hint, group = false }: { readonly label: string; readonly children: ReactNode; readonly hint?: string | undefined; readonly group?: boolean }) {
+  if (group) {
+    return (
+      <div className="field" role="group" aria-label={label}>
+        <span className="field-label" aria-hidden="true">{label}</span>
+        {children}
+        {hint ? <span className="field-hint">{hint}</span> : null}
+      </div>
+    );
+  }
   return (
     <label className="field">
       <span className="field-label">{label}</span>
