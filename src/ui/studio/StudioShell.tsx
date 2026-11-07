@@ -9,6 +9,7 @@ import { useState, type ReactNode } from 'react';
 import { engine } from '../../app/engine';
 import { BPM_MAX, BPM_MIN, type AppMode, type MixChannel } from '../../app/settings';
 import { useApp, usePlayhead } from '../../app/store';
+import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
 import { Board } from '../Board';
 import { Fader, Knob, OutputMeter } from '../hardware';
@@ -67,6 +68,7 @@ function TransportPlate() {
         <span className="ws-engraved">Click</span>
         <ClickSelect />
       </div>
+      <AccentGrid />
     </section>
   );
 }

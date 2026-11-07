@@ -4,7 +4,7 @@
  */
 import { WebAudioSink, workerTimer } from '../audio/webAudioSink';
 import {
-  PPQ, TimelineScheduler, barBeatAt, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
+  PPQ, TimelineScheduler, accentLevel, barBeatAt, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
   type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink,
 } from '../timeline';
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
@@ -12,7 +12,7 @@ import { BPM_MAX, BPM_MIN, channelVolume, meterOf, type Settings } from './setti
 import { useApp, usePlayhead, type Playhead } from './store';
 
 export interface DebugLog {
-  scheduled: { kind: string; tick: number; time: number; chord?: number; note?: number }[];
+  scheduled: { kind: string; tick: number; time: number; chord?: number; note?: number; step?: number; level?: number }[];
   shown: { kind: 'beat' | 'note' | 'chord'; tick: number; value: number; time: number; scheduled: number }[];
 }
 
@@ -33,8 +33,11 @@ class Engine {
     this.debug = typeof location !== 'undefined' && location.search.includes('debug') ? { scheduled: [], shown: [] } : null;
     const sink: TimelineSink = {
       metronome: (event: MetronomeEvent, time: number) => {
-        this.audio?.metronome(event, time);
-        this.debug?.scheduled.push({ kind: event.kind, tick: event.tick, time });
+        // Read at scheduling time: a changed pattern is heard within the lookahead.
+        const { clickAccents, clickSound, subdivision } = useApp.getState().settings;
+        const level = accentLevel(clickAccents, event, subdivision);
+        this.audio?.click(clickSound, level, time);
+        this.debug?.scheduled.push({ kind: event.kind, tick: event.tick, time, step: event.step, level });
       },
       trackEvent: (event: ScheduledTrackEvent, time: number) => {
         this.audio?.trackEvent(event, time);

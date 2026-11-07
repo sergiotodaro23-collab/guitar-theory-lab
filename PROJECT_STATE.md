@@ -6,8 +6,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 262 test unitari.
-- `npm run test:e2e`: verde, 33 casi su Chromium headless (`e2e/app.spec.ts`, `e2e/appearance.spec.ts`; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 271 test unitari.
+- `npm run test:e2e`: verde, 36 casi su Chromium headless (`e2e/app.spec.ts`, `e2e/appearance.spec.ts`, `e2e/accents.spec.ts`; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -43,4 +43,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-revisione dei materiali di Studio (P2-02) → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.
+P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.

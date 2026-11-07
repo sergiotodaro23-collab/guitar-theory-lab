@@ -444,6 +444,7 @@
   .cs-more[aria-expanded='true'] { color: var(--amber); }
   .cs-transport-extra { display: none; grid-column: 1 / -1; }
   .cs-transport.is-open .cs-transport-extra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-around; gap: 10px; }
+  .cs-transport.is-open { max-height: 80vh; overflow-y: auto; }
   .cs-main { padding-bottom: 170px; }
   .cs-bay { padding: 8px 6px; }
   .cs-lower { margin-top: 6px; }

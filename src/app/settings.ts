@@ -2,10 +2,11 @@
 import { CAGED_FORMS, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
 import { ARP_SPAN, ROUTINE_TEMPLATES, arpeggioNotes, generateSequence, parseCustomPattern, resolvePhase, sanitizeRoutine, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec } from '../exercises';
 import type { AvoidProfile } from '../harmony';
+import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
 import { COMP_PATTERNS, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, type CompPattern, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
-import type { Meter, Subdivision } from '../timeline';
+import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
 import { clampActive, sanitizeChordLayers, type ChordLayer } from './chordLayers';
 
@@ -73,6 +74,9 @@ export interface HarmonySettings {
   readonly muteClick: boolean;
   readonly muteNotes: boolean;
   readonly muteComp: boolean;
+  /** Click accents, 16 steps from the downbeat; null follows the meter (D-18). */
+  readonly clickAccents: readonly AccentLevel[] | null;
+  readonly clickSound: ClickSound;
 }
 
 export interface ArpeggioSettings {
@@ -151,6 +155,8 @@ export const DEFAULT_SETTINGS: Settings = {
   muteClick: false,
   muteNotes: false,
   muteComp: false,
+  clickAccents: null,
+  clickSound: 'beep',
   arpSource: 'chord',
   arpSymbol: 'Cmaj7',
   arpLow: 7,
@@ -224,6 +230,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     muteClick: r.muteClick === true,
     muteNotes: r.muteNotes === true,
     muteComp: r.muteComp === true,
+    clickAccents: sanitizeAccents(r.clickAccents),
+    clickSound: oneOf(r.clickSound, CLICK_SOUNDS.map((c) => c.value), d.clickSound),
     arpSource: oneOf(r.arpSource, ['chord', 'progression'] as const, d.arpSource),
     arpSymbol: typeof r.arpSymbol === 'string' ? r.arpSymbol.slice(0, 24) : d.arpSymbol,
     arpLow: typeof r.arpLow === 'number' && Number.isFinite(r.arpLow) ? clamp(Math.round(r.arpLow), 0, DEFAULT_FRETS - ARP_SPAN) : d.arpLow,

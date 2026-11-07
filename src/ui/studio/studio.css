@@ -571,3 +571,13 @@
 @media (max-width: 680px) {
   .ws-notes { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Click / Accenti on the steel plate: keys with an amber level bar. */
+:root[data-theme='studio'] .ws-transport .accent-grid { padding: 10px 12px 12px; background: rgba(5, 5, 6, 0.45); border-radius: 8px; box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8); }
+:root[data-theme='studio'] .accent-title { font: 600 14px/1 var(--plate-font); letter-spacing: 0.14em; color: var(--engrave); }
+:root[data-theme='studio'] .accent-source { color: var(--amber); font-family: var(--plate-font); font-size: 14px; }
+:root[data-theme='studio'] .accent-reset { border-style: solid; border-width: 8px; border-image: url('./assets/key.webp') 40 fill / 8px stretch; background: none; color: #ece6da; font: 600 13px/1 var(--plate-font); padding: 0 4px; border-radius: 0; }
+:root[data-theme='studio'] .accent-grid .select { background: #120d07; color: var(--amber); border: 1px solid #000; border-radius: 5px; font: 600 14px/1.2 var(--plate-font); min-height: 34px; }
+:root[data-theme='studio'] .accent-step { border-style: solid; border-width: 8px; border-image: url('./assets/key.webp') 40 fill / 8px stretch; background: none; border-radius: 0; min-height: 50px; }
+:root[data-theme='studio'] .accent-step.is-now { outline: 2px solid #5dff7e; outline-offset: 0; }
+:root[data-theme='studio'] .accent-num { color: var(--engrave); font-family: var(--plate-font); font-size: 12px; }

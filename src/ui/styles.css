@@ -414,3 +414,40 @@ button, select, input { font: inherit; color: inherit; }
   .segment { min-height: 40px; }
   .select, .text-input { min-height: 42px; font-size: 16px; }
 }
+
+/* ---- Click / Accenti: 16 step keys, 8 per row on narrow screens ---- */
+.accent-grid { flex: 1 1 100%; display: grid; gap: 8px; }
+.accent-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; }
+.accent-title { font: 600 13px/1 var(--display); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.accent-source { font-size: 13px; color: var(--muted); }
+.accent-reset { min-height: 32px; padding: 0 10px; background: var(--deck-raised); border: 1px solid var(--edge); color: var(--ink); border-radius: 4px; cursor: pointer; font-size: 13px; }
+.accent-reset:disabled { opacity: 0.45; cursor: default; }
+.accent-steps { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 4px; }
+.accent-step {
+  position: relative;
+  min-height: 46px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  padding: 6px 0 4px;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  background: var(--deck-raised);
+  cursor: pointer;
+}
+.accent-step.is-beat { border-color: var(--muted); }
+.accent-step:nth-child(4n + 1) { margin-left: 2px; }
+.accent-step:disabled { opacity: 0.3; cursor: not-allowed; }
+/* Height of the bar shows the level, so it reads without colour. */
+.accent-led { width: 60%; border-radius: 2px; background: #3a2508; height: 4px; }
+.accent-step.level-1 .accent-led { height: 8px; background: #8a5a14; }
+.accent-step.level-2 .accent-led { height: 14px; background: #d98a1c; }
+.accent-step.level-3 .accent-led { height: 20px; background: #ffb347; box-shadow: 0 0 6px #ffb347; }
+.accent-step.level-0 .accent-led { background: transparent; border: 1px dashed var(--muted); height: 6px; }
+.accent-step.is-now { outline: 2px solid #5dff7e; outline-offset: -2px; }
+.accent-num { font: 600 11px/1 var(--display); color: var(--muted); min-height: 11px; }
+@media (max-width: 760px) {
+  .accent-steps { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .accent-step:nth-child(4n + 1) { margin-left: 0; }
+}

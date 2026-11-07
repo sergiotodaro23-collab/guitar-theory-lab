@@ -8,6 +8,7 @@ import { useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'r
 import { engine } from '../../app/engine';
 import { BPM_MAX, BPM_MIN, type AppMode } from '../../app/settings';
 import { useApp, usePlayhead } from '../../app/store';
+import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
 import { Board } from '../Board';
 import {
@@ -64,6 +65,7 @@ function TransportModule() {
         <span className="cs-silk">Click</span>
         <ClickSelect />
       </div>
+      <AccentGrid />
       </div>
     </section>
   );

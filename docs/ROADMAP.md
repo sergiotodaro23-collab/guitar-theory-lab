@@ -53,7 +53,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P2-05 | Barra etichette con "Intervalli" e layer indipendenti | PARTIAL | — | viz, ui | Etichette presenti tranne intervalli; layer non separati. |
 | P2-06 | Pannelli comprimibili, modalità Studio/Workbench/Focus | MISSING | — | ui | |
 | P2-07 | Mixer laterale | PARTIAL | P2-02 | ui, audio | Fader Click, Note, Accordi, Mute per canale, meter d'uscita reale. Mancano master, monitor chitarra e gain (dipendono dall'ingresso audio, non implementato). |
-| P2-08 | Transport: stop/pausa, Click/Accenti 16 indicatori, timbri click | PARTIAL | P0-07 | ui, timeline, audio | Presenti avvia/pausa/ferma, TAP, swing, suddivisione. Mancano griglia 16 accenti, 4 timbri. |
+| P2-08 | Transport: stop/pausa, Click/Accenti 16 indicatori, timbri click | IMPLEMENTED | P0-07 | ui, timeline, audio | D-18: griglia di 16 passi a quattro livelli (2×8 su telefono), pattern dalla metrica o personale, tastiera, passo corrente evidenziato; 4 timbri sintetizzati. Test unitari sul modello e e2e sugli eventi programmati. |
 | P2-09 | Tutor pixel-art nel telefono | PARTIAL | P2-02 | ui, `tutor` | D-17: regole locali con test, sprite originale con sei espressioni, modalità Silenzioso/Contesto/Tutor, riducibile. Da fare: riposizionamento libero, più regole (esercizi, errori live). |
 | P2-10 | Quattro workspace in navigazione | IMPLEMENTED | P1-12 | ui | Fretboard, Harmony, Arpeggios, Jam; lo stato musicale resta condiviso. |
 
@@ -87,6 +87,5 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P2-02** revisione del proprietario sui materiali di Studio (screenshot in `test-results/visual/`); rifiniture o asset esterni secondo l'esito.
-2. **P2-08** griglia Click / Accenti a 16 indicatori e timbri del click.
-3. **P3-02** step sequencer Simple in Jam Studio.
+1. **P3-02** step sequencer Simple in Jam Studio.
+2. **P2-02** revisione del proprietario sui materiali di Studio, rimandata dal proprietario a dopo il completamento delle funzioni (screenshot in `test-results/visual/`).

@@ -134,7 +134,7 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
     return { string: note.string, fret: note.fret, label };
   })() : null;
 
-  const shownMarkers = showAids ? layer.markers : [];
+  const shownMarkers = useMemo(() => (showAids ? layer.markers : []), [showAids, layer.markers]);
   const played = active !== null;
   const entries = useMemo(() => legendEntries(shownMarkers, { played }), [shownMarkers, played]);
   const legend = showAids
