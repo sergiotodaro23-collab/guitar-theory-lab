@@ -6,6 +6,7 @@ import { midiToHz } from '../theory';
 import type { AccentLevel, ScheduledTrackEvent } from '../timeline';
 import { clickRecipe, type ClickSound } from './clickSounds';
 import { drumRecipe } from './drumSounds';
+import { BASS_RECIPES, COMP_RECIPES, kitRecipe, strumOffsets, type BassTimbre, type CompTimbre, type DrumKitSound, type ToneRecipe } from './instruments';
 
 export type AudioBus = 'click' | 'notes' | 'comp' | 'bass' | 'drums';
 
@@ -72,6 +73,13 @@ export class WebAudioSink {
     if (recipe) this.voice('click', time, recipe.duration, recipe.level, recipe.attack, recipe.oscillators, recipe.decaying);
   }
 
+  private timbres: { drums: DrumKitSound; bass: BassTimbre; comp: CompTimbre } = { drums: 'acoustic', bass: 'finger', comp: 'keys' };
+
+  /** Kit and instrument sounds for the jam (D-32); they apply from the next note. */
+  setTimbres(timbres: { drums: DrumKitSound; bass: BassTimbre; comp: CompTimbre }): void {
+    this.timbres = timbres;
+  }
+
   trackEvent(event: ScheduledTrackEvent, time: number): void {
     const { payload } = event;
     if (payload.type === 'drum') {
@@ -82,20 +90,18 @@ export class WebAudioSink {
       this.pluck(payload.midi, time);
     } else if (payload.type === 'comp') {
       const duration = payload.durationTicks * this.secondsPerTick();
+      const recipe = COMP_RECIPES[this.timbres.comp];
+      const offsets = strumOffsets(payload.midis.length, recipe);
       payload.midis.forEach((midi, i) => {
-        const level = (i === 0 ? 0.3 : 0.17) * payload.velocity;
-        const frequency = midiToHz(midi);
-        this.voice('comp', time, duration, level, 0.008, [
-          { type: 'triangle', frequency },
-          { type: 'sawtooth', frequency: frequency * 1.002, mix: 0.12 },
-        ]);
+        const level = (i === 0 ? 0.3 : 0.17) * payload.velocity * recipe.gain;
+        this.tone('comp', recipe, midiToHz(midi), time + (offsets[i] ?? 0), Math.max(0.03, duration - (offsets[i] ?? 0)), level);
       });
     }
   }
 
   /** One hit of the jam drum kit: a gliding tone and/or a filtered noise burst. */
   drum(voice: string, velocity: number, time: number): void {
-    const recipe = drumRecipe(voice);
+    const recipe = kitRecipe(voice, this.timbres.drums, drumRecipe);
     if (!recipe || velocity <= 0) return;
     const { tone, noise } = recipe;
     const length = Math.max(tone?.decay ?? 0, noise?.decay ?? 0) + (recipe.bursts.at(-1) ?? 0) + 0.03;
@@ -146,42 +152,51 @@ export class WebAudioSink {
     }
   }
 
-  /** A plucked electric bass: saw and sine through a closing low-pass filter. */
+  /** A bass note in the chosen timbre. */
   bassNote(midi: number, duration: number, velocity: number, time: number): void {
-    const frequency = midiToHz(midi);
-    const end = time + duration + 0.06;
+    const recipe = BASS_RECIPES[this.timbres.bass];
+    this.tone('bass', recipe, midiToHz(midi), time, duration, 0.55 * velocity * recipe.gain);
+  }
+
+  /**
+   * One note from a recipe: partials into a low-pass that closes, an envelope
+   * with attack, decay to a sustain level, and release.
+   */
+  private tone(bus: AudioBus, recipe: ToneRecipe, frequency: number, time: number, duration: number, peak: number): void {
+    const end = time + duration + recipe.release;
     const out = this.ctx.createGain();
     out.gain.setValueAtTime(0, time);
-    out.gain.linearRampToValueAtTime(0.55 * velocity, time + 0.006);
-    out.gain.setTargetAtTime(0.32 * velocity, time + 0.02, 0.12);
-    out.gain.setValueAtTime(0.32 * velocity, time + duration);
+    out.gain.linearRampToValueAtTime(peak, time + recipe.attack);
+    out.gain.setTargetAtTime(peak * recipe.sustain, time + recipe.attack, recipe.decay / 3);
+    out.gain.setValueAtTime(peak * recipe.sustain, time + Math.max(recipe.attack, duration));
     out.gain.linearRampToValueAtTime(0, end);
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.Q.value = 2;
-    filter.frequency.setValueAtTime(1400, time);
-    filter.frequency.exponentialRampToValueAtTime(380, time + 0.25);
-    filter.connect(out).connect(this.buses.bass);
-    const saw = this.ctx.createOscillator();
-    saw.type = 'sawtooth';
-    saw.frequency.value = frequency;
-    const sine = this.ctx.createOscillator();
-    sine.type = 'sine';
-    sine.frequency.value = frequency;
-    const sub = this.ctx.createGain();
-    sub.gain.value = 0.8;
-    saw.connect(filter);
-    sine.connect(sub).connect(out);
-    for (const osc of [saw, sine]) {
+    filter.Q.value = recipe.filter.q;
+    filter.frequency.setValueAtTime(recipe.filter.from, time);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(40, recipe.filter.to), time + recipe.filter.time);
+    filter.connect(out).connect(this.buses[bus]);
+    const sources = recipe.partials.map((partial) => {
+      const osc = this.ctx.createOscillator();
+      osc.type = partial.type;
+      osc.frequency.value = frequency * partial.ratio;
+      if (partial.detune) osc.detune.value = partial.detune;
+      const level = this.ctx.createGain();
+      level.gain.value = partial.level / recipe.partials.length;
+      osc.connect(level).connect(filter);
       osc.start(time);
       osc.stop(end);
-    }
-    const voiceEntry: Voice = { start: time, end, gain: out, sources: [saw, sine] };
+      return osc;
+    });
+    const voiceEntry: Voice = { start: time, end, gain: out, sources };
     this.voices.push(voiceEntry);
-    saw.onended = () => {
-      out.disconnect();
-      this.voices = this.voices.filter((v) => v !== voiceEntry);
-    };
+    const first = sources[0];
+    if (first) {
+      first.onended = () => {
+        out.disconnect();
+        this.voices = this.voices.filter((v) => v !== voiceEntry);
+      };
+    }
   }
 
   private noise: AudioBuffer | null = null;

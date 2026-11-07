@@ -86,6 +86,7 @@ class Engine {
   private applyVolumes(s: Settings): void {
     for (const channel of MIX_CHANNELS) this.audio?.setVolume(channel, channelVolume(s, channel));
     this.audio?.setMaster(s.volMaster);
+    this.audio?.setTimbres({ drums: s.drumSound, bass: s.bassTimbre, comp: s.compTimbre });
   }
 
   /** Which drum step is sounding: the sixteenth of the drum track's bar, wrapped to the 16-step grid. */
@@ -130,7 +131,8 @@ class Engine {
     if (s.bpm !== previous.bpm) this.scheduler.setBpm(s.bpm);
     if (s.subdivision !== previous.subdivision) this.scheduler.setSubdivision(s.subdivision);
     if (s.swing !== previous.swing) this.scheduler.setSwing(s.swing);
-    if (s.volMaster !== previous.volMaster || MIX_CHANNELS.some((c) => channelVolume(s, c) !== channelVolume(previous, c))) this.applyVolumes(s);
+    const timbres = s.drumSound !== previous.drumSound || s.bassTimbre !== previous.bassTimbre || s.compTimbre !== previous.compTimbre;
+    if (timbres || s.volMaster !== previous.volMaster || MIX_CHANNELS.some((c) => channelVolume(s, c) !== channelVolume(previous, c))) this.applyVolumes(s);
     this.syncTracks(s, meterChanged);
     if (s.mode !== previous.mode || s.changeMode !== previous.changeMode) this.manualChanges = [];
     if (this.scheduler.transportState !== 'playing') this.publish();

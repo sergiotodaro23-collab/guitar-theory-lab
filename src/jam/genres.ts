@@ -7,6 +7,7 @@
 import type { BassNote, BassPattern, BassTone } from './bass';
 import { DEFAULT_KIT, pattern, type DrumKit } from './drums';
 import type { CompPattern } from './progression';
+import type { BassTimbre, CompTimbre, DrumKitSound } from '../audio/instruments';
 
 export type GenreId = 'rock' | 'blues' | 'jazz' | 'funk' | 'fusion' | 'metal' | 'latin' | 'ambient';
 
@@ -21,6 +22,8 @@ export interface Genre {
   readonly bass: readonly [BassPattern, BassPattern, BassPattern, BassPattern];
   /** Suggested balance (fader levels 0–1), applied when the genre is chosen: the user can move them. */
   readonly mix: { readonly drums: number; readonly bass: number; readonly comp: number };
+  /** Suggested sounds (D-32), applied with the genre. */
+  readonly sounds: { readonly drums: DrumKitSound; readonly bass: BassTimbre; readonly comp: CompTimbre };
 }
 
 const TRIPLET = 1 / 3;
@@ -37,6 +40,7 @@ export const GENRES: readonly Genre[] = [
   {
     id: 'rock', label: 'Rock', swing: 0, bpm: 110, comp: 'eighths',
     mix: { drums: 0.75, bass: 0.72, comp: 0.6 },
+    sounds: { drums: 'acoustic', bass: 'pick', comp: 'clean' },
     kit: DEFAULT_KIT,
     bass: [
       line('Ottavi sulla fondamentale', every(2, 2, ['root'])),
@@ -48,6 +52,7 @@ export const GENRES: readonly Genre[] = [
   {
     id: 'blues', label: 'Blues', swing: TRIPLET, bpm: 92, comp: 'charleston',
     mix: { drums: 0.62, bass: 0.72, comp: 0.66 },
+    sounds: { drums: 'acoustic', bass: 'finger', comp: 'organ' },
     kit: {
       patterns: [
         pattern({ kick: 'X.......X.......', snare: '....X.......X...', hat: 'x.x.x.x.x.x.x.x.' }),
@@ -67,6 +72,7 @@ export const GENRES: readonly Genre[] = [
   {
     id: 'jazz', label: 'Jazz', swing: TRIPLET, bpm: 140, comp: 'charleston',
     mix: { drums: 0.5, bass: 0.78, comp: 0.58 },
+    sounds: { drums: 'brushes', bass: 'upright', comp: 'keys' },
     kit: {
       patterns: [
         // Spang-a-lang on the ride, hi-hat foot on 2 and 4, feathered kick.
@@ -90,6 +96,7 @@ export const GENRES: readonly Genre[] = [
   {
     id: 'funk', label: 'Funk', swing: 0, bpm: 100, comp: 'stabs',
     mix: { drums: 0.72, bass: 0.78, comp: 0.55 },
+    sounds: { drums: 'acoustic', bass: 'finger', comp: 'clean' },
     kit: {
       patterns: [
         pattern({ kick: 'X.x....x..X.....', snare: '.g..X..g.g..X..g', hat: 'xxxxxxxxxxxxxxxx' }),
@@ -109,6 +116,7 @@ export const GENRES: readonly Genre[] = [
   {
     id: 'fusion', label: 'Fusion', swing: 0, bpm: 108, comp: 'push',
     mix: { drums: 0.66, bass: 0.74, comp: 0.58 },
+    sounds: { drums: 'acoustic', bass: 'finger', comp: 'epiano' },
     kit: {
       patterns: [
         // A: sixteenth hats with accents on the beat, ghosted snare, syncopated kick.
@@ -132,6 +140,7 @@ export const GENRES: readonly Genre[] = [
   {
     id: 'metal', label: 'Metal', swing: 0, bpm: 150, comp: 'eighths',
     mix: { drums: 0.8, bass: 0.7, comp: 0.6 },
+    sounds: { drums: 'acoustic', bass: 'pick', comp: 'keys' },
     kit: {
       patterns: [
         pattern({ kick: 'XxxxXxxxXxxxXxxx', snare: '....X.......X...', open: 'x...x...x...x...' }),
@@ -151,6 +160,7 @@ export const GENRES: readonly Genre[] = [
   {
     id: 'latin', label: 'Latin', swing: 0, bpm: 120, comp: 'push',
     mix: { drums: 0.6, bass: 0.72, comp: 0.62 },
+    sounds: { drums: 'acoustic', bass: 'upright', comp: 'epiano' },
     kit: {
       patterns: [
         // Bossa nova: bass drum on 1 and the and of 2, cross-stick clave.
@@ -174,6 +184,7 @@ export const GENRES: readonly Genre[] = [
   {
     id: 'ambient', label: 'Ambient', swing: 0, bpm: 72, comp: 'sustain',
     mix: { drums: 0.42, bass: 0.6, comp: 0.74 },
+    sounds: { drums: 'electronic', bass: 'synth', comp: 'pad' },
     kit: {
       patterns: [
         pattern({ kick: 'X...............', open: '........x.......' }),

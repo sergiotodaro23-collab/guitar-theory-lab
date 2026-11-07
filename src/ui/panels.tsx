@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { STUDY_PRESETS } from '../app/builtins';
+import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
 import { engine } from '../app/engine';
 import { genreSettings, sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
 import { presetRepository, useApp, usePlayhead } from '../app/store';
@@ -814,6 +815,17 @@ export function JamPanels() {
         <button type="button" className="btn" disabled={s.bpm === genreOf(s.jamGenre).bpm} onClick={() => update({ bpm: genreOf(s.jamGenre).bpm })}>
           Usa {genreOf(s.jamGenre).bpm} BPM
         </button>
+        <div className="row" data-testid="jam-sounds">
+          <Field label="Batteria">
+            <Select<DrumKitSound> label="Suono della batteria" testId="drum-sound" value={s.drumSound} options={(Object.keys(DRUM_KIT_SOUNDS) as DrumKitSound[]).map((k) => ({ value: k, label: DRUM_KIT_SOUNDS[k] }))} onChange={(drumSound) => update({ drumSound })} />
+          </Field>
+          <Field label="Basso">
+            <Select<BassTimbre> label="Suono del basso" testId="bass-timbre" value={s.bassTimbre} options={(Object.keys(BASS_TIMBRES) as BassTimbre[]).map((k) => ({ value: k, label: BASS_TIMBRES[k] }))} onChange={(bassTimbre) => update({ bassTimbre })} />
+          </Field>
+          <Field label="Accordi">
+            <Select<CompTimbre> label="Suono degli accordi" testId="comp-timbre" value={s.compTimbre} options={(Object.keys(COMP_TIMBRES) as CompTimbre[]).map((k) => ({ value: k, label: COMP_TIMBRES[k] }))} onChange={(compTimbre) => update({ compTimbre })} />
+          </Field>
+        </div>
         <Toggle checked={s.bassOn} onChange={(bassOn) => update({ bassOn })}>Suona il basso</Toggle>
         <Field label="Linea di basso">
           <Select<number>

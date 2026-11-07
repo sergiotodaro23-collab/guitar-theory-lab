@@ -94,3 +94,31 @@ test('Fusion: chords and bass anticipate each change by an eighth, ghost notes o
   expect(ticks).not.toContain(1920);
   expect(errors).toEqual([]);
 });
+
+test('timbres: a genre sets kit, bass and chord sounds; every sound actually plays', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const errors = await open(page);
+  await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
+  await page.getByTestId('jam-genre').selectOption('ambient');
+  await expect(page.getByTestId('drum-sound')).toHaveValue('electronic');
+  await expect(page.getByTestId('bass-timbre')).toHaveValue('synth');
+  await expect(page.getByTestId('comp-timbre')).toHaveValue('pad');
+  await page.getByTestId('jam-genre').selectOption('jazz');
+  await expect(page.getByTestId('drum-sound')).toHaveValue('brushes');
+  await expect(page.getByTestId('bass-timbre')).toHaveValue('upright');
+  // Only the chords: mute drums, bass and click, so the meter hears the comping timbre alone.
+  for (const channel of ['drums', 'bass', 'click']) await page.getByTestId(`mute-${channel}`).click();
+  await page.getByTestId('play').click();
+  for (const comp of ['keys', 'epiano', 'organ', 'clean', 'pad']) {
+    await page.getByTestId('comp-timbre').selectOption(comp);
+    const peak = await page.evaluate(async () => {
+      let p = 0;
+      const end = performance.now() + 700;
+      while (performance.now() < end) { p = Math.max(p, window.__gtl?.engine.outputLevel() ?? 0); await new Promise((r) => setTimeout(r, 10)); }
+      return p;
+    });
+    expect(peak, comp).toBeGreaterThan(0.01);
+  }
+  await page.getByTestId('stop').click();
+  expect(errors).toEqual([]);
+});

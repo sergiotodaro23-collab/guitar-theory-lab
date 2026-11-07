@@ -3,6 +3,7 @@ import { CAGED_FORMS, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRE
 import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
 import { HOME_MODES, type AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
+import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
 import { SENSITIVITIES, TUNINGS, sanitizeProfiles, type LiveProfile, type Sensitivity } from '../pitch';
 import { COMP_PATTERNS, DEFAULT_KIT, GENRES, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
@@ -98,6 +99,10 @@ export interface HarmonySettings {
   readonly bassOn: boolean;
   readonly bassPattern: number;
   readonly volBass: number;
+  /** Jam timbres (D-32): drum kit, bass and comping sounds. */
+  readonly drumSound: DrumKitSound;
+  readonly bassTimbre: BassTimbre;
+  readonly compTimbre: CompTimbre;
   readonly muteBass: boolean;
   /** Guitar input (D-21): device, gain, monitor level; tuner reference and tuning; detected notes on the neck. */
   readonly inputDeviceId: string;
@@ -219,6 +224,9 @@ export const DEFAULT_SETTINGS: Settings = {
   bassOn: true,
   bassPattern: 0,
   volBass: 0.7,
+  drumSound: 'acoustic',
+  bassTimbre: 'finger',
+  compTimbre: 'keys',
   muteBass: false,
   inputDeviceId: '',
   inputGain: 1,
@@ -328,6 +336,9 @@ export function sanitizeSettings(raw: unknown): Settings {
     bassOn: typeof r.bassOn === 'boolean' ? r.bassOn : d.bassOn,
     bassPattern: oneOf(r.bassPattern, [0, 1, 2, 3], d.bassPattern),
     volBass: number01(r.volBass, d.volBass),
+    drumSound: oneOf(r.drumSound, Object.keys(DRUM_KIT_SOUNDS) as DrumKitSound[], d.drumSound),
+    bassTimbre: oneOf(r.bassTimbre, Object.keys(BASS_TIMBRES) as BassTimbre[], d.bassTimbre),
+    compTimbre: oneOf(r.compTimbre, Object.keys(COMP_TIMBRES) as CompTimbre[], d.compTimbre),
     muteBass: r.muteBass === true,
     inputDeviceId: typeof r.inputDeviceId === 'string' ? r.inputDeviceId.slice(0, 200) : d.inputDeviceId,
     inputGain: typeof r.inputGain === 'number' && r.inputGain >= 0 && r.inputGain <= 4 ? r.inputGain : d.inputGain,
@@ -456,6 +467,7 @@ export function genreSettings(id: GenreId): Partial<Settings> {
   return {
     jamGenre: id, drumKit: genre.kit, drumPattern: 0, compPattern: genre.comp, swing: genre.swing, bassPattern: 0,
     volDrums: genre.mix.drums, volBass: genre.mix.bass, volComp: genre.mix.comp,
+    drumSound: genre.sounds.drums, bassTimbre: genre.sounds.bass, compTimbre: genre.sounds.comp,
   };
 }
 
