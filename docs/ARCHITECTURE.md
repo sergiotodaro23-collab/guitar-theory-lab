@@ -59,6 +59,10 @@ Le avoid notes non sono una verità assoluta. `AvoidProfile` sceglie la tradizio
 
 `src/exercises/arpShapes.ts` (puro): `arpeggioPitches` (altezze), `placeLine` (posizioni, programmazione dinamica con stato della mano), `fingerLine` (dita e cambi di posizione), `octaveLine` / `sweepLine` / `skipLine` / `cagedArpeggioNotes`, `descentOf` (ritorno), `arpeggioPlan` (cosa disegnare, cosa suonare, dita). `settings.arpeggioPlanOf` lo applica alle impostazioni; `tracks.ts` lo suona, `Board.tsx` lo disegna con `exact` e `fingers`; `ArpShapePanel.tsx` lo sceglie.
 
+## Analisi armonica
+
+`src/harmony/interchange.ts` (puro): `chordOrigin(chord, tonica, modo)` → tipo (diatonico, secondaria, prestito, cromatico), numerale, modo d'origine, scala proposta. Lo usano `HarmonyAnalysis` (panels), `Board.tsx` con `contextScales` e `ChordViewPanel` per le viste nuove.
+
 ## Vista per accordo
 
 `src/app/chordViews.ts` (puro): `ChordView` per id dell'accordo della progressione, `viewNotes` (arpeggio nella forma o scala), `viewOverlays` (scale aggiunte e arpeggi come scale di toni dell'accordo), `viewForChord`. `Board.tsx` sceglie la vista dell'accordo corrente (`useHarmonyContext`) e la passa a `buildMarkerLayer` come note, scala, focus e sovrapposizioni; `ChordViewPanel.tsx` la modifica.

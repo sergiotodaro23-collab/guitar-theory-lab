@@ -56,7 +56,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P1-12 | Arpeggios Lab (workspace) | IMPLEMENTED | P1-07 | exercises, fretboard, app, ui | Quarta modalità. Tre livelli separati: note dell'accordo (teoria), pattern (`ArpeggioSpec`: direzione sale/scende/sale-scende/scende-sale, grado di partenza per i rivolti, passi personalizzati), diteggiatura (posizione di cinque tasti, `arpeggioNotes`). Un accordo o la progressione condivisa con Harmony Lab, con arpeggi che ripartono o si collegano per nota più vicina (voice leading, mai più di un tono al cambio su ii–V–I). Guide tones evidenziati, funzioni sulle note, accompagnamento, sincronia con il transport, due preset. Test: 9 unit sul motore, 3 sulle tracce, 1 e2e. |
 | P1-12b | Arpeggi per forma CAGED, salti di corda, sweep, target sul battere | IMPLEMENTED | P1-12 | exercises | D-27: CAGED sulla fondamentale dell'accordo (e sulla progressione la forma più vicina alla zona scelta), salto di corda 6-4-2/5-3-1, sweep su 3–6 corde con girata, collegamento "Arriva su un grado" sul battere del cambio. Unit e e2e. |
 | P1-12c | Arpeggios Lab avanzato | PARTIAL | P1-12b, P2-01 | exercises, fretboard, ui | D-27. Fatto: quattro livelli separati (teoria → altezze → posizioni → diteggiatura), 1–3 ottave solo se realizzabili (altrimenti null, opzione disattivata), cambi di posizione contati e mostrati, sweep, salto di corda, ritorno diverso dalla salita, partenza da qualsiasi grado, collegamento per nota vicina o per grado target, famiglie: triadi, settime, m7♭5, dim7, sus, add, seste, none, alterati (7alt, 7b9, 7#9, 7b5), 11, 13, slash. Unit 22, e2e 6. Mancano: fasi arpeggio nell'editor dei percorsi (con P1-10), slash chord con il basso come prima nota, voice leading oltre il target, rifinitura delle dita (stesso dito su corde vicine). |
-| P1-11b | Harmony Lab: interscambio modale, avoid contestuali per accordo | MISSING | P1-11, P1-14 | harmony, ui | |
+| P1-11b | Harmony Lab: interscambio modale, avoid contestuali per accordo | IMPLEMENTED | P1-11, P1-14 | harmony, ui | D-30: origine di ogni accordo (diatonico, dominante secondaria, prestito da modo parallelo, cromatico), numerale, scala proposta; tabella in Harmony Lab; tastiera, funzioni e avoid che seguono la scala di ogni accordo (interruttore); vista per accordo che parte dalla proposta; due modelli di interscambio. Unit 15, e2e 3. |
 | P1-13 | Preset di percorsi | PARTIAL | P1-08 | persistence, app | Il percorso è salvato con i preset di studio; due preset predefiniti. Manca una libreria di soli percorsi. |
 
 ## P2 — UX/UI Workbench
@@ -115,7 +115,6 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-Su richiesta del proprietario gli incrementi avanzano senza attendere il merge, uno dopo l'altro sullo stesso branch (una PR aggiornata). Fatto: P1-12b, P1-12c (parziale), P3-06. Poi:
+Su richiesta del proprietario gli incrementi avanzano senza attendere il merge, uno dopo l'altro sullo stesso branch (una PR aggiornata). Fatto: P1-12b, P1-12c (parziale), P3-06, P1-14, P1-11b. Poi:
 
-1. **P1-14** completamenti (intervallo di tasti, colori, esercizio per accordo) e **P1-11b** interscambio modale.
-2. **P3-10…P3-12** Live Monitor 2.0 (stima della posizione, risposta e sensibilità, calibrazione): prima della beta stabile.
+1. **P3-10…P3-12** Live Monitor 2.0 (stima della posizione, risposta e sensibilità, calibrazione): prima della beta stabile.

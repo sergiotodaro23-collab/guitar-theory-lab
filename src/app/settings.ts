@@ -1,7 +1,7 @@
 /** Everything the user can configure and save. Pure and framework-free. */
 import { CAGED_FORMS, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
 import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
-import type { AvoidProfile } from '../harmony';
+import { HOME_MODES, type AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
 import { TUNINGS } from '../pitch';
@@ -63,6 +63,11 @@ export interface HarmonySettings {
   readonly progression: Progression;
   /** Per-chord views (D-26), keyed by progression chord id, and the switch that applies them. */
   readonly chordViewsOn: boolean;
+  /** Key of the progression for the analysis (modal interchange, D-30): tonic and home mode. */
+  readonly harmonyKey: string;
+  readonly harmonyMode: ScaleId;
+  /** Without a chord view: the board takes each chord's scale from the analysis. */
+  readonly contextScales: boolean;
   /** With views on: the exercise uses each chord's view while that chord plays. */
   readonly exerciseFollowsView: boolean;
   readonly chordViews: ChordViews;
@@ -181,6 +186,9 @@ export const DEFAULT_SETTINGS: Settings = {
   swing: 0,
   progression: instantiateTemplate(firstTemplate, firstTemplate.defaultKey),
   chordViewsOn: true,
+  harmonyKey: 'C',
+  harmonyMode: 'ionian',
+  contextScales: false,
   exerciseFollowsView: true,
   chordViews: {},
   loop: true,
@@ -284,6 +292,9 @@ export function sanitizeSettings(raw: unknown): Settings {
     swing: typeof r.swing === 'number' && Number.isFinite(r.swing) ? clamp(r.swing, 0, 0.5) : d.swing,
     progression: validProgression,
     chordViewsOn: typeof r.chordViewsOn === 'boolean' ? r.chordViewsOn : d.chordViewsOn,
+    harmonyKey: typeof r.harmonyKey === 'string' && TONICS.includes(r.harmonyKey) ? r.harmonyKey : d.harmonyKey,
+    harmonyMode: oneOf(r.harmonyMode, HOME_MODES, d.harmonyMode),
+    contextScales: typeof r.contextScales === 'boolean' ? r.contextScales : d.contextScales,
     exerciseFollowsView: typeof r.exerciseFollowsView === 'boolean' ? r.exerciseFollowsView : d.exerciseFollowsView,
     chordViews: sanitizeChordViews(r.chordViews, validProgression.chords.map((c) => c.id)),
     loop: typeof r.loop === 'boolean' ? r.loop : d.loop,

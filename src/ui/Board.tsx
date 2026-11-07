@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { engine } from '../app/engine';
 import { arpeggioPlanOf, boardContext } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
-import { AVOID_PROFILES, classifyTone, functionsAcross } from '../harmony';
+import { AVOID_PROFILES, chordOrigin, classifyTone, functionsAcross } from '../harmony';
 import { parsedChords } from '../jam';
 import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
 import { resolveChordLayer } from '../app/chordLayers';
@@ -13,7 +13,7 @@ import { useLive } from '../audio/liveInput';
 import { livePositions, noteOf } from '../pitch';
 import type { FretPosition } from '../fretboard';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
-import { MAX_VISIBLE_OVERLAYS, viewForChord, viewNotes, viewOverlays, viewScale } from '../app/chordViews';
+import { MAX_VISIBLE_OVERLAYS, defaultScaleFor, viewForChord, viewNotes, viewOverlays, viewScale } from '../app/chordViews';
 import { buildMarkerLayer, type Marker } from '../viz/markers';
 
 export function useHarmonyContext() {
@@ -117,6 +117,11 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
       return { ...boardContext(settings, null), notes: plan?.notes ?? [], wholeNeck: false, exact: plan?.route ?? false, fingers: plan?.fingers ?? null };
     }
     if (view && chord) return { scale: viewScale(view), notes: viewNotes(view, chord), wholeNeck: view.positionType === 'neck' };
+    // No view: with "scale from the analysis", the chord's own scale in its context (D-30).
+    if (chord && settings.contextScales && (settings.mode === 'harmony' || settings.mode === 'jam')) {
+      const own = chordOrigin(chord, settings.harmonyKey, settings.harmonyMode).scale ?? { tonic: chord.rootName, scaleId: defaultScaleFor(chord) };
+      return boardContext({ ...settings, tonic: own.tonic, scaleId: own.scaleId }, phaseIndex);
+    }
     return boardContext(settings, phaseIndex);
   }, [settings, phaseIndex, chord, view]);
   const { scale } = context;

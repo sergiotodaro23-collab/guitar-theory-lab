@@ -12,6 +12,7 @@ import {
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, type LayerColor } from '../app/scaleLayers';
 
 import { useApp, usePlayhead } from '../app/store';
+import { chordOrigin } from '../harmony';
 import { CAGED_FORMS, DEFAULT_FRETS, type CagedForm } from '../fretboard';
 import { SCALES, tryParseChord, type ScaleId } from '../theory';
 import { Field, Panel, Segmented, Select, Toggle } from './controls';
@@ -56,6 +57,12 @@ export function ChordViewPanel() {
     // Stopped: show the chord being edited. Playing: the progression keeps the board.
     if (transport === 'stopped') engine.setChord(i);
   };
+  // A new view starts from the scale the analysis proposes in this key (D-30), else the chord's usual one.
+  const origin = chord ? chordOrigin(chord, s.harmonyKey, s.harmonyMode) : null;
+  const contextView = (c: NonNullable<typeof chord>): ChordView => {
+    const base = defaultView(c);
+    return origin?.scale ? { ...base, tonic: origin.scale.tonic, scaleId: origin.scale.scaleId } : base;
+  };
   const others = chords.flatMap((c, i) => (i !== index && s.chordViews[c.id] ? [{ value: c.id, label: `${i + 1}. ${c.symbol}` }] : []));
   const overlayRoom = view ? visibleOverlayCount(view) < MAX_VISIBLE_OVERLAYS : false;
 
@@ -92,7 +99,7 @@ export function ChordViewPanel() {
       {!view ? (
         <div className="row chord-view-empty">
           <p className="field-hint">{entry?.symbol} usa la vista generale (scala e forma del pannello Scala).</p>
-          <button type="button" className="btn btn-accent" data-testid="view-customize" disabled={!chord} onClick={() => chord && setView(defaultView(chord))}>
+          <button type="button" className="btn btn-accent" data-testid="view-customize" disabled={!chord} onClick={() => chord && setView(contextView(chord))}>
             Personalizza {entry?.symbol}
           </button>
           {others.length > 0 ? (
@@ -118,7 +125,7 @@ export function ChordViewPanel() {
           </Field>
           <div className="row">
             <Field label="Tonica"><Select label="Tonica della vista" testId="view-tonic" value={view.tonic} options={tonicOptions} onChange={(tonic) => change({ tonic })} /></Field>
-            <Field label="Scala" hint={chord ? `Di solito su ${chord.symbol}: ${chord.rootName} ${SCALES[defaultScaleFor(chord)].name}.` : undefined}>
+            <Field label="Scala" hint={origin ? `${origin.numeral} · ${origin.text}` : chord ? `Di solito su ${chord.symbol}: ${chord.rootName} ${SCALES[defaultScaleFor(chord)].name}.` : undefined}>
               <Select label="Scala della vista" testId="view-scale" value={view.scaleId} options={scaleOptions} onChange={(scaleId: ScaleId) => change({ scaleId })} />
             </Field>
           </div>

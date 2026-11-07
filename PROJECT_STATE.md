@@ -6,14 +6,14 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 374 test unitari.
-- `npm run test:e2e`: verde, 80 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 390 test unitari.
+- `npm run test:e2e`: verde, 83 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
 ## Funziona
 
-- Quattro modalità: Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus), Arpeggios Lab, Jam Studio (progressioni, comping, loop).
+- Quattro modalità: Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus, analisi con interscambio modale e scala di ogni accordo, D-30), Arpeggios Lab, Jam Studio (progressioni, comping, loop).
 - **Arpeggios Lab**: un accordo o la progressione, rivolti, quattro direzioni, pattern personalizzati, arpeggi collegati per nota più vicina o per grado target sul battere. Forme decise dal motore (D-27): posizione, CAGED, 1–3 ottave lungo il manico con cambi di posizione e diteggiatura, sweep, salto di corda, ritorno diverso dalla salita; le forme non suonabili vengono rifiutate.
 - Tastiera 0–24 tasti a celle uniformi, CAGED (5 forme) e 3NPS (7 pattern), intervalli 2ª–8ª, sequenze personalizzate.
 - **Percorsi a fasi** (nuovo): ogni fase con scala, forma CAGED/3NPS/range di tasti, ottava, sequenza, direzione, note per movimento e ripetizioni. Fasi sul battere, tastiera che segue la fase in riproduzione.

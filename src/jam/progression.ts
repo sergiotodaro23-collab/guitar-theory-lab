@@ -2,7 +2,7 @@
  * Jam Session Engine: progressions as data, with pure edits, plus their
  * translation into timeline tracks. Harmonic Context Switch uses it too.
  */
-import { mod, noteName, parseChord, parseDegree, parseNote, spellDegree, transposeNote, tryParseChord, type Chord } from '../theory';
+import { mod, noteName, parseChord, parseDegree, parseNote, spellDegree, transposeNote, tryParseChord, type Chord, type ScaleId } from '../theory';
 import { ticksPerBar, ticksPerBeat, type ChordChangePayload, type CompPayload, type Meter, type Track } from '../timeline';
 import { guideTones } from '../harmony';
 
@@ -220,6 +220,8 @@ export interface ProgressionTemplate {
   readonly id: string;
   readonly name: string;
   readonly defaultKey: string;
+  /** Home mode for the analysis (modal interchange): ionian unless stated. */
+  readonly mode?: ScaleId;
   /** "degree suffix beats": degree relative to the key, major-scale numbering. */
   readonly steps: readonly (readonly [degree: string, suffix: string, beats: number])[];
 }
@@ -233,18 +235,21 @@ const A_SECTION: ProgressionTemplate['steps'] = [
 
 export const PROGRESSION_TEMPLATES: readonly ProgressionTemplate[] = [
   { id: 'ii-v-i', name: 'ii–V–I maggiore', defaultKey: 'C', steps: [['2', 'm7', 4], ['5', '7', 4], ['1', 'maj7', 8]] },
-  { id: 'ii-v-i-minor', name: 'iiø–V7–i minore', defaultKey: 'A', steps: [['2', 'm7b5', 4], ['5', '7b9', 4], ['1', 'm7', 8]] },
+  { id: 'ii-v-i-minor', name: 'iiø–V7–i minore', defaultKey: 'A', mode: 'aeolian', steps: [['2', 'm7b5', 4], ['5', '7b9', 4], ['1', 'm7', 8]] },
   {
     id: 'blues',
     name: 'Blues in dodici battute',
     defaultKey: 'A',
+    mode: 'mixolydian',
     steps: [
       ['1', '7', 4], ['4', '7', 4], ['1', '7', 8], ['4', '7', 8], ['1', '7', 8],
       ['5', '7', 4], ['4', '7', 4], ['1', '7', 4], ['5', '7', 4],
     ],
   },
   { id: 'i-vi-ii-v', name: 'I–vi–ii–V', defaultKey: 'C', steps: [['1', 'maj7', 4], ['6', 'm7', 4], ['2', 'm7', 4], ['5', '7', 4]] },
-  { id: 'modal', name: 'Vamp modale dorico', defaultKey: 'D', steps: [['1', 'm7', 8], ['4', '7', 8]] },
+  { id: 'modal', name: 'Vamp modale dorico', defaultKey: 'D', mode: 'dorian', steps: [['1', 'm7', 8], ['4', '7', 8]] },
+  { id: 'interchange-iv', name: 'Interscambio: I–IV–iv–I', defaultKey: 'C', steps: [['1', 'maj7', 4], ['4', 'maj7', 4], ['4', 'm7', 4], ['1', 'maj7', 4]] },
+  { id: 'interchange-backdoor', name: 'Interscambio: I–♭VI–♭VII–I', defaultKey: 'C', steps: [['1', 'maj7', 4], ['b6', 'maj7', 4], ['b7', '7', 4], ['1', 'maj7', 4]] },
   {
     id: 'rhythm',
     name: 'Rhythm changes semplificati',

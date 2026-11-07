@@ -5,7 +5,7 @@ import { genreSettings, sanitizeSettings, type HarmonyFocus, type LabelMode, typ
 import { presetRepository, useApp, usePlayhead } from '../app/store';
 import { CAGED_FORMS } from '../fretboard';
 import { INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
-import { AVOID_PROFILES, guideTones, type AvoidProfile } from '../harmony';
+import { AVOID_PROFILES, HOME_MODES, chordOrigin, guideTones, type AvoidProfile } from '../harmony';
 import {
   COMP_PATTERNS, GENRES, PROGRESSION_TEMPLATES, addChord, genreOf, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord, withChord,
   type CompPattern, type Progression, type ChordDuration,
@@ -618,6 +618,43 @@ export const FOCUS_OPTIONS: readonly { value: HarmonyFocus; label: string; help:
   { value: 'targeting', label: 'Chord-tone target', help: 'Un bersaglio per accordo, il più vicino al precedente. Il tratteggio è il prossimo.' },
 ];
 
+const ORIGIN_LABELS = { diatonic: 'Diatonico', secondary: 'Dominante secondaria', borrowed: 'Prestito modale', chromatic: 'Cromatico' } as const;
+
+/** Modal interchange at a glance (P1-11b, D-30): each chord's numeral, origin and scale. */
+export function HarmonyAnalysis() {
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  const rows = s.progression.chords.map((entry) => {
+    const chord = tryParseChord(entry.symbol);
+    return { entry, origin: chord ? chordOrigin(chord, s.harmonyKey, s.harmonyMode) : null };
+  });
+  return (
+    <div className="harmony-analysis" data-testid="harmony-analysis">
+      <div className="row">
+        <Field label="Analisi in">
+          <Select label="Tonica dell’analisi" testId="analysis-key" value={s.harmonyKey} options={tonicOptions} onChange={(harmonyKey) => update({ harmonyKey })} />
+        </Field>
+        <Field label="Modo di casa">
+          <Select<ScaleId> label="Modo di casa dell’analisi" testId="analysis-mode" value={s.harmonyMode} options={HOME_MODES.map((m) => ({ value: m, label: SCALES[m].name }))} onChange={(harmonyMode) => update({ harmonyMode })} />
+        </Field>
+      </div>
+      <ol className="analysis-list">
+        {rows.map(({ entry, origin }, i) => (
+          <li key={entry.id} className={`analysis-row origin-${origin?.kind ?? 'none'}`} data-testid={`analysis-${i}`} data-kind={origin?.kind ?? ''}>
+            <strong className="analysis-symbol">{entry.symbol}</strong>
+            <span className="analysis-numeral">{origin?.numeral ?? '—'}</span>
+            <span className="analysis-kind">{origin ? ORIGIN_LABELS[origin.kind] : 'Accordo non riconosciuto'}</span>
+            <span className="analysis-text muted">{origin?.text}</span>
+          </li>
+        ))}
+      </ol>
+      <Toggle checked={s.contextScales} onChange={(contextScales) => update({ contextScales })}>
+        Scala di ogni accordo dall’analisi (tensioni e avoid seguono l’accordo)
+      </Toggle>
+    </div>
+  );
+}
+
 export function ProgressionLoader() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
@@ -632,7 +669,7 @@ export function ProgressionLoader() {
           options={[{ value: '__', label: 'Scegli…' }, ...PROGRESSION_TEMPLATES.map((t) => ({ value: t.id, label: t.name }))]}
           onChange={(id) => {
             const template = PROGRESSION_TEMPLATES.find((t) => t.id === id);
-            if (template) update({ progression: instantiateTemplate(template, key) });
+            if (template) update({ progression: instantiateTemplate(template, key), harmonyKey: key, harmonyMode: template.mode ?? 'ionian' });
           }}
         />
       </Field>
@@ -662,6 +699,7 @@ export function HarmonyPanel() {
       <Panel title="Cambio di contesto armonico" className="panel-wide">
         <ChordStrip />
         <ProgressionLoader />
+        <HarmonyAnalysis />
         <div className="row">
           <Field label="Cambio accordi">
             <Segmented
