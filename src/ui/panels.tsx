@@ -225,7 +225,7 @@ function RoutineSummary() {
           return (
             <li key={phase.id}>
               <button type="button" className={`routine-phase ${i === current ? 'is-current' : ''}`} aria-pressed={i === current} onClick={() => setSelectedPhase(i)}>
-                <strong>{i + 1}</strong> {scale.tonicName} {scale.definition.name}, {positionLabel(phase.position, scale)}{phase.octave ? ' alta' : ''}, {describeDirection(phase.direction)}{phase.repeats > 1 ? ` ×${phase.repeats}` : ''}
+                <strong>{i + 1}</strong> {phase.kind === 'arpeggio' ? `Arpeggio ${phase.chord} · ` : ''}{scale.tonicName} {scale.definition.name}, {positionLabel(phase.position, scale)}{phase.octave ? ' alta' : ''}, {describeDirection(phase.direction)}{phase.repeats > 1 ? ` ×${phase.repeats}` : ''}
               </button>
             </li>
           );

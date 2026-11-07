@@ -149,3 +149,32 @@ describe('routine persistence', () => {
     expect(sanitizeRoutine(json, fallback)).toEqual(fallback);
   });
 });
+
+describe('arpeggio phases (P1-10)', () => {
+  it('Dm7 inside D dorian, E form: only D F A C, in rising pitch from the lowest D', () => {
+    const r = resolvePhase(defaultPhase('a', { kind: 'arpeggio', chord: 'Dm7', tonic: 'D', scaleId: 'dorian', position: { kind: 'caged', form: 'E' } }));
+    expect(r.issues).toEqual([]);
+    expect(new Set(r.sequence.map((n) => n.name))).toEqual(new Set(['D', 'F', 'A', 'C']));
+    expect(r.sequence[0]?.name).toBe('D');
+    expect(r.sequence.map((n) => n.midi)).toEqual([...r.sequence.map((n) => n.midi)].sort((a, b) => a - b));
+    expect(r.label).toContain('Arpeggio Dm7');
+  });
+  it('a chord outside the scale is a warning, and its foreign tones keep their spelling', () => {
+    const r = resolvePhase(defaultPhase('b', { kind: 'arpeggio', chord: 'E7', position: { kind: 'caged', form: 'E' } }));
+    expect(r.issues.some((i) => i.level === 'warning' && i.message.includes('G#'))).toBe(true);
+    expect(r.sequence.some((n) => n.name === 'G#')).toBe(true);
+  });
+  it('an unreadable chord is an error with a fix: the tonic seventh of the scale', () => {
+    const r = resolvePhase(defaultPhase('c', { kind: 'arpeggio', chord: 'Hm9' }));
+    expect(r.sequence).toEqual([]);
+    expect(r.issues[0]?.fix?.change).toEqual({ chord: 'Cmaj7' });
+  });
+  it('the ii–V–I template plays three chords in order, each from its downbeat', () => {
+    const t = ROUTINE_TEMPLATES.find((x) => x.name.startsWith('ii–V–I'));
+    expect(t).toBeDefined();
+    const plan = planRoutine(t as Routine, { beatsPerBar: 4, beatUnit: 4 });
+    expect(plan.phases.map((p) => p.label.split(',')[0])).toEqual(['Arpeggio Dm7', 'Arpeggio G7', 'Arpeggio Cmaj7']);
+    expect(plan.phases.every((p) => p.startTick % 1920 === 0)).toBe(true);
+    expect(sanitizeRoutine(JSON.parse(JSON.stringify(t)), t as Routine)).toEqual(t);
+  });
+});

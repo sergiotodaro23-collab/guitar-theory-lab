@@ -7,16 +7,21 @@ import {
   CAGED_FORMS,
   DEFAULT_FRETS,
   cagedPosition,
+  pitchesInWindow,
   rangePosition,
+  spellPosition,
   shiftOctave,
   threeNpsPosition,
   type CagedForm,
   type FretNote,
   type SpelledFretNote,
 } from '../fretboard';
-import { SCALES, TONICS, buildScale, mod, type Scale, type ScaleId } from '../theory';
+import { SCALES, TONICS, buildScale, diatonicSeventh, mod, tryParseChord, type Scale, type ScaleId } from '../theory';
+import { arpeggioSequence } from './arpeggio';
 import { ticksPerBar, ticksPerBeat, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
 import { generateSequence, parseCustomPattern, type Direction, type ExerciseKind, type IntervalNumber, type PairMotion } from './generator';
+
+export type PhaseKind = ExerciseKind | 'arpeggio';
 
 export type PhasePosition =
   | { readonly kind: 'caged'; readonly form: CagedForm }
@@ -30,7 +35,10 @@ export interface RoutinePhase {
   readonly position: PhasePosition;
   /** 1 plays the same shape twelve frets higher. */
   readonly octave: 0 | 1;
-  readonly kind: ExerciseKind;
+  /** "arpeggio" (P1-10): the chord's tones inside the phase's shape, from the chord below. */
+  readonly kind: PhaseKind;
+  /** The chord of an arpeggio phase: a symbol the theory engine reads. */
+  readonly chord: string;
   readonly interval: IntervalNumber;
   readonly pairMotion: PairMotion;
   readonly direction: Direction;
@@ -125,6 +133,27 @@ export function resolvePhase(phase: RoutinePhase): ResolvedPhase {
     }
   }
 
+  // An arpeggio phase: the chord's tones inside the shape's frets (D-35).
+  if (phase.kind === 'arpeggio' && notes.length > 0) {
+    const chord = tryParseChord(phase.chord);
+    if (!chord) {
+      const tonic = diatonicSeventh(scale, 0);
+      issues.push({
+        level: 'error',
+        message: `Accordo non riconosciuto: "${phase.chord}". Prova Cmaj7, Dm7, G7, Am7b5.`,
+        ...(tonic ? { fix: { label: `Usa ${tonic.symbol}`, change: { chord: tonic.symbol } } } : {}),
+      });
+      notes = [];
+    } else {
+      const outside = chord.tones.filter((t) => !scale.tones.some((x) => x.pc === t.pc));
+      if (outside.length > 0) {
+        issues.push({ level: 'warning', message: `${outside.map((t) => t.name).join(', ')} non è nella scala della fase: la forma resta quella della scala, l’arpeggio la esce.` });
+      }
+      const frets = notes.map((n) => n.fret);
+      notes = pitchesInWindow(chord.tones.map((t) => t.pc), Math.min(...frets), Math.max(...frets));
+    }
+  }
+
   const customPattern = parseCustomPattern(phase.customText);
   if (phase.kind === 'custom' && !customPattern) {
     issues.push({
@@ -134,15 +163,21 @@ export function resolvePhase(phase: RoutinePhase): ResolvedPhase {
     });
   }
 
+  const arpChord = phase.kind === 'arpeggio' ? tryParseChord(phase.chord) : null;
   const sequence = notes.length === 0 || (phase.kind === 'custom' && !customPattern)
     ? []
-    : generateSequence(notes, scale, {
-      kind: phase.kind,
-      interval: phase.interval,
-      direction: phase.direction,
-      pairMotion: phase.pairMotion,
-      customPattern: customPattern ?? [1],
-    });
+    : arpChord
+      // Spelled by the scale; chord tones outside it keep the chord's own spelling.
+      ? spellPosition(arpeggioSequence(arpChord, notes, { direction: phase.direction, start: 0, customPattern: null }), {
+        ...scale, tones: [...scale.tones, ...arpChord.tones.filter((t) => !scale.tones.some((x) => x.pc === t.pc)).map((t) => ({ degree: t.degree, name: t.name, note: t.note, pc: t.pc }))],
+      })
+      : generateSequence(notes, scale, {
+        kind: phase.kind === 'arpeggio' ? 'scale' : phase.kind,
+        interval: phase.interval,
+        direction: phase.direction,
+        pairMotion: phase.pairMotion,
+        customPattern: customPattern ?? [1],
+      });
 
   if (notes.length > 0 && sequence.length === 0 && issues.every((i) => i.level !== 'error')) {
     issues.push({
@@ -156,7 +191,7 @@ export function resolvePhase(phase: RoutinePhase): ResolvedPhase {
   return {
     phase,
     scale,
-    label: positionLabel(pos, scale) + (phase.octave === 1 ? ', ottava alta' : ''),
+    label: (phase.kind === 'arpeggio' && arpChord ? `Arpeggio ${arpChord.symbol}, ` : '') + positionLabel(pos, scale) + (phase.octave === 1 ? ', ottava alta' : ''),
     notes,
     sequence,
     lowFret: frets.length ? Math.min(...frets) : 0,
@@ -230,6 +265,7 @@ export function defaultPhase(id: string, base?: Partial<RoutinePhase>): RoutineP
     customText: '1 2 3 5',
     notesPerBeat: 2,
     repeats: 1,
+    chord: 'Cmaj7',
     ...base,
   };
 }
@@ -265,7 +301,8 @@ export function sanitizeRoutine(raw: unknown, fallback: Routine): Routine {
       scaleId: oneOf(p.scaleId, Object.keys(SCALES) as ScaleId[], d.scaleId),
       position: sanitizePosition(p.position),
       octave: p.octave === 1 ? 1 : 0,
-      kind: oneOf(p.kind, ['scale', 'interval', 'custom'] as const, d.kind),
+      kind: oneOf(p.kind, ['scale', 'interval', 'custom', 'arpeggio'] as const, d.kind),
+      chord: typeof p.chord === 'string' ? p.chord.slice(0, 24) : d.chord,
       interval: oneOf(p.interval, [2, 3, 4, 5, 6, 7, 8] as const, d.interval),
       pairMotion: oneOf(p.pairMotion, ['ascending', 'descending', 'alternating'] as const, d.pairMotion),
       direction: oneOf(p.direction, ['up', 'down', 'updown'] as const, d.direction),
@@ -306,6 +343,14 @@ export const ROUTINE_TEMPLATES: readonly Routine[] = [
     phases: [
       defaultPhase('t4a', { position: { kind: 'caged', form: 'E' }, direction: 'up' }),
       defaultPhase('t4b', { tonic: 'A', scaleId: 'aeolian', position: { kind: 'caged', form: 'E' }, direction: 'down' }),
+    ],
+  },
+  {
+    name: 'ii–V–I in Do arpeggiato, forma E: un accordo per fase',
+    phases: [
+      defaultPhase('t6a', { kind: 'arpeggio', chord: 'Dm7', tonic: 'D', scaleId: 'dorian', position: { kind: 'caged', form: 'E' }, direction: 'up' }),
+      defaultPhase('t6b', { kind: 'arpeggio', chord: 'G7', tonic: 'G', scaleId: 'mixolydian', position: { kind: 'caged', form: 'E' }, direction: 'down' }),
+      defaultPhase('t6c', { kind: 'arpeggio', chord: 'Cmaj7', position: { kind: 'caged', form: 'E' }, direction: 'updown', repeats: 2 }),
     ],
   },
   {
