@@ -6,8 +6,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 249 test unitari.
-- `npm run test:e2e`: verde, 29 casi su Chromium headless (`e2e/app.spec.ts`, `e2e/appearance.spec.ts`; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 262 test unitari.
+- `npm run test:e2e`: verde, 33 casi su Chromium headless (`e2e/app.spec.ts`, `e2e/appearance.spec.ts`; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -27,7 +27,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Limiti noti
 
-- Aspetto **Semplificata** (predefinito, unico su smartphone verticale) e **Studio** (prototipo da validare). Due layout sullo stesso stato, vedi D-15.
+- Aspetto **Studio** (banco da lavoro, predefinito su tablet e computer, materiali da validare) e **Semplificata** (console, unica su smartphone verticale). Due layout sullo stesso stato, vedi D-16 e D-17. Asset rigenerabili con `python3 tools/studio-assets/render.py`.
 - Solo accordatura standard; nessuna vista per mancini.
 - Nessun input audio (pitch, monitor, tuner).
 - Firefox e WebKit non testati (browser assenti nell'ambiente).
@@ -43,4 +43,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-revisione del prototipo Studio (P2-02) → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.
+revisione dei materiali di Studio (P2-02) → P2-08 Click / Accenti → P3-02 step sequencer. Dettagli in `docs/ROADMAP.md`.

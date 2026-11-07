@@ -47,14 +47,14 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | ID | Requisito | Stato | Dip. | Moduli | Strategia · test · accettazione |
 |----|-----------|-------|------|--------|---------------------------------|
 | P2-01 | Editor avanzato a schermo ampio | IMPLEMENTED | P1-08 | ui | `<dialog>` modale (focus, Escape = annulla, scroll indipendenti, responsive a colonna sotto 900 px), blocchi fase con Scala/Posizione/Sequenza/Direzione e tempo, riordino, duplica, elimina, modelli, anteprima con striscia temporale, tastiera, note e transizione. e2e su desktop e tablet. |
-| P2-02 | Due aspetti: Semplificata e Studio | PARTIAL | — | ui | Due shell sullo stesso stato (D-15), toggle con preferenza persistente, regola responsive testata. Studio copre le quattro modalità, l'editor, scale e accordi multipli, legenda, transport, mixer, preset. Da fare: revisione del proprietario sul prototipo Studio, rifiniture (manopole per altri parametri, legenda adattiva ai layer), Firefox/WebKit. |
-| P2-03 | Tastiera in legno credibile | PARTIAL | P2-02 | viz | In Studio: acero con venature, tasti in nichel, capotasto in osso, madreperla; celle uniformi. Navigazione ‹ › per posizione quando la tastiera scorre (entrambi gli aspetti). |
-| P2-04 | Legenda grande, adattiva, in basso a destra | PARTIAL | — | ui | Oggi in basso a sinistra, piccola; forme già distinte oltre al colore. |
+| P2-02 | Due aspetti: Semplificata e Studio | PARTIAL | — | ui | D-16: Semplificata = console (anche telefono), Studio = banco da lavoro con asset renderizzati, `look` auto/semplificata/studio, Studio predefinita su tablet e computer. Coperte le quattro modalità, editor, scale e accordi multipli, legenda, trasporto, mixer, preset. Da fare: revisione del proprietario sulla qualità dei materiali, Firefox/WebKit. |
+| P2-03 | Tastiera in legno credibile | IMPLEMENTED | P2-02 | viz | Barrette come rettangoli (il gradiente su una linea di larghezza zero non veniva disegnato), 24 tasti più capotasto verificati da test strutturale e sui pixel in entrambi gli aspetti. Studio: acero renderizzato, segnatasti, marker con luce speculare. Frecce ‹ › e intervallo visibile quando la tastiera scorre. |
+| P2-04 | Legenda grande, adattiva, in basso a destra | IMPLEMENTED | — | ui | Solo le categorie presenti (tonica, scala, guide tone, accordo, tensione, avoid, esterna, scale aggiunte, forma, target, nota suonata), con forme oltre ai colori. In Studio sul post-it sotto il telefono. Note rilevate quando esisterà il Live Monitor. |
 | P2-05 | Barra etichette con "Intervalli" e layer indipendenti | PARTIAL | — | viz, ui | Etichette presenti tranne intervalli; layer non separati. |
 | P2-06 | Pannelli comprimibili, modalità Studio/Workbench/Focus | MISSING | — | ui | |
-| P2-07 | Mixer laterale | PARTIAL | P2-02 | ui, audio | In Studio: fader Click, Note, Accordi e meter d'uscita reale. Mancano mute/solo e master (non ancora nel motore audio). |
+| P2-07 | Mixer laterale | PARTIAL | P2-02 | ui, audio | Fader Click, Note, Accordi, Mute per canale, meter d'uscita reale. Mancano master, monitor chitarra e gain (dipendono dall'ingresso audio, non implementato). |
 | P2-08 | Transport: stop/pausa, Click/Accenti 16 indicatori, timbri click | PARTIAL | P0-07 | ui, timeline, audio | Presenti avvia/pausa/ferma, TAP, swing, suddivisione. Mancano griglia 16 accenti, 4 timbri. |
-| P2-09 | Tutor pixel-art in iPod Touch 1ª gen. | MISSING | P2-02 | ui, nuovo `tutor` | Regole locali deterministiche; sprite originale. |
+| P2-09 | Tutor pixel-art nel telefono | PARTIAL | P2-02 | ui, `tutor` | D-17: regole locali con test, sprite originale con sei espressioni, modalità Silenzioso/Contesto/Tutor, riducibile. Da fare: riposizionamento libero, più regole (esercizi, errori live). |
 | P2-10 | Quattro workspace in navigazione | IMPLEMENTED | P1-12 | ui | Fretboard, Harmony, Arpeggios, Jam; lo stato musicale resta condiviso. |
 
 ## P3 — Jam Studio e audio
@@ -87,6 +87,6 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P2-02** revisione del proprietario sul prototipo Studio; rifiniture conseguenti.
+1. **P2-02** revisione del proprietario sui materiali di Studio (screenshot in `test-results/visual/`); rifiniture o asset esterni secondo l'esito.
 2. **P2-08** griglia Click / Accenti a 16 indicatori e timbri del click.
 3. **P3-02** step sequencer Simple in Jam Studio.
