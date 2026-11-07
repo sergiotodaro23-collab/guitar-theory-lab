@@ -6,7 +6,7 @@ Nomenclatura P0–P5 invariata. **Ordine operativo** (direttiva del 7 novembre 2
 1. stabilità generale, routing audio, bug funzionali (incluse le correzioni UX che impediscono l'uso: P0-14);
 2. core didattico: scale e accordi multipli, configurazioni per accordo (P1-14), arpeggi avanzati (P1-12c), Harmony Lab;
 3. Jam Studio: groove, suoni, arrangiamenti, mixer (P3-06…P3-08);
-4. Live Monitor avanzato e calibrazione (P3-10, P3-11);
+4. Live Monitor 2.0: stima della posizione, risposta e sensibilità, calibrazione e profili (P3-10…P3-13), prima della beta stabile;
 5. backing track reali (P3-09);
 6. ricerca NAM, IR, MIDI, polifonia (P4);
 7. design definitivo con Claude Design, accessibilità, ottimizzazione, rilascio.
@@ -30,7 +30,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P0-11 | Layout stabile durante il Live Monitor | IMPLEMENTED | P3-04 | ui | D-22: spazi riservati per messaggi, lettura, posizioni, riscontro, accordatore; legenda con le voci live fisse a ingresso acceso; barra di livello con `transform`. e2e: 25 campioni in 3 s con note e silenzi, nessuno spostamento di tastiera, legenda, pannelli, trasporto, in entrambi gli aspetti. |
 | P0-12 | Routing della chitarra e master | IMPLEMENTED | P3-04 | audio, ui | D-22: canale d'ingresso (entrambi/1/2) in mono, gain, analisi sul segnale pulito, ascolto solo manuale, canale Chitarra e Master nel mixer, suono di prova, diagnostica. e2e: livello reale in uscita nullo ad ascolto spento, presente acceso, nullo con fader Chitarra o Master a zero. **Non verificato con hardware reale.** Procedura: `docs/AUDIO_DIAGNOSTICS.md`. |
 | P0-13 | Selezione degli accordi in riproduzione | IMPLEMENTED | — | app, timeline, ui | D-22: due scelte nello stesso movimento non suonano più insieme (l'ultima vince), N N avanza di due, in automatico la scelta non sposta più una selezione nascosta e la striscia spiega perché è bloccata. |
-| P0-14 | Layout desktop: trasporto e tastiera sempre visibili, pannelli scorrevoli | MISSING | — | ui | Direttiva 7/11: barra del trasporto fissa, tastiera sempre in vista nello studio normale, scale/accordi/esercizi in un'area che scorre da sola, finestre desktop piccole comprese. Marker della Semplificata come riferimento anche per Studio. |
+| P0-14 | Layout desktop: trasporto e tastiera sempre visibili, pannelli scorrevoli | IMPLEMENTED | — | ui | D-24: da 1200 × 720 pagina ferma, area pannelli e colonna destra di Studio con scorrimento proprio; Click/Accenti in pannello sovrapposto; sotto soglia la pagina scorre con trasporto agganciato (Semplificata). e2e `desktop-layout.spec.ts`: 4 dimensioni × 2 aspetti, nessuno scorrimento della pagina, trasporto e tastiera in vista, controlli del trasporto non coperti, nulla si muove scorrendo, cambiando workspace e in riproduzione; ridimensionamento; finestra piccola. Limite: a 1280 × 720 restano circa 150 px ai pannelli. |
 | P0-15 | Misure leggere di prestazioni | MISSING | — | e2e, tools | CPU, memoria, rendering, latenza audio, stabilità del transport, molti layer: strumenti del browser e script riproducibili, nessuna infrastruttura esterna. |
 | P0-10 | Tag `v0.1.0` sul remoto | BLOCKED | — | git | Approvato dal proprietario e creato in locale su `3b3c314`, ma l'ambiente cloud rifiuta il push dei tag (403). Da pubblicare dal sito GitHub o da un clone locale. |
 
@@ -87,8 +87,10 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P3-07 | Jam fase B: kit e timbri multipli | MISSING | P3-06 | audio | Batterie acustiche ed elettroniche, varianti dei pezzi, basso più realistico, comping differenziato per genere. Campioni originali o con licenza compatibile, leggeri; nessuna libreria proprietaria senza autorizzazione. |
 | P3-08 | Jam fase C: arrangiamenti | MISSING | P3-06 | jam, ui | Intro, strofa, ritornello, bridge, outro; variazioni A–D, fill e transizioni per sezione, dinamiche, mute/solo, preset musicali. |
 | P3-09 | Jam fase D: backing track audio locali | MISSING | P1-14 | audio, persistence, ui | Import di file locali (mai caricati su server senza scelta esplicita), riproduzione sincronizzata, mappa accordi e sezioni, loop, volume, stem se presenti, scale e arpeggi sincronizzati. Time-stretch, separazione stem e analisi armonica automatica in una fase successiva. |
-| P3-10 | Calibrazione della latenza e compensazione | MISSING | P3-04 | audio, ui | Procedura guidata empirica e regolazione manuale; distinguere acquisizione, analisi, ascolto e compensazione del riscontro. Mai presentare come misurato ciò che il browser non espone. |
-| P3-11 | Pitch tracking più stabile | PARTIAL | P3-04 | pitch | Oggi YIN + mediana su 5 frame. Da fare: meno falsi cambi, note brevi, rumore, persistenza e dissolvenza dei marker, AudioWorklet. |
+| P3-10 | Live Monitor 2.0 · stima della posizione | MISSING | P3-04 | pitch, ui | D-25. Distinguere nota riconosciuta, tutte le posizioni possibili, posizione stimata. La forma selezionata è un indizio debole (peso, non filtro); continuità con le note precedenti e distanza della mano; se nessuna posizione supera una soglia di probabilità, mostrare l'incertezza (tutte uguali, nessuna piena). Accettazione: suonando fuori dal box, la stima segue la mano entro due note; con una nota isolata senza contesto nessuna posizione piena. Test: unit su sequenze sintetiche di posizioni (dentro e fuori dal box, salti, note isolate). |
+| P3-11 | Live Monitor 2.0 · risposta ai passaggi veloci e sensibilità | PARTIAL | P3-04 | pitch, audio | D-25. Oggi: frame 2048 campioni ogni 40 ms, YIN soglia 0,15, affidabilità ≥ 0,8, mediana su 5 frame (≈ 120–200 ms per una nota stabile). Da fare: AudioWorklet, frame più corti con sovrapposizione, rilevamento degli attacchi (onset), stabilizzazione adattiva. Tre modalità con parametri documentati: **Precisa** (frame lunghi, mediana ampia, soglia alta: note tenute), **Bilanciata** (attuale), **Rapida** (frame corti, onset, mediana breve: legati, hammer-on, pull-off). Accettazione: con WAV sintetici di legati a 16esimi a 120 BPM, in Rapida almeno il 90% delle note riconosciute con meno del 5% di note spurie; in Precisa nessuna nota spuria su note tenute con vibrato leggero. Test: unit su WAV generati, e2e con WAV come microfono; prova con hardware del proprietario. |
+| P3-12 | Live Monitor 2.0 · calibrazione e profili per strumento | MISSING | P3-11 | audio, pitch, persistence, ui | D-25, richiesto prima della beta stabile. Procedura guidata: silenzio (rumore di fondo e soglia), note tenute (livello, affidabilità tipica), passaggio breve (risposta), latenza (empirica: battito sul click e ascolto). Profilo per chitarra, pickup, scheda e canale, con livello, rumore, sensibilità, stabilizzazione e compensazione; modificabile, ripristinabile, riutilizzabile. Distinguere misurato e regolato a mano; mai promettere corda o tasto certi da un segnale monofonico. Test: unit sul calcolo dei parametri da campioni sintetici; e2e della procedura con WAV. |
+| P3-13 | Live Monitor 2.0 · persistenza e dissolvenza dei marker | PARTIAL | P3-11 | ui | Oggi l'opacità segue il livello e sfuma in 260 ms. Da rifinire insieme alla modalità di sensibilità. |
 | P3-05 | Catena audio con gain separati e master | PARTIAL | — | audio | Bus click/note/comp/basso/batteria, ingresso chitarra con gain e ascolto separato (D-21). Mancano master e amp modeling. |
 
 ## P4 — Avanzate
@@ -113,9 +115,9 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-In attesa del merge della PR Live Monitor (P3-04, P0-11…P0-13). Poi, una PR per incremento:
+In attesa del merge della PR P0-14. Poi:
 
-1. **P0-14** layout desktop con trasporto e tastiera sempre visibili e pannelli scorrevoli.
-2. **P1-14** configurazione per singolo accordo (modello dati condiviso, poi Harmony Lab, poi Arpeggios e Jam).
-3. **P1-12c** Arpeggios Lab avanzato.
-4. **P3-06** revisione dei groove e Fusion.
+1. **P1-14** configurazione per singolo accordo (modello dati condiviso, poi Harmony Lab, poi Arpeggios e Jam).
+2. **P1-12c** Arpeggios Lab avanzato.
+3. **P3-06** revisione dei groove e Fusion.
+4. **P3-10…P3-12** Live Monitor 2.0 (stima della posizione, risposta e sensibilità, calibrazione): prima della beta stabile.

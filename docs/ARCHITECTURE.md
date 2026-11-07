@@ -48,6 +48,13 @@ Lo scheduler non sa nulla delle fasi. L'engine pubblica `phase` nel playhead leg
 
 Le avoid notes non sono una verità assoluta. `AvoidProfile` sceglie la tradizione (chord-scale, dominanti alterate, modale) e il risultato porta `contextual` e `reason`, mostrati all'utente.
 
+## Interfaccia: due aspetti, un solo stato
+
+- `src/ui/App.tsx` sceglie l'aspetto (`look` + `src/ui/appearance.ts`, per dimensione della finestra) e monta `simple/SimpleShell.tsx` o `studio/StudioShell.tsx`; l'editor avanzato è montato sopra entrambi.
+- Le shell compongono gli stessi componenti: `Transport.tsx` (pezzi del trasporto), `Board.tsx` (tastiera, legenda, ispettore), `panels.tsx` (pannelli di studio), `AccentGrid.tsx`, `DrumMachine.tsx`, `LivePanels.tsx`, `hardware.tsx` (manopole, fader, meter, canale Chitarra, Master). Nessuna logica musicale nelle shell.
+- Layout desktop (D-24): da 1200 × 720 le shell fissano intestazione, trasporto e tastiera; lo scorrimento sta in `[data-testid="scroll-panels"]` (e `scroll-side` in Studio). Tutto in CSS (`simple/simple.css`, `studio/studio.css`); sotto soglia i contenitori di Studio sono `display: contents`.
+- Ingresso audio: `src/audio/liveInput.ts` (catena, stato in `useLive`), analisi pura in `src/pitch/`.
+
 ## Timeline condivisa
 
 - Tempo in tick da inizio riproduzione, 480 PPQ. Il BPM conta l'unità della metrica: in 6/8 conta gli ottavi.
