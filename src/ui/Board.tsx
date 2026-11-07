@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { engine } from '../app/engine';
 import { arpeggioBoardNotes, boardContext } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
@@ -7,6 +8,7 @@ import { parsedChords } from '../jam';
 import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
 import { resolveChordLayer } from '../app/chordLayers';
 import { Fretboard, type LayerStyle } from '../viz/Fretboard';
+import { legendEntries, type LegendEntry } from '../viz/legend';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
 import { buildMarkerLayer, type Marker } from '../viz/markers';
 
@@ -41,18 +43,6 @@ export function useHarmonyContext() {
   }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, settings.arpSource, settings.arpSymbol, playheadChord, selected]);
 }
 
-const LEGEND_CHORD: readonly { role: string; label: string; guide?: boolean }[] = [
-  { role: 'chord-tone', label: 'Guide tone', guide: true },
-  { role: 'chord-tone', label: 'Chord tone' },
-  { role: 'tension', label: 'Tensione' },
-  { role: 'avoid', label: 'Avoid contestuale' },
-  { role: 'outside', label: 'Esterna' },
-];
-const LEGEND_SCALE = [
-  { role: 'root', label: 'Tonica' },
-  { role: 'scale', label: 'Scala' },
-];
-
 /** Colour, opacity and readable name of every overlay, by list position. */
 export function layerStylesOf(layers: readonly ScaleLayer[]): readonly LayerStyle[] {
   return layers.map((layer) => {
@@ -61,15 +51,15 @@ export function layerStylesOf(layers: readonly ScaleLayer[]): readonly LayerStyl
   });
 }
 
-function Legend({ withChord, layers }: { readonly withChord: boolean; readonly layers: readonly ScaleLayer[] }) {
-  const items = withChord ? LEGEND_CHORD : LEGEND_SCALE;
+/** Only what is drawn: the entries come from the markers on the neck, with shapes as well as colours. */
+function Legend({ entries, layers }: { readonly entries: readonly LegendEntry[]; readonly layers: readonly ScaleLayer[] }) {
   const styles = layerStylesOf(layers);
   return (
     <ul className="legend" aria-label="Legenda" data-testid="legend">
-      {items.map((item) => (
-        <li key={item.label} className={`legend-item role-${item.role} ${'guide' in item && item.guide ? 'is-guide' : ''}`}>
+      {entries.map((entry) => (
+        <li key={entry.kind} className={`legend-item legend-${entry.kind}`} data-kind={entry.kind}>
           <span className="legend-swatch" aria-hidden="true" />
-          {item.label}
+          {entry.label}
         </li>
       ))}
       {layers.map((layer, i) => (layer.visible ? (
@@ -87,7 +77,11 @@ function Legend({ withChord, layers }: { readonly withChord: boolean; readonly l
 
 const PIP_DIRS: readonly (readonly [number, number])[] = [[1, -1], [1, 1], [-1, 1], [-1, -1]];
 
-export function Board() {
+/**
+ * The neck with its legend and note inspector. A layout that keeps the legend
+ * elsewhere (Studio's note under the phone) passes the element to render it into.
+ */
+export function Board({ legendHost = null, boardImage = null }: { readonly legendHost?: HTMLElement | null; readonly boardImage?: string | null } = {}) {
   const settings = useApp((s) => s.settings);
   const pinnedPc = useApp((s) => s.pinnedPc);
   const setPinned = useApp((s) => s.setPinned);
@@ -140,18 +134,27 @@ export function Board() {
     return { string: note.string, fret: note.fret, label };
   })() : null;
 
+  const shownMarkers = showAids ? layer.markers : [];
+  const played = active !== null;
+  const entries = useMemo(() => legendEntries(shownMarkers, { played }), [shownMarkers, played]);
+  const legend = showAids
+    ? <Legend entries={entries} layers={settings.scaleLayers} />
+    : <p className="aids-off">Aiuti nascosti: suona a orecchio, l’accordo resta in alto.</p>;
+
   return (
     <section className="board-section" aria-label="Tastiera">
+      {legendHost ? createPortal(legend, legendHost) : null}
       <Fretboard
-        markers={showAids ? layer.markers : []}
+        markers={shownMarkers}
         arrows={showAids ? layer.arrows : []}
         active={active}
         trail={showAids ? trail : []}
         layerStyles={layerStyles}
+        boardImage={boardImage}
         onPick={onPick}
       />
       <div className="board-foot">
-        {showAids ? <Legend withChord={chord !== null} layers={settings.scaleLayers} /> : <p className="aids-off">Aiuti nascosti: suona a orecchio, l’accordo resta in alto.</p>}
+        {legendHost ? null : legend}
         <NoteInspector chords={chords} chordIndex={chordIndex} scale={scale} />
       </div>
     </section>

@@ -26,11 +26,19 @@ const stringY = (string: number): number => BOTTOM - string * STRING_GAP;
 const INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
 const DOUBLE_INLAYS = [12, 24];
 
-const FretGrid = memo(function FretGrid() {
+/**
+ * Fret wires and nut are rectangles, not lines: a gradient in bounding-box
+ * units has nothing to paint on a zero-width line, which made the wires vanish.
+ */
+const FRET_WIRE = 4;
+const NUT_WIDTH = 7;
+
+const FretGrid = memo(function FretGrid({ boardImage }: { readonly boardImage: string | null }) {
   return (
     <g>
       <rect className="board" x={NUT_X} y={TOP - 12} width={RIGHT - NUT_X} height={BOTTOM - TOP + 24} />
       <rect className="board-grain" x={NUT_X} y={TOP - 12} width={RIGHT - NUT_X} height={BOTTOM - TOP + 24} />
+      {boardImage ? <image className="board-image" href={boardImage} x={NUT_X} y={TOP - 12} width={RIGHT - NUT_X} height={BOTTOM - TOP + 24} preserveAspectRatio="none" /> : null}
       {INLAYS.map((fret) => (
         <circle key={fret} className="inlay" cx={noteX(fret)} cy={(TOP + BOTTOM) / 2} r={5} />
       ))}
@@ -41,9 +49,9 @@ const FretGrid = memo(function FretGrid() {
         </g>
       ))}
       {Array.from({ length: DEFAULT_FRETS }, (_, i) => i + 1).map((fret) => (
-        <line key={fret} className="fret" x1={fretX(fret)} x2={fretX(fret)} y1={TOP - 12} y2={BOTTOM + 12} />
+        <rect key={fret} className="fret" data-fret-wire={fret} x={fretX(fret) - FRET_WIRE / 2} y={TOP - 12} width={FRET_WIRE} height={BOTTOM - TOP + 24} />
       ))}
-      <line className="nut" x1={NUT_X} x2={NUT_X} y1={TOP - 12} y2={BOTTOM + 12} />
+      <rect className="nut" x={NUT_X - NUT_WIDTH} y={TOP - 14} width={NUT_WIDTH} height={BOTTOM - TOP + 28} />
       {[0, 1, 2, 3, 4, 5].map((string) => (
         <line key={string} className="string" style={{ strokeWidth: 2.4 - string * 0.32 }} x1={NUT_X - 40} x2={RIGHT} y1={stringY(string)} y2={stringY(string)} />
       ))}
@@ -175,12 +183,14 @@ export interface FretboardProps {
   readonly active: ActiveNote | null;
   readonly trail: readonly FretPosition[];
   readonly layerStyles?: readonly LayerStyle[];
+  /** A rendered wood surface for the board (Studio); null keeps the flat fill. */
+  readonly boardImage?: string | null;
   readonly onPick: (marker: Marker) => void;
 }
 
 const NO_LAYERS: readonly LayerStyle[] = [];
 
-export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAYERS, onPick }: FretboardProps) {
+export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAYERS, boardImage = null, onPick }: FretboardProps) {
   const scroller = useRef<HTMLDivElement>(null);
   const lowestFret = markers.length > 0 ? Math.min(...markers.map((m) => m.fret)) : 0;
   const [view, setView] = useState<{ low: number; high: number; scrolls: boolean }>({ low: 0, high: DEFAULT_FRETS, scrolls: false });
@@ -248,6 +258,16 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
             <stop offset="0.8" stopColor="#d6dbe6" />
             <stop offset="1" stopColor="#b9bfcc" />
           </radialGradient>
+          {/* Lit bead: a specular highlight from the upper left and a soft cast shadow, for any marker shape. */}
+          <filter id="gtl-bead" x="-35%" y="-35%" width="170%" height="170%" colorInterpolationFilters="sRGB">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="blur" />
+            <feSpecularLighting in="blur" surfaceScale="3.5" specularConstant="0.85" specularExponent="18" lightingColor="#ffffff" result="spec">
+              <feDistantLight azimuth="225" elevation="52" />
+            </feSpecularLighting>
+            <feComposite in="spec" in2="SourceAlpha" operator="in" result="gloss" />
+            <feComposite in="SourceGraphic" in2="gloss" operator="arithmetic" k1="0" k2="1" k3="0.75" k4="0" result="lit" />
+            <feDropShadow in="lit" dx="0.8" dy="1.8" stdDeviation="1.3" floodColor="#3b2208" floodOpacity="0.55" />
+          </filter>
           <marker id="arrow-guide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M0 0 L8 4 L0 8 z" className="arrowhead-guide" />
           </marker>
@@ -255,7 +275,7 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
             <path d="M0 0 L8 4 L0 8 z" className="arrowhead-tension" />
           </marker>
         </defs>
-        <FretGrid />
+        <FretGrid boardImage={boardImage} />
         {arrows.map((arrow, i) => <ArrowLine key={i} arrow={arrow} />)}
         {markers.map((marker) => (
           <MarkerGlyph key={`${marker.string}-${marker.fret}`} marker={marker} layerStyles={layerStyles} onPick={onPick} />
