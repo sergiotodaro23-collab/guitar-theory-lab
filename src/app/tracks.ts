@@ -1,10 +1,12 @@
 /** Translate settings into the timeline tracks each mode needs. Pure. */
-import { exerciseTrack, progressionArpeggioTrack, routineTrack } from '../exercises';
+import { exerciseTrack, generateSequence, progressionArpeggioTrack, progressionExerciseTrack, routineTrack } from '../exercises';
+import type { FretNote } from '../fretboard';
+import { chordAsScale, viewNotes, viewScale } from './chordViews';
 import { bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
 import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
 import { ticksPerBeat, type Track } from '../timeline';
-import { arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, meterOf, type Settings } from './settings';
+import { arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, exerciseSpecOf, meterOf, type Settings } from './settings';
 
 export type TrackSpec = Omit<Track, 'originTick'>;
 
@@ -32,6 +34,11 @@ export function buildTracks(s: Settings): ModeTracks {
   let exercise: TrackSpec | null = null;
   if (s.exerciseOn && s.exerciseMode === 'routine') {
     exercise = routineTrack(s.routine, meter);
+  } else if (s.exerciseOn && auto && viewsDriveExercise(s)) {
+    exercise = progressionExerciseTrack(
+      chordSpans(s.progression, meter).map((span) => ({ tick: span.tick, lengthTicks: span.lengthTicks, sequence: chordExerciseSequence(s, span.index, span.chord) })),
+      meter, s.notesPerBeat, progressionLength(s.progression, meter), loop,
+    );
   } else if (s.exerciseOn) {
     const sequence = currentExerciseSequence(s);
     if (sequence.length > 0) exercise = exerciseTrack(sequence, meter, s.notesPerBeat);
@@ -44,6 +51,25 @@ export function buildTracks(s: Settings): ModeTracks {
     drums: s.mode === 'jam' && s.drumOn ? drumTrack(s.drumKit, s.drumPattern, meter, s.drumFillEvery) : null,
     endTick: s.mode === 'jam' && !s.loop && hasProgression ? progressionLength(s.progression, meter) : null,
   };
+}
+
+/** True when at least one chord of the progression has a view the exercise should follow. */
+const viewsDriveExercise = (s: Settings): boolean =>
+  s.chordViewsOn && s.exerciseFollowsView && s.progression.chords.some((c) => s.chordViews[c.id]);
+
+/**
+ * The exercise over one chord: on its view's notes and scale (the chord's
+ * tones as the scale when the view shows only the arpeggio), or the general
+ * exercise when the chord has no view.
+ */
+export function chordExerciseSequence(s: Settings, index: number, chord: Chord): readonly FretNote[] {
+  const id = s.progression.chords[index]?.id;
+  const view = id ? s.chordViews[id] : undefined;
+  if (!view) return currentExerciseSequence(s);
+  // The whole neck is a map, not an exercise: practise in the view's CAGED form instead.
+  const shaped = view.positionType === 'neck' ? { ...view, positionType: 'caged' as const } : view;
+  const scale = view.show === 'arpeggio' ? chordAsScale(chord) : viewScale(view);
+  return generateSequence(viewNotes(shaped, chord), scale, exerciseSpecOf(s));
 }
 
 /** Arpeggios Lab: the arpeggio is the exercise; on a progression the chords and comping play along. */

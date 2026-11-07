@@ -63,6 +63,8 @@ export interface HarmonySettings {
   readonly progression: Progression;
   /** Per-chord views (D-26), keyed by progression chord id, and the switch that applies them. */
   readonly chordViewsOn: boolean;
+  /** With views on: the exercise uses each chord's view while that chord plays. */
+  readonly exerciseFollowsView: boolean;
   readonly chordViews: ChordViews;
   readonly loop: boolean;
   readonly changeMode: ChangeMode;
@@ -179,6 +181,7 @@ export const DEFAULT_SETTINGS: Settings = {
   swing: 0,
   progression: instantiateTemplate(firstTemplate, firstTemplate.defaultKey),
   chordViewsOn: true,
+  exerciseFollowsView: true,
   chordViews: {},
   loop: true,
   changeMode: 'auto',
@@ -281,6 +284,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     swing: typeof r.swing === 'number' && Number.isFinite(r.swing) ? clamp(r.swing, 0, 0.5) : d.swing,
     progression: validProgression,
     chordViewsOn: typeof r.chordViewsOn === 'boolean' ? r.chordViewsOn : d.chordViewsOn,
+    exerciseFollowsView: typeof r.exerciseFollowsView === 'boolean' ? r.exerciseFollowsView : d.exerciseFollowsView,
     chordViews: sanitizeChordViews(r.chordViews, validProgression.chords.map((c) => c.id)),
     loop: typeof r.loop === 'boolean' ? r.loop : d.loop,
     changeMode: oneOf(r.changeMode, ['auto', 'manual'] as const, d.changeMode),

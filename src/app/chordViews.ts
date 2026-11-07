@@ -6,7 +6,7 @@
  * shows that chord's view. Keyed by the progression chord's id, so Harmony
  * Lab, Arpeggios Lab and Jam Studio read the same data. Pure, no DOM.
  */
-import { CAGED_FORMS, DEFAULT_FRETS, allFretNotes, cagedPosition, threeNpsPosition, type CagedForm, type FretNote } from '../fretboard';
+import { CAGED_FORMS, DEFAULT_FRETS, allFretNotes, cagedPosition, rangePosition, threeNpsPosition, type CagedForm, type FretNote } from '../fretboard';
 import { SCALE_IDS, TONICS, buildScale, tryParseChord, type Chord, type Scale, type ScaleId } from '../theory';
 import { LAYER_COLORS, MAX_EXTRA_SCALES, newLayerId, sanitizeLayers, type LayerColor, type ScaleLayer } from './scaleLayers';
 import type { HarmonyFocus, PositionType } from './settings';
@@ -17,6 +17,10 @@ export const MAX_ARPEGGIO_LAYERS = 8;
 export const MAX_VISIBLE_OVERLAYS = 4;
 
 export type ViewShow = 'arpeggio' | 'scale';
+/** A view's shape: the general ones, or a free stretch of frets. */
+export type ViewPosition = PositionType | 'range';
+/** A free stretch is at most an octave of frets: wider is the whole neck. */
+export const MAX_RANGE_SPAN = 12;
 
 export interface ArpeggioLayer {
   readonly id: string;
@@ -31,9 +35,12 @@ export interface ChordView {
   /** The scale that gives the shape and the spelling (also for the arpeggio). */
   readonly tonic: string;
   readonly scaleId: ScaleId;
-  readonly positionType: PositionType;
+  readonly positionType: ViewPosition;
   readonly cagedForm: CagedForm;
   readonly npsStart: number;
+  /** Used with positionType "range": first and last fret, inclusive. */
+  readonly rangeLow: number;
+  readonly rangeHigh: number;
   readonly focus: HarmonyFocus;
   /** Extra scales, up to four: five with the view's own. */
   readonly layers: readonly ScaleLayer[];
@@ -67,6 +74,8 @@ export function defaultView(chord: Chord): ChordView {
     positionType: 'caged',
     cagedForm: 'E',
     npsStart: 0,
+    rangeLow: 5,
+    rangeHigh: 9,
     focus: 'all',
     layers: [],
     arpeggios: [],
@@ -86,6 +95,7 @@ export function viewShapeNotes(view: ChordView): readonly FretNote[] {
     const position = threeNpsPosition(scale, view.npsStart);
     if (position) return position.notes;
   }
+  if (view.positionType === 'range') return rangePosition(scale, view.rangeLow, view.rangeHigh).notes;
   return cagedPosition(scale, view.cagedForm).notes;
 }
 
@@ -99,8 +109,8 @@ export function viewNotes(view: ChordView, chord: Chord): readonly FretNote[] {
   const chordPcs = new Set(chord.tones.map((t) => t.pc));
   if (view.positionType === 'neck') return allFretNotes(DEFAULT_FRETS).filter((n) => chordPcs.has(n.pc));
   const frets = shape.map((n) => n.fret);
-  const low = Math.min(...frets);
-  const high = Math.max(...frets);
+  const low = view.positionType === 'range' ? view.rangeLow : Math.min(...frets);
+  const high = view.positionType === 'range' ? view.rangeHigh : Math.max(...frets);
   return allFretNotes(DEFAULT_FRETS).filter((n) => chordPcs.has(n.pc) && n.fret >= low && n.fret <= high);
 }
 
@@ -161,8 +171,16 @@ export function copyView(view: ChordView): ChordView {
   return { ...view, layers: view.layers.map((l) => ({ ...l, id: newLayerId() })), arpeggios: view.arpeggios.map((a) => ({ ...a, id: newLayerId() })) };
 }
 
+/** Low before high, never wider than an octave of frets. */
+export function clampRange(low: number, high: number): { readonly rangeLow: number; readonly rangeHigh: number } {
+  const a = Math.max(0, Math.min(DEFAULT_FRETS, Math.min(low, high)));
+  const b = Math.max(0, Math.min(DEFAULT_FRETS, Math.max(low, high)));
+  return { rangeLow: a, rangeHigh: Math.min(b, a + MAX_RANGE_SPAN) };
+}
+
 const FOCI: readonly HarmonyFocus[] = ['all', 'guide', 'common', 'resolution', 'targeting'];
-const POSITIONS: readonly PositionType[] = ['caged', '3nps', 'neck'];
+const POSITIONS: readonly ViewPosition[] = ['caged', '3nps', 'neck', 'range'];
+const fret = (v: unknown, fallback: number) => (typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= DEFAULT_FRETS ? v : fallback);
 
 function sanitizeView(raw: unknown): ChordView | null {
   if (typeof raw !== 'object' || raw === null) return null;
@@ -174,9 +192,10 @@ function sanitizeView(raw: unknown): ChordView | null {
     show: r.show === 'arpeggio' ? 'arpeggio' : 'scale',
     tonic: r.tonic,
     scaleId: r.scaleId as ScaleId,
-    positionType: POSITIONS.includes(r.positionType as PositionType) ? (r.positionType as PositionType) : 'caged',
+    positionType: POSITIONS.includes(r.positionType as ViewPosition) ? (r.positionType as ViewPosition) : 'caged',
     cagedForm: CAGED_FORMS.includes(r.cagedForm as CagedForm) ? (r.cagedForm as CagedForm) : 'E',
     npsStart: typeof r.npsStart === 'number' && Number.isInteger(r.npsStart) && r.npsStart >= 0 && r.npsStart < 7 ? r.npsStart : 0,
+    ...clampRange(fret(r.rangeLow, 5), fret(r.rangeHigh, 9)),
     focus: FOCI.includes(r.focus as HarmonyFocus) ? (r.focus as HarmonyFocus) : 'all',
     layers: sanitizeLayers({ scaleLayers: Array.isArray(r.layers) ? r.layers : [] }).slice(0, MAX_EXTRA_SCALES),
     arpeggios: arps.flatMap((a): ArpeggioLayer[] => {

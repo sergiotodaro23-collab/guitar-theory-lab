@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { STUDY_PRESETS } from './builtins';
 import { DEFAULT_SETTINGS, currentExerciseSequence, currentPositionNotes, sanitizeSettings, type Settings } from './settings';
 import { buildTracks } from './tracks';
+import { defaultView } from './chordViews';
+import { withChord } from '../jam';
+import { parseChord } from '../theory';
 
 const s = (over: Partial<Settings>): Settings => ({ ...DEFAULT_SETTINGS, ...over });
 
@@ -26,6 +29,31 @@ describe('settings sanitising', () => {
   });
   it('accepts its own output unchanged', () => {
     expect(sanitizeSettings(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)))).toEqual(DEFAULT_SETTINGS);
+  });
+});
+
+describe('the exercise follows each chord\'s view (P1-14)', () => {
+  const progression = { name: 't', chords: [withChord('Dm7'), withChord('G7')] };
+  const [dm, g] = progression.chords;
+  const base = { mode: 'harmony' as const, exerciseOn: true, progression, notesPerBeat: 2 as const };
+  it('a chord with a view plays its own notes for its bar, the other the general exercise', () => {
+    const views = { [g?.id ?? '']: { ...defaultView(parseChord('G7')), show: 'arpeggio' as const } };
+    const tracks = buildTracks(s({ ...base, chordViews: views }));
+    const events = tracks.exercise?.events ?? [];
+    const bar = 1920;
+    const second = events.filter((e) => e.tick >= bar && e.tick < 2 * bar);
+    expect(second).toHaveLength(8);
+    expect(second.every((e) => [2, 5, 7, 11].includes((e.payload as { midi: number }).midi % 12))).toBe(true);
+    expect(tracks.exercise?.lengthTicks).toBe(2 * bar);
+    // The first chord has no view: the general exercise (C major in the default settings).
+    const first = events.filter((e) => e.tick < bar);
+    expect(first.every((e) => [0, 2, 4, 5, 7, 9, 11].includes((e.payload as { midi: number }).midi % 12))).toBe(true);
+    expect(dm).toBeDefined();
+  });
+  it('switching it off brings back the single exercise', () => {
+    const views = { [g?.id ?? '']: defaultView(parseChord('G7')) };
+    const settings = s({ ...base, chordViews: views, exerciseFollowsView: false });
+    expect(buildTracks(settings).exercise?.events).toHaveLength(currentExerciseSequence(settings).length);
   });
 });
 
