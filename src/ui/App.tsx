@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
 import { engine } from '../app/engine';
 import { useApp } from '../app/store';
-import { Board } from './Board';
-import { AppFooter } from './AppFooter';
-import { Transport } from './Transport';
 import { RoutineEditor } from './RoutineEditor';
+import { SimpleShell } from './simple/SimpleShell';
 import { StudioShell } from './studio/StudioShell';
 import { effectiveAppearance, studioAvailable } from './appearance';
-import { ArpeggioPanel, ExercisePanel, HarmonyPanel, JamPanels, ChordsPanel, PresetsPanel, ScalePanel } from './panels';
 
 function useShortcuts() {
   useEffect(() => {
@@ -59,40 +56,17 @@ function useViewport(): { width: number; height: number } {
   return size;
 }
 
-/** The essential look: one column of panels under the neck. */
-function SimpleShell({ studioAllowed }: { readonly studioAllowed: boolean }) {
-  const mode = useApp((s) => s.settings.mode);
-  return (
-    <>
-      <Transport studioAllowed={studioAllowed} />
-      <main className="main">
-        <Board />
-        <div className="panels" data-mode={mode}>
-          {mode === 'harmony' ? <HarmonyPanel /> : null}
-          {mode === 'arpeggio' ? <ArpeggioPanel /> : null}
-          {mode === 'jam' ? <JamPanels /> : null}
-          <ScalePanel />
-          {mode !== 'arpeggio' ? <ExercisePanel /> : null}
-          {mode === 'fretboard' ? <ChordsPanel /> : null}
-          <PresetsPanel />
-        </div>
-        <AppFooter />
-      </main>
-    </>
-  );
-}
-
 /**
  * Both looks render the same components over the same store, so switching
  * keeps playback, chords, scales and exercises exactly as they are.
  */
 export function App() {
-  const preference = useApp((s) => s.settings.appearance);
+  const look = useApp((s) => s.settings.look);
   const editorOpen = useApp((s) => s.editorOpen);
   const setEditorOpen = useApp((s) => s.setEditorOpen);
   const { width, height } = useViewport();
   const allowed = studioAvailable(width, height);
-  const appearance = effectiveAppearance(preference, width, height);
+  const appearance = effectiveAppearance(look, width, height);
   useShortcuts();
   useEffect(() => {
     document.documentElement.dataset.theme = appearance;

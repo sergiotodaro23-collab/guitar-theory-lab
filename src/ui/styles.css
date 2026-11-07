@@ -43,16 +43,6 @@ ul, ol { list-style: none; }
 button, select, input { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--hot); outline-offset: 2px; }
 
-/* ---- Rack: always-reachable transport ---- */
-.rack {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--deck);
-  border-bottom: 2px solid var(--chord-tone);
-  padding: 10px 20px 12px;
-}
-.rack-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
 .nameplate {
   /* A brushed aluminium plate, engraved, held by two screws. */
   position: relative;
@@ -82,7 +72,6 @@ button, select, input { font: inherit; color: inherit; }
 .nameplate::after { right: 10px; }
 .nameplate-title { font: 700 18px/1 var(--display); letter-spacing: 0.16em; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6); }
 .nameplate-byline { font: 600 11px/1 var(--display); letter-spacing: 0.06em; color: #4a4f57; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); }
-.rack-controls { display: flex; align-items: center; gap: 12px 22px; flex-wrap: wrap; }
 
 .segmented { display: inline-flex; flex-wrap: wrap; gap: 2px; background: var(--void); padding: 2px; clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
 .segment { background: transparent; border: 0; padding: 7px 12px; font: 600 14px/1.1 var(--display); color: var(--muted); cursor: pointer; min-height: 34px; }
@@ -109,7 +98,6 @@ button, select, input { font: inherit; color: inherit; }
 .bpm-input { width: 76px; background: transparent; border: 0; border-bottom: 1px solid var(--edge); text-align: right; font: 700 32px/1 var(--display); font-variant-numeric: tabular-nums; color: var(--ink); -moz-appearance: textfield; appearance: textfield; }
 .bpm-input::-webkit-inner-spin-button, .bpm-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .bpm-unit { font: 600 12px/1 var(--display); color: var(--muted); }
-.bpm-range { width: 130px; }
 .tap { background: var(--deck-raised); padding: 8px 12px; }
 
 .beat-lights { display: flex; gap: 5px; align-items: center; }
@@ -189,13 +177,19 @@ button, select, input { font: inherit; color: inherit; }
 .legend { display: flex; gap: 6px 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
 .legend-item { display: flex; align-items: center; gap: 6px; }
 .legend-swatch { width: 12px; height: 12px; display: inline-block; border-radius: 50%; }
-.legend-item.role-chord-tone .legend-swatch { background: var(--chord-tone); }
-.legend-item.role-chord-tone.is-guide .legend-swatch { box-shadow: 0 0 0 2px var(--void), 0 0 0 3.5px var(--chord-tone); }
-.legend-item.role-tension .legend-swatch { background: var(--tension); border-radius: 0; transform: rotate(45deg); }
-.legend-item.role-avoid .legend-swatch { background: transparent; width: 0; height: 0; border-radius: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 12px solid var(--avoid); }
-.legend-item.role-outside .legend-swatch { border: 2px solid var(--outside); }
-.legend-item.role-root .legend-swatch { background: var(--root); }
-.legend-item.role-scale .legend-swatch { background: #2d1e63; border: 2px solid var(--scale); }
+/* Legend swatches repeat the marker shapes: circle, ringed circle, diamond, triangle, hollow ring. */
+.legend-root .legend-swatch { background: var(--root); }
+.legend-scale .legend-swatch { background: #2d1e63; border: 2px solid var(--scale); }
+.legend-guide .legend-swatch { background: var(--chord-tone); box-shadow: 0 0 0 2px var(--void), 0 0 0 3.5px var(--chord-tone); }
+.legend-chord-tone .legend-swatch { background: var(--chord-tone); }
+.legend-tension .legend-swatch { background: var(--tension); border-radius: 0; transform: rotate(45deg); }
+.legend-avoid .legend-swatch { background: transparent; width: 0; height: 0; border-radius: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 12px solid var(--avoid); }
+.legend-outside .legend-swatch { border: 2px solid var(--outside); }
+.legend-other-scale .legend-swatch { border: 2px dashed var(--muted); }
+.legend-voicing .legend-swatch { border: 2px solid var(--ink); border-radius: 3px; }
+.legend-target-now .legend-swatch, .legend-target-next .legend-swatch { border: 2px solid var(--hot); background: transparent; }
+.legend-target-next .legend-swatch { border-style: dashed; }
+.legend-played .legend-swatch { background: var(--hot); box-shadow: 0 0 6px var(--hot); }
 .aids-off { color: var(--muted); }
 
 .inspector { max-width: 100%; }
@@ -227,7 +221,7 @@ button, select, input { font: inherit; color: inherit; }
 .spelling { font: 600 16px/1.3 var(--display); color: var(--chord-tone); word-spacing: 0.3em; }
 .note { font-size: 13px; color: var(--tension); }
 
-.toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-height: 30px; }
+.toggle { position: relative; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-height: 30px; }
 .toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .toggle-box { width: 18px; height: 18px; border: 1.5px solid var(--edge); background: var(--void); flex: none; }
 .toggle input:checked + .toggle-box { background: var(--chord-tone); border-color: var(--chord-tone); }
@@ -260,14 +254,7 @@ button, select, input { font: inherit; color: inherit; }
 .foot { margin-top: 18px; color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
 .legal a { color: var(--chord-tone); }
 
-@media (max-width: 1150px) {
-  .time-controls { margin-left: 0; }
-}
 @media (max-width: 640px) {
-  /* On a phone the full rack would cover the fretboard. */
-  .rack { position: static; padding: 10px 16px; }
-  .main { padding: 12px 16px 24px; }
-  .bpm-range { width: 90px; }
   .panels { grid-template-columns: minmax(0, 1fr); }
   .builder-row { grid-template-columns: 1fr 1fr; }
   .row-actions { grid-column: 1 / -1; }
@@ -418,41 +405,11 @@ button, select, input { font: inherit; color: inherit; }
 .fret-nav-range { font: 600 14px/1 var(--display); color: var(--muted); min-width: 92px; text-align: center; font-variant-numeric: tabular-nums; }
 .fretboard-scroll { scroll-behavior: smooth; }
 
-/* ---- Simple look: the rack's time settings, folded on narrow screens ---- */
-.time-more-toggle { display: none; }
-
+/* ---- Narrow screens: real touch targets; the neck keeps readable cells and scrolls ---- */
 @media (max-width: 599px) {
-  .rack-top { gap: 8px; margin-bottom: 0; }
-  .nameplate { padding: 5px 24px 4px; }
-  .nameplate-title { font-size: 15px; }
   .mode-nav { width: 100%; overflow-x: auto; }
   .mode-nav .segmented { flex-wrap: nowrap; }
   .mode-nav .segment { white-space: nowrap; min-height: 40px; }
-  /* Transport becomes a bar fixed at the bottom, within thumb reach, always visible. */
-  .rack-controls {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
-    gap: 8px 10px;
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-    background: var(--deck);
-    border-top: 2px solid var(--chord-tone);
-    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
-  }
-  .main { padding-bottom: 150px; }
-  .rack-controls .play, .rack-controls .stop { min-height: 44px; }
-  .rack-controls .play { min-width: 92px; }
-  .bpm-range { display: none; }
-  .bpm-input { font-size: 26px; width: 60px; }
-  .now-playing { min-width: 0; }
-  .now-chord { font-size: 26px; }
-  .time-more-toggle { display: inline-flex; align-items: center; min-height: 40px; padding: 0 10px; background: var(--deck-raised); border: 1px solid var(--edge); color: var(--ink); font-size: 13px; cursor: pointer; }
-  .time-more-toggle[aria-expanded='true'] { border-color: var(--chord-tone); }
-  .time-controls { display: none; width: 100%; }
-  .time-controls.is-open { display: flex; }
-  /* Bigger cells: notes become real touch targets; the arrows move one position at a time. */
   .fretboard { min-width: 1240px; }
   .segment { min-height: 40px; }
   .select, .text-input { min-height: 42px; font-size: 16px; }

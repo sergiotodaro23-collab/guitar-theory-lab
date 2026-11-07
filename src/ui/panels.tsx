@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { STUDY_PRESETS } from '../app/builtins';
 import { engine } from '../app/engine';
 import { sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
@@ -448,9 +448,14 @@ export function ChordsPanel() {
   );
 }
 
+/** True inside a layout that has its own mixer: the panels then leave their level sliders out. */
+export const MixerShown = createContext(false);
+
 function AudioMix({ showComp }: { readonly showComp: boolean }) {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
+  const mixerShown = useContext(MixerShown);
+  if (mixerShown) return null;
   return (
     <div className="row audio-mix">
       <Volume label="Click" value={s.volClick} onChange={(volClick) => update({ volClick })} />
@@ -770,7 +775,7 @@ export function JamPanels() {
 
 /** What a saved study preset keeps: everything except the mixer and mode-free UI state. */
 /** Mixer levels and the visual theme belong to the person, not to a study preset. */
-const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'appearance']);
+const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'look', 'tutorMode', 'tutorMinimized']);
 const pickStudy = (s: Settings): Partial<Settings> =>
   Object.fromEntries(Object.entries(s).filter(([key]) => !MIXER_KEYS.has(key))) as Partial<Settings>;
 

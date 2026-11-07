@@ -4,8 +4,8 @@
  * output. No control here only looks like one.
  */
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
-import { engine } from '../../app/engine';
-import { usePlayhead } from '../../app/store';
+import { engine } from '../app/engine';
+import { usePlayhead } from '../app/store';
 
 interface KnobProps {
   readonly label: string;
@@ -78,6 +78,7 @@ export function Knob({ label, value, min, max, step, onChange, format, testId }:
         onPointerUp={() => { drag.current = null; }}
         onPointerCancel={() => { drag.current = null; }}
         onDoubleClick={() => set(min)}
+        style={{ ['--knob-angle' as string]: `${angle}deg` }}
       >
         <svg viewBox="0 0 60 60" aria-hidden="true">
           <path className="knob-track" d={arc(SWEEP / 2)} />
@@ -86,6 +87,8 @@ export function Knob({ label, value, min, max, step, onChange, format, testId }:
           <circle className="knob-cap" cx="30" cy="30" r="13" />
           <line className="knob-pointer" x1="30" y1="30" x2="30" y2="19" transform={`rotate(${angle} 30 30)`} />
         </svg>
+        {/* Studio draws a rendered metal knob here, turned by --knob-angle; Simple hides it. */}
+        <span className="knob-face" aria-hidden="true"><span className="knob-tick" /></span>
       </div>
       <span className="knob-label">{label}</span>
       <span className="knob-readout">{format(value)}</span>

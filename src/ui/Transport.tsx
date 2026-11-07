@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { engine } from '../app/engine';
-import { BPM_MAX, BPM_MIN, METERS, meterOf, type AppMode, type LabelMode } from '../app/settings';
+import { BPM_MAX, BPM_MIN, METERS, meterOf, type AppMode, type Appearance, type LabelMode } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { Select, Segmented } from './controls';
 
@@ -74,20 +74,19 @@ export function Nameplate() {
 }
 
 /** The look toggle. Studio is disabled, not hidden, where the screen cannot hold it. */
-export function AppearanceToggle({ studioAllowed }: { readonly studioAllowed: boolean }) {
-  const appearance = useApp((s) => s.settings.appearance);
+export function AppearanceToggle({ studioAllowed, current }: { readonly studioAllowed: boolean; readonly current: Appearance }) {
   const update = useApp((s) => s.update);
   return (
     <div className="appearance" role="group" aria-label="Aspetto" data-testid="appearance">
       <span className="appearance-label">Aspetto</span>
       <Segmented
         label="Aspetto dell'interfaccia"
-        value={appearance}
+        value={current}
         options={[
           { value: 'simple', label: 'Semplificata' },
           { value: 'studio', label: 'Studio', disabled: !studioAllowed },
         ]}
-        onChange={(value) => update({ appearance: value })}
+        onChange={(value) => update({ look: value })}
       />
       {!studioAllowed ? <span className="appearance-note">Studio richiede uno schermo più grande</span> : null}
     </div>
@@ -176,46 +175,5 @@ export function ClickSelect() {
       ]}
       onChange={(value) => update({ subdivision: value })}
     />
-  );
-}
-
-/** Simple look: one rack, with the time settings folded away on narrow screens. */
-export function Transport({ studioAllowed }: { readonly studioAllowed: boolean }) {
-  const settings = useApp((s) => s.settings);
-  const update = useApp((s) => s.update);
-  const tap = useTap();
-  const [moreOpen, setMoreOpen] = useState(false);
-
-  return (
-    <header className="rack">
-      <div className="rack-top">
-        <Nameplate />
-        <AppearanceToggle studioAllowed={studioAllowed} />
-        <ModeNav />
-      </div>
-      <div className="rack-controls">
-        <PlayControls />
-        <div className="bpm">
-          <button type="button" className="nudge" aria-label="Rallenta di 1 BPM" onClick={() => engine.nudgeBpm(-1)}>−</button>
-          <BpmInput />
-          <button type="button" className="nudge" aria-label="Accelera di 1 BPM" onClick={() => engine.nudgeBpm(1)}>+</button>
-          <input className="range bpm-range" type="range" min={BPM_MIN} max={BPM_MAX} value={settings.bpm} aria-label="Regola il BPM" onChange={(event) => update({ bpm: Number(event.target.value) })} />
-          <button type="button" className="tap" onClick={tap}>Tap</button>
-        </div>
-        <BeatLights />
-        <CurrentChord />
-        <button type="button" className="time-more-toggle" aria-expanded={moreOpen} aria-controls="time-controls" onClick={() => setMoreOpen(!moreOpen)}>
-          Metrica e click
-        </button>
-        <div className={`time-controls ${moreOpen ? 'is-open' : ''}`} id="time-controls">
-          <MeterSelect />
-          <ClickSelect />
-          <label className="swing">
-            <span>Swing</span>
-            <input className="range" type="range" min={0} max={0.5} step={0.01} value={settings.swing} aria-label="Swing" onChange={(event) => update({ swing: Number(event.target.value) })} />
-          </label>
-        </div>
-      </div>
-    </header>
   );
 }

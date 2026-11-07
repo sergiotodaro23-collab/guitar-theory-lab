@@ -1,5 +1,5 @@
 /**
- * Studio look: a console. Header strip with identity and modes, a transport
+ * Semplificata: a console. Header strip with identity and modes, a transport
  * module with an LCD and real knobs, the instrument bay with the neck at full
  * width, and a deck of tabbed modules beside a mixer. Every control is one of
  * the shared components or a real input; the musical state is the same store.
@@ -13,8 +13,8 @@ import { Board } from '../Board';
 import {
   AppearanceToggle, BeatLights, BpmInput, ClickSelect, CurrentChord, MeterSelect, ModeNav, Nameplate, PlayControls, useTap,
 } from '../Transport';
-import { ArpeggioPanel, ChordsPanel, ExercisePanel, HarmonyPanel, JamPanels, LabelModeSelector, PresetsPanel, ScalePanel } from '../panels';
-import { Fader, Knob, OutputMeter } from './controls';
+import { ArpeggioPanel, ChordsPanel, ExercisePanel, HarmonyPanel, JamPanels, LabelModeSelector, MixerShown, PresetsPanel, ScalePanel } from '../panels';
+import { Fader, Knob, OutputMeter } from '../hardware';
 
 function BarCounter() {
   const bar = usePlayhead((p) => p.bar);
@@ -32,10 +32,11 @@ function TransportModule() {
   const swing = useApp((s) => s.settings.swing);
   const update = useApp((s) => s.update);
   const tap = useTap();
+  const [moreOpen, setMoreOpen] = useState(false);
   return (
-    <section className="st-transport" aria-label="Trasporto">
+    <section className={`cs-transport ${moreOpen ? 'is-open' : ''}`} aria-label="Trasporto">
       <PlayControls />
-      <div className="st-lcd" data-testid="studio-lcd">
+      <div className="cs-lcd" data-testid="lcd">
         <div className="lcd-row lcd-main">
           <CurrentChord />
         </div>
@@ -50,13 +51,19 @@ function TransportModule() {
         </div>
       </div>
       <button type="button" className="tap" onClick={tap}>Tap</button>
+      {/* On a phone the transport is a bar at the bottom; tempo, swing and metre fold behind this button. */}
+      <button type="button" className="cs-more" aria-expanded={moreOpen} aria-controls="cs-transport-extra" data-testid="time-more-toggle" onClick={() => setMoreOpen(!moreOpen)}>
+        Tempo e metrica
+      </button>
+      <div className="cs-transport-extra" id="cs-transport-extra">
       <Knob label="Tempo" value={bpm} min={BPM_MIN} max={BPM_MAX} step={1} format={(v) => `${v} BPM`} onChange={(v) => update({ bpm: v })} testId="knob-bpm" />
       <Knob label="Swing" value={swing} min={0} max={0.5} step={0.01} format={(v) => `${Math.round(v * 200)}%`} onChange={(v) => update({ swing: v })} testId="knob-swing" />
-      <div className="st-time">
-        <span className="st-silk">Metrica</span>
+      <div className="cs-time">
+        <span className="cs-silk">Metrica</span>
         <MeterSelect />
-        <span className="st-silk">Click</span>
+        <span className="cs-silk">Click</span>
         <ClickSelect />
+      </div>
       </div>
     </section>
   );
@@ -101,28 +108,28 @@ function Deck() {
     refs.current[next]?.focus();
   };
   return (
-    <section className="st-deck" aria-label="Moduli">
-      <div className="st-tabs" role="tablist" aria-label="Moduli" aria-orientation="vertical">
+    <section className="cs-deck" aria-label="Moduli">
+      <div className="cs-tabs" role="tablist" aria-label="Moduli" aria-orientation="vertical">
         {tabs.map((tab, i) => (
           <button
             key={tab.id}
             ref={(el) => { refs.current[i] = el; }}
             type="button"
             role="tab"
-            id={`st-tab-${tab.id}`}
+            id={`cs-tab-${tab.id}`}
             aria-selected={tab.id === active?.id}
-            aria-controls="st-module"
+            aria-controls="cs-module"
             tabIndex={tab.id === active?.id ? 0 : -1}
-            className="st-tab"
+            className="cs-tab"
             onClick={() => setPicked({ ...picked, [mode]: tab.id })}
             onKeyDown={(e) => onKey(e, i)}
           >
-            <span className="st-tab-led" aria-hidden="true" />
+            <span className="cs-tab-led" aria-hidden="true" />
             {tab.label}
           </button>
         ))}
       </div>
-      <div className="st-module" id="st-module" role="tabpanel" aria-labelledby={`st-tab-${active?.id}`} data-tab={active?.id}>
+      <div className="cs-module" id="cs-module" role="tabpanel" aria-labelledby={`cs-tab-${active?.id}`} data-tab={active?.id}>
         {active?.content}
       </div>
     </section>
@@ -133,9 +140,9 @@ function Mixer() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   return (
-    <section className="st-mixer" aria-label="Mixer">
-      <h2 className="st-silk st-mixer-title">Mixer</h2>
-      <div className="st-faders">
+    <section className="cs-mixer" aria-label="Mixer">
+      <h2 className="cs-silk cs-mixer-title">Mixer</h2>
+      <div className="cs-faders">
         <Fader label="Click" value={s.volClick} onChange={(volClick) => update({ volClick })} testId="fader-click" />
         <Fader label="Note" value={s.volNotes} onChange={(volNotes) => update({ volNotes })} testId="fader-notes" />
         <Fader label="Accordi" value={s.volComp} onChange={(volComp) => update({ volComp })} testId="fader-comp" />
@@ -145,28 +152,30 @@ function Mixer() {
   );
 }
 
-export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean }) {
+export function SimpleShell({ studioAllowed }: { readonly studioAllowed: boolean }) {
   return (
-    <div className="st-chassis" data-testid="studio">
-      <header className="st-header">
+    <MixerShown.Provider value>
+      <div className="cs-chassis" data-testid="simple-shell">
+      <header className="cs-header">
         <Nameplate />
         <ModeNav />
-        <AppearanceToggle studioAllowed={studioAllowed} />
+        <AppearanceToggle studioAllowed={studioAllowed} current="simple" />
       </header>
       <TransportModule />
-      <main className="st-main">
-        <section className="st-bay" aria-label="Strumento">
-          <div className="st-bay-toolbar">
+      <main className="cs-main">
+        <section className="cs-bay" aria-label="Strumento">
+          <div className="cs-bay-toolbar">
             <LabelModeSelector />
           </div>
           <Board />
         </section>
-        <div className="st-lower">
+        <div className="cs-lower">
           <Deck />
           <Mixer />
         </div>
         <AppFooter />
       </main>
     </div>
+      </MixerShown.Provider>
   );
 }

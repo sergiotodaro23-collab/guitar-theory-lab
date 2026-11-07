@@ -6,6 +6,11 @@ import '@fontsource/chakra-petch/700.css';
 import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
 import './ui/styles.css';
+import '@fontsource/barlow-condensed/latin-500.css';
+import '@fontsource/barlow-condensed/latin-600.css';
+import '@fontsource/barlow-condensed/latin-700.css';
+import '@fontsource/caveat/latin-700.css';
+import './ui/simple/simple.css';
 import './ui/studio/studio.css';
 import { App } from './ui/App';
 

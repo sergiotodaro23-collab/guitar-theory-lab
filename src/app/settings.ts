@@ -2,6 +2,7 @@
 import { CAGED_FORMS, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
 import { ARP_SPAN, ROUTINE_TEMPLATES, arpeggioNotes, generateSequence, parseCustomPattern, resolvePhase, sanitizeRoutine, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec } from '../exercises';
 import type { AvoidProfile } from '../harmony';
+import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
 import { COMP_PATTERNS, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, type CompPattern, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import type { Meter, Subdivision } from '../timeline';
@@ -68,6 +69,10 @@ export interface HarmonySettings {
   readonly volClick: number;
   readonly volNotes: number;
   readonly volComp: number;
+  /** Mute keeps the fader where it is: unmuting restores the same level. */
+  readonly muteClick: boolean;
+  readonly muteNotes: boolean;
+  readonly muteComp: boolean;
 }
 
 export interface ArpeggioSettings {
@@ -85,13 +90,18 @@ export interface ArpeggioSettings {
   readonly arpNotesPerBeat: Subdivision;
 }
 
-/** Two permanent looks over the same state: essential, or the studio console. */
+/** Two permanent looks over the same state: Semplificata (the console) and Studio (the workbench). */
 export type Appearance = 'simple' | 'studio';
+/** The saved choice: 'auto' until the user picks one (Studio where it fits, Simple elsewhere). */
+export type Look = 'auto' | Appearance;
 
 export interface Settings extends StudySettings, HarmonySettings, ArpeggioSettings {
   readonly mode: AppMode;
-  /** Visual theme only: never changes what is played or shown musically. */
-  readonly appearance: Appearance;
+  /** Visual layout only: never changes what is played or shown musically. */
+  readonly look: Look;
+  /** The tutor phone in Studio: how much it says, and whether it is folded away. */
+  readonly tutorMode: TutorMode;
+  readonly tutorMinimized: boolean;
 }
 
 const firstRoutine = ROUTINE_TEMPLATES[0];
@@ -101,7 +111,9 @@ if (!firstTemplate) throw new Error('Nessuna progressione predefinita');
 
 export const DEFAULT_SETTINGS: Settings = {
   mode: 'fretboard',
-  appearance: 'simple',
+  look: 'auto',
+  tutorMode: 'contextual',
+  tutorMinimized: false,
   tonic: 'C',
   scaleId: 'ionian',
   positionType: 'caged',
@@ -136,6 +148,9 @@ export const DEFAULT_SETTINGS: Settings = {
   volClick: 0.7,
   volNotes: 0.7,
   volComp: 0.7,
+  muteClick: false,
+  muteNotes: false,
+  muteComp: false,
   arpSource: 'chord',
   arpSymbol: 'Cmaj7',
   arpLow: 7,
@@ -168,7 +183,10 @@ export function sanitizeSettings(raw: unknown): Settings {
   return {
     mode: oneOf(r.mode, APP_MODES, d.mode),
     // Names used by the first prototype are carried over.
-    appearance: r.appearance === 'workbench' ? 'studio' : r.appearance === 'classic' ? 'simple' : oneOf(r.appearance, ['simple', 'studio'] as const, d.appearance),
+    // A new key: the earlier 'appearance' named layouts that have since been renamed.
+    look: oneOf(r.look, ['auto', 'simple', 'studio'] as const, d.look),
+    tutorMode: oneOf(r.tutorMode, TUTOR_MODES, d.tutorMode),
+    tutorMinimized: typeof r.tutorMinimized === 'boolean' ? r.tutorMinimized : d.tutorMinimized,
     tonic: oneOf(r.tonic, TONICS, d.tonic),
     scaleId: oneOf(r.scaleId, scaleIds, d.scaleId),
     positionType: oneOf(r.positionType, ['caged', '3nps', 'neck'] as const, d.positionType),
@@ -203,6 +221,9 @@ export function sanitizeSettings(raw: unknown): Settings {
     volClick: number01(r.volClick, d.volClick),
     volNotes: number01(r.volNotes, d.volNotes),
     volComp: number01(r.volComp, d.volComp),
+    muteClick: r.muteClick === true,
+    muteNotes: r.muteNotes === true,
+    muteComp: r.muteComp === true,
     arpSource: oneOf(r.arpSource, ['chord', 'progression'] as const, d.arpSource),
     arpSymbol: typeof r.arpSymbol === 'string' ? r.arpSymbol.slice(0, 24) : d.arpSymbol,
     arpLow: typeof r.arpLow === 'number' && Number.isFinite(r.arpLow) ? clamp(Math.round(r.arpLow), 0, DEFAULT_FRETS - ARP_SPAN) : d.arpLow,
@@ -271,3 +292,14 @@ export function boardContext(s: StudySettings, phaseIndex: number | null): { sca
 }
 
 export const meterOf = (s: Pick<StudySettings, 'meterId'>): Meter => METERS[s.meterId] ?? { beatsPerBar: 4, beatUnit: 4 };
+
+export type MixChannel = 'click' | 'notes' | 'comp';
+
+/** The level a channel actually plays at: its fader, or silence while muted. */
+export function channelVolume(s: Settings, channel: MixChannel): number {
+  switch (channel) {
+    case 'click': return s.muteClick ? 0 : s.volClick;
+    case 'notes': return s.muteNotes ? 0 : s.volNotes;
+    case 'comp': return s.muteComp ? 0 : s.volComp;
+  }
+}

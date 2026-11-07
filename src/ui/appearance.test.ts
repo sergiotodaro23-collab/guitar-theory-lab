@@ -23,9 +23,30 @@ describe('appearance by viewport', () => {
     expect(effectiveAppearance('simple', 1280, 800)).toBe('simple');
   });
 
-  it('carries over the prototype names', () => {
-    expect(sanitizeSettings({ ...DEFAULT_SETTINGS, appearance: 'workbench' }).appearance).toBe('studio');
-    expect(sanitizeSettings({ ...DEFAULT_SETTINGS, appearance: 'classic' }).appearance).toBe('simple');
-    expect(sanitizeSettings({ ...DEFAULT_SETTINGS, appearance: 'neon' }).appearance).toBe('simple');
+  it('with no choice made, Studio on tablets and computers, Simple on phones', () => {
+    expect(DEFAULT_SETTINGS.look).toBe('auto');
+    expect(effectiveAppearance('auto', 1440, 900)).toBe('studio');
+    expect(effectiveAppearance('auto', 768, 1024)).toBe('studio');
+    expect(effectiveAppearance('auto', 390, 844)).toBe('simple');
+    expect(effectiveAppearance('auto', 844, 390)).toBe('simple');
+  });
+
+  it('ignores the old look names, whose layouts were renamed', () => {
+    expect(sanitizeSettings({ ...DEFAULT_SETTINGS, look: 'workbench' }).look).toBe('auto');
+    expect(sanitizeSettings({ ...DEFAULT_SETTINGS, look: 'studio' }).look).toBe('studio');
+    const old: Record<string, unknown> = { ...DEFAULT_SETTINGS, appearance: 'studio' };
+    delete old.look;
+    expect(sanitizeSettings(old).look).toBe('auto');
+  });
+});
+
+describe('mixer mute', () => {
+  it('mutes a channel without moving its fader, and unmuting restores the level', async () => {
+    const { channelVolume } = await import('../app/settings');
+    const s = { ...DEFAULT_SETTINGS, volClick: 0.4, muteClick: true };
+    expect(channelVolume(s, 'click')).toBe(0);
+    expect(channelVolume({ ...s, muteClick: false }, 'click')).toBe(0.4);
+    expect(channelVolume(s, 'notes')).toBe(DEFAULT_SETTINGS.volNotes);
+    expect(sanitizeSettings({ ...s, muteNotes: 'yes' }).muteNotes).toBe(false);
   });
 });
