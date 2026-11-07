@@ -8,7 +8,8 @@ import {
   type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink,
 } from '../timeline';
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
-import { stepAt } from '../jam';
+import { fileOffsetAt, loopRegion, progressionLength, sectionSpans, stepAt } from '../jam';
+import { backingTrack } from '../audio/backingTrack';
 import { BPM_MAX, BPM_MIN, MIX_CHANNELS, channelVolume, meterOf, type Settings } from './settings';
 import { useApp, usePlayhead, type Playhead } from './store';
 
@@ -134,6 +135,13 @@ class Engine {
     const timbres = s.drumSound !== previous.drumSound || s.bassTimbre !== previous.bassTimbre || s.compTimbre !== previous.compTimbre;
     if (timbres || s.volMaster !== previous.volMaster || MIX_CHANNELS.some((c) => channelVolume(s, c) !== channelVolume(previous, c))) this.applyVolumes(s);
     this.syncTracks(s, meterChanged);
+    const backingChanged = s.backing !== previous.backing || s.bpm !== previous.bpm || meterChanged || s.mode !== previous.mode || s.loop !== previous.loop || s.arrangement !== previous.arrangement || s.arrangementOn !== previous.arrangementOn;
+    if (backingChanged) {
+      // Volume alone needs no restart.
+      const onlyVolume = s.backing !== previous.backing && JSON.stringify({ ...s.backing, volume: 0 }) === JSON.stringify({ ...previous.backing, volume: 0 }) && s.bpm === previous.bpm && !meterChanged;
+      if (onlyVolume) backingTrack.setVolume(s.backing.volume);
+      else this.syncBacking();
+    }
     if (s.mode !== previous.mode || s.changeMode !== previous.changeMode) this.manualChanges = [];
     if (this.scheduler.transportState !== 'playing') this.publish();
   }
@@ -245,7 +253,40 @@ class Engine {
     return event ? event.payload.chordIndex : selectedChord;
   }
 
+  /**
+   * The backing track follows the transport (D-34): started at the file
+   * position of the tick that will sound a moment from now, on the audio
+   * clock; stopped on pause and stop. Called again when its settings change.
+   */
+  private syncBacking(): void {
+    const s = useApp.getState().settings;
+    const playing = this.scheduler.transportState === 'playing';
+    if (!playing || s.mode !== 'jam' || !s.backing.on || !this.ctx || !this.audio) {
+      backingTrack.stop();
+      return;
+    }
+    const meter = meterOf(s);
+    const song = s.arrangementOn && s.arrangement.length > 0;
+    const loopTicks = !s.loop || s.progression.chords.length === 0 ? null
+      : song ? sectionSpans(s.arrangement, s.progression, meter).reduce((sum, x) => sum + x.lengthTicks, 0) : progressionLength(s.progression, meter);
+    // Just started: the first tick is still ahead, so start exactly on it. Already running: join a moment from now.
+    const now = this.ctx.currentTime;
+    let tick = this.scheduler.positionAt(now);
+    let when = this.scheduler.timeOf(tick);
+    if (when < now + 0.02) {
+      tick = this.scheduler.positionAt(now + 0.06);
+      when = this.scheduler.timeOf(tick);
+    }
+    const ctx = this.ctx;
+    const out = this.audio.monitorInput;
+    void backingTrack.restore(ctx).then((ok) => {
+      if (!ok || this.scheduler.transportState !== 'playing') return;
+      backingTrack.start(ctx, out, when, fileOffsetAt(s.backing, tick, meter, loopTicks), s.backing.volume, loopTicks ? loopRegion(s.backing, loopTicks, meter) : null);
+    });
+  }
+
   private afterTransport(): void {
+    this.syncBacking();
     cancelAnimationFrame(this.frame);
     this.publish();
     if (this.scheduler.transportState === 'playing') {
@@ -368,8 +409,8 @@ export const engine = new Engine();
 
 declare global {
   interface Window {
-    __gtl?: { engine: Engine; debug: DebugLog };
+    __gtl?: { engine: Engine; debug: DebugLog; backing?: typeof backingTrack };
   }
 }
 
-if (engine.debug) window.__gtl = { engine, debug: engine.debug };
+if (engine.debug) window.__gtl = { engine, debug: engine.debug, backing: backingTrack };

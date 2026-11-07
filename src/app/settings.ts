@@ -6,7 +6,7 @@ import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
 import { SENSITIVITIES, TUNINGS, sanitizeProfiles, type LiveProfile, type Sensitivity } from '../pitch';
-import { COMP_PATTERNS, DEFAULT_KIT, GENRES, sanitizeSections, type Section, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
+import { COMP_PATTERNS, DEFAULT_BACKING, DEFAULT_KIT, GENRES, sanitizeBacking, sanitizeSections, type BackingSettings, type Section, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
@@ -101,6 +101,8 @@ export interface HarmonySettings {
   readonly volBass: number;
   /** Jam timbres (D-32): drum kit, bass and comping sounds. */
   /** Song form for Jam Studio (D-33): off plays the progression in a loop. */
+  /** A local audio file played in time with the jam (D-34). */
+  readonly backing: BackingSettings;
   readonly arrangementOn: boolean;
   readonly arrangement: readonly Section[];
   /** One channel alone ('' none): the others fall silent, the guitar monitor is not touched. */
@@ -229,6 +231,7 @@ export const DEFAULT_SETTINGS: Settings = {
   bassOn: true,
   bassPattern: 0,
   volBass: 0.7,
+  backing: DEFAULT_BACKING,
   arrangementOn: false,
   arrangement: [],
   soloChannel: '',
@@ -344,6 +347,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     bassOn: typeof r.bassOn === 'boolean' ? r.bassOn : d.bassOn,
     bassPattern: oneOf(r.bassPattern, [0, 1, 2, 3], d.bassPattern),
     volBass: number01(r.volBass, d.volBass),
+    backing: sanitizeBacking(r.backing),
     arrangementOn: typeof r.arrangementOn === 'boolean' ? r.arrangementOn : d.arrangementOn,
     arrangement: sanitizeSections(r.arrangement),
     soloChannel: oneOf(r.soloChannel, ['', 'click', 'notes', 'comp', 'bass', 'drums'] as const, d.soloChannel),

@@ -13,6 +13,7 @@ import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
 import { DrumPanel } from '../DrumMachine';
 import { ArrangementPanel } from '../ArrangementPanel';
+import { BackingPanel } from '../BackingPanel';
 import { ChordViewPanel } from '../ChordViewPanel';
 import { InputPanels } from '../LivePanels';
 import { Board } from '../Board';
@@ -139,7 +140,7 @@ function Notes({ mode }: { readonly mode: AppMode }) {
       case 'arpeggio':
         return [<Note id="arpeggio" fastener="pin" wide key="arpeggio"><ArpeggioPanel /></Note>, scale, views];
       case 'jam':
-        return [<Note id="jam" fastener="tape" key="jam"><JamPanels /></Note>, views, scale, exercise, <Note id="drums" fastener="pin" full key="drums"><DrumPanel /></Note>, <Note id="song" fastener="tape" full key="song"><ArrangementPanel /></Note>];
+        return [<Note id="jam" fastener="tape" key="jam"><JamPanels /></Note>, views, scale, exercise, <Note id="drums" fastener="pin" full key="drums"><DrumPanel /></Note>, <Note id="song" fastener="tape" full key="song"><ArrangementPanel /></Note>, <Note id="backing" fastener="pin" key="backing"><BackingPanel /></Note>];
     }
   })();
   return <div className="ws-notes" data-mode={mode}>{notes}</div>;
