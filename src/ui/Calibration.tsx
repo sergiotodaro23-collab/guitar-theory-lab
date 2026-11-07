@@ -157,7 +157,7 @@ export function CalibrationPanel() {
             <button type="button" className="btn" data-testid="profile-reset" onClick={() => saveProfile({ ...DEFAULT_PROFILE, guitar: profile.guitar, pickup: profile.pickup, device: profile.device })}>Ripristina i valori di partenza</button>
             <button type="button" className="btn" data-testid="profile-delete" onClick={() => apply({ liveProfiles: s.liveProfiles.filter((p) => p.id !== profile.id), liveProfileId: '' })}>Elimina il profilo</button>
           </div>
-          <p className="field-hint">La latenza misurata non è ancora usata per correggere il riscontro sugli esercizi.</p>
+          <p className="field-hint">La latenza del profilo scelto corregge il riscontro sugli esercizi: la nota sentita si confronta con quella chiesta in quell’istante.</p>
         </>
       ) : <p className="field-hint">Crea un profilo per ogni chitarra, pickup, scheda e canale: la calibrazione si salva lì.</p>}
     </Panel>

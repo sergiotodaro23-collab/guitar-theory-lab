@@ -89,7 +89,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P3-09 | Jam fase D: backing track audio locali | PARTIAL | P1-14 | audio, persistence, ui | D-34: file locale decodificato e salvato solo nel browser, riproduzione agganciata al clock (battuta 1 a un offset, BPM manuale o con tap), pausa/stop/ripresa dal punto giusto, loop con la progressione o la canzone, volume, progressione come mappa degli accordi. Unit 5, e2e 1 (traccia di click sintetica). Mancano: time-stretch, stem, analisi armonica automatica, sezioni mappate sul file. |
 | P3-10 | Live Monitor 2.0 · stima della posizione | IMPLEMENTED | P3-04 | pitch, ui | D-31: probabilità per posizione da continuità della mano, corda precedente e forma (peso, non filtro); nessuna posizione piena senza contesto (tranne note con un solo posto); la stima segue la mano fuori dalla forma. Unit 5 su sequenze sintetiche, e2e (WAV ripetuto). Non verificato con chitarra reale. |
 | P3-11 | Live Monitor 2.0 · risposta ai passaggi veloci e sensibilità | PARTIAL | P3-04 | pitch, audio | D-31: tre modalità Precisa/Bilanciata/Rapida con parametri documentati, frame più corti con sovrapposizione, attacchi riconosciuti. Criteri sintetici rispettati: Rapida 16/16 su sedicesimi legati a 120 BPM senza spurie, Precisa una sola nota su nota tenuta con vibrato. Mancano: AudioWorklet, prova con l'hardware del proprietario. |
-| P3-12 | Live Monitor 2.0 · calibrazione e profili per strumento | IMPLEMENTED | P3-11 | audio, pitch, persistence, ui | D-31: procedura in quattro passi (silenzio, note tenute, passaggio breve, latenza), profili per chitarra/pickup/scheda/canale, misurato vs impostato a mano, modificabili e ripristinabili. Unit 6, e2e 1 con WAV. La latenza misurata non corregge ancora il riscontro sugli esercizi. Non verificato con hardware reale. |
+| P3-12 | Live Monitor 2.0 · calibrazione e profili per strumento | IMPLEMENTED | P3-11 | audio, pitch, persistence, ui | D-31: procedura in quattro passi (silenzio, note tenute, passaggio breve, latenza), profili per chitarra/pickup/scheda/canale, misurato vs impostato a mano, modificabili e ripristinabili. Unit 6, e2e 1 con WAV. La latenza del profilo corregge il riscontro sugli esercizi (D-37). Non verificato con hardware reale. |
 | P3-13 | Live Monitor 2.0 · persistenza e dissolvenza dei marker | PARTIAL | P3-11 | ui | Oggi l'opacità segue il livello e sfuma in 260 ms. Da rifinire insieme alla modalità di sensibilità. |
 | P3-05 | Catena audio con gain separati e master | PARTIAL | — | audio | Bus click/note/comp/basso/batteria, ingresso chitarra con gain e ascolto separato (D-21). Mancano master e amp modeling. |
 
@@ -102,7 +102,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P4-03 | Sequencer avanzato, MIDI, piano roll | MISSING | Le tracce sono già eventi su tick. |
 | P4-04 | Tutor evoluto | MISSING | |
 | P4-05 | Studio sperimentale sulla polifonia (accordi, note simultanee) | MISSING | YIN è monofonico: nessuna promessa. Prototipi isolati DSP o ML con misure di precisione, CPU, memoria e latenza; integrazione solo se i risultati lo giustificano. |
-| P4-06 | Controller MIDI | MISSING | Ingresso MIDI (Web MIDI) per note e comandi del trasporto. |
+| P4-06 | Controller MIDI | IMPLEMENTED | D-37: note MIDI esatte al Live Monitor e alla tastiera, Start/Stop/Continue e pedale di sustain sul trasporto. Unit 2, e2e 1 con dispositivo simulato; non provato con hardware MIDI reale. |
 
 ## P5 — Consolidamento
 
@@ -115,4 +115,4 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-Su richiesta del proprietario gli incrementi avanzano senza attendere il merge, uno dopo l'altro sullo stesso branch (una PR aggiornata). Fatto: P1-12b, P1-12c (parziale), P3-06, P1-14, P1-11b, P3-10, P3-11 (parziale), P3-12, P3-07, P3-08, P3-09 (parziale), P1-10, P1-05, P2-05 (parziale). Poi: completamenti locali (P0-15 prestazioni, latenza nel riscontro, AudioWorklet, MIDI, progressioni per sezione), quindi le attività che richiedono internet (NAM, IR con licenza, browser aggiuntivi), lasciate per ultime.
+Su richiesta del proprietario gli incrementi avanzano senza attendere il merge, uno dopo l'altro sullo stesso branch (una PR aggiornata). Fatto: P1-12b, P1-12c (parziale), P3-06, P1-14, P1-11b, P3-10, P3-11 (parziale), P3-12, P3-07, P3-08, P3-09 (parziale), P1-10, P1-05, P2-05 (parziale), P4-06. Poi: completamenti locali (P0-15 prestazioni, AudioWorklet, progressioni per sezione), quindi le attività che richiedono internet (NAM, IR con licenza, browser aggiuntivi), lasciate per ultime.

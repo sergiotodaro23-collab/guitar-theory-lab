@@ -10,6 +10,7 @@ import { resolveChordLayer } from '../app/chordLayers';
 import { Fretboard, type LayerStyle } from '../viz/Fretboard';
 import { legendEntries, type LegendEntry } from '../viz/legend';
 import { useLive } from '../audio/liveInput';
+import { midiPitch, useMidi } from '../audio/midi';
 import { HandEstimator, noteOf } from '../pitch';
 import type { FretPosition } from '../fretboard';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
@@ -179,8 +180,13 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
   })() : null;
 
   // Detected pitch: every place it can be played, the likely one from what the board shows.
-  const livePitch = useLive((l) => l.pitch);
-  const liveOn = useLive((l) => l.state === 'on') && settings.liveOnBoard;
+  // Audio input first; a MIDI note held stands in for it (D-37).
+  const audioPitch = useLive((l) => l.pitch);
+  const midiNote = useMidi((m) => m.note);
+  const midiOn = useMidi((m) => m.status === 'on');
+  const livePitch = useMemo(() => audioPitch ?? midiPitch(midiNote, settings.tunerA4), [audioPitch, midiNote, settings.tunerA4]);
+  const audioOn = useLive((l) => l.state === 'on');
+  const liveOn = (audioOn || midiOn) && settings.liveOnBoard;
   const lastLive = useRef<{ all: readonly FretPosition[]; likely: FretPosition | null; probabilities: readonly number[]; midi: number | null }>({ all: [], likely: null, probabilities: [], midi: null });
   // Live Monitor 2.0 (D-31): the hand, from continuity first; the board's shape is only a hint.
   const hand = useRef(new HandEstimator());
