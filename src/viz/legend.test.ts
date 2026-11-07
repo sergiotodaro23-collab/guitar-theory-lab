@@ -29,4 +29,9 @@ describe('legend follows the drawn markers', () => {
     expect(kinds).toEqual(['chord-tone', 'voicing', 'target-next', 'played']);
     expect(legendEntries([], { played: false })).toEqual([]);
   });
+
+  it('detected notes: the likely place and the other possible ones, each only when drawn', () => {
+    expect(legendEntries([], { played: false, live: { likely: true, others: true } }).map((e) => e.kind)).toEqual(['live-likely', 'live-possible']);
+    expect(legendEntries([], { played: false, live: { likely: false, others: true } }).map((e) => e.kind)).toEqual(['live-possible']);
+  });
 });

@@ -321,7 +321,12 @@ export class TimelineScheduler {
   }
 
   /** One event on the shared grid, for manual chord changes. */
+  /**
+   * Queue a single event. A one-shot still waiting under the same id is
+   * dropped: the last choice wins, so two quick picks never sound together.
+   */
   scheduleOneShot(trackId: string, tick: number, payload: ScheduledTrackEvent['payload']): void {
+    this.oneShots = this.oneShots.filter((event) => event.trackId !== trackId);
     this.oneShots.push({ tick, trackId, payload, repetition: 0 });
   }
 

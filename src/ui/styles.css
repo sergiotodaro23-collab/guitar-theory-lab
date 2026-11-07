@@ -477,3 +477,66 @@ button, select, input { font: inherit; color: inherit; }
   .drum-voice { font-size: 12px; }
   .drum-step { min-height: 36px; }
 }
+
+/* ---- Live Monitor on the neck: red, fading with the level ---- */
+.live-layer { pointer-events: none; transition: opacity 260ms linear; }
+.live-possible { fill: none; stroke: #e0261b; stroke-width: 2.6; stroke-dasharray: 4 3; }
+.live-likely { fill: #e0261b; stroke: #fff2ee; stroke-width: 2; }
+.legend-live-likely .legend-swatch { background: #e0261b; box-shadow: 0 0 0 2px #fff2ee; }
+.legend-live-possible .legend-swatch { border: 2px dashed #e0261b; background: transparent; }
+
+/* ---- Guitar input, Live Monitor, Tuner ---- */
+.live-input { display: grid; gap: 10px; }
+.live-status { font-size: 13px; color: var(--muted); }
+.live-level { height: 10px; border-radius: 5px; background: var(--void); border: 1px solid var(--edge); overflow: hidden; }
+.live-level-bar { display: block; height: 100%; background: linear-gradient(90deg, #3fbf5c 0 70%, #ffb347 70% 90%, #e0261b 90%); transition: width 60ms linear; }
+.live-readout { display: grid; gap: 2px; justify-items: start; }
+.live-note { font: 700 40px/1 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.live-detail { font-size: 13px; color: var(--muted); }
+.live-feedback { font-weight: 700; padding: 6px 10px; border-radius: 4px; }
+.live-feedback.is-giusto { background: #12391f; color: #9ff0b4; }
+.live-feedback.is-ottava { background: #3d2c08; color: #ffd27a; }
+.live-feedback.is-diverso { background: #3d1210; color: #ffb3aa; }
+.tuner-a4 { width: 96px; }
+.tuner-display { display: grid; justify-items: center; gap: 4px; padding: 8px; border-radius: 8px; background: var(--void); border: 1px solid var(--edge); }
+.tuner-meter { width: 100%; max-width: 260px; }
+.tuner-scale { fill: none; stroke: var(--edge); stroke-width: 3; }
+.tuner-tick { stroke: var(--muted); stroke-width: 2; }
+.tuner-tick.is-zero { stroke: #3fbf5c; stroke-width: 3; }
+.tuner-needle { stroke: #e0261b; stroke-width: 3; stroke-linecap: round; transition: transform 90ms linear; }
+.tuner-needle.is-idle { opacity: 0.3; }
+.tuner-hub { fill: var(--ink); }
+.tuner-string { font: 700 22px/1 var(--display); color: var(--ink); }
+.tuner-cents { font: 600 16px/1 var(--display); color: var(--muted); font-variant-numeric: tabular-nums; min-height: 16px; }
+.tuner-advice { font-weight: 700; min-height: 20px; color: var(--muted); }
+.tuner-display.is-in-tune { border-color: #3fbf5c; box-shadow: 0 0 0 1px #3fbf5c inset; }
+.tuner-display.is-in-tune .tuner-advice { color: #6fe08a; }
+.tuner-heard { font-size: 13px; color: var(--muted); }
+
+/* ---- No layout shift from live readings: every changing text has a reserved box ---- */
+.live-message { margin: 0; min-height: 2.9em; max-height: 2.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 13px; color: var(--muted); }
+.live-message.is-error { color: #ff8a80; font-weight: 700; }
+.live-message.is-warn { color: #ffd27a; font-weight: 700; }
+.live-level-bar { width: 100%; transform-origin: left center; transition: transform 60ms linear; }
+.live-readout { min-height: 88px; }
+.live-note { min-width: 4ch; }
+.live-detail { min-height: 1.4em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.live-positions { margin: 0; height: 4.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.live-feedback { margin: 0; min-height: 34px; line-height: 22px; }
+.live-monitor { display: grid; gap: 6px; }
+.live-monitor-hint { margin: 0; }
+.live-diagnostics summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+.live-diagnostics[open] { display: grid; gap: 8px; }
+.diag-list { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 13px; margin: 0; }
+.diag-list dt { color: var(--muted); }
+.diag-list dd { margin: 0; }
+.tuner-string, .tuner-cents, .tuner-advice, .tuner-heard { min-height: 1.4em; line-height: 1.4em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.chord-strip-hint { margin: 4px 0 0; min-height: 2.9em; }
+
+/* ---- Mixer: guitar channel (fader, input LEDs, listen key) and master ---- */
+.mix-guitar { display: grid; justify-items: center; gap: 8px; }
+.mix-guitar-strip { display: flex; align-items: flex-end; gap: 4px; }
+.meter-input { padding-top: 0; }
+.cs-listen { min-height: 30px; padding: 0 8px; border-radius: 4px; border: 1px solid var(--edge); background: var(--deck-raised); color: var(--ink); font-size: 12px; cursor: pointer; }
+.cs-listen[aria-pressed='true'] { background: #3fbf5c; color: #08240f; border-color: #3fbf5c; }
+.cs-listen:disabled { opacity: 0.45; cursor: not-allowed; }

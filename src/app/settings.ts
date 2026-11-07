@@ -4,6 +4,7 @@ import { ARP_SPAN, ROUTINE_TEMPLATES, arpeggioNotes, generateSequence, parseCust
 import type { AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
+import { TUNINGS } from '../pitch';
 import { COMP_PATTERNS, DEFAULT_KIT, GENRES, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
@@ -87,6 +88,16 @@ export interface HarmonySettings {
   readonly bassPattern: number;
   readonly volBass: number;
   readonly muteBass: boolean;
+  /** Guitar input (D-21): device, gain, monitor level; tuner reference and tuning; detected notes on the neck. */
+  readonly inputDeviceId: string;
+  readonly inputGain: number;
+  readonly monitorVol: number;
+  readonly tunerA4: number;
+  readonly tunerTuning: string;
+  readonly liveOnBoard: boolean;
+  readonly inputChannel: 'mix' | 'left' | 'right';
+  /** Master output level, after every channel including the guitar monitor. */
+  readonly volMaster: number;
   /** Click accents, 16 steps from the downbeat; null follows the meter (D-18). */
   readonly clickAccents: readonly AccentLevel[] | null;
   readonly clickSound: ClickSound;
@@ -179,6 +190,14 @@ export const DEFAULT_SETTINGS: Settings = {
   bassPattern: 0,
   volBass: 0.7,
   muteBass: false,
+  inputDeviceId: '',
+  inputGain: 1,
+  monitorVol: 0.6,
+  tunerA4: 440,
+  tunerTuning: 'standard',
+  liveOnBoard: true,
+  inputChannel: 'mix',
+  volMaster: 0.85,
   clickAccents: null,
   clickSound: 'beep',
   arpSource: 'chord',
@@ -265,6 +284,14 @@ export function sanitizeSettings(raw: unknown): Settings {
     bassPattern: oneOf(r.bassPattern, [0, 1, 2, 3], d.bassPattern),
     volBass: number01(r.volBass, d.volBass),
     muteBass: r.muteBass === true,
+    inputDeviceId: typeof r.inputDeviceId === 'string' ? r.inputDeviceId.slice(0, 200) : d.inputDeviceId,
+    inputGain: typeof r.inputGain === 'number' && r.inputGain >= 0 && r.inputGain <= 4 ? r.inputGain : d.inputGain,
+    monitorVol: number01(r.monitorVol, d.monitorVol),
+    tunerA4: typeof r.tunerA4 === 'number' && r.tunerA4 >= 415 && r.tunerA4 <= 466 ? Math.round(r.tunerA4) : d.tunerA4,
+    tunerTuning: oneOf(r.tunerTuning, TUNINGS.map((t) => t.id), d.tunerTuning),
+    liveOnBoard: typeof r.liveOnBoard === 'boolean' ? r.liveOnBoard : d.liveOnBoard,
+    inputChannel: oneOf(r.inputChannel, ['mix', 'left', 'right'] as const, d.inputChannel),
+    volMaster: number01(r.volMaster, d.volMaster),
     clickAccents: sanitizeAccents(r.clickAccents),
     clickSound: oneOf(r.clickSound, CLICK_SOUNDS.map((c) => c.value), d.clickSound),
     arpSource: oneOf(r.arpSource, ['chord', 'progression'] as const, d.arpSource),

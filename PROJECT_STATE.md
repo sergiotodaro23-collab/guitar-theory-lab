@@ -1,13 +1,13 @@
 # Stato del progetto
 
-Versione 0.1.0 (package.json). Ultimo aggiornamento: 6 novembre 2026, branch `claude/serene-hopper-ubi687`.
+Versione 0.1.0 (package.json). Ultimo aggiornamento: 7 novembre 2026, branch `claude/serene-hopper-ubi687`. Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 294 test unitari.
-- `npm run test:e2e`: verde, 45 casi su Chromium headless (`e2e/app.spec.ts`, `e2e/appearance.spec.ts`, `e2e/accents.spec.ts`, `e2e/drums.spec.ts`, `e2e/genres.spec.ts`; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 314 test unitari.
+- `npm run test:e2e`: verde, 56 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -22,6 +22,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 - **Cambio di metrica in riproduzione**: il transport non si ferma, la nuova metrica parte alla stanghetta successiva (anche verso 6/8, dove il BPM conta gli ottavi).
 - **Accordi multipli**: fino a 8 accordi con builder (fondamentale, qualità, basso), slash chord e rivolti, forme eseguibili cercate sul manico e contornate sulla tastiera, diagrammi, invio a Harmony Lab come progressione.
 - **Scale multiple**: fino a 5 scale (principale + 4) con `+ Aggiungi scala`, visibilità, colore, opacità, zona, riordino e confronto delle note.
+- **Jam Studio**: step sequencer (D-19), otto generi e basso generato (D-20), mixer con Click, Note, Accordi, Basso, Batteria, Chitarra, Master e mute.
+- **Ingresso chitarra, Live Monitor, accordatore** (D-21, D-22): canale d'ingresso, gain, ascolto solo manuale, diagnostica e suono di prova, nota rilevata sulla tastiera come stima, accordatore con modalità cromatica. Layout fermo durante il rilevamento.
 - Targhetta con versione reale e autore.
 - Metronomo e scheduler con un solo clock audio, preset versionati, sessione salvata.
 
@@ -29,7 +31,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 - Aspetto **Studio** (banco da lavoro, predefinito su tablet e computer, materiali da validare) e **Semplificata** (console, unica su smartphone verticale). Due layout sullo stesso stato, vedi D-16 e D-17. Asset rigenerabili con `python3 tools/studio-assets/render.py`.
 - Solo accordatura standard; nessuna vista per mancini.
-- Nessun input audio (pitch, monitor, tuner).
+- Ingresso chitarra, ascolto, Live Monitor e accordatore: **testati con segnali sintetici** (WAV come microfono). La prova del proprietario con chitarra reale ha trovato tre problemi (layout, ascolto, accordi), corretti in D-22 ma **non ancora riverificati con l'hardware**. Diagnostica: `docs/AUDIO_DIAGNOSTICS.md`.
+- Trasporto e tastiera non restano fissi durante lo scorrimento (P0-14, prossimo incremento).
 - Firefox e WebKit non testati (browser assenti nell'ambiente).
 - Vulnerabilità solo nelle dipendenze di sviluppo (Vitest 3), vedi QA.
 
@@ -43,4 +46,4 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-P3-04 pitch detection, Live Monitor e Tuner. Dettagli in `docs/ROADMAP.md`.
+In attesa del merge della PR Live Monitor. Poi P0-14 layout desktop, P1-14 configurazione per accordo, P1-12c arpeggi avanzati, P3-06 groove. Dettagli in `docs/ROADMAP.md`.

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { engine } from '../app/engine';
 import { arpeggioBoardNotes, boardContext } from '../app/settings';
@@ -9,6 +9,9 @@ import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale }
 import { resolveChordLayer } from '../app/chordLayers';
 import { Fretboard, type LayerStyle } from '../viz/Fretboard';
 import { legendEntries, type LegendEntry } from '../viz/legend';
+import { useLive } from '../audio/liveInput';
+import { livePositions, noteOf } from '../pitch';
+import type { FretPosition } from '../fretboard';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
 import { buildMarkerLayer, type Marker } from '../viz/markers';
 
@@ -134,9 +137,31 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
     return { string: note.string, fret: note.fret, label };
   })() : null;
 
+  // Detected pitch: every place it can be played, the likely one from what the board shows.
+  const livePitch = useLive((l) => l.pitch);
+  const liveOn = useLive((l) => l.state === 'on') && settings.liveOnBoard;
+  const lastLive = useRef<{ all: readonly FretPosition[]; likely: FretPosition | null }>({ all: [], likely: null });
+  const live = useMemo(() => {
+    if (!liveOn) return null;
+    if (livePitch) {
+      const midi = noteOf(livePitch.frequency, settings.tunerA4).midi;
+      const where = livePositions(midi, layer.markers, lastLive.current.likely);
+      lastLive.current = { all: where.all, likely: where.likely };
+      // Loudness sets the opacity; RMS 0.15 is a firm pick.
+      return { ...lastLive.current, intensity: Math.min(1, 0.35 + livePitch.rms / 0.15) };
+    }
+    // Silence: keep the last places, faded out by the CSS transition.
+    return { ...lastLive.current, intensity: 0 };
+  }, [liveOn, livePitch, layer.markers, settings.tunerA4]);
   const shownMarkers = useMemo(() => (showAids ? layer.markers : []), [showAids, layer.markers]);
   const played = active !== null;
-  const entries = useMemo(() => legendEntries(shownMarkers, { played }), [shownMarkers, played]);
+  // While the input is on, the legend keeps both live entries: notes coming and going never resize it.
+  const liveLikely = live !== null;
+  const liveOthers = live !== null;
+  const entries = useMemo(
+    () => legendEntries(shownMarkers, { played, live: { likely: liveLikely, others: liveOthers } }),
+    [shownMarkers, played, liveLikely, liveOthers],
+  );
   const legend = showAids
     ? <Legend entries={entries} layers={settings.scaleLayers} />
     : <p className="aids-off">Aiuti nascosti: suona a orecchio, l’accordo resta in alto.</p>;
@@ -151,6 +176,7 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
         trail={showAids ? trail : []}
         layerStyles={layerStyles}
         boardImage={boardImage}
+        live={live}
         onPick={onPick}
       />
       <div className="board-foot">

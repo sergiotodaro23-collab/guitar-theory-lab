@@ -570,6 +570,7 @@ export function ChordStrip() {
   const locked = auto && transport === 'playing';
   const current = playhead ?? selected;
   return (
+    <>
     <ol className="chord-strip" data-testid="chord-strip">
       {s.progression.chords.map((chord, i) => (
         <li key={chord.id}>
@@ -587,6 +588,15 @@ export function ChordStrip() {
         </li>
       ))}
     </ol>
+    {/* Reserved line: the hint swaps text, the strip never moves. */}
+    <p className="field-hint chord-strip-hint" data-testid="chord-strip-hint">
+      {locked
+        ? s.mode === 'jam'
+          ? 'In riproduzione la progressione avanza da sola. Ferma per scegliere da quale accordo partire.'
+          : 'In automatico gli accordi seguono la progressione. Per sceglierli mentre suona, passa a Cambio accordi: Manuale.'
+        : auto ? 'Scegli l’accordo da cui partire.' : 'Scegli l’accordo: entra al prossimo movimento o battuta.'}
+    </p>
+    </>
   );
 }
 
@@ -791,7 +801,7 @@ export function JamPanels() {
 
 /** What a saved study preset keeps: everything except the mixer and mode-free UI state. */
 /** Mixer levels and the visual theme belong to the person, not to a study preset. */
-const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'volDrums', 'muteDrums', 'volBass', 'muteBass', 'look', 'tutorMode', 'tutorMinimized']);
+const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'volDrums', 'muteDrums', 'volBass', 'muteBass', 'inputDeviceId', 'inputGain', 'monitorVol', 'tunerA4', 'tunerTuning', 'liveOnBoard', 'inputChannel', 'volMaster', 'look', 'tutorMode', 'tutorMinimized']);
 const pickStudy = (s: Settings): Partial<Settings> =>
   Object.fromEntries(Object.entries(s).filter(([key]) => !MIXER_KEYS.has(key))) as Partial<Settings>;
 

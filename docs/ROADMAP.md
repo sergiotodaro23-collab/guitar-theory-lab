@@ -1,8 +1,16 @@
 # Roadmap e registro delle attività
 
-Stati: `IMPLEMENTED | PARTIAL | BROKEN | MISSING | BLOCKED`. Requisiti in `docs/MASTER_SPEC.md`. Aggiornato: 6 novembre 2026 (v0.1.0 + branch `claude/serene-hopper-ubi687`).
+Stati: `IMPLEMENTED | PARTIAL | BROKEN | MISSING | BLOCKED`. Requisiti in `docs/MASTER_SPEC.md`. Aggiornato: 7 novembre 2026, direttiva strategica del proprietario dopo la prova con chitarra reale.
 
-Ordine: P0 integrità → P1 core didattico → P2 UX/UI → P3 Jam e audio → P4 avanzate → P5 consolidamento. È un ordine di lavoro, non una riduzione degli obiettivi.
+Nomenclatura P0–P5 invariata. **Ordine operativo** (direttiva del 7 novembre 2026, desktop-first):
+1. stabilità generale, routing audio, bug funzionali (incluse le correzioni UX che impediscono l'uso: P0-14);
+2. core didattico: scale e accordi multipli, configurazioni per accordo (P1-14), arpeggi avanzati (P1-12c), Harmony Lab;
+3. Jam Studio: groove, suoni, arrangiamenti, mixer (P3-06…P3-08);
+4. Live Monitor avanzato e calibrazione (P3-10, P3-11);
+5. backing track reali (P3-09);
+6. ricerca NAM, IR, MIDI, polifonia (P4);
+7. design definitivo con Claude Design, accessibilità, ottimizzazione, rilascio.
+Le dipendenze tecniche restano vincolanti. Ogni incremento è una PR separata; il merge lo fa il proprietario.
 
 Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test / accettazione.
 
@@ -19,6 +27,11 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P0-07 | Timeline condivisa unica | IMPLEMENTED | — | timeline, app | Già presente: `TimelineScheduler` su `AudioContext.currentTime`. |
 | P0-08 | Cambio metrica senza fermare la riproduzione | IMPLEMENTED | P0-07 | timeline, app, ui | Segmenti di metrica sulla timeline (`MeterSegment`, `withMeterChange`): il cambio parte alla stanghetta successiva, i tick non ripartono, la `TempoMap` cambia l'unità del BPM (ottavi in 6/8). Tracce e fine progressione ripartono sul nuovo battere; le luci dei movimenti seguono la metrica udita. Funziona anche in pausa; un cambio annullato prima della stanghetta sparisce. Test: 9 unit (griglia continua, 4/4→3/4, 4/4→6/8, BPM durante l'attesa, pausa, stop, tracce, swing), 1 e2e con misura dei click nel browser. |
 | P0-09 | Test cross-browser Firefox/WebKit | BLOCKED | — | e2e | Solo Chromium installato nell'ambiente cloud. Aggiungere progetti Playwright quando i browser sono disponibili (CI: `npx playwright install firefox webkit`). |
+| P0-11 | Layout stabile durante il Live Monitor | IMPLEMENTED | P3-04 | ui | D-22: spazi riservati per messaggi, lettura, posizioni, riscontro, accordatore; legenda con le voci live fisse a ingresso acceso; barra di livello con `transform`. e2e: 25 campioni in 3 s con note e silenzi, nessuno spostamento di tastiera, legenda, pannelli, trasporto, in entrambi gli aspetti. |
+| P0-12 | Routing della chitarra e master | IMPLEMENTED | P3-04 | audio, ui | D-22: canale d'ingresso (entrambi/1/2) in mono, gain, analisi sul segnale pulito, ascolto solo manuale, canale Chitarra e Master nel mixer, suono di prova, diagnostica. e2e: livello reale in uscita nullo ad ascolto spento, presente acceso, nullo con fader Chitarra o Master a zero. **Non verificato con hardware reale.** Procedura: `docs/AUDIO_DIAGNOSTICS.md`. |
+| P0-13 | Selezione degli accordi in riproduzione | IMPLEMENTED | — | app, timeline, ui | D-22: due scelte nello stesso movimento non suonano più insieme (l'ultima vince), N N avanza di due, in automatico la scelta non sposta più una selezione nascosta e la striscia spiega perché è bloccata. |
+| P0-14 | Layout desktop: trasporto e tastiera sempre visibili, pannelli scorrevoli | MISSING | — | ui | Direttiva 7/11: barra del trasporto fissa, tastiera sempre in vista nello studio normale, scale/accordi/esercizi in un'area che scorre da sola, finestre desktop piccole comprese. Marker della Semplificata come riferimento anche per Studio. |
+| P0-15 | Misure leggere di prestazioni | MISSING | — | e2e, tools | CPU, memoria, rendering, latenza audio, stabilità del transport, molti layer: strumenti del browser e script riproducibili, nessuna infrastruttura esterna. |
 | P0-10 | Tag `v0.1.0` sul remoto | BLOCKED | — | git | Approvato dal proprietario e creato in locale su `3b3c314`, ma l'ambiente cloud rifiuta il push dei tag (403). Da pubblicare dal sito GitHub o da un clone locale. |
 
 ## P1 — Core didattico
@@ -33,6 +46,8 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P1-06 | Scale multiple (fino a 5) | IMPLEMENTED | — | theory, app, viz, ui | Scala principale + fino a 4 `ScaleLayer` (`src/app/scaleLayers.ts`): `+ Aggiungi scala`, lista espandibile, tonica e tipo, zona (posizione o tutta la tastiera), visibilità, colore, opacità, riordino, rimozione, confronto (`compareScales`). Nuove scale nascoste oltre la seconda visibile, avviso di densità. Ogni scala ha un punto colorato in una posizione fissa attorno alla nota. Migrazione della vecchia "seconda scala". Test: 7 unit sul modello, 3 sul confronto, 2 sul marker layer; 1 e2e completo. |
 | P1-06b | Forma CAGED/3NPS indipendente per scala sovrapposta | MISSING | P1-06 | viz, ui | Oggi una scala sovrapposta segue la posizione della principale o copre tutta la tastiera. |
 | P1-07 | Accordi multipli (fino a 8), Chord Builder, slash, rivolti, voicing | IMPLEMENTED | P1-06 | theory, fretboard, app, viz, ui | `ChordLayer` (`src/app/chordLayers.ts`): accordo principale + `+ Aggiungi accordo` che propone le settime diatoniche della scala; visibilità, selezione, riordino, rimozione. Slash chord e basso indipendente nel parser, nome del rivolto, trasposizione e comping con il basso giusto. Builder fondamentale/qualità/basso. Voicing eseguibili cercati sul manico (`chordVoicings`), contorno sulla tastiera, diagrammi. Sulla tastiera solo l'accordo attivo. "Usa come progressione" li porta in Harmony Lab. Test: 14 forme da manuale, vincoli di basso/estensione/mano, settime diatoniche su maggiore e armonica, slash e rivolti, migrazione; 1 e2e completo. |
+| P1-06c | Leggibilità delle sovrapposizioni con forme distinte | MISSING | P1-06 | viz | Contorni, rombi, quadrati, aloni o simboli per scala, senza nascondere il nome della nota; oggi colore più punto in un angolo (D-09). |
+| P1-14 | Configurazione per singolo accordo della progressione | MISSING | P1-06, P1-07 | app, ui, persistence | Ogni accordo porta scale, arpeggi, layer, colori, forme, posizioni, target e guide tones; la tastiera cambia con l'accordo attivo, in manuale e in automatico. Modello unico per Harmony, Arpeggios e Jam; salvabile e riutilizzabile. Limiti: 5 scale e 8 layer per configurazione. |
 | P1-07b | Accordi personalizzati (formula libera), altre qualità (11, 9sus4, add11, 7b5…), diteggiatura delle forme | MISSING | P1-07 | theory, fretboard | Le qualità sono quelle del parser; le forme non indicano ancora le dita. |
 | P1-08 | Esercizi a fasi: forma/posizione/direzione per fase | IMPLEMENTED | P1-03 | exercises, app, ui | `src/exercises/routine.ts`: fasi dichiarative serializzabili, ottava alta, range di tasti, ripetizioni, suddivisione per fase, inizio fase sul battere. 12 test (C su / G giù, 3NPS, relativa, validazioni, round-trip JSON). |
 | P1-09 | Validazione con alternativa | IMPLEMENTED | P1-08 | exercises, ui | `PhaseIssue.fix` applicabile con un clic; e2e su 3NPS di pentatonica. |
@@ -40,6 +55,8 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P1-11 | Harmony Lab: dominanti secondarie, sostituzioni, voice leading | PARTIAL | P1-07 | harmony | Presenti: context switch, guide tones, note comuni, risoluzioni, targeting. |
 | P1-12 | Arpeggios Lab (workspace) | IMPLEMENTED | P1-07 | exercises, fretboard, app, ui | Quarta modalità. Tre livelli separati: note dell'accordo (teoria), pattern (`ArpeggioSpec`: direzione sale/scende/sale-scende/scende-sale, grado di partenza per i rivolti, passi personalizzati), diteggiatura (posizione di cinque tasti, `arpeggioNotes`). Un accordo o la progressione condivisa con Harmony Lab, con arpeggi che ripartono o si collegano per nota più vicina (voice leading, mai più di un tono al cambio su ii–V–I). Guide tones evidenziati, funzioni sulle note, accompagnamento, sincronia con il transport, due preset. Test: 9 unit sul motore, 3 sulle tracce, 1 e2e. |
 | P1-12b | Arpeggi per forma CAGED, salti di corda, sweep, target sul battere | MISSING | P1-12 | exercises | Oggi la posizione è una finestra di tasti scelta a mano. |
+| P1-12c | Arpeggios Lab avanzato | MISSING | P1-12b, P2-01 | exercises, fretboard, ui | Famiglie: triadi, settime, m7♭5, dim7, sus, add, seste, none, alterati, slash. Forme lungo il manico, CAGED, 1–3 ottave solo se fisicamente realizzabili, cambi di posizione, salti di corda, sweep, ritorno diverso dalla salita, partenza da qualsiasi grado, collegamenti, voice leading, target. Note teoriche → sequenza → posizioni → diteggiatura distinte. Editor a fasi esteso. |
+| P1-11b | Harmony Lab: interscambio modale, avoid contestuali per accordo | MISSING | P1-11, P1-14 | harmony, ui | |
 | P1-13 | Preset di percorsi | PARTIAL | P1-08 | persistence, app | Il percorso è salvato con i preset di studio; due preset predefiniti. Manca una libreria di soli percorsi. |
 
 ## P2 — UX/UI Workbench
@@ -55,6 +72,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P2-07 | Mixer laterale | PARTIAL | P2-02 | ui, audio | Fader Click, Note, Accordi, Basso, Batteria, Mute per canale, meter d'uscita reale. Mancano master, solo, monitor chitarra e gain (dipendono dall'ingresso audio, non implementato). |
 | P2-08 | Transport: stop/pausa, Click/Accenti 16 indicatori, timbri click | IMPLEMENTED | P0-07 | ui, timeline, audio | D-18: griglia di 16 passi a quattro livelli (2×8 su telefono), pattern dalla metrica o personale, tastiera, passo corrente evidenziato; 4 timbri sintetizzati. Test unitari sul modello e e2e sugli eventi programmati. |
 | P2-09 | Tutor pixel-art nel telefono | PARTIAL | P2-02 | ui, `tutor` | D-17: regole locali con test, sprite originale con sei espressioni, modalità Silenzioso/Contesto/Tutor, riducibile. Da fare: riposizionamento libero, più regole (esercizi, errori live). |
+| P2-11 | Requisiti per il redesign con Claude Design | MISSING | P2-02 | ui | Registrati in MASTER_SPEC §8.1: play/pausa con simboli standard, stop e reset distinti, BPM su display LED dedicato senza controlli ridondanti, tastiera sempre leggibile con marker grandi, legenda stabile, telefono con anteprima del prossimo accordo o mini-tastiera. Non ora: prima le funzioni. |
 | P2-10 | Quattro workspace in navigazione | IMPLEMENTED | P1-12 | ui | Fretboard, Harmony, Arpeggios, Jam; lo stato musicale resta condiviso. |
 
 ## P3 — Jam Studio e audio
@@ -64,8 +82,14 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P3-01 | Jam multitraccia (batteria, basso, armonia), mute/solo | PARTIAL | — | jam, audio | Batteria (D-19), basso dalla progressione (D-20) e comping come tracce separate con fader e mute. Mancano solo, drone e strumenti armonici alternativi. |
 | P3-02 | Drum step sequencer Simple (16 step, A–D, fill) | IMPLEMENTED | — | jam, ui, audio | D-19: 6 pezzi × 16 passi con accento, pattern A–D, fill ogni 2/4/8 battute, cambi alla stanghetta successiva, passo corrente evidenziato, tastiera, 2×8 su telefono, kit sintetizzato, canale Batteria con mute. Livello Advanced (velocity, ghost, probabilità, 32/64 passi, piano roll) non ancora fatto. |
 | P3-03 | Generi e almeno 4 pattern per strumento | IMPLEMENTED | P3-01 | jam | D-20: 8 generi × 4 groove di batteria + fill, 4 linee di basso, ritmo degli accordi e swing; tempo suggerito. Pattern scritti per 4/4. |
-| P3-04 | Pitch detection, Live Monitor, Tuner | MISSING | — | nuovo `pitch` | YIN/MPM in AudioWorklet; test sintetici con sinusoidi e campioni registrati; distinzione pitch / posizioni possibili. |
-| P3-05 | Catena audio con gain separati e master | PARTIAL | — | audio | Bus click/note/comp/basso/batteria presenti; manca input chitarra. |
+| P3-04 | Pitch detection, Live Monitor, Tuner | PARTIAL | — | `pitch`, audio, ui | D-21: YIN puro con test sintetici; ingresso con permessi, dispositivi, errori, gain, livello, saturazione; ascolto solo manuale; Live Monitor con nota, frequenza, affidabilità, posizioni possibili e probabile sulla tastiera, riscontro sull'esercizio; accordatore con La configurabile, cinque accordature, modalità cromatica. e2e con un file WAV come microfono finto. Mancano AudioWorklet, calibrazione della latenza e prove con chitarra e interfacce reali. |
+| P3-06 | Jam fase A: groove, bilanciamento, Fusion | MISSING | P3-03 | jam, audio | Rivedere pattern, swing, accenti, velocity, volumi, basso e comping; Fusion da riscrivere; sincronia nei cambi di accordo, tempo e metrica. Nessuna copia di registrazioni protette. |
+| P3-07 | Jam fase B: kit e timbri multipli | MISSING | P3-06 | audio | Batterie acustiche ed elettroniche, varianti dei pezzi, basso più realistico, comping differenziato per genere. Campioni originali o con licenza compatibile, leggeri; nessuna libreria proprietaria senza autorizzazione. |
+| P3-08 | Jam fase C: arrangiamenti | MISSING | P3-06 | jam, ui | Intro, strofa, ritornello, bridge, outro; variazioni A–D, fill e transizioni per sezione, dinamiche, mute/solo, preset musicali. |
+| P3-09 | Jam fase D: backing track audio locali | MISSING | P1-14 | audio, persistence, ui | Import di file locali (mai caricati su server senza scelta esplicita), riproduzione sincronizzata, mappa accordi e sezioni, loop, volume, stem se presenti, scale e arpeggi sincronizzati. Time-stretch, separazione stem e analisi armonica automatica in una fase successiva. |
+| P3-10 | Calibrazione della latenza e compensazione | MISSING | P3-04 | audio, ui | Procedura guidata empirica e regolazione manuale; distinguere acquisizione, analisi, ascolto e compensazione del riscontro. Mai presentare come misurato ciò che il browser non espone. |
+| P3-11 | Pitch tracking più stabile | PARTIAL | P3-04 | pitch | Oggi YIN + mediana su 5 frame. Da fare: meno falsi cambi, note brevi, rumore, persistenza e dissolvenza dei marker, AudioWorklet. |
+| P3-05 | Catena audio con gain separati e master | PARTIAL | — | audio | Bus click/note/comp/basso/batteria, ingresso chitarra con gain e ascolto separato (D-21). Mancano master e amp modeling. |
 
 ## P4 — Avanzate
 
@@ -75,6 +99,8 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P4-02 | IR cabinet | MISSING | ConvolverNode, IR con licenza compatibile. |
 | P4-03 | Sequencer avanzato, MIDI, piano roll | MISSING | Le tracce sono già eventi su tick. |
 | P4-04 | Tutor evoluto | MISSING | |
+| P4-05 | Studio sperimentale sulla polifonia (accordi, note simultanee) | MISSING | YIN è monofonico: nessuna promessa. Prototipi isolati DSP o ML con misure di precisione, CPU, memoria e latenza; integrazione solo se i risultati lo giustificano. |
+| P4-06 | Controller MIDI | MISSING | Ingresso MIDI (Web MIDI) per note e comandi del trasporto. |
 
 ## P5 — Consolidamento
 
@@ -87,5 +113,9 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-1. **P3-04** pitch detection, Live Monitor e Tuner (primo ingresso audio: permessi, dispositivi, segnale DI).
-2. **P2-02** revisione del proprietario sui materiali di Studio, rimandata dal proprietario a dopo il completamento delle funzioni (screenshot in `test-results/visual/`).
+In attesa del merge della PR Live Monitor (P3-04, P0-11…P0-13). Poi, una PR per incremento:
+
+1. **P0-14** layout desktop con trasporto e tastiera sempre visibili e pannelli scorrevoli.
+2. **P1-14** configurazione per singolo accordo (modello dati condiviso, poi Harmony Lab, poi Arpeggios e Jam).
+3. **P1-12c** Arpeggios Lab avanzato.
+4. **P3-06** revisione dei groove e Fusion.

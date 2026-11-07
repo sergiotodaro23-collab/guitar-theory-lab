@@ -5,7 +5,8 @@
  */
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { engine } from '../app/engine';
-import { usePlayhead } from '../app/store';
+import { useApp, usePlayhead } from '../app/store';
+import { liveInput, useLive } from '../audio/liveInput';
 
 interface KnobProps {
   readonly label: string;
@@ -141,4 +142,57 @@ export function OutputMeter() {
       <span className="meter-label">Out</span>
     </div>
   );
+}
+
+/** LED column for the guitar input level, fed by the analysis (about 25 updates a second). */
+export function InputMeter() {
+  const level = useLive((l) => l.level);
+  const on = useLive((l) => l.state === 'on');
+  const segments = 8;
+  const lit = on ? Math.min(segments, Math.round((level / 0.5) * segments)) : 0;
+  return (
+    <div className="meter meter-input" role="meter" aria-label="Livello della chitarra" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round((lit / segments) * 100)}>
+      {Array.from({ length: segments }, (_, i) => {
+        const n = segments - i;
+        const zone = n > 7 ? 'hot' : n > 5 ? 'warm' : 'ok';
+        return <span key={n} className={`meter-led meter-${zone} ${n <= lit ? 'is-on' : ''}`} />;
+      })}
+    </div>
+  );
+}
+
+/**
+ * The guitar in the mixer: its monitor level, the listen key (off at every
+ * start, enabled only while the input runs) and the input level.
+ */
+export function GuitarChannel({ keyClass }: { readonly keyClass: string }) {
+  const vol = useApp((s) => s.settings.monitorVol);
+  const update = useApp((s) => s.update);
+  const monitorOn = useLive((l) => l.monitorOn);
+  const inputOn = useLive((l) => l.state === 'on');
+  return (
+    <div className="mix-channel mix-guitar">
+      <div className="mix-guitar-strip">
+        <Fader label="Chitarra" value={vol} onChange={(monitorVol) => { update({ monitorVol }); if (monitorOn) liveInput.setMonitor(true, monitorVol); }} testId="fader-guitar" />
+        <InputMeter />
+      </div>
+      <button
+        type="button"
+        className={keyClass}
+        aria-pressed={monitorOn}
+        disabled={!inputOn}
+        title={inputOn ? 'Ascolto della chitarra (usa le cuffie)' : 'Avvia l’ingresso per ascoltare la chitarra'}
+        data-testid="mixer-listen"
+        onClick={() => liveInput.setMonitor(!monitorOn, vol)}
+      >
+        Ascolta
+      </button>
+    </div>
+  );
+}
+
+export function MasterFader() {
+  const vol = useApp((s) => s.settings.volMaster);
+  const update = useApp((s) => s.update);
+  return <Fader label="Master" value={vol} onChange={(volMaster) => update({ volMaster })} testId="fader-master" />;
 }
