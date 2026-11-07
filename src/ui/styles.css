@@ -544,8 +544,8 @@ button, select, input { font: inherit; color: inherit; }
 /* ---- Click / Accenti as a floating panel opened from the transport ---- */
 /*
  * The panel hangs from the transport, not from the key: the key can wrap to
- * the start of a second row when the system font is wider (fonts are not
- * bundled), and a panel aligned to its right edge would leave the window.
+ * the start of a second row when the text is wider (fallback font before the
+ * bundled ones load, different rendering), and a panel aligned to its right edge would leave the window.
  */
 .cs-transport, .ws-transport { position: relative; }
 .accent-toggle { min-height: 40px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--edge); background: var(--deck-raised); color: var(--ink); font: 600 14px/1 var(--display); cursor: pointer; }

@@ -83,7 +83,8 @@ test('on a phone the 16 steps sit in two rows of eight, all visible', async ({ p
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });
 
-// Fonts are not bundled: a wider system font can push the key to a second
+// Text widths differ between machines (font loading, rendering, fallback
+// before the bundled fonts arrive): a wider font can push the key to a second
 // row. The panel must still open inside the window and keep its place when
 // the pattern turns personal (the failure seen on the CI runner).
 for (const look of ['Studio', 'Semplificata'] as const) {
