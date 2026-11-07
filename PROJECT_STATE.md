@@ -6,8 +6,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 358 test unitari.
-- `npm run test:e2e`: verde, 78 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 370 test unitari.
+- `npm run test:e2e`: verde, 79 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -22,7 +22,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 - **Cambio di metrica in riproduzione**: il transport non si ferma, la nuova metrica parte alla stanghetta successiva (anche verso 6/8, dove il BPM conta gli ottavi).
 - **Accordi multipli**: fino a 8 accordi con builder (fondamentale, qualità, basso), slash chord e rivolti, forme eseguibili cercate sul manico e contornate sulla tastiera, diagrammi, invio a Harmony Lab come progressione.
 - **Scale multiple**: fino a 5 scale (principale + 4) con `+ Aggiungi scala`, visibilità, colore, opacità, zona, riordino e confronto delle note.
-- **Jam Studio**: step sequencer (D-19), otto generi e basso generato (D-20), mixer con Click, Note, Accordi, Basso, Batteria, Chitarra, Master e mute.
+- **Jam Studio**: step sequencer con note fantasma e ride (D-19, D-28), otto generi con bilanciamento proprio e Fusion riscritta, comping e basso con anticipi, basso generato (D-20), mixer con Click, Note, Accordi, Basso, Batteria, Chitarra, Master e mute.
 - **Vista per accordo** (D-26): ogni accordo della progressione può avere la sua tastiera (arpeggio o scala, forma, focus, scale e arpeggi sovrapposti), che cambia con l'accordo in manuale e in automatico; condivisa da Harmony, Jam e Arpeggios.
 - **Layout desktop** (D-24): da 1200 × 720 trasporto e tastiera fissi, pannelli e colonna destra con scorrimento proprio; Click/Accenti in un pannello sovrapposto.
 - **Ingresso chitarra, Live Monitor, accordatore** (D-21, D-22): canale d'ingresso, gain, ascolto solo manuale, diagnostica e suono di prova, nota rilevata sulla tastiera come stima, accordatore con modalità cromatica. Layout fermo durante il rilevamento.

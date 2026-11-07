@@ -83,7 +83,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | P3-02 | Drum step sequencer Simple (16 step, A–D, fill) | IMPLEMENTED | — | jam, ui, audio | D-19: 6 pezzi × 16 passi con accento, pattern A–D, fill ogni 2/4/8 battute, cambi alla stanghetta successiva, passo corrente evidenziato, tastiera, 2×8 su telefono, kit sintetizzato, canale Batteria con mute. Livello Advanced (velocity, ghost, probabilità, 32/64 passi, piano roll) non ancora fatto. |
 | P3-03 | Generi e almeno 4 pattern per strumento | IMPLEMENTED | P3-01 | jam | D-20: 8 generi × 4 groove di batteria + fill, 4 linee di basso, ritmo degli accordi e swing; tempo suggerito. Pattern scritti per 4/4. |
 | P3-04 | Pitch detection, Live Monitor, Tuner | PARTIAL | — | `pitch`, audio, ui | D-21: YIN puro con test sintetici; ingresso con permessi, dispositivi, errori, gain, livello, saturazione; ascolto solo manuale; Live Monitor con nota, frequenza, affidabilità, posizioni possibili e probabile sulla tastiera, riscontro sull'esercizio; accordatore con La configurabile, cinque accordature, modalità cromatica. e2e con un file WAV come microfono finto. Mancano AudioWorklet, calibrazione della latenza e prove con chitarra e interfacce reali. |
-| P3-06 | Jam fase A: groove, bilanciamento, Fusion | MISSING | P3-03 | jam, audio | Rivedere pattern, swing, accenti, velocity, volumi, basso e comping; Fusion da riscrivere; sincronia nei cambi di accordo, tempo e metrica. Nessuna copia di registrazioni protette. |
+| P3-06 | Jam fase A: groove, bilanciamento, Fusion | IMPLEMENTED | P3-03 | jam, audio | D-28: note fantasma e ride, pulsazione dei piatti, comping "Anticipi" e "Colpi sincopati", anticipo del basso, Fusion riscritta, Jazz con ride, Funk con fantasmi, bilanciamento per genere, test di sincronia in 4/4, 3/4 e 6/8. Unit 11, e2e 1 nuovo e 3 aggiornati. Da giudicare all'ascolto dal proprietario. |
 | P3-07 | Jam fase B: kit e timbri multipli | MISSING | P3-06 | audio | Batterie acustiche ed elettroniche, varianti dei pezzi, basso più realistico, comping differenziato per genere. Campioni originali o con licenza compatibile, leggeri; nessuna libreria proprietaria senza autorizzazione. |
 | P3-08 | Jam fase C: arrangiamenti | MISSING | P3-06 | jam, ui | Intro, strofa, ritornello, bridge, outro; variazioni A–D, fill e transizioni per sezione, dinamiche, mute/solo, preset musicali. |
 | P3-09 | Jam fase D: backing track audio locali | MISSING | P1-14 | audio, persistence, ui | Import di file locali (mai caricati su server senza scelta esplicita), riproduzione sincronizzata, mappa accordi e sezioni, loop, volume, stem se presenti, scale e arpeggi sincronizzati. Time-stretch, separazione stem e analisi armonica automatica in una fase successiva. |
@@ -115,8 +115,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-Su richiesta del proprietario gli incrementi avanzano senza attendere il merge, uno dopo l'altro sullo stesso branch (una PR aggiornata). Fatto: P1-12b, P1-12c (parziale). Poi:
+Su richiesta del proprietario gli incrementi avanzano senza attendere il merge, uno dopo l'altro sullo stesso branch (una PR aggiornata). Fatto: P1-12b, P1-12c (parziale), P3-06. Poi:
 
-1. **P3-06** revisione dei groove e Fusion.
-2. **P1-14** completamenti (intervallo di tasti, colori, esercizio per accordo) e **P1-11b** interscambio modale.
-3. **P3-10…P3-12** Live Monitor 2.0 (stima della posizione, risposta e sensibilità, calibrazione): prima della beta stabile.
+1. **P1-14** completamenti (intervallo di tasti, colori, esercizio per accordo) e **P1-11b** interscambio modale.
+2. **P3-10…P3-12** Live Monitor 2.0 (stima della posizione, risposta e sensibilità, calibrazione): prima della beta stabile.

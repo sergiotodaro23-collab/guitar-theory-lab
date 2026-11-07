@@ -428,5 +428,8 @@ export function channelVolume(s: Settings, channel: MixChannel): number {
 export function genreSettings(id: GenreId): Partial<Settings> {
   const genre = GENRES.find((g) => g.id === id);
   if (!genre) return {};
-  return { jamGenre: id, drumKit: genre.kit, drumPattern: 0, compPattern: genre.comp, swing: genre.swing, bassPattern: 0 };
+  return {
+    jamGenre: id, drumKit: genre.kit, drumPattern: 0, compPattern: genre.comp, swing: genre.swing, bassPattern: 0,
+    volDrums: genre.mix.drums, volBass: genre.mix.bass, volComp: genre.mix.comp,
+  };
 }

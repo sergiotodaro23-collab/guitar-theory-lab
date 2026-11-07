@@ -17,6 +17,8 @@ const RECIPES: Readonly<Record<string, DrumRecipe>> = {
   snare: { tone: { type: 'triangle', from: 230, to: 170, decay: 0.12, level: 0.45 }, noise: { filter: 'bandpass', frequency: 1900, q: 0.8, decay: 0.19, level: 0.8 }, bursts: [0] },
   hat: { tone: null, noise: { filter: 'highpass', frequency: 7500, q: 0.7, decay: 0.045, level: 0.45 }, bursts: [0] },
   open: { tone: null, noise: { filter: 'highpass', frequency: 7000, q: 0.7, decay: 0.32, level: 0.4 }, bursts: [0] },
+  // Ride: a long, bright wash with a faint metallic ping on top.
+  ride: { tone: { type: 'square', from: 3150, to: 3050, decay: 0.38, level: 0.05 }, noise: { filter: 'bandpass', frequency: 6200, q: 0.9, decay: 0.55, level: 0.32 }, bursts: [0] },
   clap: { tone: null, noise: { filter: 'bandpass', frequency: 1250, q: 1.4, decay: 0.12, level: 0.75 }, bursts: [0, 0.011, 0.022] },
   tom: { tone: { type: 'sine', from: 190, to: 110, decay: 0.32, level: 0.85 }, noise: { filter: 'lowpass', frequency: 900, q: 0.7, decay: 0.02, level: 0.15 }, bursts: [0] },
 };

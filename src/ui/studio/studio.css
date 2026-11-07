@@ -590,6 +590,7 @@
 :root[data-theme='studio'] .ws-note .drum-step { border-color: #a8916c; }
 :root[data-theme='studio'] .ws-note .drum-step.step-1 { background: linear-gradient(to top, #9a4a00 55%, rgba(255, 255, 255, 0.55) 55%); }
 :root[data-theme='studio'] .ws-note .drum-step.step-2 { background: #9a4a00; border: 2px solid #2a2017; }
+:root[data-theme='studio'] .ws-note .drum-step.step-3 { background: linear-gradient(to top, #9a4a00 22%, rgba(255, 255, 255, 0.55) 22%); border-style: dashed; }
 :root[data-theme='studio'] .ws-note .drum-step.is-beat { border-left-color: #2a2017; }
 :root[data-theme='studio'] .ws-note .drum-step.is-now { outline-color: #1d7a35; }
 

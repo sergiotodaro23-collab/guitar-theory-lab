@@ -58,7 +58,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
   });
 }
 
-test('the fill takes the last bar of every N; steps cycle off, on, accent; keyboard moves', async ({ page }) => {
+test('the fill takes the last bar of every N; steps cycle off, on, accent, ghost; keyboard moves', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await open(page);
   await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
@@ -75,6 +75,9 @@ test('the fill takes the last bar of every N; steps cycle off, on, accent; keybo
   await expect(step).toHaveAttribute('data-step', '1');
   await step.click();
   await expect(step).toHaveAttribute('data-step', '2');
+  await step.click();
+  await expect(step).toHaveAttribute('data-step', '3');
+  await expect(step).toHaveAccessibleName('Tom, passo 4: nota fantasma');
   await step.click();
   await expect(step).toHaveAttribute('data-step', '0');
   await step.focus();

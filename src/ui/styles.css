@@ -465,6 +465,7 @@ button, select, input { font: inherit; color: inherit; }
 /* On fills half the key, accent fills it all with a light rim: readable without colour. */
 .drum-step.step-1 { background: linear-gradient(to top, #c9781a 55%, var(--deck-raised) 55%); }
 .drum-step.step-2 { background: #ffb347; border: 2px solid #fff1d6; }
+.drum-step.step-3 { background: linear-gradient(to top, #7b5a2c 22%, var(--deck-raised) 22%); border-style: dashed; }
 .drum-step.is-now { outline: 2px solid #5dff7e; outline-offset: -1px; }
 .drum-step:disabled { opacity: 0.25; cursor: not-allowed; }
 @media (max-width: 900px) {
