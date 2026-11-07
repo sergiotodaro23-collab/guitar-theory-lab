@@ -5,7 +5,7 @@
  * - fingering: the concrete notes inside a five-fret hand position.
  * Pure: no DOM, no audio.
  */
-import { pitchesInWindow, type FretNote } from '../fretboard';
+import { STANDARD_TUNING, pitchesInWindow, type FretNote } from '../fretboard';
 import type { Chord } from '../theory';
 import { ticksPerBeat, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
 
@@ -30,8 +30,8 @@ export interface ArpeggioSpec {
 const byPitch = (a: FretNote, b: FretNote) => a.midi - b.midi;
 
 /** The chord tones a hand reaches in the window starting at `low`. */
-export function arpeggioNotes(chord: Chord, low: number): readonly FretNote[] {
-  return [...pitchesInWindow(chord.tones.map((t) => t.pc), low, low + ARP_SPAN)].sort(byPitch);
+export function arpeggioNotes(chord: Chord, low: number, tuning: readonly number[] = STANDARD_TUNING): readonly FretNote[] {
+  return [...pitchesInWindow(chord.tones.map((t) => t.pc), low, low + ARP_SPAN, tuning)].sort(byPitch);
 }
 
 function startIndex(chord: Chord, sorted: readonly FretNote[], start: number): number {

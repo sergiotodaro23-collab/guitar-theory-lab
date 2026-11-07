@@ -128,3 +128,22 @@ describe('arpeggios lab tracks', () => {
     expect(buildTracks(sanitizeSettings({ ...DEFAULT_SETTINGS, mode: 'arpeggio', arpSymbol: 'Hx' })).exercise).toBeNull();
   });
 });
+
+describe('neck tunings (P1-05)', () => {
+  it('presets and a custom tuning give the open strings', async () => {
+    const { tuningOf, sanitizeTuning } = await import('./settings');
+    expect(tuningOf(s({ neckTuning: 'drop-d' }))).toEqual([38, 45, 50, 55, 59, 64]);
+    expect(tuningOf(s({ neckTuning: 'custom', customTuning: [36, 43, 50, 55, 59, 64] }))).toEqual([36, 43, 50, 55, 59, 64]);
+    expect(sanitizeTuning([40, 45, 50, 55, 59])).toBeNull();
+    expect(sanitizeTuning([40, 60, 50, 55, 59, 64])).toBeNull();
+    expect(sanitizeSettings({ ...DEFAULT_SETTINGS, neckTuning: 'custom', customTuning: [1, 2, 3, 4, 5, 6] }).customTuning).toEqual([40, 45, 50, 55, 59, 64]);
+  });
+  it('in Drop D the whole neck has D on the open sixth string, and the exercise follows the tuning', () => {
+    const drop = s({ neckTuning: 'drop-d', tonic: 'D', scaleId: 'ionian', positionType: 'neck' });
+    expect(currentPositionNotes(drop).find((n) => n.string === 0 && n.fret === 0)?.midi).toBe(38);
+    // E form of D major in Drop D: every note is a D major note at a real place of the retuned string.
+    const shape = currentPositionNotes(s({ neckTuning: 'drop-d', tonic: 'D', scaleId: 'ionian', positionType: 'caged', cagedForm: 'E' }));
+    for (const n of shape) expect(n.midi).toBe([38, 45, 50, 55, 59, 64][n.string]! + n.fret);
+    expect(currentExerciseSequence(drop).length).toBeGreaterThan(0);
+  });
+});

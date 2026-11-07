@@ -101,3 +101,16 @@ describe('marker layer', () => {
     for (const m of markers) expect(['1', '2', '3', '4']).toContain(m.label);
   });
 });
+
+describe('interval labels (P2-05)', () => {
+  it('over Dm7, every note is named by its interval from D: F 3m, A 5G, C 7m, B 6M, E 2M', () => {
+    const { markers } = buildMarkerLayer(input({ labelMode: 'interval' }));
+    const at = (pc: number) => markers.find((m) => m.pc === pc)?.label;
+    expect([at(2), at(5), at(9), at(0), at(11), at(4), at(7)]).toEqual(['U', '3m', '5G', '7m', '6M', '2M', '4G']);
+  });
+  it('without a chord, from the scale tonic', () => {
+    const { markers } = buildMarkerLayer(input({ chord: null, nextChord: null, labelMode: 'interval' }));
+    expect(markers.find((m) => m.pc === 4)?.label).toBe('3M');
+    expect(markers.find((m) => m.pc === 5)?.label).toBe('4G');
+  });
+});

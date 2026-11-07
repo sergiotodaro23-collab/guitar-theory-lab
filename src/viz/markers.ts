@@ -6,7 +6,7 @@ import { allFretNotes, fingerPosition, DEFAULT_FRETS, type FingeredNote, type Fr
 import { classifyTone, commonTones, guideTones, resolveTone, targetingPath, type AvoidProfile, type ToneFunction, type ToneRole } from '../harmony';
 import { chromaticName, mod, type Chord, type Scale } from '../theory';
 
-export type LabelMode = 'note' | 'degree' | 'function' | 'finger' | 'none';
+export type LabelMode = 'note' | 'degree' | 'function' | 'interval' | 'finger' | 'none';
 export type Focus = 'all' | 'guide' | 'common' | 'resolution' | 'targeting';
 /** 'other-scale': in an overlaid scale only, not in the main one. */
 export type MarkerRole = 'root' | 'scale' | 'other-scale' | ToneRole;
@@ -58,6 +58,8 @@ export interface MarkerInput {
   readonly exact?: boolean;
   /** Fingers decided by the engine for these notes (a route that shifts position). */
   readonly fingers?: readonly FingeredNote[] | null;
+  /** Open strings, low to high (standard when absent). */
+  readonly tuning?: readonly number[];
 }
 
 export interface MarkerLayer {
@@ -85,6 +87,10 @@ function nearestPosition(from: FretNote, midi: number, candidates: readonly Fret
   return best;
 }
 
+/** Interval names by semitone, Italian shorthand: m minor, M major, G perfect (giusta), TT tritone. */
+export const INTERVAL_SHORT = ['U', '2m', '2M', '3m', '3M', '4G', 'TT', '5G', '6m', '6M', '7m', '7M'] as const;
+export const intervalName = (semitones: number): string => INTERVAL_SHORT[mod(semitones, 12)] ?? '';
+
 export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
   const { notes, scale, chord, nextChord, focus, profile, labelMode, pinnedPc, overlays } = input;
   const scalePcs = new Set(scale.tones.map((t) => t.pc));
@@ -94,7 +100,7 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
   const frets = notes.map((n) => n.fret);
   const low = input.wholeNeck || frets.length === 0 ? 0 : Math.min(...frets);
   const high = input.wholeNeck || frets.length === 0 ? DEFAULT_FRETS : Math.max(...frets);
-  const neck = allFretNotes(DEFAULT_FRETS);
+  const neck = allFretNotes(DEFAULT_FRETS, input.tuning);
   const inRegion = neck.filter((n) => n.fret >= low && n.fret <= high);
 
   // Chord tones outside the scale and notes of overlaid scales join what is drawn.
@@ -158,6 +164,7 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
       case 'note': label = name; break;
       case 'degree': label = scaleTone?.degree ?? fn?.degree ?? ownerTone?.degree ?? name; break;
       case 'function': label = fn?.degree ?? scaleTone?.degree ?? ownerTone?.degree ?? name; break;
+      case 'interval': label = intervalName(note.pc - (chord?.tones[0]?.pc ?? rootPc ?? 0)); break;
       case 'finger': label = String(fingers.get(key(note)) ?? ''); break;
       case 'none': label = ''; break;
     }

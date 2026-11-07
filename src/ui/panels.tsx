@@ -1,8 +1,9 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { STUDY_PRESETS } from '../app/builtins';
+import { TUNINGS } from '../pitch';
 import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
 import { engine } from '../app/engine';
-import { genreSettings, sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
+import { genreSettings, sanitizeSettings, sanitizeTuning, tuningOf, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
 import { presetRepository, useApp, usePlayhead } from '../app/store';
 import { CAGED_FORMS } from '../fretboard';
 import { INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
@@ -126,12 +127,52 @@ export function LabelModeSelector() {
           { value: 'degree', label: 'Grado' },
           { value: 'note', label: 'Nome' },
           { value: 'function', label: 'Funzione' },
+          { value: 'interval', label: 'Intervallo' },
           { value: 'finger', label: 'Dito' },
           { value: 'none', label: 'Nulla' },
         ]}
         onChange={(labelMode) => update({ labelMode })}
       />
     </Field>
+  );
+}
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const midiName = (m: number) => `${NOTE_NAMES[m % 12]}${Math.floor(m / 12) - 1}`;
+const OPEN_OPTIONS = Array.from({ length: 76 - 23 + 1 }, (_, i) => ({ value: 23 + i, label: midiName(23 + i) }));
+
+/** Tuning of the neck (P1-05, D-36): presets, or six open strings of your own. */
+export function TuningField() {
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  const strings = tuningOf(s);
+  const standard = s.neckTuning === 'standard';
+  return (
+    <div className="tuning-field" data-testid="tuning-field">
+      <Field label="Accordatura" hint={standard ? undefined : 'CAGED e 3NPS sono pensate per l’accordatura standard: qui restano suonabili ma non sono le forme classiche. Tasti e Tutta la tastiera sono esatti.'}>
+        <Select<string>
+          label="Accordatura della tastiera" testId="neck-tuning" value={s.neckTuning}
+          options={[...TUNINGS.map((t) => ({ value: t.id, label: t.name })), { value: 'custom', label: 'Personalizzata' }]}
+          onChange={(neckTuning) => update(neckTuning === 'custom'
+            ? { neckTuning, customTuning: [...strings] }
+            : { neckTuning, tunerTuning: neckTuning })}
+        />
+      </Field>
+      {s.neckTuning === 'custom' ? (
+        <div className="row tuning-strings" role="group" aria-label="Corde a vuoto, dalla sesta alla prima">
+          {strings.map((midi, i) => (
+            <Select<number>
+              key={i} label={`Corda ${6 - i} a vuoto`} testId={`tuning-string-${6 - i}`} value={midi} options={OPEN_OPTIONS}
+              onChange={(v) => {
+                const next = strings.map((m, k) => (k === i ? v : m));
+                const clean = sanitizeTuning(next);
+                if (clean) update({ customTuning: clean });
+              }}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -148,6 +189,7 @@ export function ScalePanel({ showLabels = true }: { readonly showLabels?: boolea
         <Field label="Scala"><Select testId="scale" label="Scala" value={s.scaleId} options={scaleOptions} onChange={(scaleId: ScaleId) => update({ scaleId })} /></Field>
       </div>
       <p className="spelling" data-testid="scale-spelling">{scale.tones.map((t) => t.name).join('  ')}</p>
+      <TuningField />
       {s.mode === 'arpeggio' ? null : (
         <>
       <Field label="Diteggiatura">
@@ -330,7 +372,8 @@ function ChordEditor({ index }: { readonly index: number }) {
   const layers = useApp((state) => state.settings.chordLayers);
   const update = useApp((state) => state.update);
   const layer = layers[index];
-  const resolved = useMemo(() => (layer ? resolveChordLayer(layer) : null), [layer]);
+  const tuning = useApp((state) => tuningOf(state.settings));
+  const resolved = useMemo(() => (layer ? resolveChordLayer(layer, tuning) : null), [layer, tuning]);
   if (!layer || !resolved) return null;
   const { chord, voicings, shape } = resolved;
   const change = (patch: Partial<ChordLayer>) => update({ chordLayers: layers.map((l, i) => (i === index ? { ...l, ...patch } : l)) });
@@ -383,7 +426,8 @@ export function ChordsPanel() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const layers = s.chordLayers;
-  const resolved = useMemo(() => layers.map(resolveChordLayer), [layers]);
+  const tuning = useApp((state) => tuningOf(state.settings));
+  const resolved = useMemo(() => layers.map((l) => resolveChordLayer(l, tuning)), [layers, tuning]);
   const scale = useMemo(() => buildScale(s.tonic, s.scaleId), [s.tonic, s.scaleId]);
   const full = layers.length >= MAX_CHORDS;
   const setActive = (activeChord: number) => update({ activeChord });

@@ -368,19 +368,19 @@ const lineRules = (shape: ArpShape): Omit<LineRules, 'avoid' | 'preferFret'> =>
   shape === 'skip' ? { maxPerString: 2, stringStep: 2 } : { maxPerString: 3, stringStep: 1 };
 
 /** The route a shape takes on one chord, or null. */
-export function shapeLine(chord: Chord, c: ShapeChoice, start: number): ArpLine | null {
+export function shapeLine(chord: Chord, c: ShapeChoice, start: number, tuning: readonly number[] = STANDARD_TUNING): ArpLine | null {
   switch (c.shape) {
-    case 'octaves': return octaveLine(chord, c.low, c.octaves, start);
-    case 'sweep': return sweepLine(chord, c.low, c.strings, start);
-    case 'skip': return skipLine(chord, c.low, start);
+    case 'octaves': return octaveLine(chord, c.low, c.octaves, start, tuning);
+    case 'sweep': return sweepLine(chord, c.low, c.strings, start, tuning);
+    case 'skip': return skipLine(chord, c.low, start, tuning);
     default: return null;
   }
 }
 
 /** Put a route in playing order: up, down, or both with the chosen way back. */
-export function routeSequence(up: ArpLine, direction: ArpDirection, ret: ArpReturn, shape: ArpShape): { readonly sequence: readonly FingeredNote[]; readonly down: ArpLine } {
+export function routeSequence(up: ArpLine, direction: ArpDirection, ret: ArpReturn, shape: ArpShape, tuning: readonly number[] = STANDARD_TUNING): { readonly sequence: readonly FingeredNote[]; readonly down: ArpLine } {
   // A sweep comes back over the same strings: that is the technique.
-  const down = descentOf(up, ret === 'other' && shape !== 'sweep', lineRules(shape));
+  const down = descentOf(up, ret === 'other' && shape !== 'sweep', lineRules(shape), tuning);
   switch (direction) {
     case 'up': return { sequence: up.notes, down };
     case 'down': return { sequence: down.notes, down };
@@ -390,14 +390,14 @@ export function routeSequence(up: ArpLine, direction: ArpDirection, ret: ArpRetu
 }
 
 /** Everything Arpeggios Lab needs for one chord: what to draw, what to play, and the fingers. */
-export function arpeggioPlan(chord: Chord, c: ShapeChoice, spec: ArpeggioSpec): ArpPlan {
+export function arpeggioPlan(chord: Chord, c: ShapeChoice, spec: ArpeggioSpec, tuning: readonly number[] = STANDARD_TUNING): ArpPlan {
   if (c.shape === 'window' || c.shape === 'caged') {
-    const notes = c.shape === 'caged' ? cagedArpeggioNotes(chord, c.form) : arpeggioNotes(chord, c.low);
+    const notes = c.shape === 'caged' ? cagedArpeggioNotes(chord, c.form, tuning) : arpeggioNotes(chord, c.low, tuning);
     return { notes, sequence: arpeggioSequence(chord, notes, spec), fingers: null, shifts: 0, playable: notes.length > 0, route: false };
   }
-  const up = shapeLine(chord, c, spec.start);
+  const up = shapeLine(chord, c, spec.start, tuning);
   if (!up) return { notes: [], sequence: [], fingers: null, shifts: 0, playable: false, route: true };
-  const { sequence, down } = routeSequence(up, spec.direction, c.ret, c.shape);
+  const { sequence, down } = routeSequence(up, spec.direction, c.ret, c.shape, tuning);
   const usesDown = spec.direction !== 'up' && !spec.customPattern;
   const drawn = new Map<string, FingeredNote>();
   for (const n of [...up.notes, ...(usesDown ? down.notes : [])]) if (!drawn.has(keyOf(n))) drawn.set(keyOf(n), n);

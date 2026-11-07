@@ -6,7 +6,7 @@ import { arrangementTracks, bassTrack, chordSpans, chordTrack, compTrack, drumTr
 import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
 import { ticksPerBeat, type Track } from '../timeline';
-import { arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, exerciseSpecOf, meterOf, type Settings } from './settings';
+import { arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, exerciseSpecOf, meterOf, tuningOf, type Settings } from './settings';
 
 export type TrackSpec = Omit<Track, 'originTick'>;
 
@@ -33,7 +33,7 @@ export function buildTracks(s: Settings): ModeTracks {
 
   let exercise: TrackSpec | null = null;
   if (s.exerciseOn && s.exerciseMode === 'routine') {
-    exercise = routineTrack(s.routine, meter);
+    exercise = routineTrack(s.routine, meter, tuningOf(s));
   } else if (s.exerciseOn && auto && viewsDriveExercise(s)) {
     exercise = progressionExerciseTrack(
       chordSpans(s.progression, meter).map((span) => ({ tick: span.tick, lengthTicks: span.lengthTicks, sequence: chordExerciseSequence(s, span.index, span.chord) })),
@@ -87,7 +87,7 @@ export function chordExerciseSequence(s: Settings, index: number, chord: Chord):
   // The whole neck is a map, not an exercise: practise in the view's CAGED form instead.
   const shaped = view.positionType === 'neck' ? { ...view, positionType: 'caged' as const } : view;
   const scale = view.show === 'arpeggio' ? chordAsScale(chord) : viewScale(view);
-  return generateSequence(viewNotes(shaped, chord), scale, exerciseSpecOf(s));
+  return generateSequence(viewNotes(shaped, chord, tuningOf(s)), scale, exerciseSpecOf(s));
 }
 
 /** Arpeggios Lab: the arpeggio is the exercise; on a progression the chords and comping play along. */

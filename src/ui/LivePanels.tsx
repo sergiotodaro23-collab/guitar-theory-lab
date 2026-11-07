@@ -5,11 +5,11 @@
  * says which note, not which string: the panels keep the two apart.
  */
 import { engine } from '../app/engine';
-import { analysisSettingsOf } from '../app/settings';
+import { analysisSettingsOf, tuningOf } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { CalibrationPanel } from './Calibration';
 import { liveInput, useLive } from '../audio/liveInput';
-import { IN_TUNE_CENTS, MIN_CONFIDENCE, STRING_NAMES, TUNINGS, livePositions, noteOf, positionsOf, tunerReading } from '../pitch';
+import { IN_TUNE_CENTS, MIN_CONFIDENCE, STRING_NAMES, TUNINGS, noteOf, positionsOf, tunerReading } from '../pitch';
 import { Field, Panel, Segmented, Select, Toggle } from './controls';
 
 const pct = (value: number) => `${Math.round(value * 100)}%`;
@@ -153,7 +153,8 @@ export function LiveMonitorPanel() {
   const expected = usePlayhead((p) => p.note);
   const playing = usePlayhead((p) => p.state === 'playing');
   const note = pitch ? noteOf(pitch.frequency, s.tunerA4) : null;
-  const where = note ? livePositions(note.midi, [], null) : null;
+  const tuning = tuningOf(useApp.getState().settings);
+  const where = note ? { all: positionsOf(note.midi, tuning) } : null;
   // Feedback only on a steady reading against the exercise note sounding now.
   const feedback = note && pitch?.stable && playing && expected
     ? note.midi === expected.midi ? 'giusto' : note.midi % 12 === expected.midi % 12 ? 'ottava' : 'diverso'
@@ -167,9 +168,9 @@ export function LiveMonitorPanel() {
         <span className="live-detail" data-testid="live-confidence">{pitch ? `Affidabilità ${pct(pitch.confidence)}${pitch.stable ? ', stabile' : ''}` : `Mostra le note sopra ${pct(MIN_CONFIDENCE)} di affidabilità`}</span>
       </div>
       {/* Fixed boxes: a note coming and going never moves what is below. */}
-      <p className="field-hint live-positions" data-testid="live-positions" title={note ? positionsOf(note.midi).map(place).join('; ') : undefined}>
+      <p className="field-hint live-positions" data-testid="live-positions" title={note ? positionsOf(note.midi, tuning).map(place).join('; ') : undefined}>
         {note && where
-          ? `${nameOfMidi(note.midi)} si suona in ${where.all.length} ${where.all.length === 1 ? 'punto' : 'punti'}: ${positionsOf(note.midi).map(place).join('; ')}.`
+          ? `${nameOfMidi(note.midi)} si suona in ${where.all.length} ${where.all.length === 1 ? 'punto' : 'punti'}: ${positionsOf(note.midi, tuning).map(place).join('; ')}.`
           : 'Un segnale solo dà l’altezza, non la corda: la tastiera mostra tutte le posizioni possibili e piena la più probabile, che resta una stima.'}
       </p>
       <p className={`live-feedback ${feedback ? `is-${feedback}` : ''}`} data-testid="live-feedback">

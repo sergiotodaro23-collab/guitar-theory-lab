@@ -6,6 +6,7 @@
 import {
   CAGED_FORMS,
   DEFAULT_FRETS,
+  STANDARD_TUNING,
   cagedPosition,
   pitchesInWindow,
   rangePosition,
@@ -85,14 +86,14 @@ export function positionLabel(position: PhasePosition, scale?: Scale): string {
 }
 
 /** Turn one phase into a shape and a note order, collecting every problem found. */
-export function resolvePhase(phase: RoutinePhase): ResolvedPhase {
+export function resolvePhase(phase: RoutinePhase, tuning: readonly number[] = STANDARD_TUNING): ResolvedPhase {
   const scale = buildScale(phase.tonic, phase.scaleId);
   const issues: PhaseIssue[] = [];
   let notes: readonly FretNote[] = [];
   const pos = phase.position;
 
   if (pos.kind === 'caged') {
-    notes = cagedPosition(scale, pos.form).notes;
+    notes = cagedPosition(scale, pos.form, DEFAULT_FRETS, tuning).notes;
   } else if (pos.kind === '3nps') {
     if (scale.tones.length !== 7) {
       issues.push({
@@ -101,7 +102,7 @@ export function resolvePhase(phase: RoutinePhase): ResolvedPhase {
         fix: { label: 'Usa la forma CAGED E', change: { position: { kind: 'caged', form: 'E' } } },
       });
     } else {
-      const found = threeNpsPosition(scale, pos.start);
+      const found = threeNpsPosition(scale, pos.start, DEFAULT_FRETS, tuning);
       if (found) notes = found.notes;
       else issues.push({ level: 'error', message: 'Questa forma 3NPS non entra nei 24 tasti.' });
     }
@@ -113,7 +114,7 @@ export function resolvePhase(phase: RoutinePhase): ResolvedPhase {
         fix: { label: 'Usa i tasti 5–8', change: { position: { kind: 'range', low: 5, high: 8 } } },
       });
     } else {
-      notes = rangePosition(scale, pos.low, pos.high).notes;
+      notes = rangePosition(scale, pos.low, pos.high, tuning).notes;
       if (pos.high - pos.low > 5) {
         issues.push({ level: 'warning', message: 'Range più largo di una posizione: la mano dovrà spostarsi lungo il manico.' });
       }
@@ -150,7 +151,7 @@ export function resolvePhase(phase: RoutinePhase): ResolvedPhase {
         issues.push({ level: 'warning', message: `${outside.map((t) => t.name).join(', ')} non è nella scala della fase: la forma resta quella della scala, l’arpeggio la esce.` });
       }
       const frets = notes.map((n) => n.fret);
-      notes = pitchesInWindow(chord.tones.map((t) => t.pc), Math.min(...frets), Math.max(...frets));
+      notes = pitchesInWindow(chord.tones.map((t) => t.pc), Math.min(...frets), Math.max(...frets), tuning);
     }
   }
 
@@ -209,11 +210,11 @@ export interface RoutinePlan {
  * Lay phases end to end. Each phase repeats as asked, then rests to the bar
  * line, so every phase starts on a downbeat and the hand has a beat to move.
  */
-export function planRoutine(routine: Routine, meter: Meter): RoutinePlan {
+export function planRoutine(routine: Routine, meter: Meter, tuning: readonly number[] = STANDARD_TUNING): RoutinePlan {
   const bar = ticksPerBar(meter);
   let start = 0;
   const phases = routine.phases.map((phase) => {
-    const resolved = resolvePhase(phase);
+    const resolved = resolvePhase(phase, tuning);
     const step = ticksPerBeat(meter) / phase.notesPerBeat;
     const played = resolved.sequence.length * step * phase.repeats;
     const lengthTicks = played === 0 ? 0 : Math.ceil(played / bar) * bar;
@@ -224,8 +225,8 @@ export function planRoutine(routine: Routine, meter: Meter): RoutinePlan {
   return { phases, lengthTicks: start };
 }
 
-export function routineTrack(routine: Routine, meter: Meter): Omit<Track<NotePayload>, 'originTick'> | null {
-  const plan = planRoutine(routine, meter);
+export function routineTrack(routine: Routine, meter: Meter, tuning: readonly number[] = STANDARD_TUNING): Omit<Track<NotePayload>, 'originTick'> | null {
+  const plan = planRoutine(routine, meter, tuning);
   if (plan.lengthTicks === 0) return null;
   const events: { tick: number; payload: NotePayload }[] = [];
   plan.phases.forEach((resolved, phaseIndex) => {

@@ -1,5 +1,5 @@
 /** Everything the user can configure and save. Pure and framework-free. */
-import { CAGED_FORMS, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
+import { CAGED_FORMS, STANDARD_TUNING, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
 import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
 import { HOME_MODES, type AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
@@ -16,7 +16,7 @@ import { clampActive, sanitizeChordLayers, type ChordLayer } from './chordLayers
 export type AppMode = 'fretboard' | 'harmony' | 'arpeggio' | 'jam';
 export const APP_MODES: readonly AppMode[] = ['fretboard', 'harmony', 'arpeggio', 'jam'];
 export type PositionType = 'caged' | '3nps' | 'neck';
-export type LabelMode = 'note' | 'degree' | 'function' | 'finger' | 'none';
+export type LabelMode = 'note' | 'degree' | 'function' | 'interval' | 'finger' | 'none';
 export type HarmonyFocus = 'all' | 'guide' | 'common' | 'resolution' | 'targeting';
 export type ChangeMode = 'auto' | 'manual';
 /** One exercise on the current shape, or a routine of phases built in the editor. */
@@ -34,6 +34,9 @@ export const BPM_MIN = 30;
 export const BPM_MAX = 280;
 
 export interface StudySettings {
+  /** Tuning of the neck (P1-05, D-36): a preset id, or 'custom' with its six open strings. */
+  readonly neckTuning: string;
+  readonly customTuning: readonly number[];
   readonly tonic: string;
   readonly scaleId: ScaleId;
   readonly positionType: PositionType;
@@ -178,6 +181,8 @@ export const DEFAULT_SETTINGS: Settings = {
   look: 'auto',
   tutorMode: 'contextual',
   tutorMinimized: false,
+  neckTuning: 'standard',
+  customTuning: [40, 45, 50, 55, 59, 64],
   tonic: 'C',
   scaleId: 'ionian',
   positionType: 'caged',
@@ -294,12 +299,14 @@ export function sanitizeSettings(raw: unknown): Settings {
     look: oneOf(r.look, ['auto', 'simple', 'studio'] as const, d.look),
     tutorMode: oneOf(r.tutorMode, TUTOR_MODES, d.tutorMode),
     tutorMinimized: typeof r.tutorMinimized === 'boolean' ? r.tutorMinimized : d.tutorMinimized,
+    neckTuning: oneOf(r.neckTuning, [...TUNINGS.map((t) => t.id), 'custom'], d.neckTuning),
+    customTuning: sanitizeTuning(r.customTuning) ?? d.customTuning,
     tonic: oneOf(r.tonic, TONICS, d.tonic),
     scaleId: oneOf(r.scaleId, scaleIds, d.scaleId),
     positionType: oneOf(r.positionType, ['caged', '3nps', 'neck'] as const, d.positionType),
     cagedForm: oneOf(r.cagedForm, CAGED_FORMS, d.cagedForm),
     npsStart: typeof r.npsStart === 'number' ? mod(Math.round(r.npsStart), 7) : d.npsStart,
-    labelMode: oneOf(r.labelMode, ['note', 'degree', 'function', 'finger', 'none'] as const, d.labelMode),
+    labelMode: oneOf(r.labelMode, ['note', 'degree', 'function', 'interval', 'finger', 'none'] as const, d.labelMode),
     chordLayers,
     activeChord: clampActive(r.activeChord, chordLayers),
     exerciseOn: typeof r.exerciseOn === 'boolean' ? r.exerciseOn : d.exerciseOn,
@@ -386,6 +393,19 @@ export function sanitizeSettings(raw: unknown): Settings {
   };
 }
 
+/** Six open strings, low to high, each from B0 to E5, rising string by string by at most an octave. */
+export function sanitizeTuning(raw: unknown): readonly number[] | null {
+  if (!Array.isArray(raw) || raw.length !== 6 || !raw.every((v) => Number.isInteger(v) && v >= 23 && v <= 76)) return null;
+  const strings = raw as number[];
+  return strings.every((v, i) => i === 0 || (v > (strings[i - 1] as number) - 1 && v - (strings[i - 1] as number) <= 12)) ? strings : null;
+}
+
+/** The open strings the neck uses now. */
+export function tuningOf(s: Pick<StudySettings, 'neckTuning' | 'customTuning'>): readonly number[] {
+  if (s.neckTuning === 'custom') return s.customTuning;
+  return TUNINGS.find((t) => t.id === s.neckTuning)?.strings ?? STANDARD_TUNING;
+}
+
 export const currentScale = (s: Pick<StudySettings, 'tonic' | 'scaleId'>): Scale => buildScale(s.tonic, s.scaleId);
 
 /** The notes shown for the chosen position. Pentatonics have no 3NPS shape: fall back to CAGED. */
@@ -393,13 +413,13 @@ export function currentPositionNotes(s: StudySettings): readonly FretNote[] {
   const scale = currentScale(s);
   if (s.positionType === 'neck') {
     const pcs = new Set(scale.tones.map((tone) => tone.pc));
-    return allFretNotes(DEFAULT_FRETS).filter((note) => pcs.has(note.pc));
+    return allFretNotes(DEFAULT_FRETS, tuningOf(s)).filter((note) => pcs.has(note.pc));
   }
   if (s.positionType === '3nps') {
-    const position = threeNpsPosition(scale, s.npsStart);
+    const position = threeNpsPosition(scale, s.npsStart, DEFAULT_FRETS, tuningOf(s));
     if (position) return position.notes;
   }
-  return cagedPosition(scale, s.cagedForm).notes;
+  return cagedPosition(scale, s.cagedForm, DEFAULT_FRETS, tuningOf(s)).notes;
 }
 
 /** An exercise needs one playable shape, so the whole-neck view exercises its CAGED form. */
@@ -415,7 +435,7 @@ export function exerciseSpecOf(s: StudySettings): ExerciseSpec {
 
 export function currentExerciseSequence(s: StudySettings) {
   const scale = currentScale(s);
-  const notes = s.positionType === 'neck' ? cagedPosition(scale, s.cagedForm).notes : currentPositionNotes(s);
+  const notes = s.positionType === 'neck' ? cagedPosition(scale, s.cagedForm, DEFAULT_FRETS, tuningOf(s)).notes : currentPositionNotes(s);
   return generateSequence(notes, scale, exerciseSpecOf(s));
 }
 
@@ -433,15 +453,15 @@ export const shapeChoiceOf = (s: ArpeggioSettings): ShapeChoice => ({
  * One chord's arpeggio plan. On a progression a CAGED shape picks, for each
  * chord, the form nearest the chosen area of the neck, so the hand stays put.
  */
-export function arpeggioPlanOf(chord: Chord | null, s: ArpeggioSettings): ArpPlan | null {
+export function arpeggioPlanOf(chord: Chord | null, s: ArpeggioSettings & Pick<StudySettings, 'neckTuning' | 'customTuning'>): ArpPlan | null {
   if (!chord) return null;
   const choice = shapeChoiceOf(s);
   const form = s.arpSource === 'progression' && s.arpShape === 'caged' ? nearestCagedForm(chord, s.arpLow + 2) : s.arpForm;
-  return arpeggioPlan(chord, { ...choice, form }, arpeggioSpecOf(s));
+  return arpeggioPlan(chord, { ...choice, form }, arpeggioSpecOf(s), tuningOf(s));
 }
 
 /** What the board draws for the arpeggio. */
-export const arpeggioBoardNotes = (chord: Chord | null, s: ArpeggioSettings): readonly FretNote[] =>
+export const arpeggioBoardNotes = (chord: Chord | null, s: ArpeggioSettings & Pick<StudySettings, 'neckTuning' | 'customTuning'>): readonly FretNote[] =>
   arpeggioPlanOf(chord, s)?.notes ?? [];
 
 /** What the board shows: in a routine, the shape and scale of the given phase. */
@@ -449,7 +469,7 @@ export function boardContext(s: StudySettings, phaseIndex: number | null): { sca
   if (s.exerciseOn && s.exerciseMode === 'routine') {
     const phase = s.routine.phases[Math.min(phaseIndex ?? 0, s.routine.phases.length - 1)];
     if (phase) {
-      const resolved = resolvePhase(phase);
+      const resolved = resolvePhase(phase, tuningOf(s));
       return { scale: resolved.scale, notes: resolved.notes, wholeNeck: false };
     }
   }

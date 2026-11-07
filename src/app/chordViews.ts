@@ -6,7 +6,7 @@
  * shows that chord's view. Keyed by the progression chord's id, so Harmony
  * Lab, Arpeggios Lab and Jam Studio read the same data. Pure, no DOM.
  */
-import { CAGED_FORMS, DEFAULT_FRETS, allFretNotes, cagedPosition, rangePosition, threeNpsPosition, type CagedForm, type FretNote } from '../fretboard';
+import { CAGED_FORMS, DEFAULT_FRETS, STANDARD_TUNING, allFretNotes, cagedPosition, rangePosition, threeNpsPosition, type CagedForm, type FretNote } from '../fretboard';
 import { SCALE_IDS, TONICS, buildScale, tryParseChord, type Chord, type Scale, type ScaleId } from '../theory';
 import { LAYER_COLORS, MAX_EXTRA_SCALES, newLayerId, sanitizeLayers, type LayerColor, type ScaleLayer } from './scaleLayers';
 import type { HarmonyFocus, PositionType } from './settings';
@@ -85,33 +85,33 @@ export function defaultView(chord: Chord): ChordView {
 export const viewScale = (view: ChordView): Scale => buildScale(view.tonic, view.scaleId);
 
 /** The notes of the view's shape: CAGED box, 3NPS pattern or the whole neck. */
-export function viewShapeNotes(view: ChordView): readonly FretNote[] {
+export function viewShapeNotes(view: ChordView, tuning: readonly number[] = STANDARD_TUNING): readonly FretNote[] {
   const scale = viewScale(view);
   if (view.positionType === 'neck') {
     const pcs = new Set(scale.tones.map((t) => t.pc));
-    return allFretNotes(DEFAULT_FRETS).filter((n) => pcs.has(n.pc));
+    return allFretNotes(DEFAULT_FRETS, tuning).filter((n) => pcs.has(n.pc));
   }
   if (view.positionType === '3nps') {
-    const position = threeNpsPosition(scale, view.npsStart);
+    const position = threeNpsPosition(scale, view.npsStart, DEFAULT_FRETS, tuning);
     if (position) return position.notes;
   }
-  if (view.positionType === 'range') return rangePosition(scale, view.rangeLow, view.rangeHigh).notes;
-  return cagedPosition(scale, view.cagedForm).notes;
+  if (view.positionType === 'range') return rangePosition(scale, view.rangeLow, view.rangeHigh, tuning).notes;
+  return cagedPosition(scale, view.cagedForm, DEFAULT_FRETS, tuning).notes;
 }
 
 /**
  * What the board draws for this chord. With `arpeggio`, only chord tones
  * inside the shape's frets (the marker layer adds those outside the scale).
  */
-export function viewNotes(view: ChordView, chord: Chord): readonly FretNote[] {
-  const shape = viewShapeNotes(view);
+export function viewNotes(view: ChordView, chord: Chord, tuning: readonly number[] = STANDARD_TUNING): readonly FretNote[] {
+  const shape = viewShapeNotes(view, tuning);
   if (view.show === 'scale') return shape;
   const chordPcs = new Set(chord.tones.map((t) => t.pc));
-  if (view.positionType === 'neck') return allFretNotes(DEFAULT_FRETS).filter((n) => chordPcs.has(n.pc));
+  if (view.positionType === 'neck') return allFretNotes(DEFAULT_FRETS, tuning).filter((n) => chordPcs.has(n.pc));
   const frets = shape.map((n) => n.fret);
   const low = view.positionType === 'range' ? view.rangeLow : Math.min(...frets);
   const high = view.positionType === 'range' ? view.rangeHigh : Math.max(...frets);
-  return allFretNotes(DEFAULT_FRETS).filter((n) => chordPcs.has(n.pc) && n.fret >= low && n.fret <= high);
+  return allFretNotes(DEFAULT_FRETS, tuning).filter((n) => chordPcs.has(n.pc) && n.fret >= low && n.fret <= high);
 }
 
 /** A chord's tones in the shape of a scale, so an arpeggio can ride the overlay machinery. */

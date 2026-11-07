@@ -64,8 +64,8 @@ export class HandEstimator {
    * One detected note (call it once per new note, not per frame). `shape` is
    * what the board shows; it nudges, never decides.
    */
-  estimate(midi: number, now: number, shape: readonly FretPosition[] = []): HandEstimate {
-    const candidates = positionsOf(midi);
+  estimate(midi: number, now: number, shape: readonly FretPosition[] = [], tuning?: readonly number[]): HandEstimate {
+    const candidates = positionsOf(midi, tuning);
     const center = this.center(now);
     const previous = center !== null ? this.recent.at(-1)?.position ?? null : null;
     const inShape = new Set(shape.map(key));
