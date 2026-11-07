@@ -550,3 +550,4 @@ test('arpeggios lab: one chord by its tones and inversion, then connected over t
   await page.getByTestId('stop').click();
   expect(errors).toEqual([]);
 });
+

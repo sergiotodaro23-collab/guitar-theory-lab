@@ -3,7 +3,8 @@
  * never decides when something plays. Synthesised on purpose: no samples to ship.
  */
 import { midiToHz } from '../theory';
-import type { MetronomeEvent, ScheduledTrackEvent, TimelineSink } from '../timeline';
+import type { AccentLevel, ScheduledTrackEvent } from '../timeline';
+import { clickRecipe, type ClickSound } from './clickSounds';
 
 export type AudioBus = 'click' | 'notes' | 'comp';
 
@@ -14,7 +15,8 @@ interface Voice {
   readonly sources: readonly OscillatorNode[];
 }
 
-export class WebAudioSink implements TimelineSink {
+/** The engine's timeline sink forwards here, after deciding each click's accent. */
+export class WebAudioSink {
   private readonly master: GainNode;
   private readonly buses: Record<AudioBus, GainNode>;
   private voices: Voice[] = [];
@@ -39,10 +41,10 @@ export class WebAudioSink implements TimelineSink {
     this.buses[bus].gain.setTargetAtTime(value, this.ctx.currentTime, 0.01);
   }
 
-  metronome(event: MetronomeEvent, time: number): void {
-    const frequency = event.kind === 'bar' ? 1760 : event.kind === 'beat' ? 1180 : 820;
-    const level = event.kind === 'bar' ? 0.7 : event.kind === 'beat' ? 0.45 : 0.18;
-    this.voice('click', time, 0.035, level, 0.001, [{ type: 'square', frequency }]);
+  /** One click of the metronome at its accent level, in the chosen timbre. */
+  click(sound: ClickSound, level: AccentLevel, time: number): void {
+    const recipe = clickRecipe(sound, level);
+    if (recipe) this.voice('click', time, recipe.duration, recipe.level, recipe.attack, recipe.oscillators, recipe.decaying);
   }
 
   trackEvent(event: ScheduledTrackEvent, time: number): void {

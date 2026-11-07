@@ -189,6 +189,10 @@ export interface Track<P extends TrackPayload = TrackPayload> {
 export interface MetronomeEvent {
   readonly kind: 'bar' | 'beat' | 'subdivision';
   readonly tick: number;
+  /** Click index within its bar, from 0 on the downbeat. */
+  readonly step: number;
+  /** Meter of the bar the click belongs to (the old one until a change's bar line). */
+  readonly meter: Meter;
 }
 
 export interface ScheduledTrackEvent<P extends TrackPayload = TrackPayload> {
@@ -218,7 +222,7 @@ export function metronomeInRange(from: number, to: number, config: TimeConfig): 
     for (let n = Math.ceil((start - segment.tick) / step); segment.tick + n * step < end; n += 1) {
       const local = n * step;
       const kind = local % bar === 0 ? 'bar' : local % beat === 0 ? 'beat' : 'subdivision';
-      result.push({ kind, tick: segment.tick + local });
+      result.push({ kind, tick: segment.tick + local, step: Math.round((local % bar) / step), meter: segment.meter });
     }
   });
   return result;

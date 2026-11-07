@@ -56,6 +56,7 @@ Pulsante `Apri editor avanzato` nel pannello Esercizio → workspace ampio sovra
 
 ## 8. UX/UI
 
+- **Due aspetti permanenti** (direttiva UX finale, novembre 2026), selezionabili da `Aspetto` con preferenza salvata: **Semplificata** (la console antracite con accenti arancioni, ottimizzata per smartphone) e **Studio** (banco da lavoro iperrealistico: composizione della variante A, materiali fotografici, post-it Scale/Chords/Exercise, telefono con tutor, legenda su post-it). Studio predefinita su desktop e tablet, Semplificata obbligatoria su smartphone verticale; senza scelta esplicita vale la regola del dispositivo. Stessi stato, dati e funzioni. Breakpoint per dimensione, mai per user-agent.
 - Direzione: **Physical Guitar Workbench A**, skeuomorfismo realistico professionale (riferimenti: plugin audio, hardware da studio, pedali, amplificatori). Legno, metallo, plastica stampata, carta ed etichette, manopole, fader, incisioni, viti, LED, ombre coerenti. Niente cartoon, retrofuturismo, usura decorativa. Nessun asset proprietario copiato.
 - Targhetta: `GUITAR THEORY LAB` / `v[versione reale] — by Sergio Todaro`, fisica, applicata o incisa.
 - Navigazione a quattro modalità, compatta, senza perdita di configurazione.

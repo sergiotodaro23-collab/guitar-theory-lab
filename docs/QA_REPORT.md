@@ -22,6 +22,9 @@ Ambiente: container cloud Linux, Node 22.23, npm 10.9, Chromium headless (Playwr
 | Percorsi a fasi (C su / G giù, melodica classica, 3NPS, validazioni, JSON) | Verde |
 | Editor: apertura, modelli, aggiunta, riordino, eliminazione, alternativa a un errore, Escape, applica, riproduzione con cambio di forma | Verde (e2e) |
 | Editor a 820 px senza overflow orizzontale | Verde (e2e) |
+| Click / Accenti (D-18): 16 passi, attivi secondo metrica e suddivisione (4/4, sedicesimi, 6/8), ciclo dei livelli, tastiera, ritorno alla metrica, livelli consegnati all'audio uguali al pattern durante la riproduzione, timbro Legno; 2×8 visibili su telefono senza overflow; in Studio e Semplificata | Verde (e2e); 271 unit, 36 e2e. Solo Chromium; timbri non ascoltati da un orecchio umano |
+| Direttiva UX finale (D-16, D-17): barrette dei tasti visibili in entrambi gli aspetti (24 rettangoli con larghezza e riempimento, contrasto sui pixel contro il legno, anche a 390×844); Studio predefinita a 1280×800, Semplificata obbligatoria a 390×844 con preferenza conservata, Studio disabilitata a 844×390; stato invariato al cambio in riproduzione; nessun overflow in 4 modalità × 7 formati; manopole, fader, mute e schede da tastiera; tutor (tre modalità, testo dal motore, riduzione); legenda adattiva; contrasto WCAG ≥ 4,5:1 in entrambi gli aspetti (corretto il parsing dei colori esadecimali nel test, prima inaffidabile); trasporto del telefono in basso | Verde (e2e); 262 unit, 33 e2e. Solo Chromium |
+| Aspetti Semplificata/Studio: stato invariato al cambio durante la riproduzione; Semplificata forzata a 390×844, Studio disabilitato a 844×390, ripristinato a 768×1024 e 1280×800; nessun overflow in 4 modalità × 6 formati; manopole, fader e schede da tastiera; contrasto WCAG ≥ 4,5:1 in Studio; frecce della tastiera su telefono | Verde (e2e); 249 unit, 29 e2e dopo il blocco |
 | Arpeggios Lab: solo note dell'accordo nella posizione, rivolto dalla terza, arpeggi collegati sulla progressione | Verde (e2e); 238 unit, 22 e2e dopo il blocco |
 | Cambio di metrica in riproduzione: 4/4 → 3/4 → 6/8 a 120 BPM, click a 0,5 s esatti, nessun doppione, luci aggiornate alla stanghetta | Verde (e2e); 226 unit, 21 e2e dopo il blocco |
 | Accordi multipli: builder, slash/rivolto, forma sulla tastiera, selezione, riordino, invio a Harmony Lab | Verde (e2e); 218 unit, 20 e2e dopo il blocco |
@@ -42,7 +45,7 @@ Ambiente: container cloud Linux, Node 22.23, npm 10.9, Chromium headless (Playwr
 
 ### Divergenze principali dalla specifica
 
-1. Interfaccia in tema scuro "neon", lontana dallo skeuomorfismo realistico richiesto (P2-02).
+1. Interfaccia in tema scuro "neon", lontana dallo skeuomorfismo realistico richiesto (P2-02). Prototipo "Workbench" disponibile come tema opzionale.
 2. ~~Tre workspace su quattro: manca Arpeggios Lab.~~ Risolto (P1-12).
 3. Scale e accordi multipli assenti o limitati (seconda scala solo in Jam, un accordo sovrapposto).
 4. Nessun input chitarra: niente pitch detection, Live Monitor, Tuner.

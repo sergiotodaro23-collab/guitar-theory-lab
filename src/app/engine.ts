@@ -4,15 +4,15 @@
  */
 import { WebAudioSink, workerTimer } from '../audio/webAudioSink';
 import {
-  PPQ, TimelineScheduler, barBeatAt, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
+  PPQ, TimelineScheduler, accentLevel, barBeatAt, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
   type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink,
 } from '../timeline';
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
-import { BPM_MAX, BPM_MIN, meterOf, type Settings } from './settings';
+import { BPM_MAX, BPM_MIN, channelVolume, meterOf, type Settings } from './settings';
 import { useApp, usePlayhead, type Playhead } from './store';
 
 export interface DebugLog {
-  scheduled: { kind: string; tick: number; time: number; chord?: number; note?: number }[];
+  scheduled: { kind: string; tick: number; time: number; chord?: number; note?: number; step?: number; level?: number }[];
   shown: { kind: 'beat' | 'note' | 'chord'; tick: number; value: number; time: number; scheduled: number }[];
 }
 
@@ -33,8 +33,11 @@ class Engine {
     this.debug = typeof location !== 'undefined' && location.search.includes('debug') ? { scheduled: [], shown: [] } : null;
     const sink: TimelineSink = {
       metronome: (event: MetronomeEvent, time: number) => {
-        this.audio?.metronome(event, time);
-        this.debug?.scheduled.push({ kind: event.kind, tick: event.tick, time });
+        // Read at scheduling time: a changed pattern is heard within the lookahead.
+        const { clickAccents, clickSound, subdivision } = useApp.getState().settings;
+        const level = accentLevel(clickAccents, event, subdivision);
+        this.audio?.click(clickSound, level, time);
+        this.debug?.scheduled.push({ kind: event.kind, tick: event.tick, time, step: event.step, level });
       },
       trackEvent: (event: ScheduledTrackEvent, time: number) => {
         this.audio?.trackEvent(event, time);
@@ -78,9 +81,7 @@ class Engine {
   }
 
   private applyVolumes(s: Settings): void {
-    this.audio?.setVolume('click', s.volClick);
-    this.audio?.setVolume('notes', s.volNotes);
-    this.audio?.setVolume('comp', s.volComp);
+    for (const channel of ['click', 'notes', 'comp'] as const) this.audio?.setVolume(channel, channelVolume(s, channel));
   }
 
   /** With `meterChanged`, every track restarts on the bar line where the new meter begins. */
@@ -111,7 +112,7 @@ class Engine {
     if (s.bpm !== previous.bpm) this.scheduler.setBpm(s.bpm);
     if (s.subdivision !== previous.subdivision) this.scheduler.setSubdivision(s.subdivision);
     if (s.swing !== previous.swing) this.scheduler.setSwing(s.swing);
-    if (s.volClick !== previous.volClick || s.volNotes !== previous.volNotes || s.volComp !== previous.volComp) this.applyVolumes(s);
+    if ((['click', 'notes', 'comp'] as const).some((c) => channelVolume(s, c) !== channelVolume(previous, c))) this.applyVolumes(s);
     this.syncTracks(s, meterChanged);
     if (s.mode !== previous.mode || s.changeMode !== previous.changeMode) this.manualChanges = [];
     if (this.scheduler.transportState !== 'playing') this.publish();

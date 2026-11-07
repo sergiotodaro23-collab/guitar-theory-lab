@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { engine } from '../app/engine';
 import { useApp } from '../app/store';
-import { Board } from './Board';
-import { Transport } from './Transport';
-import { ArpeggioPanel, ExercisePanel, HarmonyPanel, JamPanels, ChordsPanel, PresetsPanel, ScalePanel } from './panels';
+import { RoutineEditor } from './RoutineEditor';
+import { SimpleShell } from './simple/SimpleShell';
+import { StudioShell } from './studio/StudioShell';
+import { effectiveAppearance, studioAvailable } from './appearance';
 
 function useShortcuts() {
   useEffect(() => {
@@ -39,31 +40,41 @@ function useShortcuts() {
   }, []);
 }
 
+/** Window size, kept current on resize and rotation. */
+function useViewport(): { width: number; height: number } {
+  const read = () => ({ width: window.innerWidth, height: window.innerHeight });
+  const [size, setSize] = useState(read);
+  useEffect(() => {
+    const onResize = () => setSize(read());
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    };
+  }, []);
+  return size;
+}
+
+/**
+ * Both looks render the same components over the same store, so switching
+ * keeps playback, chords, scales and exercises exactly as they are.
+ */
 export function App() {
-  const mode = useApp((s) => s.settings.mode);
+  const look = useApp((s) => s.settings.look);
+  const editorOpen = useApp((s) => s.editorOpen);
+  const setEditorOpen = useApp((s) => s.setEditorOpen);
+  const { width, height } = useViewport();
+  const allowed = studioAvailable(width, height);
+  const appearance = effectiveAppearance(look, width, height);
   useShortcuts();
+  useEffect(() => {
+    document.documentElement.dataset.theme = appearance;
+  }, [appearance]);
   return (
     <>
-      <Transport />
-      <main className="main">
-        <Board />
-        <div className="panels" data-mode={mode}>
-          {mode === 'harmony' ? <HarmonyPanel /> : null}
-          {mode === 'arpeggio' ? <ArpeggioPanel /> : null}
-          {mode === 'jam' ? <JamPanels /> : null}
-          <ScalePanel />
-          {mode !== 'arpeggio' ? <ExercisePanel /> : null}
-          {mode === 'fretboard' ? <ChordsPanel /> : null}
-          <PresetsPanel />
-        </div>
-        <footer className="foot">
-          <p>Spazio avvia e mette in pausa. N e P cambiano accordo. + e − regolano il BPM.</p>
-          <p className="legal" data-testid="license-notice">
-            © 2026 Sergio Todaro. Software libero sotto licenza GNU GPL 3.0 o successiva, senza alcuna garanzia.{' '}
-            <a href="https://github.com/sergiotodaro23-collab/guitar-theory-lab" target="_blank" rel="noreferrer">Codice sorgente</a>
-          </p>
-        </footer>
-      </main>
+      {appearance === 'studio' ? <StudioShell studioAllowed={allowed} /> : <SimpleShell studioAllowed={allowed} />}
+      <RoutineEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
     </>
   );
 }
