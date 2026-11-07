@@ -10,7 +10,7 @@ import { resolveChordLayer } from '../app/chordLayers';
 import { Fretboard, type LayerStyle } from '../viz/Fretboard';
 import { legendEntries, type LegendEntry } from '../viz/legend';
 import { useLive } from '../audio/liveInput';
-import { livePositions, noteOf } from '../pitch';
+import { HandEstimator, noteOf } from '../pitch';
 import type { FretPosition } from '../fretboard';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
 import { MAX_VISIBLE_OVERLAYS, defaultScaleFor, viewForChord, viewNotes, viewOverlays, viewScale } from '../app/chordViews';
@@ -179,17 +179,23 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
   // Detected pitch: every place it can be played, the likely one from what the board shows.
   const livePitch = useLive((l) => l.pitch);
   const liveOn = useLive((l) => l.state === 'on') && settings.liveOnBoard;
-  const lastLive = useRef<{ all: readonly FretPosition[]; likely: FretPosition | null }>({ all: [], likely: null });
+  const lastLive = useRef<{ all: readonly FretPosition[]; likely: FretPosition | null; probabilities: readonly number[]; midi: number | null }>({ all: [], likely: null, probabilities: [], midi: null });
+  // Live Monitor 2.0 (D-31): the hand, from continuity first; the board's shape is only a hint.
+  const hand = useRef(new HandEstimator());
   const live = useMemo(() => {
     if (!liveOn) return null;
     if (livePitch) {
       const midi = noteOf(livePitch.frequency, settings.tunerA4).midi;
-      const where = livePositions(midi, layer.markers, lastLive.current.likely);
-      lastLive.current = { all: where.all, likely: where.likely };
+      // One estimate per note: a held note keeps its place, a new pitch asks again.
+      if (midi !== lastLive.current.midi) {
+        const where = hand.current.estimate(midi, performance.now() / 1000, layer.markers);
+        lastLive.current = { all: where.all.map((e) => e.position), likely: where.likely, probabilities: where.all.map((e) => e.probability), midi };
+      }
       // Loudness sets the opacity; RMS 0.15 is a firm pick.
       return { ...lastLive.current, intensity: Math.min(1, 0.35 + livePitch.rms / 0.15) };
     }
-    // Silence: keep the last places, faded out by the CSS transition.
+    // Silence: keep the last places, faded out by the CSS transition; the next note is a new one.
+    lastLive.current = { ...lastLive.current, midi: null };
     return { ...lastLive.current, intensity: 0 };
   }, [liveOn, livePitch, layer.markers, settings.tunerA4]);
   const shownMarkers = useMemo(() => (showAids ? layer.markers : []), [showAids, layer.markers]);

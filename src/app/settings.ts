@@ -4,7 +4,7 @@ import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, arpeggioPlan, generateSequence
 import { HOME_MODES, type AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
-import { TUNINGS } from '../pitch';
+import { SENSITIVITIES, TUNINGS, sanitizeProfiles, type LiveProfile, type Sensitivity } from '../pitch';
 import { COMP_PATTERNS, DEFAULT_KIT, GENRES, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
@@ -107,6 +107,10 @@ export interface HarmonySettings {
   readonly tunerTuning: string;
   readonly liveOnBoard: boolean;
   readonly inputChannel: 'mix' | 'left' | 'right';
+  /** Live Monitor 2.0 (D-31): sensitivity, calibration profiles, the chosen one ('' none). */
+  readonly liveSensitivity: Sensitivity;
+  readonly liveProfiles: readonly LiveProfile[];
+  readonly liveProfileId: string;
   /** Master output level, after every channel including the guitar monitor. */
   readonly volMaster: number;
   /** Click accents, 16 steps from the downbeat; null follows the meter (D-18). */
@@ -223,6 +227,9 @@ export const DEFAULT_SETTINGS: Settings = {
   tunerTuning: 'standard',
   liveOnBoard: true,
   inputChannel: 'mix',
+  liveSensitivity: 'balanced',
+  liveProfiles: [],
+  liveProfileId: '',
   volMaster: 0.85,
   clickAccents: null,
   clickSound: 'beep',
@@ -329,6 +336,9 @@ export function sanitizeSettings(raw: unknown): Settings {
     tunerTuning: oneOf(r.tunerTuning, TUNINGS.map((t) => t.id), d.tunerTuning),
     liveOnBoard: typeof r.liveOnBoard === 'boolean' ? r.liveOnBoard : d.liveOnBoard,
     inputChannel: oneOf(r.inputChannel, ['mix', 'left', 'right'] as const, d.inputChannel),
+    liveSensitivity: oneOf(r.liveSensitivity, SENSITIVITIES, d.liveSensitivity),
+    liveProfiles: sanitizeProfiles(r.liveProfiles),
+    liveProfileId: typeof r.liveProfileId === 'string' && sanitizeProfiles(r.liveProfiles).some((p) => p.id === r.liveProfileId) ? r.liveProfileId : '',
     volMaster: number01(r.volMaster, d.volMaster),
     clickAccents: sanitizeAccents(r.clickAccents),
     clickSound: oneOf(r.clickSound, CLICK_SOUNDS.map((c) => c.value), d.clickSound),
@@ -447,4 +457,10 @@ export function genreSettings(id: GenreId): Partial<Settings> {
     jamGenre: id, drumKit: genre.kit, drumPattern: 0, compPattern: genre.comp, swing: genre.swing, bassPattern: 0,
     volDrums: genre.mix.drums, volBass: genre.mix.bass, volComp: genre.mix.comp,
   };
+}
+
+/** The analysis settings for the input: the chosen profile's gates, else the defaults, with the sensitivity. */
+export function analysisSettingsOf(s: Pick<Settings, 'liveSensitivity' | 'liveProfiles' | 'liveProfileId'>): { sensitivity: Sensitivity; minRms: number; minConfidence: number | null } {
+  const profile = s.liveProfiles.find((p) => p.id === s.liveProfileId);
+  return { sensitivity: s.liveSensitivity, minRms: profile?.minRms ?? 0.01, minConfidence: profile ? profile.minConfidence : null };
 }

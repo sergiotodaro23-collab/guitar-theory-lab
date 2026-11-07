@@ -849,7 +849,7 @@ export function JamPanels() {
 
 /** What a saved study preset keeps: everything except the mixer and mode-free UI state. */
 /** Mixer levels and the visual theme belong to the person, not to a study preset. */
-const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'volDrums', 'muteDrums', 'volBass', 'muteBass', 'inputDeviceId', 'inputGain', 'monitorVol', 'tunerA4', 'tunerTuning', 'liveOnBoard', 'inputChannel', 'volMaster', 'look', 'tutorMode', 'tutorMinimized']);
+const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'volDrums', 'muteDrums', 'volBass', 'muteBass', 'inputDeviceId', 'inputGain', 'monitorVol', 'tunerA4', 'tunerTuning', 'liveOnBoard', 'inputChannel', 'liveSensitivity', 'liveProfiles', 'liveProfileId', 'volMaster', 'look', 'tutorMode', 'tutorMinimized']);
 const pickStudy = (s: Settings): Partial<Settings> =>
   Object.fromEntries(Object.entries(s).filter(([key]) => !MIXER_KEYS.has(key))) as Partial<Settings>;
 

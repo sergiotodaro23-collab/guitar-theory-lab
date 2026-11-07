@@ -5,7 +5,9 @@
  * says which note, not which string: the panels keep the two apart.
  */
 import { engine } from '../app/engine';
+import { analysisSettingsOf } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
+import { CalibrationPanel } from './Calibration';
 import { liveInput, useLive } from '../audio/liveInput';
 import { IN_TUNE_CENTS, MIN_CONFIDENCE, STRING_NAMES, TUNINGS, livePositions, noteOf, positionsOf, tunerReading } from '../pitch';
 import { Field, Panel, Segmented, Select, Toggle } from './controls';
@@ -24,6 +26,7 @@ const CHANNEL_OPTIONS = [
 /** Start the input with the saved device, channel and gain. */
 export function startInput(deviceId?: string): void {
   const s = useApp.getState().settings;
+  liveInput.configure(analysisSettingsOf(s));
   void liveInput.start(() => engine.audioOut(), deviceId ?? s.inputDeviceId, s.inputChannel).then(() => liveInput.setGain(useApp.getState().settings.inputGain));
 }
 
@@ -230,6 +233,7 @@ export function InputPanels() {
   return (
     <>
       <LiveMonitorPanel />
+      <CalibrationPanel />
       <TunerPanel />
     </>
   );

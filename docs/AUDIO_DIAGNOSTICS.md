@@ -35,3 +35,9 @@ La diagnostica riporta solo ciò che il browser dichiara: latenza di base e late
 ## Cosa riportare in un'issue
 
 Sistema operativo e browser con versione, modello della scheda, dati della sezione *Diagnostica audio*, quale passo fallisce, se il suono di prova si sente.
+
+## Sensibilità e calibrazione (Live Monitor 2.0, D-31)
+
+- **Sensibilità**: Precisa per note tenute e accordatura, Bilanciata come compromesso, Rapida per legati e passaggi veloci (più sensibile ai rumori). Se compaiono note fantasma, passa a Bilanciata o Precisa, oppure rifai il passo "Silenzio" della calibrazione.
+- **Calibrazione**: crea un profilo (chitarra, pickup, scheda, canale), poi esegui i quattro passi con l'ingresso avviato. Ogni valore indica se è misurato o impostato a mano; "Ripristina" torna ai valori di partenza.
+- **Posizione stimata**: è una stima. Con una nota isolata non viene mostrata nessuna posizione piena; con alcune note di contesto segue la mano. La forma mostrata sulla tastiera è solo un indizio.

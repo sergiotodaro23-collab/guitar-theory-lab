@@ -588,3 +588,12 @@ button, select, input { font: inherit; color: inherit; }
   .analysis-row { grid-template-columns: 5em 6em 1fr; }
   .analysis-text { grid-column: 1 / -1; }
 }
+
+/* ---- Live Monitor calibration ---- */
+.calibration-steps { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 6px; }
+.calibration-step { display: grid; grid-template-columns: 9em 1fr auto; gap: 8px; align-items: center; font-size: 13px; }
+.calibration-values { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 13px; margin: 8px 0; }
+.calibration-values dd { margin: 0; display: flex; align-items: center; gap: 8px; }
+.calibration-result { min-height: 1.4em; }
+.text-input.narrow { width: 6em; }
+@media (max-width: 599px) { .calibration-step { grid-template-columns: 1fr; } }

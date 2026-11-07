@@ -6,7 +6,7 @@
  * timer at about 25 Hz; it is not a musical clock and schedules no sound.
  */
 import { create } from 'zustand';
-import { detectPitch, PitchTracker, type TrackedPitch } from '../pitch';
+import { SENSITIVITY, detectPitch, PitchTracker, type Sensitivity, type TrackedPitch } from '../pitch';
 import { workerTimer } from './webAudioSink';
 
 export type LiveState = 'off' | 'starting' | 'on' | 'error';
@@ -62,7 +62,26 @@ export function inputErrorMessage(error: unknown): string {
   }
 }
 
-const FRAME = 2048;
+/** The analyser keeps the longest frame any mode reads; each mode takes its most recent part. */
+const FRAME = 4096;
+
+/** What the analysis uses: the sensitivity mode, and the profile's gates when one is chosen. */
+export interface AnalysisSettings {
+  readonly sensitivity: Sensitivity;
+  readonly minRms: number;
+  /** Null keeps the mode's own gate. */
+  readonly minConfidence: number | null;
+}
+
+/** A short recording for the calibration: raw samples, plus the readings the analysis made meanwhile. */
+export interface Capture {
+  readonly samples: Float32Array;
+  readonly sampleRate: number;
+  /** AudioContext time of the first sample. */
+  readonly startTime: number;
+  readonly levels: readonly number[];
+  readonly readings: readonly { readonly rms: number; readonly confidence: number }[];
+}
 
 class LiveInput {
   private stream: MediaStream | null = null;
@@ -79,6 +98,9 @@ class LiveInput {
   private clipUntil = 0;
   private inputGain = 1;
   private monitorLevel = 0.6;
+  private settings: AnalysisSettings = { sensitivity: 'balanced', minRms: 0.01, minConfidence: null };
+  private sampleRate = 48000;
+  private capturing: { levels: number[]; readings: { rms: number; confidence: number }[] } | null = null;
 
   async start(out: () => { ctx: AudioContext; destination: AudioNode }, deviceId: string, channel: InputChannel = 'mix'): Promise<void> {
     this.stop();
@@ -109,8 +131,8 @@ class LiveInput {
       this.mono.connect(this.gain);
       this.gain.connect(this.analyser);
       this.gain.connect(this.monitor).connect(destination);
-      const sampleRate = ctx.sampleRate;
-      this.stopTimer = workerTimer.start(() => this.analyse(sampleRate), 40);
+      this.sampleRate = ctx.sampleRate;
+      this.configure(this.settings);
       const devices = (await navigator.mediaDevices.enumerateDevices())
         .filter((d) => d.kind === 'audioinput')
         .map((d, i) => ({ id: d.deviceId, label: d.label || `Ingresso ${i + 1}` }));
@@ -157,6 +179,73 @@ class LiveInput {
     }
   }
 
+  /** Sensitivity and gates; restarts the analysis clock at the mode's pace. */
+  configure(settings: AnalysisSettings): void {
+    this.settings = settings;
+    const mode = SENSITIVITY[settings.sensitivity];
+    this.tracker.configure({ ...mode.tracker, minConfidence: settings.minConfidence ?? mode.tracker.minConfidence });
+    if (!this.analyser) return;
+    this.stopTimer?.();
+    this.stopTimer = workerTimer.start(() => this.analyse(this.sampleRate), mode.hopMs);
+  }
+
+  /**
+   * Record the dry signal for a few seconds (calibration only). A script
+   * processor copies the samples; its output is silent.
+   */
+  capture(seconds: number): Promise<Capture | null> {
+    const gain = this.gain;
+    if (!gain) return Promise.resolve(null);
+    const ctx = gain.context as AudioContext;
+    const total = Math.round(seconds * ctx.sampleRate);
+    const samples = new Float32Array(total);
+    const recorder = ctx.createScriptProcessor(4096, 1, 1);
+    const mute = ctx.createGain();
+    mute.gain.value = 0;
+    gain.connect(recorder);
+    recorder.connect(mute).connect(ctx.destination);
+    this.capturing = { levels: [], readings: [] };
+    let written = 0;
+    let startTime = -1;
+    return new Promise((resolve) => {
+      recorder.onaudioprocess = (event) => {
+        if (startTime < 0) startTime = event.playbackTime;
+        const input = event.inputBuffer.getChannelData(0);
+        const n = Math.min(input.length, total - written);
+        samples.set(input.subarray(0, n), written);
+        written += n;
+        if (written >= total) {
+          recorder.onaudioprocess = null;
+          gain.disconnect(recorder);
+          recorder.disconnect();
+          mute.disconnect();
+          const taken = this.capturing ?? { levels: [], readings: [] };
+          this.capturing = null;
+          resolve({ samples, sampleRate: ctx.sampleRate, startTime, levels: taken.levels, readings: taken.readings });
+        }
+      };
+    });
+  }
+
+  /** Short clicks at known times on the audio clock, for the latency step; returns their times. */
+  playClicks(count: number, interval: number, out: AudioNode): readonly number[] {
+    const ctx = out.context;
+    const first = ctx.currentTime + 0.5;
+    const times = Array.from({ length: count }, (_, i) => first + i * interval);
+    for (const t of times) {
+      const osc = ctx.createOscillator();
+      const env = ctx.createGain();
+      osc.frequency.value = 1500;
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(0.5, t + 0.002);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+      osc.connect(env).connect(out);
+      osc.start(t);
+      osc.stop(t + 0.05);
+    }
+    return times;
+  }
+
   setGain(value: number): void {
     this.inputGain = value;
     this.gain?.gain.setTargetAtTime(value, this.gain.context.currentTime, 0.02);
@@ -181,9 +270,15 @@ class LiveInput {
     for (let i = 0; i < this.buffer.length; i += 1) peak = Math.max(peak, Math.abs(this.buffer[i] ?? 0));
     const now = performance.now();
     if (peak >= 0.98) this.clipUntil = now + 800;
-    const reading = detectPitch(this.buffer, sampleRate);
+    const mode = SENSITIVITY[this.settings.sensitivity];
+    const frame = this.buffer.subarray(FRAME - mode.frame);
+    const reading = detectPitch(frame, sampleRate, { threshold: mode.yinThreshold, minRms: this.settings.minRms });
     const pitch = this.tracker.push(reading);
-    const level = reading?.rms ?? Math.sqrt(this.buffer.reduce((sum, v) => sum + v * v, 0) / this.buffer.length);
+    const level = reading?.rms ?? Math.sqrt(frame.reduce((sum, v) => sum + v * v, 0) / frame.length);
+    if (this.capturing) {
+      this.capturing.levels.push(level);
+      if (reading) this.capturing.readings.push({ rms: reading.rms, confidence: reading.confidence });
+    }
     useLive.setState({ level, clipping: now < this.clipUntil, pitch });
   }
 }
