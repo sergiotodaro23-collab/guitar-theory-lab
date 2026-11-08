@@ -1,9 +1,11 @@
 /**
- * Overlay shell for the physical devices (handoff DeviceDrawer). Mounted as
- * the last child of the notebook, which never moves: the device rises from a
- * slot at its bottom edge. One device at a time; switching replaces it with
- * no exit animation. Escape and the scrim close it; focus goes to the close
- * key on open and back to the launcher on close; reduced motion fades only.
+ * Overlay shell for the physical devices (handoff DeviceDrawer, D-42
+ * geometry). It covers the whole notebook zone, right of the rail and under
+ * the divider, with an opaque rack panel that rises from the bottom edge; the
+ * neck and the notebook underneath never move. One device at a time;
+ * switching replaces it with no exit animation. Escape and the close key
+ * close it; focus goes to the close key on open and back to the launcher on
+ * close; reduced motion fades only.
  */
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import type { DeviceId } from './uiStore';
@@ -89,7 +91,6 @@ export function DeviceDrawer({ device, label, onClose, returnFocusTo, compactLev
   if (!shown) return null;
   return (
     <div className="v57-dvx" data-out={closing ? '1' : '0'} data-c={String(compactLevel)} data-testid="device-drawer" data-device={shown}>
-      <button type="button" className="v57-dvscrim" tabIndex={-1} aria-label="Chiudi il dispositivo" onClick={onClose} />
       <div className="v57-dvl">
         <section className="v57-dv" role="dialog" aria-label={content.label} key={shown}>
           <button ref={closeRef} type="button" className="v57-dclose" aria-label={`Chiudi ${content.label}`} data-testid="device-close" onClick={onClose}>

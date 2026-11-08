@@ -104,20 +104,15 @@ describe('UI preferences', () => {
     expect(p.viz).toEqual(VIZ_DEFAULTS);
     expect(p.split).toBe(0.5);
     expect(p.lcdExpanded).toBe(true);
-    expect(p.devices.ampPower).toBe(false);
   });
   it('round-trips and repairs values', () => {
     const store = memory();
     savePref(store, 'split', 0.62);
     savePref(store, 'viz', { ...VIZ_DEFAULTS, anim: 'glow', layerMarks: 'dots' });
-    store.data[STORAGE_KEYS.devices] = JSON.stringify({ ampKnobs: { gain: 140, bass: 'x' }, ampPower: true });
     const p = loadPrefs(store);
     expect(p.split).toBe(0.62);
     expect(p.viz.anim).toBe('glow');
     expect(p.viz.layerMarks).toBe('dots');
-    expect(p.devices.ampKnobs.gain).toBe(100);
-    expect(p.devices.ampKnobs.bass).toBe(50);
-    expect(p.devices.ampPower).toBe(true);
   });
   it('a storage that throws never breaks the app', () => {
     const broken: KeyValueStore = { getItem: () => { throw new Error('denied'); }, setItem: () => { throw new Error('full'); } };

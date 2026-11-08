@@ -3,6 +3,7 @@
  * Nothing else owns a clock: the UI reads positions derived from AudioContext time.
  */
 import { WebAudioSink, workerTimer } from '../audio/webAudioSink';
+import { liveInput } from '../audio/liveInput';
 import {
   PPQ, TimelineScheduler, accentLevel, barBeatAt, ticksPerBar, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
   type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink,
@@ -66,6 +67,7 @@ class Engine {
       settings.bpm,
     );
     this.syncTracks(settings);
+    liveInput.setRig(settings.rig);
     useApp.subscribe((state, previous) => {
       if (state.settings !== previous.settings) this.onSettings(state.settings, previous.settings);
     });
@@ -129,6 +131,7 @@ class Engine {
       this.scheduler.setMeter(meterOf(s));
       this.manualChanges = [];
     }
+    if (s.rig !== previous.rig) liveInput.setRig(s.rig);
     if (s.bpm !== previous.bpm) this.scheduler.setBpm(s.bpm);
     if (s.subdivision !== previous.subdivision) this.scheduler.setSubdivision(s.subdivision);
     if (s.swing !== previous.swing) this.scheduler.setSwing(s.swing);
@@ -409,8 +412,8 @@ export const engine = new Engine();
 
 declare global {
   interface Window {
-    __gtl?: { engine: Engine; debug: DebugLog; backing?: typeof backingTrack };
+    __gtl?: { engine: Engine; debug: DebugLog; backing?: typeof backingTrack; live?: typeof liveInput };
   }
 }
 
-if (engine.debug) window.__gtl = { engine, debug: engine.debug, backing: backingTrack };
+if (engine.debug) window.__gtl = { engine, debug: engine.debug, backing: backingTrack, live: liveInput };

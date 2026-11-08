@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type Poin
 import { MixerShown } from '../panels';
 import { Console } from './v57/Console';
 import { FretboardPanel } from './v57/FretboardPanel';
-import { Notebook } from './v57/Notebook';
+import { DeviceBay, Notebook } from './v57/Notebook';
 import { Rail } from './v57/Rail';
 import { DEFAULT_SPLIT, FB_MIN, clampRatio, splitHeight } from './v57/layout';
 import { useStudioUi } from './v57/uiStore';
@@ -96,7 +96,10 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
               onKeyDown={onKey}
               onDoubleClick={() => setSplit(DEFAULT_SPLIT)}
             ><i aria-hidden="true" /></div>
-            <Notebook onLegendHost={setLegendHost} />
+            <div className="v57-nbzone" data-testid="notebook-zone">
+              <Notebook onLegendHost={setLegendHost} />
+              <DeviceBay />
+            </div>
           </div>
         </div>
       </div>

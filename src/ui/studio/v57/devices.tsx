@@ -1,24 +1,16 @@
 /**
- * Amplifier, tuner and audio interface on their rendered chassis (handoff
- * geometry, device CSS px). The tuner and the interface read the real guitar
- * input; the amplifier has no DSP yet and says so on its tape.
+ * Tuner and audio interface on their rendered chassis (handoff geometry,
+ * device CSS px), both on the real guitar input. The Guitar Rig is in rig.tsx.
  */
 import { Fragment, type ReactNode } from 'react';
 import { engine } from '../../../app/engine';
 import { useApp } from '../../../app/store';
-import { NO_AMP_PROCESSOR } from '../../../audio/ampProcessor';
 import { liveInput, useLive, type InputChannel } from '../../../audio/liveInput';
 import { IN_TUNE_CENTS, TUNINGS, noteOf, tunerReading } from '../../../pitch';
 import { startInput } from '../../LivePanels';
-import { AMP_KNOBS, gainDb, gainToKnob, hzToKnob, knobToGain, knobToHz } from './layout';
+import { gainDb, gainToKnob, hzToKnob, knobToGain, knobToHz } from './layout';
 import { RotaryKnob } from './RotaryKnob';
 import { useStudioUi } from './uiStore';
-import ampBody from './assets/amp-body@2x.webp';
-import knobGold from './assets/knob-gold@2x.png';
-import rockerOn from './assets/rocker-on@2x.png';
-import rockerOff from './assets/rocker-off@2x.png';
-import toggleUp from './assets/toggle-up@2x.png';
-import toggleDown from './assets/toggle-down@2x.png';
 import tunerBody from './assets/tuner-body@2x.webp';
 import knobBlack from './assets/knob-black@2x.png';
 import footswitch from './assets/footswitch@2x.png';
@@ -32,7 +24,7 @@ export const IFACE = { canvas: { w: 668, h: 254 }, render: { w: 730, h: 312 }, g
 
 const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-function Canvas({ w, h, scale, body, render, children }: { readonly w: number; readonly h: number; readonly scale: number; readonly body: string; readonly render: { readonly w: number; readonly h: number }; readonly children: ReactNode }) {
+export function Canvas({ w, h, scale, body, render, children }: { readonly w: number; readonly h: number; readonly scale: number; readonly body: string; readonly render: { readonly w: number; readonly h: number }; readonly children: ReactNode }) {
   return (
     <div className="gtl-wrap" style={{ width: w * scale, height: h * scale }}>
       <div className="gtl-canvas" style={{ width: w, height: h, transform: `scale(${scale})` }}>
@@ -40,46 +32,6 @@ function Canvas({ w, h, scale, body, render, children }: { readonly w: number; r
         {children}
       </div>
     </div>
-  );
-}
-
-/* ---------------- amplifier (design device, no DSP) ---------------- */
-
-export function AmpDevice({ scale }: { readonly scale: number }) {
-  const devices = useStudioUi((u) => u.devices);
-  const setDevices = useStudioUi((u) => u.setDevices);
-  const processing = NO_AMP_PROCESSOR.status.connected;
-  const suffix = processing ? '' : ' (stato visivo, nessuna elaborazione audio)';
-  return (
-    <>
-      <p className="v57-dvnote" data-testid="amp-status">
-        {processing ? `Elaborazione: ${NO_AMP_PROCESSOR.status.model ?? 'attiva'}.` : 'Nessuna elaborazione audio: manopole e interruttori cambiano solo il loro stato. Il NAM (Neural Amp Modeler) è una fase futura.'}
-      </p>
-      <Canvas w={AMP.canvas.w} h={AMP.canvas.h} scale={scale} body={ampBody} render={AMP.render}>
-        {!processing ? <span className="gtl-tape" style={{ left: 86, top: 26 }}>Solo visivo · nessun DSP · NAM futuro</span> : null}
-        <span className="gtl-a-lab" style={{ left: 89, top: AMP.labelY }}>Power</span>
-        <span className="gtl-a-lab" style={{ left: 134, top: AMP.labelY }}>On</span>
-        <span className="gtl-a-lab" style={{ left: 182, top: AMP.labelY }}>Input</span>
-        <span className="gtl-a-lab" style={{ left: 752, top: AMP.labelY }}>Bypass</span>
-        <img src={devices.ampPower ? rockerOn : rockerOff} alt="" className="gtl-abs" style={{ left: 64, top: 239, width: 50, height: 62 }} />
-        <button type="button" className="gtl-hit" style={{ left: 70, top: 244, width: 38, height: 52 }} aria-pressed={devices.ampPower}
-          aria-label={`Accensione dell’amplificatore${suffix}`} data-testid="amp-power"
-          onClick={() => { NO_AMP_PROCESSOR.setPower(!devices.ampPower); setDevices({ ampPower: !devices.ampPower }); }} />
-        <span className="gtl-a-lamp" data-on={devices.ampPower ? 1 : 0} />
-        <img src={devices.ampBypass ? toggleDown : toggleUp} alt="" className="gtl-abs" style={{ left: 732, top: 238, width: 40, height: 60 }} />
-        <button type="button" className="gtl-hit" style={{ left: 734, top: 240, width: 36, height: 56 }} aria-pressed={devices.ampBypass}
-          aria-label={`Bypass dell’amplificatore${suffix}`} data-testid="amp-bypass"
-          onClick={() => { NO_AMP_PROCESSOR.setBypass(!devices.ampBypass); setDevices({ ampBypass: !devices.ampBypass }); }} />
-        {AMP_KNOBS.map(([id, name, def], i) => (
-          <Fragment key={id}>
-            <span className="gtl-a-lab" style={{ left: AMP.knobCx[i], top: AMP.labelY }}>{name}</span>
-            <RotaryKnob value={devices.ampKnobs[id]} label={name + suffix} valueText={`${Math.round(devices.ampKnobs[id] / 10)} su 10`}
-              onChange={(v) => { NO_AMP_PROCESSOR.setKnob(id, v); setDevices({ ampKnobs: { ...devices.ampKnobs, [id]: v } }); }}
-              bodySrc={knobGold} bodySize={72} hitSize={52} pointer={{ length: 10, offset: 4, color: '#efe3bd' }} cx={AMP.knobCx[i] ?? 0} cy={AMP.knobCy} defaultValue={def} testId={`amp-${id}`} />
-          </Fragment>
-        ))}
-      </Canvas>
-    </>
   );
 }
 

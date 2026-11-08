@@ -120,48 +120,68 @@ test('divider: keyboard, drag and double-click; the height is saved', async ({ p
   await expect.poll(() => fbHeight(page)).toBeGreaterThan(dragged + 30);
 });
 
-test('drawer: devices rise over the notebook, Escape closes, focus returns, page and tab stay', async ({ page }) => {
+const rect = (page: Page, selector: string) => page.locator(selector).first().evaluate((el) => {
+  const r = el.getBoundingClientRect();
+  return { left: Math.round(r.left), top: Math.round(r.top), right: Math.round(r.right), bottom: Math.round(r.bottom) };
+});
+
+test('drawer: covers the whole notebook zone right of the rail; Escape closes, focus returns, neck and page stay', async ({ page }) => {
   await open(page);
   await tab(page, 'Esercizio').click();
   const pageBox = page.getByTestId('notebook-page');
   await pageBox.evaluate((el) => { el.scrollTop = 80; });
   const before = await pageBox.evaluate((el) => [el.getBoundingClientRect().top, el.scrollTop]);
-  const fbBefore = await fbHeight(page);
+  const neck = await rect(page, '[data-testid="fretboard-panel"]');
+  const board = await rect(page, '.v57-board .fretboard');
   for (const device of ['mixer', 'amp', 'tuner', 'iface'] as const) {
     await page.getByTestId(`device-${device}`).click();
     await expect(page.getByTestId('device-drawer')).toHaveAttribute('data-device', device);
     await expect(page.getByTestId('device-close')).toBeFocused();
-    // The device fits inside the notebook: the drawer is clipped to it on purpose.
-    const [nb, dv] = await page.evaluate(() => [document.querySelector('[data-testid="notebook"]')?.getBoundingClientRect().toJSON(), document.querySelector('.v57-dv')?.getBoundingClientRect().toJSON()]);
-    expect(dv.left).toBeGreaterThanOrEqual(nb.left - 1);
-    expect(dv.right).toBeLessThanOrEqual(nb.right + 1);
+    await page.waitForTimeout(450);
+    const [zone, panel, rail] = [await rect(page, '[data-testid="notebook-zone"]'), await rect(page, '.v57-dv'), await rect(page, '[data-testid="studio-rail"]')];
+    // The whole zone under the divider, edge to edge, and nothing of the rail.
+    for (const side of ['left', 'top', 'right', 'bottom'] as const) expect(Math.abs(panel[side] - zone[side]), `${device} ${side}`).toBeLessThanOrEqual(1);
+    expect(panel.left).toBeGreaterThan(rail.right);
+    // Nothing of the notebook shows through: the panel is opaque where the page was.
+    const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x ?? 0, y ?? 0)?.closest('.v57-dvx') !== null, [zone.left + 30, zone.bottom - 30]);
+    expect(hit, device).toBe(true);
+    // The neck keeps its size and place.
+    expect(await rect(page, '[data-testid="fretboard-panel"]')).toEqual(neck);
+    expect(await rect(page, '.v57-board .fretboard')).toEqual(board);
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('device-drawer')).toHaveCount(0);
     await expect(page.getByTestId(`device-${device}`)).toBeFocused();
   }
-  // Switching device replaces it at once; the notebook never moved.
+  // Switching device replaces it at once; the rail key closes it; the notebook never moved.
   await page.getByTestId('device-mixer').click();
   await page.getByTestId('device-tuner').click();
   await expect(page.getByTestId('device-drawer')).toHaveAttribute('data-device', 'tuner');
   await page.getByTestId('device-tuner').click();
   await expect(page.getByTestId('device-drawer')).toHaveCount(0);
+  await page.getByTestId('device-amp').click();
+  await page.getByTestId('device-close').click();
+  await expect(page.getByTestId('device-drawer')).toHaveCount(0);
+  await expect(page.getByTestId('device-amp')).toBeFocused();
   expect(await pageBox.evaluate((el) => [el.getBoundingClientRect().top, el.scrollTop])).toEqual(before);
-  expect(await fbHeight(page)).toBe(fbBefore);
   await expect(tab(page, 'Esercizio')).toHaveAttribute('aria-selected', 'true');
 });
 
-test('drawer fits short and tall notebooks', async ({ page }) => {
+test('drawer: devices fit short and tall notebook zones', async ({ page }) => {
   await open(page);
   const divider = page.getByTestId('divider');
   for (const key of ['End', 'Home']) {
     await divider.focus();
     await page.keyboard.press(key);
-    await openDevice(page, 'mixer');
-    const [nb, canvas] = await page.evaluate(() => [document.querySelector('[data-testid="notebook"]')?.getBoundingClientRect().toJSON(), document.querySelector('[data-testid="v57-mixer"]')?.getBoundingClientRect().toJSON()]);
-    expect(canvas.width, key).toBeLessThanOrEqual(nb.width);
-    expect(canvas.height, key).toBeLessThanOrEqual(nb.height + 14);
-    await page.keyboard.press('Escape');
-    await expect(page.getByTestId('device-drawer')).toHaveCount(0);
+    for (const [device, canvas] of [['mixer', '[data-testid="v57-mixer"]'], ['amp', '[data-testid="rig"]']] as const) {
+      await openDevice(page, device);
+      await page.waitForTimeout(450);
+      const [panel, box] = [await rect(page, '.v57-dv'), await rect(page, canvas)];
+      expect(box.left, `${key} ${device}`).toBeGreaterThanOrEqual(panel.left);
+      expect(box.right, `${key} ${device}`).toBeLessThanOrEqual(panel.right);
+      expect(box.bottom, `${key} ${device}`).toBeLessThanOrEqual(panel.bottom);
+      await page.keyboard.press('Escape');
+      await expect(page.getByTestId('device-drawer')).toHaveCount(0);
+    }
   }
 });
 
@@ -173,24 +193,6 @@ test('reduced motion: the drawer fades and closes at once', async ({ page }) => 
   expect(animation).toBe('v57-fade');
   await page.getByTestId('device-close').click();
   await expect(page.getByTestId('device-drawer')).toHaveCount(0, { timeout: 100 });
-});
-
-test('amp: visual only, said on the device; knobs, power and bypass keep their state', async ({ page }) => {
-  await open(page);
-  await openDevice(page, 'amp');
-  await expect(page.getByTestId('amp-status')).toContainText('Nessuna elaborazione audio');
-  const gain = page.getByTestId('amp-gain');
-  await expect(gain).toHaveAccessibleName(/nessuna elaborazione audio/);
-  await gain.focus();
-  await page.keyboard.press('End');
-  await expect(gain).toHaveAttribute('aria-valuenow', '100');
-  await page.getByTestId('amp-power').click();
-  await expect(page.getByTestId('amp-power')).toHaveAttribute('aria-pressed', 'true');
-  const before = await page.evaluate(() => window.__gtl?.engine.outputLevel() ?? 0);
-  expect(before).toBe(0);
-  await page.reload();
-  await openDevice(page, 'amp');
-  await expect(page.getByTestId('amp-gain')).toHaveAttribute('aria-valuenow', '100');
 });
 
 test('tuner and interface without input: honest states, opening never starts monitoring', async ({ page }) => {

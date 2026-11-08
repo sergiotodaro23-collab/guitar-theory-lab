@@ -13,7 +13,8 @@ import { InputPanels } from '../../LivePanels';
 import { ArpeggioPanel, ChordsPanel, ExercisePanel, HarmonyPanel, JamPanels, ScalePanel } from '../../panels';
 import { TutorPhone } from '../TutorPhone';
 import { DeviceDrawer } from './DeviceDrawer';
-import { AmpDevice, AMP, IFACE, InterfaceDevice, TUNER, TunerDevice } from './devices';
+import { IFACE, InterfaceDevice, TUNER, TunerDevice } from './devices';
+import { RIG_LAYOUTS, RigDevice, type RigLayout } from './rig';
 import { MIXER_CANVAS, MixerDevice } from './MixerDevice';
 import { NextFretboard } from './NextFretboard';
 import { DEVICES } from './Rail';
@@ -22,7 +23,7 @@ import { useStudioUi, type DeviceId } from './uiStore';
 
 const CANVAS: Record<DeviceId, { w: number; h: number }> = {
   mixer: MIXER_CANVAS,
-  amp: AMP.canvas,
+  amp: RIG_LAYOUTS.stack,
   tuner: TUNER.canvas,
   iface: IFACE.canvas,
 };
@@ -65,15 +66,6 @@ export function Notebook({ onLegendHost }: { readonly onLegendHost: (el: HTMLEle
   const tabs = tabsFor(mode);
   const active = activeTab(mode, ui.pickedTab);
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
-  const box = useRef<HTMLElement>(null);
-  const [size, setSize] = useState({ w: 1000, h: 400 });
-  useEffect(() => {
-    const el = box.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(([entry]) => { if (entry) setSize({ w: entry.contentRect.width, h: entry.contentRect.height }); });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
   // The legend lives on its page: when the page is not shown there is no host.
   useEffect(() => { if (active.id !== 'legend') onLegendHost(null); }, [active.id, onLegendHost]);
 
@@ -86,14 +78,8 @@ export function Notebook({ onLegendHost }: { readonly onLegendHost: (el: HTMLEle
     refs.current[next]?.focus();
   };
 
-  const device = ui.device;
-  const canvas = device ? CANVAS[device] : CANVAS.mixer;
-  const scale = fitScale(canvas.w, canvas.h, size.w, size.h, true);
-  const label = DEVICES.find((d) => d.id === device)?.label ?? '';
-  const openInputTab = () => { ui.pickTab(mode, 'input'); ui.closeDevice(); };
-
   return (
-    <section className="v57-nb" aria-label="Taccuino" ref={box} data-testid="notebook">
+    <section className="v57-nb" aria-label="Taccuino" data-testid="notebook">
       <div className="v57-tabs" role="tablist" aria-label="Schede del taccuino" data-count={tabs.length}>
         {tabs.map((tab, i) => (
           <button
@@ -119,12 +105,46 @@ export function Notebook({ onLegendHost }: { readonly onLegendHost: (el: HTMLEle
         style={{ ['--tc' as string]: active.color }} data-tab={active.id} data-testid="notebook-page" key={`${mode}-${active.id}`}>
         {page(active.id, onLegendHost)}
       </div>
+    </section>
+  );
+}
+
+/** Frame of the drawer panel (plate border and padding) around the device, in CSS px. */
+const BAY_FRAME = 56;
+
+/**
+ * The device drawer covers the whole notebook zone: full width right of the
+ * rail, from the divider down. The neck above never changes size; the
+ * notebook's page and tab stay as they are underneath.
+ */
+export function DeviceBay() {
+  const mode = useApp((s) => s.settings.mode);
+  const ui = useStudioUi();
+  const box = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: 1000, h: 400 });
+  useEffect(() => {
+    const el = box.current?.parentElement;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(([entry]) => { if (entry) setSize({ w: entry.contentRect.width, h: entry.contentRect.height }); });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const device = ui.device;
+  const canvas = device ? CANVAS[device] : CANVAS.mixer;
+  const fit = (c: { w: number; h: number }) => fitScale(c.w, c.h, size.w - BAY_FRAME, size.h - BAY_FRAME, true);
+  // The rig takes whichever arrangement shows its controls larger.
+  const rigLayout: RigLayout = fit(RIG_LAYOUTS.row) > fit(RIG_LAYOUTS.stack) ? 'row' : 'stack';
+  const scale = device === 'amp' ? fit(RIG_LAYOUTS[rigLayout]) : fit(canvas);
+  const label = DEVICES.find((d) => d.id === device)?.label ?? '';
+  const openInputTab = () => { ui.pickTab(mode, 'input'); ui.closeDevice(); };
+  return (
+    <div ref={box} className="v57-bay">
       <DeviceDrawer device={device} label={label} onClose={ui.closeDevice} returnFocusTo={ui.launcher} compactLevel={compactLevel(size.h)}>
         {device === 'mixer' ? <MixerDevice scale={scale} /> : null}
-        {device === 'amp' ? <AmpDevice scale={scale} /> : null}
+        {device === 'amp' ? <RigDevice scale={scale} layout={rigLayout} /> : null}
         {device === 'tuner' ? <TunerDevice scale={scale} /> : null}
         {device === 'iface' ? <InterfaceDevice scale={scale} onOpenPanel={openInputTab} /> : null}
       </DeviceDrawer>
-    </section>
+    </div>
   );
 }

@@ -25,6 +25,17 @@ I test esistenti girano invariati nella logica: `e2e/studio.ts` (`chooseLook`, `
 
 Ispezione visiva a 1600×1000, 1440×900, 1366×768, 1280×800, 1100×720: nessuno scorrimento della pagina, LCD senza tagli verticali, 24 barrette e capotasto (25 posizioni), cassetto dentro il taccuino. A 1100×720 il taccuino è basso e i dispositivi scendono alla scala minima 0,45 dell'handoff: leggibili, più comodi alzando il divisore.
 
+### Guitar Rig e cassetti a tutta zona (D-42)
+
+| Verifica | Risultato |
+|---|---|
+| `npm run check` | Verde: 464 test unitari (35 file), build. |
+| `npm run test:e2e` | Verde: 119 casi. |
+
+Nuovi test: `src/app/rig.test.ts` (9 unit: impostazioni e riparazione, mappature, clipper dispari/limitato/monotono, cabinet a energia unitaria più scuri sopra 6 kHz con il 4x12, coda di riverbero −60 dB alla durata). `e2e/guitar-rig.spec.ts` (3 casi con un WAV come microfono: un solo cassetto con testata, cabinet e cinque pedali, immagini caricate, apertura e chiusura dalla barra; interruttori, LED, manopole da tastiera e trascinamento, salvataggio dopo il reload; catena reale: stadi attivi nell'ordine giusto, tempo del delay e durata del riverbero nei nodi, output a zero = silenzio, bypass, power spento = silenzio con l'accordatore che legge ancora la nota, livello dell'Overdrive). `e2e/studio-v57-shell.spec.ts`: il cassetto copre la zona del taccuino bordo a bordo, non la barra, è opaco, e tastiera e pagina non si muovono; mixer e rig entrano in taccuini bassi e alti.
+
+Non verificato: chitarra e cuffie reali, latenza e CPU della catena su hardware, file IR reali di cabinet.
+
 ### Non verificato
 
 Lettori di schermo, touch reale, Safari e Firefox (browser assenti), hardware audio reale (accordatore e interfaccia sono provati con WAV come microfono), contrasto delle schede misurato su un colore di fondo approssimato.
