@@ -379,17 +379,17 @@
 }
 .ws-note-body { max-height: 460px; overflow: auto; overscroll-behavior: contain; scrollbar-color: #a8916c transparent; }
 .ws-note.is-expanded .ws-note-body { max-height: none; }
-:root[data-theme='studio'] .ws-note .panel { background: transparent; padding: 0; gap: 12px; }
-:root[data-theme='studio'] .ws-note .panel + .panel { margin-top: 18px; padding-top: 14px; border-top: 1px dashed #b49d74; }
-:root[data-theme='studio'] .ws-note .panel-title,
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .panel { background: transparent; padding: 0; gap: 12px; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .panel + .panel { margin-top: 18px; padding-top: 14px; border-top: 1px dashed #b49d74; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .panel-title,
 .ws-hand { font: 700 30px/1 var(--hand); color: var(--paper-ink); letter-spacing: 0; text-transform: none; padding-right: 76px; }
-:root[data-theme='studio'] .ws-note .panel-subtitle { color: var(--paper-muted); font-weight: 700; }
-:root[data-theme='studio'] .ws-note .field-label,
-:root[data-theme='studio'] .ws-note .field-hint,
-:root[data-theme='studio'] .ws-note .muted { color: var(--paper-muted); }
-:root[data-theme='studio'] .ws-note .field-label { font-size: 14px; font-weight: 700; }
-:root[data-theme='studio'] .ws-note .select,
-:root[data-theme='studio'] .ws-note .text-input {
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .panel-subtitle { color: var(--paper-muted); font-weight: 700; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .field-label,
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .field-hint,
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .muted { color: var(--paper-muted); }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .field-label { font-size: 14px; font-weight: 700; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .select,
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .text-input {
   background: rgba(255, 253, 245, 0.85);
   color: var(--paper-ink);
   border: 1px solid #a8916c;
@@ -397,17 +397,17 @@
   min-height: 38px;
   box-shadow: inset 0 1px 2px rgba(80, 60, 30, 0.2);
 }
-:root[data-theme='studio'] .ws-note .segmented { background: rgba(90, 70, 40, 0.12); box-shadow: none; padding: 3px; gap: 3px; border-radius: 6px; }
-:root[data-theme='studio'] .ws-note .segment { border: 0; border-image: none; background: transparent; color: var(--paper-ink); font: 600 14px/1.1 var(--body); text-shadow: none; min-height: 36px; padding: 4px 10px; border-radius: 4px; letter-spacing: 0; }
-:root[data-theme='studio'] .ws-note .segment[aria-pressed='true'] { background: var(--paper-ink); color: #fbf4de; }
-:root[data-theme='studio'] .ws-note .btn,
-:root[data-theme='studio'] .ws-note .icon-btn { background: #3a3027; color: #fbf4de; border: 0; border-radius: 4px; }
-:root[data-theme='studio'] .ws-note .btn:hover,
-:root[data-theme='studio'] .ws-note .icon-btn:hover:not(:disabled) { background: #54473a; }
-:root[data-theme='studio'] .ws-note .btn-accent { background: #9a4a00; color: #fffaf0; }
-:root[data-theme='studio'] .ws-note .chord-chip { color: var(--paper-ink); border-color: #a8916c; background: rgba(255, 255, 255, 0.5); }
-:root[data-theme='studio'] .ws-note .range { accent-color: #9a4a00; }
-:root[data-theme='studio'] .ws-note .issue { background: #fbe6d8; color: #6b1a12; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .segmented { background: rgba(90, 70, 40, 0.12); box-shadow: none; padding: 3px; gap: 3px; border-radius: 6px; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .segment { border: 0; border-image: none; background: transparent; color: var(--paper-ink); font: 600 14px/1.1 var(--body); text-shadow: none; min-height: 36px; padding: 4px 10px; border-radius: 4px; letter-spacing: 0; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .segment[aria-pressed='true'] { background: var(--paper-ink); color: #fbf4de; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .btn,
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .icon-btn { background: #3a3027; color: #fbf4de; border: 0; border-radius: 4px; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .btn:hover,
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .icon-btn:hover:not(:disabled) { background: #54473a; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .btn-accent { background: #9a4a00; color: #fffaf0; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .chord-chip { color: var(--paper-ink); border-color: #a8916c; background: rgba(255, 255, 255, 0.5); }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .range { accent-color: #9a4a00; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .issue { background: #fbe6d8; color: #6b1a12; }
 
 /* ---- Tutor phone and legend ---- */
 .ws-side { display: flex; flex-direction: column; align-items: center; gap: 26px; }
@@ -586,13 +586,13 @@
 :root[data-theme='studio'] .accent-step.is-now { outline: 2px solid #5dff7e; outline-offset: 0; }
 :root[data-theme='studio'] .accent-num { color: var(--engrave); font-family: var(--plate-font); font-size: 12px; }
 
-:root[data-theme='studio'] .ws-note .drum-voice { color: var(--paper-ink); font-weight: 700; }
-:root[data-theme='studio'] .ws-note .drum-step { border-color: #a8916c; }
-:root[data-theme='studio'] .ws-note .drum-step.step-1 { background: linear-gradient(to top, #9a4a00 55%, rgba(255, 255, 255, 0.55) 55%); }
-:root[data-theme='studio'] .ws-note .drum-step.step-2 { background: #9a4a00; border: 2px solid #2a2017; }
-:root[data-theme='studio'] .ws-note .drum-step.step-3 { background: linear-gradient(to top, #9a4a00 22%, rgba(255, 255, 255, 0.55) 22%); border-style: dashed; }
-:root[data-theme='studio'] .ws-note .drum-step.is-beat { border-left-color: #2a2017; }
-:root[data-theme='studio'] .ws-note .drum-step.is-now { outline-color: #1d7a35; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .drum-voice { color: var(--paper-ink); font-weight: 700; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .drum-step { border-color: #a8916c; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .drum-step.step-1 { background: linear-gradient(to top, #9a4a00 55%, rgba(255, 255, 255, 0.55) 55%); }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .drum-step.step-2 { background: #9a4a00; border: 2px solid #2a2017; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .drum-step.step-3 { background: linear-gradient(to top, #9a4a00 22%, rgba(255, 255, 255, 0.55) 22%); border-style: dashed; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .drum-step.is-beat { border-left-color: #2a2017; }
+:root[data-theme='studio'] :is(.ws-note, .v57-page) .drum-step.is-now { outline-color: #1d7a35; }
 
 /* Five channels and the meter inside the plate. */
 .ws-channels { gap: 2px; }

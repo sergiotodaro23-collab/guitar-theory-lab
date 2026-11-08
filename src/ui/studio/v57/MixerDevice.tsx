@@ -56,22 +56,27 @@ interface Strip {
   onSolo?: () => void;
 }
 
-export function MixerDevice() {
+/** Canvas of the rendered chassis, shadow margin included: the drawer fits this box. */
+export const MIXER_CANVAS = { w: 890, h: 490 } as const;
+
+/** In the drawer the notebook decides the scale; on its own the mixer follows its width. */
+export function MixerDevice({ scale: fixedScale }: { readonly scale?: number } = {}) {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const inputOn = useLive((state) => state.state === 'on');
   const monitorOn = useLive((state) => state.monitorOn);
   const host = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+  const [ownScale, setScale] = useState(1);
+  const scale = fixedScale ?? ownScale;
   useEffect(() => {
     const element = host.current;
-    if (!element) return;
+    if (!element || fixedScale !== undefined || typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(([entry]) => {
       if (entry) setScale(Math.min(1, Math.max(0.63, entry.contentRect.width / 890)));
     });
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [fixedScale]);
 
   const strips: Strip[] = CHANNELS.map(({ id, label, vol, mute }) => ({
     id, label, value: s[vol], active: channelVolume(s, id) > 0,
@@ -93,8 +98,10 @@ export function MixerDevice() {
     muted: false, solo: false, onChange: (volMaster) => update({ volMaster }),
   });
 
-  return <section className="ws-mixer v57-mixer" aria-label="Mixer">
-    <h2 className="ws-engraved ws-plate-title">Mixer Studio</h2>
+  const drawer = fixedScale !== undefined;
+  const hint = 'LED: canali aperti · Out: livello reale. Solo isola Click, Note, Accordi, Basso e Batteria; la chitarra e la backing track restano indipendenti.';
+  return <section className="ws-mixer v57-mixer" aria-label="Mixer" data-drawer={drawer ? '1' : '0'}>
+    {drawer ? <p className="v57-dvnote">{hint}</p> : <h2 className="ws-engraved ws-plate-title">Mixer Studio</h2>}
     <div className="v57-mixer-host" ref={host}>
       <div className="v57-mixer-size" style={{ width: 890 * scale, height: 490 * scale }}>
         <div className="v57-mixer-canvas" data-testid="v57-mixer" style={{ transform: `scale(${scale})` }}>
@@ -125,6 +132,6 @@ export function MixerDevice() {
         </div>
       </div>
     </div>
-    <p className="v57-mixer-hint">LED: canali aperti · Out: livello reale. Solo isola Click, Note, Accordi, Basso e Batteria; la chitarra e la backing track restano indipendenti.</p>
+    {drawer ? null : <p className="v57-mixer-hint">{hint}</p>}
   </section>;
 }

@@ -7,7 +7,7 @@ import { AVOID_PROFILES, chordOrigin, classifyTone, functionsAcross } from '../h
 import { parsedChords } from '../jam';
 import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
 import { resolveChordLayer } from '../app/chordLayers';
-import { Fretboard, type LayerStyle } from '../viz/Fretboard';
+import { Fretboard, type LayerMarks, type LayerStyle } from '../viz/Fretboard';
 import { legendEntries, type LegendEntry } from '../viz/legend';
 import { useLive } from '../audio/liveInput';
 import { midiPitch, useMidi } from '../audio/midi';
@@ -68,7 +68,7 @@ interface LegendOverlay {
 }
 
 /** Only what is drawn: the entries come from the markers on the neck, with shapes as well as colours. */
-function Legend({ entries, overlays }: { readonly entries: readonly LegendEntry[]; readonly overlays: readonly LegendOverlay[] }) {
+function Legend({ entries, overlays, marks }: { readonly entries: readonly LegendEntry[]; readonly overlays: readonly LegendOverlay[]; readonly marks: LayerMarks }) {
   return (
     <ul className="legend" aria-label="Legenda" data-testid="legend">
       {entries.map((entry) => (
@@ -80,10 +80,12 @@ function Legend({ entries, overlays }: { readonly entries: readonly LegendEntry[
       {overlays.map((o) => (
         <li key={o.id} className={`legend-item legend-layer layer-${o.color}`} data-testid="legend-layer">
           <svg className="legend-pip" viewBox="0 0 20 20" aria-hidden="true">
-            <circle className="legend-pip-ring" cx="10" cy="10" r="6.5" />
-            <circle className={`pip layer-${o.color}`} cx={10 + (PIP_DIRS[o.pip]?.[0] ?? 1) * 5.5} cy={10 + (PIP_DIRS[o.pip]?.[1] ?? -1) * 5.5} r="3.2" />
+            <circle className="legend-pip-ring" cx="10" cy={marks === 'bars' ? 8 : 10} r="6.5" />
+            {marks === 'bars'
+              ? <rect className={`pip pip-bar layer-${o.color}`} x="5" y="16" width="10" height="3.6" rx="1.2" />
+              : <circle className={`pip layer-${o.color}`} cx={10 + (PIP_DIRS[o.pip]?.[0] ?? 1) * 5.5} cy={10 + (PIP_DIRS[o.pip]?.[1] ?? -1) * 5.5} r="3.2" />}
           </svg>
-          {o.name} <span className="muted">(punto {PIP_PLACES[o.pip]})</span>
+          {o.name} <span className="muted">{marks === 'bars' ? `(barretta sotto la nota, ${overlays.indexOf(o) + 1}ª da sinistra)` : `(punto ${PIP_PLACES[o.pip]})`}</span>
         </li>
       ))}
     </ul>
@@ -92,11 +94,21 @@ function Legend({ entries, overlays }: { readonly entries: readonly LegendEntry[
 
 const PIP_DIRS: readonly (readonly [number, number])[] = [[1, -1], [1, 1], [-1, 1], [-1, -1]];
 
+export interface BoardProps {
+  /** Where the legend goes when it is not under the neck. */
+  readonly legendHost?: HTMLElement | null;
+  /** 'external': legend and note inspector render only into their hosts, never under the neck. */
+  readonly foot?: 'inline' | 'external';
+  readonly inspectorHost?: HTMLElement | null;
+  readonly boardImage?: string | null;
+  readonly layerMarks?: LayerMarks;
+}
+
 /**
  * The neck with its legend and note inspector. A layout that keeps the legend
- * elsewhere (Studio's note under the phone) passes the element to render it into.
+ * elsewhere passes the element to render it into.
  */
-export function Board({ legendHost = null, boardImage = null }: { readonly legendHost?: HTMLElement | null; readonly boardImage?: string | null } = {}) {
+export function Board({ legendHost = null, foot = 'inline', inspectorHost = null, boardImage = null, layerMarks = 'dots' }: BoardProps = {}) {
   const settings = useApp((s) => s.settings);
   const pinnedPc = useApp((s) => s.pinnedPc);
   const setPinned = useApp((s) => s.setPinned);
@@ -220,12 +232,13 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
     [shownMarkers, played, liveLikely, liveOthers],
   );
   const legend = showAids
-    ? <Legend entries={entries} overlays={shownOverlays} />
+    ? <Legend entries={entries} overlays={shownOverlays} marks={layerMarks} />
     : <p className="aids-off">Aiuti nascosti: suona a orecchio, l’accordo resta in alto.</p>;
 
   return (
     <section className="board-section" aria-label="Tastiera">
       {legendHost ? createPortal(legend, legendHost) : null}
+      {foot === 'external' && inspectorHost ? createPortal(<NoteInspector chords={chords} chordIndex={chordIndex} scale={scale} />, inspectorHost) : null}
       <Fretboard
         markers={shownMarkers}
         arrows={showAids ? layer.arrows : []}
@@ -233,13 +246,16 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
         trail={showAids ? trail : []}
         layerStyles={layerStyles}
         boardImage={boardImage}
+        layerMarks={layerMarks}
         live={live}
         onPick={onPick}
       />
-      <div className="board-foot">
-        {legendHost ? null : legend}
-        <NoteInspector chords={chords} chordIndex={chordIndex} scale={scale} />
-      </div>
+      {foot === 'inline' ? (
+        <div className="board-foot">
+          {legendHost ? null : legend}
+          <NoteInspector chords={chords} chordIndex={chordIndex} scale={scale} />
+        </div>
+      ) : null}
     </section>
   );
 }

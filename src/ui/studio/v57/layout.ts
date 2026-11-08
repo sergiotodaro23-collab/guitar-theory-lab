@@ -6,6 +6,7 @@
 import type { AppMode, Settings } from '../../../app/settings';
 import { numeralOf } from '../../../harmony';
 import { buildScale, type Chord } from '../../../theory';
+import type { AmpKnobId } from '../../../audio/ampProcessor';
 
 /* ---------------- geometry ---------------- */
 
@@ -155,7 +156,7 @@ export interface DevicePrefs {
   readonly ampBypass: boolean;
 }
 
-export type AmpKnobId = 'gain' | 'bass' | 'mid' | 'treble' | 'presence' | 'out';
+export type { AmpKnobId };
 export const AMP_KNOBS: readonly (readonly [AmpKnobId, string, number])[] = [
   ['gain', 'Gain', 55], ['bass', 'Bass', 50], ['mid', 'Middle', 60], ['treble', 'Treble', 58], ['presence', 'Presence', 45], ['out', 'Output', 62],
 ];
