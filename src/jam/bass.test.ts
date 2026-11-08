@@ -84,7 +84,8 @@ describe('genres', () => {
       for (const p of [...genre.kit.patterns, genre.kit.fill]) for (const { voice } of DRUM_VOICES) expect(p[voice]).toHaveLength(DRUM_STEPS);
       for (const b of genre.bass) for (const n of b.notes) {
         expect(n.step).toBeGreaterThanOrEqual(0);
-        expect(n.step + n.length).toBeLessThanOrEqual(16);
+        // Only an anticipation may be held over the bar line, into the next chord.
+        expect(n.step + n.length).toBeLessThanOrEqual(n.tone === 'anticipate' ? 20 : 16);
       }
       // Every groove has a downbeat somewhere, and every bass line starts in the bar.
       expect(genre.bass.every((b) => b.notes.length > 0)).toBe(true);

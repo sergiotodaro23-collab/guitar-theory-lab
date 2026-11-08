@@ -3,7 +3,7 @@
  * more. Only the active one is drawn on the neck; the others wait as diagrams.
  * Pure and framework-free.
  */
-import { chordVoicings, type Voicing } from '../fretboard';
+import { STANDARD_TUNING, chordVoicings, type Voicing } from '../fretboard';
 import { diatonicSeventh, tryParseChord, type Chord, type Scale } from '../theory';
 
 export const MAX_CHORDS = 8;
@@ -28,18 +28,19 @@ export interface ResolvedChordLayer {
 const voicingCache = new Map<string, readonly Voicing[]>();
 
 /** Voicings depend only on the symbol, so they are worked out once per symbol. */
-export function voicingsFor(chord: Chord): readonly Voicing[] {
-  const cached = voicingCache.get(chord.symbol);
+export function voicingsFor(chord: Chord, tuning: readonly number[] = STANDARD_TUNING): readonly Voicing[] {
+  const key = `${chord.symbol}@${tuning.join(',')}`;
+  const cached = voicingCache.get(key);
   if (cached) return cached;
-  const found = chordVoicings(chord);
+  const found = chordVoicings(chord, { tuning });
   if (voicingCache.size > 200) voicingCache.clear();
-  voicingCache.set(chord.symbol, found);
+  voicingCache.set(key, found);
   return found;
 }
 
-export function resolveChordLayer(layer: ChordLayer): ResolvedChordLayer {
+export function resolveChordLayer(layer: ChordLayer, tuning: readonly number[] = STANDARD_TUNING): ResolvedChordLayer {
   const chord = tryParseChord(layer.symbol);
-  const voicings = chord ? voicingsFor(chord) : [];
+  const voicings = chord ? voicingsFor(chord, tuning) : [];
   const shape = layer.voicing === null ? null : voicings[layer.voicing] ?? null;
   return { layer, chord, voicings, shape };
 }

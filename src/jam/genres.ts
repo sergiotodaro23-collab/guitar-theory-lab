@@ -7,6 +7,7 @@
 import type { BassNote, BassPattern, BassTone } from './bass';
 import { DEFAULT_KIT, pattern, type DrumKit } from './drums';
 import type { CompPattern } from './progression';
+import type { BassTimbre, CompTimbre, DrumKitSound } from '../audio/instruments';
 
 export type GenreId = 'rock' | 'blues' | 'jazz' | 'funk' | 'fusion' | 'metal' | 'latin' | 'ambient';
 
@@ -19,6 +20,10 @@ export interface Genre {
   readonly comp: CompPattern;
   readonly kit: DrumKit;
   readonly bass: readonly [BassPattern, BassPattern, BassPattern, BassPattern];
+  /** Suggested balance (fader levels 0–1), applied when the genre is chosen: the user can move them. */
+  readonly mix: { readonly drums: number; readonly bass: number; readonly comp: number };
+  /** Suggested sounds (D-32), applied with the genre. */
+  readonly sounds: { readonly drums: DrumKitSound; readonly bass: BassTimbre; readonly comp: CompTimbre };
 }
 
 const TRIPLET = 1 / 3;
@@ -34,6 +39,8 @@ const every = (gap: number, length: number, tones: readonly BassTone[]): (readon
 export const GENRES: readonly Genre[] = [
   {
     id: 'rock', label: 'Rock', swing: 0, bpm: 110, comp: 'eighths',
+    mix: { drums: 0.75, bass: 0.72, comp: 0.6 },
+    sounds: { drums: 'acoustic', bass: 'pick', comp: 'clean' },
     kit: DEFAULT_KIT,
     bass: [
       line('Ottavi sulla fondamentale', every(2, 2, ['root'])),
@@ -44,6 +51,8 @@ export const GENRES: readonly Genre[] = [
   },
   {
     id: 'blues', label: 'Blues', swing: TRIPLET, bpm: 92, comp: 'charleston',
+    mix: { drums: 0.62, bass: 0.72, comp: 0.66 },
+    sounds: { drums: 'acoustic', bass: 'finger', comp: 'organ' },
     kit: {
       patterns: [
         pattern({ kick: 'X.......X.......', snare: '....X.......X...', hat: 'x.x.x.x.x.x.x.x.' }),
@@ -62,14 +71,20 @@ export const GENRES: readonly Genre[] = [
   },
   {
     id: 'jazz', label: 'Jazz', swing: TRIPLET, bpm: 140, comp: 'charleston',
+    mix: { drums: 0.5, bass: 0.78, comp: 0.58 },
+    sounds: { drums: 'brushes', bass: 'upright', comp: 'keys' },
     kit: {
       patterns: [
-        pattern({ hat: 'x...x.x.x...x.x.', kick: 'x...x...x...x...', clap: '....x.......x...' }),
-        pattern({ hat: 'x...x.x.x...x.x.', snare: '......x.......x.', clap: '....x.......x...' }),
-        pattern({ hat: 'x...x.x.x...x.x.', kick: 'X.......X.......', clap: '....x.......x...' }),
-        pattern({ snare: 'x.x.x.x.x.x.x.x.', clap: '....x.......x...', kick: 'x.......x.......' }),
+        // Spang-a-lang on the ride, hi-hat foot on 2 and 4, feathered kick.
+        pattern({ ride: 'X...x.x.X...x.x.', hat: '....x.......x...', kick: 'g...g...g...g...' }),
+        // Comping snare: ghosted chatter with an accent on the and of four.
+        pattern({ ride: 'X...x.x.X...x.x.', hat: '....x.......x...', snare: '..g...g...g...X.' }),
+        // Two feel: ride on the beat, kick on one and three.
+        pattern({ ride: 'X...x...X...x...', hat: '....x.......x...', kick: 'x.......x.......' }),
+        // Brushes-like: snare sixteenths ghosted, ride light.
+        pattern({ snare: 'gggggggggggggggg', ride: 'x...x.x.x...x.x.', hat: '....x.......x...' }),
       ],
-      fill: pattern({ snare: 'x..x..x.x..x..x.', tom: '..........x..X..', hat: 'x...' }),
+      fill: pattern({ snare: 'x..x..x.x..x..x.', tom: '..........x..X..', ride: 'X...' }),
     },
     bass: [
       line('Walking in salita', every(4, 4, ['root', 'third', 'fifth', 'approach'])),
@@ -79,11 +94,13 @@ export const GENRES: readonly Genre[] = [
     ],
   },
   {
-    id: 'funk', label: 'Funk', swing: 0, bpm: 100, comp: 'offbeat',
+    id: 'funk', label: 'Funk', swing: 0, bpm: 100, comp: 'stabs',
+    mix: { drums: 0.72, bass: 0.78, comp: 0.55 },
+    sounds: { drums: 'acoustic', bass: 'finger', comp: 'clean' },
     kit: {
       patterns: [
-        pattern({ kick: 'X.x....x..X.....', snare: '....X..x.x..X...', hat: 'xxxxxxxxxxxxxxxx' }),
-        pattern({ kick: 'X..x..X...X..x..', snare: '....X.......X.x.', hat: 'x.x.x.x.x.x.x.x.', open: '......x.......x.' }),
+        pattern({ kick: 'X.x....x..X.....', snare: '.g..X..g.g..X..g', hat: 'xxxxxxxxxxxxxxxx' }),
+        pattern({ kick: 'X..x..X...X..x..', snare: '..g.X..g..g.X.x.', hat: 'x.x.x.x.x.x.x.x.', open: '......x.......x.' }),
         pattern({ kick: 'X......x.xX.....', snare: '....X..x.x..X..x', hat: 'xxxxxxxxxxxxxxxx' }),
         pattern({ kick: 'X.x...x...x..x..', snare: '....X.......X...', hat: 'x.xxx.xxx.xxx.xx', open: '..............x.' }),
       ],
@@ -97,25 +114,33 @@ export const GENRES: readonly Genre[] = [
     ],
   },
   {
-    id: 'fusion', label: 'Fusion', swing: 0, bpm: 120, comp: 'half',
+    id: 'fusion', label: 'Fusion', swing: 0, bpm: 108, comp: 'push',
+    mix: { drums: 0.66, bass: 0.74, comp: 0.58 },
+    sounds: { drums: 'acoustic', bass: 'finger', comp: 'epiano' },
     kit: {
       patterns: [
-        pattern({ kick: 'X..x..x...x..x..', snare: '....X.......X...', hat: 'xxxxxxxxxxxxxxxx' }),
-        pattern({ kick: 'X.....x...x.....', snare: '....X..x.....X..', hat: 'x.x.x.x.x.x.x.x.', tom: '..............xx' }),
-        pattern({ kick: 'X......x..x.....', snare: '........X.......', hat: 'xxxxxxxxxxxxxxxx' }),
-        pattern({ kick: 'X..x...x..x.....', snare: '....X.......X...', tom: '.x.....x.....x..', hat: 'x...x...x...x...' }),
+        // A: sixteenth hats with accents on the beat, ghosted snare, syncopated kick.
+        pattern({ kick: 'X.....x...x..x..', snare: '..g.X..g.g..X.g.', hat: 'XxxxXxxxXxxxXxxx' }),
+        // B: linear groove: kick, snare and hat never land together.
+        pattern({ kick: 'X..X....X..X....', snare: '....X..g....X..g', hat: '.xx..xx..xx..xx.' }),
+        // C: half time on the ride, backbeat on three, ghosts around it.
+        pattern({ kick: 'X.....x...x.....', snare: '...g....X..g..g.', ride: 'X.x.x.x.X.x.x.x.', hat: '....x.......x...' }),
+        // D: songo-inspired: snare and toms answer the kick across the bar.
+        pattern({ kick: '...x...x...x...x', snare: 'x.g..x.g.gx..x.g', tom: '......X.......X.', ride: 'x.x.x.x.x.x.x.x.' }),
       ],
-      fill: pattern({ snare: 'xxx.xxx.', tom: '........XxxXxxXx', kick: 'X.......X.......' }),
+      fill: pattern({ snare: 'XggxXggx', tom: '........XxxXxxXx', kick: 'X..x...X..x.....' }),
     },
     bass: [
-      line('Fondamentale, quinta, ottava in ottavi', every(2, 2, ['root', 'fifth', 'octave', 'fifth'])),
-      line('Sedicesimi', every(1, 1, ['root', 'root', 'octave', 'root'])),
-      line('Sincopato', [[0, 3, 'root'], [3, 3, 'fifth'], [6, 2, 'seventh'], [10, 3, 'octave'], [14, 2, 'approach']]),
-      line('Pedale', [[0, 16, 'root']]),
+      line('Sedicesimi con anticipo', [[0, 2, 'root'], [3, 1, 'octave'], [6, 2, 'seventh'], [8, 2, 'fifth'], [11, 1, 'octave'], [14, 4, 'anticipate']]),
+      line('Ottave sincopate', [[0, 2, 'root'], [2, 1, 'octave'], [5, 1, 'root'], [7, 1, 'octave'], [10, 2, 'fifth'], [12, 2, 'seventh'], [15, 1, 'approach']]),
+      line('Linea melodica', [[0, 3, 'root'], [3, 3, 'third'], [6, 2, 'fifth'], [8, 3, 'seventh'], [11, 3, 'octave'], [14, 2, 'approach']]),
+      line('Pedale con anticipo', [[0, 10, 'root'], [10, 4, 'fifth'], [14, 4, 'anticipate']]),
     ],
   },
   {
     id: 'metal', label: 'Metal', swing: 0, bpm: 150, comp: 'eighths',
+    mix: { drums: 0.8, bass: 0.7, comp: 0.6 },
+    sounds: { drums: 'acoustic', bass: 'pick', comp: 'keys' },
     kit: {
       patterns: [
         pattern({ kick: 'XxxxXxxxXxxxXxxx', snare: '....X.......X...', open: 'x...x...x...x...' }),
@@ -133,7 +158,9 @@ export const GENRES: readonly Genre[] = [
     ],
   },
   {
-    id: 'latin', label: 'Latin', swing: 0, bpm: 120, comp: 'charleston',
+    id: 'latin', label: 'Latin', swing: 0, bpm: 120, comp: 'push',
+    mix: { drums: 0.6, bass: 0.72, comp: 0.62 },
+    sounds: { drums: 'acoustic', bass: 'upright', comp: 'epiano' },
     kit: {
       patterns: [
         // Bossa nova: bass drum on 1 and the and of 2, cross-stick clave.
@@ -156,6 +183,8 @@ export const GENRES: readonly Genre[] = [
   },
   {
     id: 'ambient', label: 'Ambient', swing: 0, bpm: 72, comp: 'sustain',
+    mix: { drums: 0.42, bass: 0.6, comp: 0.74 },
+    sounds: { drums: 'electronic', bass: 'synth', comp: 'pad' },
     kit: {
       patterns: [
         pattern({ kick: 'X...............', open: '........x.......' }),

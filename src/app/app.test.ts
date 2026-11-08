@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { STUDY_PRESETS } from './builtins';
 import { DEFAULT_SETTINGS, currentExerciseSequence, currentPositionNotes, sanitizeSettings, type Settings } from './settings';
 import { buildTracks } from './tracks';
+import { defaultView } from './chordViews';
+import { withChord } from '../jam';
+import { parseChord } from '../theory';
 
 const s = (over: Partial<Settings>): Settings => ({ ...DEFAULT_SETTINGS, ...over });
 
@@ -26,6 +29,31 @@ describe('settings sanitising', () => {
   });
   it('accepts its own output unchanged', () => {
     expect(sanitizeSettings(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)))).toEqual(DEFAULT_SETTINGS);
+  });
+});
+
+describe('the exercise follows each chord\'s view (P1-14)', () => {
+  const progression = { name: 't', chords: [withChord('Dm7'), withChord('G7')] };
+  const [dm, g] = progression.chords;
+  const base = { mode: 'harmony' as const, exerciseOn: true, progression, notesPerBeat: 2 as const };
+  it('a chord with a view plays its own notes for its bar, the other the general exercise', () => {
+    const views = { [g?.id ?? '']: { ...defaultView(parseChord('G7')), show: 'arpeggio' as const } };
+    const tracks = buildTracks(s({ ...base, chordViews: views }));
+    const events = tracks.exercise?.events ?? [];
+    const bar = 1920;
+    const second = events.filter((e) => e.tick >= bar && e.tick < 2 * bar);
+    expect(second).toHaveLength(8);
+    expect(second.every((e) => [2, 5, 7, 11].includes((e.payload as { midi: number }).midi % 12))).toBe(true);
+    expect(tracks.exercise?.lengthTicks).toBe(2 * bar);
+    // The first chord has no view: the general exercise (C major in the default settings).
+    const first = events.filter((e) => e.tick < bar);
+    expect(first.every((e) => [0, 2, 4, 5, 7, 9, 11].includes((e.payload as { midi: number }).midi % 12))).toBe(true);
+    expect(dm).toBeDefined();
+  });
+  it('switching it off brings back the single exercise', () => {
+    const views = { [g?.id ?? '']: defaultView(parseChord('G7')) };
+    const settings = s({ ...base, chordViews: views, exerciseFollowsView: false });
+    expect(buildTracks(settings).exercise?.events).toHaveLength(currentExerciseSequence(settings).length);
   });
 });
 
@@ -98,5 +126,24 @@ describe('arpeggios lab tracks', () => {
   });
   it('plays nothing for an unknown chord instead of failing', () => {
     expect(buildTracks(sanitizeSettings({ ...DEFAULT_SETTINGS, mode: 'arpeggio', arpSymbol: 'Hx' })).exercise).toBeNull();
+  });
+});
+
+describe('neck tunings (P1-05)', () => {
+  it('presets and a custom tuning give the open strings', async () => {
+    const { tuningOf, sanitizeTuning } = await import('./settings');
+    expect(tuningOf(s({ neckTuning: 'drop-d' }))).toEqual([38, 45, 50, 55, 59, 64]);
+    expect(tuningOf(s({ neckTuning: 'custom', customTuning: [36, 43, 50, 55, 59, 64] }))).toEqual([36, 43, 50, 55, 59, 64]);
+    expect(sanitizeTuning([40, 45, 50, 55, 59])).toBeNull();
+    expect(sanitizeTuning([40, 60, 50, 55, 59, 64])).toBeNull();
+    expect(sanitizeSettings({ ...DEFAULT_SETTINGS, neckTuning: 'custom', customTuning: [1, 2, 3, 4, 5, 6] }).customTuning).toEqual([40, 45, 50, 55, 59, 64]);
+  });
+  it('in Drop D the whole neck has D on the open sixth string, and the exercise follows the tuning', () => {
+    const drop = s({ neckTuning: 'drop-d', tonic: 'D', scaleId: 'ionian', positionType: 'neck' });
+    expect(currentPositionNotes(drop).find((n) => n.string === 0 && n.fret === 0)?.midi).toBe(38);
+    // E form of D major in Drop D: every note is a D major note at a real place of the retuned string.
+    const shape = currentPositionNotes(s({ neckTuning: 'drop-d', tonic: 'D', scaleId: 'ionian', positionType: 'caged', cagedForm: 'E' }));
+    for (const n of shape) expect(n.midi).toBe([38, 45, 50, 55, 59, 64][n.string]! + n.fret);
+    expect(currentExerciseSequence(drop).length).toBeGreaterThan(0);
   });
 });

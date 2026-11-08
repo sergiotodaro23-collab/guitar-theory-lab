@@ -1,11 +1,13 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { STUDY_PRESETS } from '../app/builtins';
+import { TUNINGS } from '../pitch';
+import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
 import { engine } from '../app/engine';
-import { genreSettings, sanitizeSettings, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
+import { genreSettings, sanitizeSettings, sanitizeTuning, tuningOf, type HarmonyFocus, type LabelMode, type PositionType, type Settings } from '../app/settings';
 import { presetRepository, useApp, usePlayhead } from '../app/store';
 import { CAGED_FORMS } from '../fretboard';
-import { ARP_SPAN, INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
-import { AVOID_PROFILES, guideTones, type AvoidProfile } from '../harmony';
+import { INTERVAL_NAMES, describeDirection, parseCustomPattern, positionLabel, type IntervalNumber } from '../exercises';
+import { AVOID_PROFILES, HOME_MODES, chordOrigin, guideTones, type AvoidProfile } from '../harmony';
 import {
   COMP_PATTERNS, GENRES, PROGRESSION_TEMPLATES, addChord, genreOf, duplicateChord, instantiateTemplate, moveChord, removeChord, transposeProgression, updateChord, withChord,
   type CompPattern, type Progression, type ChordDuration,
@@ -16,6 +18,7 @@ import { voicingKey } from '../fretboard';
 import { ChordDiagram } from '../viz/ChordDiagram';
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
+import { ArpShapeControls } from './ArpShapePanel';
 
 export const tonicOptions = TONICS.map((t) => ({ value: t, label: t }));
 export const scaleOptions = SCALE_IDS.map((id) => ({ value: id, label: SCALES[id].name }));
@@ -124,12 +127,52 @@ export function LabelModeSelector() {
           { value: 'degree', label: 'Grado' },
           { value: 'note', label: 'Nome' },
           { value: 'function', label: 'Funzione' },
+          { value: 'interval', label: 'Intervallo' },
           { value: 'finger', label: 'Dito' },
           { value: 'none', label: 'Nulla' },
         ]}
         onChange={(labelMode) => update({ labelMode })}
       />
     </Field>
+  );
+}
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const midiName = (m: number) => `${NOTE_NAMES[m % 12]}${Math.floor(m / 12) - 1}`;
+const OPEN_OPTIONS = Array.from({ length: 76 - 23 + 1 }, (_, i) => ({ value: 23 + i, label: midiName(23 + i) }));
+
+/** Tuning of the neck (P1-05, D-36): presets, or six open strings of your own. */
+export function TuningField() {
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  const strings = tuningOf(s);
+  const standard = s.neckTuning === 'standard';
+  return (
+    <div className="tuning-field" data-testid="tuning-field">
+      <Field label="Accordatura" hint={standard ? undefined : 'CAGED e 3NPS sono pensate per l’accordatura standard: qui restano suonabili ma non sono le forme classiche. Tasti e Tutta la tastiera sono esatti.'}>
+        <Select<string>
+          label="Accordatura della tastiera" testId="neck-tuning" value={s.neckTuning}
+          options={[...TUNINGS.map((t) => ({ value: t.id, label: t.name })), { value: 'custom', label: 'Personalizzata' }]}
+          onChange={(neckTuning) => update(neckTuning === 'custom'
+            ? { neckTuning, customTuning: [...strings] }
+            : { neckTuning, tunerTuning: neckTuning })}
+        />
+      </Field>
+      {s.neckTuning === 'custom' ? (
+        <div className="row tuning-strings" role="group" aria-label="Corde a vuoto, dalla sesta alla prima">
+          {strings.map((midi, i) => (
+            <Select<number>
+              key={i} label={`Corda ${6 - i} a vuoto`} testId={`tuning-string-${6 - i}`} value={midi} options={OPEN_OPTIONS}
+              onChange={(v) => {
+                const next = strings.map((m, k) => (k === i ? v : m));
+                const clean = sanitizeTuning(next);
+                if (clean) update({ customTuning: clean });
+              }}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -146,6 +189,7 @@ export function ScalePanel({ showLabels = true }: { readonly showLabels?: boolea
         <Field label="Scala"><Select testId="scale" label="Scala" value={s.scaleId} options={scaleOptions} onChange={(scaleId: ScaleId) => update({ scaleId })} /></Field>
       </div>
       <p className="spelling" data-testid="scale-spelling">{scale.tones.map((t) => t.name).join('  ')}</p>
+      <TuningField />
       {s.mode === 'arpeggio' ? null : (
         <>
       <Field label="Diteggiatura">
@@ -223,7 +267,7 @@ function RoutineSummary() {
           return (
             <li key={phase.id}>
               <button type="button" className={`routine-phase ${i === current ? 'is-current' : ''}`} aria-pressed={i === current} onClick={() => setSelectedPhase(i)}>
-                <strong>{i + 1}</strong> {scale.tonicName} {scale.definition.name}, {positionLabel(phase.position, scale)}{phase.octave ? ' alta' : ''}, {describeDirection(phase.direction)}{phase.repeats > 1 ? ` ×${phase.repeats}` : ''}
+                <strong>{i + 1}</strong> {phase.kind === 'arpeggio' ? `Arpeggio ${phase.chord} · ` : ''}{scale.tonicName} {scale.definition.name}, {positionLabel(phase.position, scale)}{phase.octave ? ' alta' : ''}, {describeDirection(phase.direction)}{phase.repeats > 1 ? ` ×${phase.repeats}` : ''}
               </button>
             </li>
           );
@@ -328,7 +372,8 @@ function ChordEditor({ index }: { readonly index: number }) {
   const layers = useApp((state) => state.settings.chordLayers);
   const update = useApp((state) => state.update);
   const layer = layers[index];
-  const resolved = useMemo(() => (layer ? resolveChordLayer(layer) : null), [layer]);
+  const tuning = useApp((state) => tuningOf(state.settings));
+  const resolved = useMemo(() => (layer ? resolveChordLayer(layer, tuning) : null), [layer, tuning]);
   if (!layer || !resolved) return null;
   const { chord, voicings, shape } = resolved;
   const change = (patch: Partial<ChordLayer>) => update({ chordLayers: layers.map((l, i) => (i === index ? { ...l, ...patch } : l)) });
@@ -381,7 +426,8 @@ export function ChordsPanel() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const layers = s.chordLayers;
-  const resolved = useMemo(() => layers.map(resolveChordLayer), [layers]);
+  const tuning = useApp((state) => tuningOf(state.settings));
+  const resolved = useMemo(() => layers.map((l) => resolveChordLayer(l, tuning)), [layers, tuning]);
   const scale = useMemo(() => buildScale(s.tonic, s.scaleId), [s.tonic, s.scaleId]);
   const full = layers.length >= MAX_CHORDS;
   const setActive = (activeChord: number) => update({ activeChord });
@@ -494,10 +540,21 @@ export function ArpeggioPanel() {
             <Segmented
               label="Collegamento tra arpeggi"
               value={s.arpLink}
-              options={[{ value: 'connect', label: 'Collega (nota più vicina)' }, { value: 'restart', label: 'Riparti dal grado scelto' }]}
+              options={[{ value: 'connect', label: 'Collega (nota più vicina)' }, { value: 'target', label: 'Arriva su un grado' }, { value: 'restart', label: 'Riparti dal grado scelto' }]}
               onChange={(arpLink) => update({ arpLink })}
             />
           </Field>
+          {s.arpLink === 'target' ? (
+            <Field label="Sul battere del cambio" hint="Ogni accordo entra sul grado scelto, il più vicino all’ultima nota: il target sul primo movimento.">
+              <Select<number>
+                label="Grado di arrivo al cambio di accordo"
+                testId="arp-target"
+                value={s.arpTarget}
+                options={ARP_START_NAMES.slice(0, 4).map((label, i) => ({ value: i, label }))}
+                onChange={(arpTarget) => update({ arpTarget })}
+              />
+            </Field>
+          ) : null}
           {s.arpLink === 'connect' ? <p className="field-hint">La linea non salta: ogni accordo parte dalla sua nota più vicina all’ultima suonata, poi prosegue e cambia verso ai bordi della posizione.</p> : null}
           <Toggle checked={s.compOn} onChange={(compOn) => update({ compOn })}>Suona gli accordi</Toggle>
         </>
@@ -521,9 +578,7 @@ export function ArpeggioPanel() {
           ) : null}
         </>
       )}
-      <Field label={`Posizione: tasti ${s.arpLow}–${s.arpLow + ARP_SPAN}`}>
-        <input className="range" type="range" min={0} max={24 - ARP_SPAN} step={1} value={s.arpLow} data-testid="arp-low" aria-label="Tasto più basso della posizione" onChange={(e) => update({ arpLow: Number(e.target.value) })} />
-      </Field>
+      <ArpShapeControls />
       <div className="row">
         <Field label="Parti da">
           <Select<number>
@@ -608,6 +663,43 @@ export const FOCUS_OPTIONS: readonly { value: HarmonyFocus; label: string; help:
   { value: 'targeting', label: 'Chord-tone target', help: 'Un bersaglio per accordo, il più vicino al precedente. Il tratteggio è il prossimo.' },
 ];
 
+const ORIGIN_LABELS = { diatonic: 'Diatonico', secondary: 'Dominante secondaria', borrowed: 'Prestito modale', chromatic: 'Cromatico' } as const;
+
+/** Modal interchange at a glance (P1-11b, D-30): each chord's numeral, origin and scale. */
+export function HarmonyAnalysis() {
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  const rows = s.progression.chords.map((entry) => {
+    const chord = tryParseChord(entry.symbol);
+    return { entry, origin: chord ? chordOrigin(chord, s.harmonyKey, s.harmonyMode) : null };
+  });
+  return (
+    <div className="harmony-analysis" data-testid="harmony-analysis">
+      <div className="row">
+        <Field label="Analisi in">
+          <Select label="Tonica dell’analisi" testId="analysis-key" value={s.harmonyKey} options={tonicOptions} onChange={(harmonyKey) => update({ harmonyKey })} />
+        </Field>
+        <Field label="Modo di casa">
+          <Select<ScaleId> label="Modo di casa dell’analisi" testId="analysis-mode" value={s.harmonyMode} options={HOME_MODES.map((m) => ({ value: m, label: SCALES[m].name }))} onChange={(harmonyMode) => update({ harmonyMode })} />
+        </Field>
+      </div>
+      <ol className="analysis-list">
+        {rows.map(({ entry, origin }, i) => (
+          <li key={entry.id} className={`analysis-row origin-${origin?.kind ?? 'none'}`} data-testid={`analysis-${i}`} data-kind={origin?.kind ?? ''}>
+            <strong className="analysis-symbol">{entry.symbol}</strong>
+            <span className="analysis-numeral">{origin?.numeral ?? '—'}</span>
+            <span className="analysis-kind">{origin ? ORIGIN_LABELS[origin.kind] : 'Accordo non riconosciuto'}</span>
+            <span className="analysis-text muted">{origin?.text}</span>
+          </li>
+        ))}
+      </ol>
+      <Toggle checked={s.contextScales} onChange={(contextScales) => update({ contextScales })}>
+        Scala di ogni accordo dall’analisi (tensioni e avoid seguono l’accordo)
+      </Toggle>
+    </div>
+  );
+}
+
 export function ProgressionLoader() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
@@ -622,7 +714,7 @@ export function ProgressionLoader() {
           options={[{ value: '__', label: 'Scegli…' }, ...PROGRESSION_TEMPLATES.map((t) => ({ value: t.id, label: t.name }))]}
           onChange={(id) => {
             const template = PROGRESSION_TEMPLATES.find((t) => t.id === id);
-            if (template) update({ progression: instantiateTemplate(template, key) });
+            if (template) update({ progression: instantiateTemplate(template, key), harmonyKey: key, harmonyMode: template.mode ?? 'ionian' });
           }}
         />
       </Field>
@@ -652,6 +744,7 @@ export function HarmonyPanel() {
       <Panel title="Cambio di contesto armonico" className="panel-wide">
         <ChordStrip />
         <ProgressionLoader />
+        <HarmonyAnalysis />
         <div className="row">
           <Field label="Cambio accordi">
             <Segmented
@@ -766,6 +859,17 @@ export function JamPanels() {
         <button type="button" className="btn" disabled={s.bpm === genreOf(s.jamGenre).bpm} onClick={() => update({ bpm: genreOf(s.jamGenre).bpm })}>
           Usa {genreOf(s.jamGenre).bpm} BPM
         </button>
+        <div className="row" data-testid="jam-sounds">
+          <Field label="Batteria">
+            <Select<DrumKitSound> label="Suono della batteria" testId="drum-sound" value={s.drumSound} options={(Object.keys(DRUM_KIT_SOUNDS) as DrumKitSound[]).map((k) => ({ value: k, label: DRUM_KIT_SOUNDS[k] }))} onChange={(drumSound) => update({ drumSound })} />
+          </Field>
+          <Field label="Basso">
+            <Select<BassTimbre> label="Suono del basso" testId="bass-timbre" value={s.bassTimbre} options={(Object.keys(BASS_TIMBRES) as BassTimbre[]).map((k) => ({ value: k, label: BASS_TIMBRES[k] }))} onChange={(bassTimbre) => update({ bassTimbre })} />
+          </Field>
+          <Field label="Accordi">
+            <Select<CompTimbre> label="Suono degli accordi" testId="comp-timbre" value={s.compTimbre} options={(Object.keys(COMP_TIMBRES) as CompTimbre[]).map((k) => ({ value: k, label: COMP_TIMBRES[k] }))} onChange={(compTimbre) => update({ compTimbre })} />
+          </Field>
+        </div>
         <Toggle checked={s.bassOn} onChange={(bassOn) => update({ bassOn })}>Suona il basso</Toggle>
         <Field label="Linea di basso">
           <Select<number>
@@ -801,7 +905,7 @@ export function JamPanels() {
 
 /** What a saved study preset keeps: everything except the mixer and mode-free UI state. */
 /** Mixer levels and the visual theme belong to the person, not to a study preset. */
-const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'volDrums', 'muteDrums', 'volBass', 'muteBass', 'inputDeviceId', 'inputGain', 'monitorVol', 'tunerA4', 'tunerTuning', 'liveOnBoard', 'inputChannel', 'volMaster', 'look', 'tutorMode', 'tutorMinimized']);
+const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'muteNotes', 'muteComp', 'volDrums', 'muteDrums', 'volBass', 'muteBass', 'inputDeviceId', 'inputGain', 'monitorVol', 'tunerA4', 'tunerTuning', 'liveOnBoard', 'inputChannel', 'backing', 'liveSensitivity', 'liveProfiles', 'liveProfileId', 'volMaster', 'look', 'tutorMode', 'tutorMinimized']);
 const pickStudy = (s: Settings): Partial<Settings> =>
   Object.fromEntries(Object.entries(s).filter(([key]) => !MIXER_KEYS.has(key))) as Partial<Settings>;
 

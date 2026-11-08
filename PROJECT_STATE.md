@@ -1,30 +1,31 @@
 # Stato del progetto
 
-Versione 0.1.0 (package.json). Ultimo aggiornamento: 7 novembre 2026, branch `claude/serene-hopper-ubi687` (ripartito da `main` dopo la PR #7). Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
+Versione 0.1.0 (package.json). Ultimo aggiornamento: 7 novembre 2026, branch `claude/serene-hopper-ubi687` (ripartito da `main` dopo la PR #9). Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 331 test unitari.
-- `npm run test:e2e`: verde, 72 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 435 test unitari.
+- `npm run test:e2e`: verde, 96 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
 ## Funziona
 
-- Quattro modalità: Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus), Arpeggios Lab, Jam Studio (progressioni, comping, loop).
-- **Arpeggios Lab**: un accordo o la progressione, posizione di cinque tasti, rivolti, quattro direzioni, pattern personalizzati, arpeggi collegati per nota più vicina.
-- Tastiera 0–24 tasti a celle uniformi, CAGED (5 forme) e 3NPS (7 pattern), intervalli 2ª–8ª, sequenze personalizzate.
-- **Percorsi a fasi** (nuovo): ogni fase con scala, forma CAGED/3NPS/range di tasti, ottava, sequenza, direzione, note per movimento e ripetizioni. Fasi sul battere, tastiera che segue la fase in riproduzione.
+- Quattro modalità: Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus, analisi con interscambio modale e scala di ogni accordo, D-30), Arpeggios Lab, Jam Studio (progressioni, comping, loop).
+- **Arpeggios Lab**: un accordo o la progressione, rivolti, quattro direzioni, pattern personalizzati, arpeggi collegati per nota più vicina o per grado target sul battere. Forme decise dal motore (D-27): posizione, CAGED, 1–3 ottave lungo il manico con cambi di posizione e diteggiatura, sweep, salto di corda, ritorno diverso dalla salita; le forme non suonabili vengono rifiutate.
+- Tastiera 0–24 tasti a celle uniformi, accordature standard, mezzo tono sotto, Drop D, Open G, DADGAD e personalizzata, etichetta Intervallo (D-36), CAGED (5 forme) e 3NPS (7 pattern), intervalli 2ª–8ª, sequenze personalizzate.
+- **Percorsi a fasi** (fasi arpeggio con il loro accordo, D-35): ogni fase con scala, forma CAGED/3NPS/range di tasti, ottava, sequenza, direzione, note per movimento e ripetizioni. Fasi sul battere, tastiera che segue la fase in riproduzione.
 - **Editor avanzato** (nuovo): dialog ampio con blocchi fase riordinabili, modelli, errori con alternativa applicabile, anteprima (battute, durata, striscia delle fasi, tastiera, note, transizione).
 - Minore melodica jazz (scala) e classica (percorso).
 - **Cambio di metrica in riproduzione**: il transport non si ferma, la nuova metrica parte alla stanghetta successiva (anche verso 6/8, dove il BPM conta gli ottavi).
 - **Accordi multipli**: fino a 8 accordi con builder (fondamentale, qualità, basso), slash chord e rivolti, forme eseguibili cercate sul manico e contornate sulla tastiera, diagrammi, invio a Harmony Lab come progressione.
 - **Scale multiple**: fino a 5 scale (principale + 4) con `+ Aggiungi scala`, visibilità, colore, opacità, zona, riordino e confronto delle note.
-- **Jam Studio**: step sequencer (D-19), otto generi e basso generato (D-20), mixer con Click, Note, Accordi, Basso, Batteria, Chitarra, Master e mute.
-- **Vista per accordo** (D-26): ogni accordo della progressione può avere la sua tastiera (arpeggio o scala, forma, focus, scale e arpeggi sovrapposti), che cambia con l'accordo in manuale e in automatico; condivisa da Harmony, Jam e Arpeggios.
+- **Jam Studio**: step sequencer con note fantasma e ride (D-19, D-28), otto generi con bilanciamento e suoni propri (tre kit, quattro bassi, cinque suoni d'accordo sintetizzati, D-32) e Fusion riscritta, comping e basso con anticipi, basso generato (D-20), arrangiamenti a sezioni, anche con accordi propri, e solo (D-33, D-39), backing track locale a tempo (D-34), mixer con Click, Note, Accordi, Basso, Batteria, Chitarra, Master e mute.
+- **Vista per accordo** (D-26): ogni accordo della progressione può avere la sua tastiera (arpeggio o scala, forma, focus, scale e arpeggi sovrapposti), che cambia con l'accordo in manuale e in automatico; condivisa da Harmony, Jam e Arpeggios; intervallo di tasti libero, colori a scelta, esercizio che segue la vista di ogni accordo (D-29).
 - **Layout desktop** (D-24): da 1200 × 720 trasporto e tastiera fissi, pannelli e colonna destra con scorrimento proprio; Click/Accenti in un pannello sovrapposto.
+- **Live Monitor 2.0** (D-31): posizione stimata dalla mano (la forma è solo un indizio), sensibilità Precisa/Bilanciata/Rapida, calibrazione in quattro passi e profili per strumento, latenza usata nel riscontro, ingresso MIDI (D-37). Solo segnali sintetici: da provare con la chitarra.
 - **Ingresso chitarra, Live Monitor, accordatore** (D-21, D-22): canale d'ingresso, gain, ascolto solo manuale, diagnostica e suono di prova, nota rilevata sulla tastiera come stima, accordatore con modalità cromatica. Layout fermo durante il rilevamento.
 - Targhetta con versione reale e autore.
 - Metronomo e scheduler con un solo clock audio, preset versionati, sessione salvata.

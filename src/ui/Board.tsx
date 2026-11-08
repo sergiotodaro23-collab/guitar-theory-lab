@@ -1,29 +1,33 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { engine } from '../app/engine';
-import { arpeggioBoardNotes, boardContext } from '../app/settings';
+import { activeChords, arpeggioPlanOf, boardContext, tuningOf } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
-import { AVOID_PROFILES, classifyTone, functionsAcross } from '../harmony';
+import { AVOID_PROFILES, chordOrigin, classifyTone, functionsAcross } from '../harmony';
 import { parsedChords } from '../jam';
 import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
 import { resolveChordLayer } from '../app/chordLayers';
 import { Fretboard, type LayerStyle } from '../viz/Fretboard';
 import { legendEntries, type LegendEntry } from '../viz/legend';
 import { useLive } from '../audio/liveInput';
-import { livePositions, noteOf } from '../pitch';
+import { midiPitch, useMidi } from '../audio/midi';
+import { HandEstimator, noteOf } from '../pitch';
 import type { FretPosition } from '../fretboard';
 import { PIP_PLACES, visibleLayers, type ScaleLayer } from '../app/scaleLayers';
-import { MAX_VISIBLE_OVERLAYS, viewForChord, viewNotes, viewOverlays, viewScale } from '../app/chordViews';
+import { MAX_VISIBLE_OVERLAYS, defaultScaleFor, viewForChord, viewNotes, viewOverlays, viewScale } from '../app/chordViews';
 import { buildMarkerLayer, type Marker } from '../viz/markers';
 
 export function useHarmonyContext() {
   const settings = useApp((s) => s.settings);
   const selected = useApp((s) => s.selectedChord);
   const playheadChord = usePlayhead((p) => p.chordIndex);
+  const tuning = tuningOf(settings);
+  const { mode, arrangementOn, arrangement, progression } = settings;
+  const song = useMemo(() => activeChords({ mode, arrangementOn, arrangement, progression }), [mode, arrangementOn, arrangement, progression]);
   return useMemo(() => {
     if (settings.mode === 'fretboard') {
       // Only the active chord is drawn; the visible ones feed the note inspector.
-      const resolved = settings.chordLayers.map(resolveChordLayer);
+      const resolved = settings.chordLayers.map((l) => resolveChordLayer(l, tuning));
       const active = resolved[settings.activeChord];
       const shown = resolved.filter((r, i) => r.chord && (r.layer.visible || i === settings.activeChord));
       const chord = active?.chord ?? null;
@@ -39,12 +43,12 @@ export function useHarmonyContext() {
       const chord = tryParseChord(settings.arpSymbol);
       return { chords: chord ? [chord] : [], chord, nextChord: null as Chord | null, chordIndex: 0, voicing: null };
     }
-    const chords = parsedChords(settings.progression);
+    const chords = parsedChords({ ...settings.progression, chords: song });
     const chordIndex = Math.min(playheadChord ?? selected, Math.max(0, chords.length - 1));
     const chord = chords[chordIndex] ?? null;
     const nextChord = chords.length > 1 ? chords[(chordIndex + 1) % chords.length] ?? null : null;
     return { chords, chord, nextChord, chordIndex, voicing: null };
-  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, settings.arpSource, settings.arpSymbol, playheadChord, selected]);
+  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, settings.arpSource, settings.arpSymbol, song, playheadChord, selected, tuning]);
 }
 
 /** Colour, opacity and readable name of every overlay, by list position. */
@@ -112,8 +116,16 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
   }, [settings.mode, settings.arpSource, settings.chordViewsOn, settings.chordViews, settings.progression, chordIndex]);
   const context = useMemo(() => {
     // Arpeggios Lab draws the chord tones of the hand position, over the current scale's spelling.
-    if (settings.mode === 'arpeggio') return { ...boardContext(settings, null), notes: arpeggioBoardNotes(chord, settings), wholeNeck: false };
-    if (view && chord) return { scale: viewScale(view), notes: viewNotes(view, chord), wholeNeck: view.positionType === 'neck' };
+    if (settings.mode === 'arpeggio') {
+      const plan = arpeggioPlanOf(chord, settings);
+      return { ...boardContext(settings, null), notes: plan?.notes ?? [], wholeNeck: false, exact: plan?.route ?? false, fingers: plan?.fingers ?? null };
+    }
+    if (view && chord) return { scale: viewScale(view), notes: viewNotes(view, chord, tuningOf(settings)), wholeNeck: view.positionType === 'neck' };
+    // No view: with "scale from the analysis", the chord's own scale in its context (D-30).
+    if (chord && settings.contextScales && (settings.mode === 'harmony' || settings.mode === 'jam')) {
+      const own = chordOrigin(chord, settings.harmonyKey, settings.harmonyMode).scale ?? { tonic: chord.rootName, scaleId: defaultScaleFor(chord) };
+      return boardContext({ ...settings, tonic: own.tonic, scaleId: own.scaleId }, phaseIndex);
+    }
     return boardContext(settings, phaseIndex);
   }, [settings, phaseIndex, chord, view]);
   const { scale } = context;
@@ -149,6 +161,9 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
     overlays,
     voicing,
     wholeNeck: context.wholeNeck,
+    exact: 'exact' in context ? context.exact : false,
+    tuning: tuningOf(settings),
+    fingers: 'fingers' in context ? context.fingers : null,
   }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, overlays, voicing, view]);
 
   const onPick = useCallback((marker: Marker) => {
@@ -167,21 +182,33 @@ export function Board({ legendHost = null, boardImage = null }: { readonly legen
   })() : null;
 
   // Detected pitch: every place it can be played, the likely one from what the board shows.
-  const livePitch = useLive((l) => l.pitch);
-  const liveOn = useLive((l) => l.state === 'on') && settings.liveOnBoard;
-  const lastLive = useRef<{ all: readonly FretPosition[]; likely: FretPosition | null }>({ all: [], likely: null });
+  // Audio input first; a MIDI note held stands in for it (D-37).
+  const audioPitch = useLive((l) => l.pitch);
+  const midiNote = useMidi((m) => m.note);
+  const midiOn = useMidi((m) => m.status === 'on');
+  const livePitch = useMemo(() => audioPitch ?? midiPitch(midiNote, settings.tunerA4), [audioPitch, midiNote, settings.tunerA4]);
+  const audioOn = useLive((l) => l.state === 'on');
+  const liveOn = (audioOn || midiOn) && settings.liveOnBoard;
+  const lastLive = useRef<{ all: readonly FretPosition[]; likely: FretPosition | null; probabilities: readonly number[]; midi: number | null }>({ all: [], likely: null, probabilities: [], midi: null });
+  // Live Monitor 2.0 (D-31): the hand, from continuity first; the board's shape is only a hint.
+  const hand = useRef(new HandEstimator());
+  const liveTuning = tuningOf(settings);
   const live = useMemo(() => {
     if (!liveOn) return null;
     if (livePitch) {
       const midi = noteOf(livePitch.frequency, settings.tunerA4).midi;
-      const where = livePositions(midi, layer.markers, lastLive.current.likely);
-      lastLive.current = { all: where.all, likely: where.likely };
+      // One estimate per note: a held note keeps its place, a new pitch asks again.
+      if (midi !== lastLive.current.midi) {
+        const where = hand.current.estimate(midi, performance.now() / 1000, layer.markers, liveTuning);
+        lastLive.current = { all: where.all.map((e) => e.position), likely: where.likely, probabilities: where.all.map((e) => e.probability), midi };
+      }
       // Loudness sets the opacity; RMS 0.15 is a firm pick.
       return { ...lastLive.current, intensity: Math.min(1, 0.35 + livePitch.rms / 0.15) };
     }
-    // Silence: keep the last places, faded out by the CSS transition.
+    // Silence: keep the last places, faded out by the CSS transition; the next note is a new one.
+    lastLive.current = { ...lastLive.current, midi: null };
     return { ...lastLive.current, intensity: 0 };
-  }, [liveOn, livePitch, layer.markers, settings.tunerA4]);
+  }, [liveOn, livePitch, layer.markers, settings.tunerA4, liveTuning]);
   const shownMarkers = useMemo(() => (showAids ? layer.markers : []), [showAids, layer.markers]);
   // The played-note entry stays while an exercise can play: it must not blink with each note (D-24).
   const played = active !== null || settings.exerciseOn || settings.mode === 'arpeggio';

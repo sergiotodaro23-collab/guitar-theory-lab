@@ -8,7 +8,11 @@ import { mod, type Chord } from '../theory';
 import { PPQ, ticksPerBar, type BassPayload, type Meter, type Track, type TrackEvent } from '../timeline';
 import { chordSpans, progressionLength, type Progression } from './progression';
 
-export type BassTone = 'root' | 'third' | 'fifth' | 'sixth' | 'seventh' | 'octave' | 'approach';
+/**
+ * `approach`: a half step into the next root. `anticipate`: the next chord's
+ * root an eighth or a sixteenth early, held into the change (fusion, latin).
+ */
+export type BassTone = 'root' | 'third' | 'fifth' | 'sixth' | 'seventh' | 'octave' | 'approach' | 'anticipate';
 
 export interface BassNote {
   /** Sixteenth of a 4/4 bar, 0–15. */
@@ -31,7 +35,7 @@ const semitonesOf = (chord: Chord, degrees: readonly string[]): number | null =>
   chord.tones.find((t) => degrees.includes(t.degree))?.semitones ?? null;
 
 /** Pitch of a chord tone above the chord's low root. A slash chord's root tone is its bass note. */
-export function bassPitch(chord: Chord, tone: Exclude<BassTone, 'approach'>): number {
+export function bassPitch(chord: Chord, tone: Exclude<BassTone, 'approach' | 'anticipate'>): number {
   const root = lowNote(chord.tones.find((t) => t.semitones === 0)?.pc ?? chord.tones[0]?.pc ?? 0);
   switch (tone) {
     case 'root': return chord.bass ? lowNote(chord.bass.pc) : root;
@@ -68,6 +72,7 @@ export function bassTrack(p: Progression, meter: Meter, pattern: BassPattern, lo
   const spans = chordSpans(p, meter);
   const events: TrackEvent<BassPayload>[] = [];
   let previous: number | null = null;
+  let anticipated = false;
   spans.forEach((span, i) => {
     const end = span.tick + span.lengthTicks;
     const next = spans[i + 1]?.chord ?? (loop ? spans[0]?.chord : undefined) ?? null;
@@ -84,17 +89,28 @@ export function bassTrack(p: Progression, meter: Meter, pattern: BassPattern, lo
     // On the change itself the bass states the new root, whatever the pattern says there.
     const first = hits[0];
     if (first && first.tick === span.tick) hits[0] = { ...first, tone: 'root' };
+    // The root already sounded early and is still held: no second attack on the downbeat.
+    if (anticipated && hits.length > 1 && hits[0]?.tick === span.tick) hits.shift();
+    anticipated = false;
     hits.forEach((hit, k) => {
       const following = hits[k + 1]?.tick ?? end;
       const last = k === hits.length - 1;
       const midi = hit.tone === 'approach'
         ? (last && next && previous !== null ? approachPitch(next, previous) : bassPitch(span.chord, last ? 'fifth' : 'octave'))
-        : bassPitch(span.chord, hit.tone);
+        : hit.tone === 'anticipate'
+          ? (last && next ? bassPitch(next, 'root') : bassPitch(span.chord, 'root'))
+          : bassPitch(span.chord, hit.tone);
       events.push({
         tick: hit.tick,
-        payload: { type: 'bass', midi, durationTicks: Math.max(sixteenth, Math.min(hit.length, following - hit.tick) * 0.92), velocity: hit.tick % bar === 0 ? 0.9 : 0.75 },
+        payload: {
+          type: 'bass', midi,
+          // An anticipation is held over the bar line into the chord it belongs to.
+          durationTicks: hit.tone === 'anticipate' && last && next ? hit.length * 0.96 : Math.max(sixteenth, Math.min(hit.length, following - hit.tick) * 0.92),
+          velocity: hit.tick % bar === 0 ? 0.9 : hit.tone === 'anticipate' ? 0.88 : 0.75,
+        },
       });
       previous = midi;
+      if (last && hit.tone === 'anticipate' && next) anticipated = true;
     });
   });
   return { id: 'bass', lengthTicks: progressionLength(p, meter), loop, events };

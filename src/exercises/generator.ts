@@ -96,3 +96,28 @@ export function exerciseTrack(sequence: readonly FretNote[], meter: Meter, notes
     })),
   };
 }
+
+export interface ExerciseSpan {
+  readonly tick: number;
+  readonly lengthTicks: number;
+  readonly sequence: readonly FretNote[];
+}
+
+/**
+ * An exercise that changes with the chord: each chord plays its own sequence
+ * from its first note, on the shared grid (P1-14: the exercise follows the
+ * chord's view). Notes never spill into the next chord.
+ */
+export function progressionExerciseTrack(spans: readonly ExerciseSpan[], meter: Meter, notesPerBeat: number, lengthTicks: number, loop: boolean): Omit<Track<NotePayload>, 'originTick'> {
+  const step = ticksPerBeat(meter) / notesPerBeat;
+  const events: { tick: number; payload: NotePayload }[] = [];
+  for (const span of spans) {
+    if (span.sequence.length === 0) continue;
+    const count = Math.floor(span.lengthTicks / step);
+    for (let i = 0; i < count; i += 1) {
+      const note = span.sequence[i % span.sequence.length] as FretNote;
+      events.push({ tick: span.tick + i * step, payload: { type: 'note', midi: note.midi, string: note.string, fret: note.fret, durationTicks: step, index: events.length } });
+    }
+  }
+  return { id: 'exercise', lengthTicks, loop, events };
+}

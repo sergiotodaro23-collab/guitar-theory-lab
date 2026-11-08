@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseChord } from '../theory';
 import {
   MAX_ARPEGGIO_LAYERS, MAX_VISIBLE_OVERLAYS, addArpeggio, chordAsScale, copyView, defaultScaleFor, defaultView,
-  sanitizeChordViews, viewForChord, viewNotes, viewOverlays, type ChordView,
+  clampRange, sanitizeChordViews, viewForChord, viewNotes, viewOverlays, type ChordView,
 } from './chordViews';
 
 const pcsOf = (notes: readonly { pc: number }[]) => [...new Set(notes.map((n) => n.pc))].sort((a, b) => a - b);
@@ -84,5 +84,30 @@ describe('saved views', () => {
     expect(Object.keys(views)).toEqual(['a', 'c']);
     expect(views.a).toEqual(good);
     expect(views.c?.arpeggios).toEqual([]);
+  });
+});
+
+describe('free fret range and colours (P1-14 completions)', () => {
+  const g7 = parseChord('G7');
+  it('a view on frets 12–15 draws only there, scale or arpeggio', () => {
+    const view: ChordView = { ...defaultView(g7), positionType: 'range', rangeLow: 12, rangeHigh: 15 };
+    const scale = viewNotes(view, g7);
+    expect(scale.every((n) => n.fret >= 12 && n.fret <= 15)).toBe(true);
+    expect(pcsOf(scale)).toEqual([0, 2, 4, 5, 7, 9, 11]);
+    const arp = viewNotes({ ...view, show: 'arpeggio' }, g7);
+    expect(arp.every((n) => n.fret >= 12 && n.fret <= 15)).toBe(true);
+    expect(pcsOf(arp)).toEqual([2, 5, 7, 11]);
+  });
+  it('a saved range is put in order and kept within twelve frets', () => {
+    expect(clampRange(9, 5)).toEqual({ rangeLow: 5, rangeHigh: 9 });
+    expect(clampRange(0, 24)).toEqual({ rangeLow: 0, rangeHigh: 12 });
+    const saved = sanitizeChordViews({ a: { ...defaultView(g7), positionType: 'range', rangeLow: 20, rangeHigh: 3, arpeggios: [{ id: 'x', symbol: 'Dm7', visible: true, color: 'rose' }] } }, ['a']);
+    expect(saved.a).toMatchObject({ positionType: 'range', rangeLow: 3, rangeHigh: 15 });
+    expect(saved.a?.arpeggios[0]?.color).toBe('rose');
+    // A view saved before ranges existed gets the default stretch.
+    const old: Record<string, unknown> = { ...defaultView(g7) };
+    delete old.rangeLow;
+    delete old.rangeHigh;
+    expect(sanitizeChordViews({ a: old }, ['a']).a).toMatchObject({ rangeLow: 5, rangeHigh: 9 });
   });
 });

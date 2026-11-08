@@ -102,3 +102,15 @@ test('a small window scrolls the page, and the Simple transport stays at the top
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   expect(await inView(page, '[data-testid="play"]')).toBe(true);
 });
+
+// Text widths differ between machines (the CI runner measured before the bundled fonts applied):
+// with a wide fallback font the header and transport still fit one row each at 1280 × 720.
+for (const look of ['Semplificata', 'Studio'] as const) {
+  test(`${look} 1280×720 with a wide fallback font: one-row header and transport, room for the panels`, async ({ page }) => {
+    await open(page, look, 1280, 720);
+    await page.addStyleTag({ content: "*, :root { font-family: 'DejaVu Sans', 'Verdana', sans-serif !important; --display: 'DejaVu Sans', 'Verdana', sans-serif; --plate-font: 'DejaVu Sans', 'Verdana', sans-serif; }" });
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(0);
+    for (const sel of ['[data-testid="play"]', '.fretboard', '[data-testid="accent-toggle"]']) expect(await inView(page, sel), sel).toBe(true);
+    expect(await page.getByTestId('scroll-panels').evaluate((el) => el.clientHeight)).toBeGreaterThanOrEqual(140);
+  });
+}

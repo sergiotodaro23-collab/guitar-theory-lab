@@ -6,18 +6,19 @@
  */
 import { PPQ, ticksPerBar, type DrumPayload, type Meter, type Track, type TrackEvent } from '../timeline';
 
-export type DrumVoice = 'kick' | 'snare' | 'hat' | 'open' | 'clap' | 'tom';
+export type DrumVoice = 'kick' | 'snare' | 'hat' | 'open' | 'ride' | 'clap' | 'tom';
 export const DRUM_VOICES: readonly { readonly voice: DrumVoice; readonly label: string }[] = [
   { voice: 'kick', label: 'Cassa' },
   { voice: 'snare', label: 'Rullante' },
   { voice: 'hat', label: 'Hi-hat chiuso' },
   { voice: 'open', label: 'Hi-hat aperto' },
+  { voice: 'ride', label: 'Ride' },
   { voice: 'clap', label: 'Battimani' },
   { voice: 'tom', label: 'Tom' },
 ];
 
-/** 0 off, 1 on, 2 accent. */
-export type DrumStep = 0 | 1 | 2;
+/** 0 off, 1 on, 2 accent, 3 ghost (a soft note between the hits: the groove's glue). */
+export type DrumStep = 0 | 1 | 2 | 3;
 export const DRUM_STEPS = 16;
 export type DrumPattern = Readonly<Record<DrumVoice, readonly DrumStep[]>>;
 export const PATTERN_NAMES = ['A', 'B', 'C', 'D'] as const;
@@ -27,13 +28,13 @@ export interface DrumKit {
   readonly fill: DrumPattern;
 }
 
-/** Steps from a readable string: "x" on, "X" accent, anything else off. */
+/** Steps from a readable string: "x" on, "X" accent, "g" ghost, anything else off. */
 export const steps = (text: string): readonly DrumStep[] =>
-  Array.from({ length: DRUM_STEPS }, (_, i) => (text[i] === 'X' ? 2 : text[i] === 'x' ? 1 : 0));
+  Array.from({ length: DRUM_STEPS }, (_, i) => (text[i] === 'X' ? 2 : text[i] === 'x' ? 1 : text[i] === 'g' ? 3 : 0));
 
 export const pattern = (rows: Partial<Record<DrumVoice, string>>): DrumPattern => ({
   kick: steps(rows.kick ?? ''), snare: steps(rows.snare ?? ''), hat: steps(rows.hat ?? ''),
-  open: steps(rows.open ?? ''), clap: steps(rows.clap ?? ''), tom: steps(rows.tom ?? ''),
+  open: steps(rows.open ?? ''), ride: steps(rows.ride ?? ''), clap: steps(rows.clap ?? ''), tom: steps(rows.tom ?? ''),
 });
 
 /** Starting kit: four everyday grooves and a tom fill, all in 4/4 sixteenths. */
@@ -62,8 +63,22 @@ export const sixteenthsPerBar = (meter: Meter): number => ticksPerBar(meter) / (
  */
 export const stepAt = (sixteenth: number): number => sixteenth % DRUM_STEPS;
 
-/** Velocity of a step: an accent is clearly louder than a normal hit. */
-export const stepVelocity = (step: DrumStep): number => (step === 2 ? 1 : step === 1 ? 0.7 : 0);
+/** Velocity of a step: an accent is clearly louder than a normal hit, a ghost clearly softer. */
+export const stepVelocity = (step: DrumStep): number => (step === 2 ? 1 : step === 1 ? 0.7 : step === 3 ? 0.3 : 0);
+
+/** Cymbals keep time with a pulse: strongest on the beat, then the eighth, then the sixteenths. */
+const TIMEKEEPERS: ReadonlySet<DrumVoice> = new Set(['hat', 'open', 'ride']);
+export function pulseFactor(sixteenth: number): number {
+  if (sixteenth % 4 === 0) return 1;
+  if (sixteenth % 2 === 0) return 0.84;
+  return 0.7;
+}
+
+/** The velocity a hit plays at: the step's level, shaped by the pulse for cymbals (accents stay full). */
+export function hitVelocity(voice: DrumVoice, step: DrumStep, sixteenth: number): number {
+  const base = stepVelocity(step);
+  return TIMEKEEPERS.has(voice) && step === 1 ? base * pulseFactor(sixteenth) : base;
+}
 
 function barEvents(p: DrumPattern, meter: Meter, offset: number): TrackEvent<DrumPayload>[] {
   const events: TrackEvent<DrumPayload>[] = [];
@@ -71,7 +86,7 @@ function barEvents(p: DrumPattern, meter: Meter, offset: number): TrackEvent<Dru
   for (let i = 0; i < sixteenthsPerBar(meter); i += 1) {
     for (const { voice } of DRUM_VOICES) {
       const step = p[voice][stepAt(i)] ?? 0;
-      if (step > 0) events.push({ tick: offset + i * sixteenth, payload: { type: 'drum', voice, velocity: stepVelocity(step) } });
+      if (step > 0) events.push({ tick: offset + i * sixteenth, payload: { type: 'drum', voice, velocity: hitVelocity(voice, step, i) } });
     }
   }
   return events;
@@ -89,17 +104,18 @@ export function drumTrack(kit: DrumKit, active: number, meter: Meter, fillEvery:
   return { id: 'drums', lengthTicks: bar * bars, loop: true, events };
 }
 
-/** One press: off → on → accent → off. */
-export const nextDrumStep = (step: DrumStep): DrumStep => ((step + 1) % 3) as DrumStep;
+/** One press: off → on → accent → ghost → off. */
+export const nextDrumStep = (step: DrumStep): DrumStep => ((step + 1) % 4) as DrumStep;
 
 const sanitizeRow = (raw: unknown): readonly DrumStep[] | null =>
-  Array.isArray(raw) && raw.length === DRUM_STEPS && raw.every((v) => v === 0 || v === 1 || v === 2) ? (raw as DrumStep[]) : null;
+  Array.isArray(raw) && raw.length === DRUM_STEPS && raw.every((v) => v === 0 || v === 1 || v === 2 || v === 3) ? (raw as DrumStep[]) : null;
 
 function sanitizePattern(raw: unknown, fallback: DrumPattern): DrumPattern {
   if (typeof raw !== 'object' || raw === null) return fallback;
   const r = raw as Record<string, unknown>;
   const out = {} as Record<DrumVoice, readonly DrumStep[]>;
-  for (const { voice } of DRUM_VOICES) out[voice] = sanitizeRow(r[voice]) ?? fallback[voice];
+  // A kit saved before a voice existed gets that row empty, not someone else's groove.
+  for (const { voice } of DRUM_VOICES) out[voice] = sanitizeRow(r[voice]) ?? (voice in r ? fallback[voice] : steps(''));
   return out;
 }
 

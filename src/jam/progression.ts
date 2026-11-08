@@ -2,7 +2,7 @@
  * Jam Session Engine: progressions as data, with pure edits, plus their
  * translation into timeline tracks. Harmonic Context Switch uses it too.
  */
-import { mod, noteName, parseChord, parseDegree, parseNote, spellDegree, transposeNote, tryParseChord, type Chord } from '../theory';
+import { mod, noteName, parseChord, parseDegree, parseNote, spellDegree, transposeNote, tryParseChord, type Chord, type ScaleId } from '../theory';
 import { ticksPerBar, ticksPerBeat, type ChordChangePayload, type CompPayload, type Meter, type Track } from '../timeline';
 import { guideTones } from '../harmony';
 
@@ -105,7 +105,7 @@ export function chordTrack(p: Progression, meter: Meter, loop: boolean): Omit<Tr
   };
 }
 
-export type CompPattern = 'sustain' | 'half' | 'quarter' | 'charleston' | 'offbeat' | 'eighths';
+export type CompPattern = 'sustain' | 'half' | 'quarter' | 'charleston' | 'offbeat' | 'eighths' | 'push' | 'stabs';
 
 export const COMP_PATTERNS: Readonly<Record<CompPattern, string>> = {
   sustain: 'Tenuto',
@@ -114,6 +114,8 @@ export const COMP_PATTERNS: Readonly<Record<CompPattern, string>> = {
   charleston: 'Charleston',
   offbeat: 'In levare',
   eighths: 'Ottavi',
+  push: 'Anticipi',
+  stabs: 'Colpi sincopati',
 };
 
 /** Offsets in beats inside a bar. */
@@ -126,6 +128,10 @@ function patternBeats(pattern: CompPattern, beatsPerBar: number): readonly numbe
     case 'charleston': return beatsPerBar >= 2 ? [0, 1.5] : [0];
     case 'offbeat': return all.map((beat) => beat + 0.5);
     case 'eighths': return all.flatMap((beat) => [beat, beat + 0.5]);
+    // Push: on the one and the and of two; the next chord arrives an eighth early (see compTrack).
+    case 'push': return beatsPerBar >= 3 ? [0, 1.5] : [0];
+    // Short sixteenth stabs on the e of one, the and of two, the a of three (funk and fusion comping).
+    case 'stabs': return [0.25, 1.5, 2.75].filter((b) => b < beatsPerBar);
   }
 }
 
@@ -146,44 +152,76 @@ export function voiceChord(chord: Chord, previous?: readonly number[]): readonly
   return [bass, ...[...new Set(clamped)].sort((a, b) => a - b)];
 }
 
-/** With `bassLine`, the bass player has the low notes: the comp leaves its bass out. */
+/** Patterns that play short: a stab is a sixteenth or so, not a held chord. */
+const SHORT: ReadonlySet<CompPattern> = new Set(['stabs']);
+
+/**
+ * With `bassLine`, the bass player has the low notes: the comp leaves its bass
+ * out. With "push" each chord after the first arrives an eighth before its
+ * bar line and is held across it (an anticipation), as fusion, funk and latin
+ * players do; the downbeat is not struck again.
+ */
 export function compTrack(p: Progression, meter: Meter, pattern: CompPattern, loop: boolean, bassLine = false): Omit<Track<CompPayload>, 'originTick'> {
   const beat = ticksPerBeat(meter);
   const bar = ticksPerBar(meter);
   const patternTicks = patternBeats(pattern, meter.beatsPerBar).map((b) => b * beat);
-  const events: Track<CompPayload>['events'][number][] = [];
-  let voicing: readonly number[] | undefined;
-  for (const span of chordSpans(p, meter)) {
-    voicing = voiceChord(span.chord, voicing);
+  const spans = chordSpans(p, meter);
+  const voicings: (readonly number[])[] = [];
+  spans.forEach((span, i) => voicings.push(voiceChord(span.chord, voicings[i - 1])));
+
+  type Hit = { tick: number; chord: number; anticipated: boolean };
+  const hits: Hit[] = [];
+  spans.forEach((span, i) => {
     const end = span.tick + span.lengthTicks;
-    const hits = new Set<number>([span.tick]);
+    const own = new Set<number>([span.tick]);
     for (let barStart = Math.floor(span.tick / bar) * bar; barStart < end; barStart += bar) {
       for (const offset of patternTicks) {
         const tick = barStart + offset;
-        if (tick >= span.tick && tick < end) hits.add(tick);
+        if (tick >= span.tick && tick < end) own.add(tick);
       }
     }
-    const sorted = [...hits].sort((a, b) => a - b);
-    sorted.forEach((tick, i) => {
-      const next = sorted[i + 1] ?? end;
-      events.push({
-        tick,
-        payload: {
-          type: 'comp',
-          midis: bassLine ? (voicing as readonly number[]).slice(1) : (voicing as readonly number[]),
-          durationTicks: Math.max(beat / 4, (next - tick) * 0.92),
-          velocity: tick % bar === 0 ? 0.8 : 0.62,
-        },
-      });
+    for (const tick of own) hits.push({ tick, chord: i, anticipated: false });
+  });
+  if (pattern === 'push' && spans.length > 1) {
+    const early = beat / 2;
+    spans.forEach((span, i) => {
+      if (i === 0) return;
+      const at = span.tick - early;
+      const previous = spans[i - 1];
+      if (!previous || at <= previous.tick) return;
+      // The anticipation replaces whatever the old chord had from there on, and the new chord's downbeat.
+      for (let k = hits.length - 1; k >= 0; k -= 1) {
+        const h = hits[k] as Hit;
+        if ((h.chord === i - 1 && h.tick >= at) || (h.chord === i && h.tick === span.tick)) hits.splice(k, 1);
+      }
+      hits.push({ tick: at, chord: i, anticipated: true });
     });
   }
-  return { id: 'comp', lengthTicks: progressionLength(p, meter), loop, events };
+  hits.sort((a, b) => a.tick - b.tick);
+  const total = progressionLength(p, meter);
+  const events: Track<CompPayload>['events'][number][] = hits.map((hit, k) => {
+    const next = hits[k + 1]?.tick ?? total;
+    const voicing = voicings[hit.chord] as readonly number[];
+    const held = Math.max(beat / 4, (next - hit.tick) * 0.92);
+    return {
+      tick: hit.tick,
+      payload: {
+        type: 'comp',
+        midis: bassLine ? voicing.slice(1) : voicing,
+        durationTicks: SHORT.has(pattern) ? Math.min(held, beat / 3) : held,
+        velocity: hit.anticipated ? 0.82 : hit.tick % bar === 0 ? 0.8 : SHORT.has(pattern) ? 0.72 : 0.62,
+      },
+    };
+  });
+  return { id: 'comp', lengthTicks: total, loop, events };
 }
 
 export interface ProgressionTemplate {
   readonly id: string;
   readonly name: string;
   readonly defaultKey: string;
+  /** Home mode for the analysis (modal interchange): ionian unless stated. */
+  readonly mode?: ScaleId;
   /** "degree suffix beats": degree relative to the key, major-scale numbering. */
   readonly steps: readonly (readonly [degree: string, suffix: string, beats: number])[];
 }
@@ -197,18 +235,21 @@ const A_SECTION: ProgressionTemplate['steps'] = [
 
 export const PROGRESSION_TEMPLATES: readonly ProgressionTemplate[] = [
   { id: 'ii-v-i', name: 'ii–V–I maggiore', defaultKey: 'C', steps: [['2', 'm7', 4], ['5', '7', 4], ['1', 'maj7', 8]] },
-  { id: 'ii-v-i-minor', name: 'iiø–V7–i minore', defaultKey: 'A', steps: [['2', 'm7b5', 4], ['5', '7b9', 4], ['1', 'm7', 8]] },
+  { id: 'ii-v-i-minor', name: 'iiø–V7–i minore', defaultKey: 'A', mode: 'aeolian', steps: [['2', 'm7b5', 4], ['5', '7b9', 4], ['1', 'm7', 8]] },
   {
     id: 'blues',
     name: 'Blues in dodici battute',
     defaultKey: 'A',
+    mode: 'mixolydian',
     steps: [
       ['1', '7', 4], ['4', '7', 4], ['1', '7', 8], ['4', '7', 8], ['1', '7', 8],
       ['5', '7', 4], ['4', '7', 4], ['1', '7', 4], ['5', '7', 4],
     ],
   },
   { id: 'i-vi-ii-v', name: 'I–vi–ii–V', defaultKey: 'C', steps: [['1', 'maj7', 4], ['6', 'm7', 4], ['2', 'm7', 4], ['5', '7', 4]] },
-  { id: 'modal', name: 'Vamp modale dorico', defaultKey: 'D', steps: [['1', 'm7', 8], ['4', '7', 8]] },
+  { id: 'modal', name: 'Vamp modale dorico', defaultKey: 'D', mode: 'dorian', steps: [['1', 'm7', 8], ['4', '7', 8]] },
+  { id: 'interchange-iv', name: 'Interscambio: I–IV–iv–I', defaultKey: 'C', steps: [['1', 'maj7', 4], ['4', 'maj7', 4], ['4', 'm7', 4], ['1', 'maj7', 4]] },
+  { id: 'interchange-backdoor', name: 'Interscambio: I–♭VI–♭VII–I', defaultKey: 'C', steps: [['1', 'maj7', 4], ['b6', 'maj7', 4], ['b7', '7', 4], ['1', 'maj7', 4]] },
   {
     id: 'rhythm',
     name: 'Rhythm changes semplificati',

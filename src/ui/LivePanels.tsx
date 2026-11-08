@@ -4,10 +4,15 @@
  * pitch analysis of the dry signal; nothing here is simulated. A heard pitch
  * says which note, not which string: the panels keep the two apart.
  */
+import { useEffect, useRef } from 'react';
 import { engine } from '../app/engine';
+import { analysisSettingsOf, tuningOf } from '../app/settings';
+import { expectedAt, judge, trimHistory, type Expected } from '../app/feedback';
 import { useApp, usePlayhead } from '../app/store';
+import { CalibrationPanel } from './Calibration';
 import { liveInput, useLive } from '../audio/liveInput';
-import { IN_TUNE_CENTS, MIN_CONFIDENCE, STRING_NAMES, TUNINGS, livePositions, noteOf, positionsOf, tunerReading } from '../pitch';
+import { midiInput, midiPitch, useMidi } from '../audio/midi';
+import { IN_TUNE_CENTS, MIN_CONFIDENCE, STRING_NAMES, TUNINGS, noteOf, positionsOf, tunerReading } from '../pitch';
 import { Field, Panel, Segmented, Select, Toggle } from './controls';
 
 const pct = (value: number) => `${Math.round(value * 100)}%`;
@@ -24,6 +29,7 @@ const CHANNEL_OPTIONS = [
 /** Start the input with the saved device, channel and gain. */
 export function startInput(deviceId?: string): void {
   const s = useApp.getState().settings;
+  liveInput.configure(analysisSettingsOf(s));
   void liveInput.start(() => engine.audioOut(), deviceId ?? s.inputDeviceId, s.inputChannel).then(() => liveInput.setGain(useApp.getState().settings.inputGain));
 }
 
@@ -133,6 +139,7 @@ function InputDiagnostics() {
           <dt>Frequenza di campionamento</dt><dd>{d.sampleRate} Hz{d.trackSampleRate && d.trackSampleRate !== d.sampleRate ? ` (ingresso ${d.trackSampleRate} Hz, ricampionato)` : ''}</dd>
           <dt>Dispositivo</dt><dd>{d.deviceLabel || 'senza nome'}</dd>
           <dt>Canali d’ingresso</dt><dd>{d.inputChannels ?? 'non dichiarati'}</dd>
+          <dt>Analisi</dt><dd data-testid="diag-analysis">{d.analysis === 'worklet' ? 'AudioWorklet, campioni continui' : 'Analyser e timer (browser senza AudioWorklet)'}</dd>
           <dt>Latenza di base dichiarata</dt><dd>{ms(d.baseLatency)}</dd>
           <dt>Latenza d’uscita dichiarata</dt><dd>{ms(d.outputLatency)}</dd>
         </dl>
@@ -143,18 +150,30 @@ function InputDiagnostics() {
 }
 
 export function LiveMonitorPanel() {
-  const pitch = useLive((l) => l.pitch);
-  const on = useLive((l) => l.state === 'on');
   const s = useApp((state) => state.settings);
+  const audioPitch = useLive((l) => l.pitch);
+  const midiNote = useMidi((m) => m.note);
+  const pitch = audioPitch ?? midiPitch(midiNote, s.tunerA4);
+  const audioOn = useLive((l) => l.state === 'on');
+  const midiOn = useMidi((m) => m.status === 'on');
+  const on = audioOn || midiOn;
   const update = useApp((state) => state.update);
   const expected = usePlayhead((p) => p.note);
   const playing = usePlayhead((p) => p.state === 'playing');
   const note = pitch ? noteOf(pitch.frequency, s.tunerA4) : null;
-  const where = note ? livePositions(note.midi, [], null) : null;
-  // Feedback only on a steady reading against the exercise note sounding now.
-  const feedback = note && pitch?.stable && playing && expected
-    ? note.midi === expected.midi ? 'giusto' : note.midi % 12 === expected.midi % 12 ? 'ottava' : 'diverso'
-    : null;
+  const tuning = tuningOf(useApp.getState().settings);
+  const where = note ? { all: positionsOf(note.midi, tuning) } : null;
+  // Feedback only on a steady reading, against the note asked for when the sound left the guitar:
+  // the profile's measured latency is taken off the detection time (D-37).
+  const latencyMs = s.liveProfiles.find((p) => p.id === s.liveProfileId)?.latencyMs ?? 0;
+  const history = useRef<Expected[]>([]);
+  const expectedMidi = playing ? expected?.midi ?? null : null;
+  useEffect(() => {
+    const now = performance.now();
+    history.current = trimHistory([...history.current, { time: now, midi: expectedMidi }], now);
+  }, [expectedMidi, expected?.index]);
+  const target = latencyMs > 0 ? expectedAt(history.current, performance.now() - latencyMs) : expectedMidi;
+  const feedback = note && pitch?.stable && playing && target !== null ? judge(note.midi, target) : null;
   return (
     <Panel title="Live Monitor" className="live-panel">
       <InputControls />
@@ -164,13 +183,13 @@ export function LiveMonitorPanel() {
         <span className="live-detail" data-testid="live-confidence">{pitch ? `Affidabilità ${pct(pitch.confidence)}${pitch.stable ? ', stabile' : ''}` : `Mostra le note sopra ${pct(MIN_CONFIDENCE)} di affidabilità`}</span>
       </div>
       {/* Fixed boxes: a note coming and going never moves what is below. */}
-      <p className="field-hint live-positions" data-testid="live-positions" title={note ? positionsOf(note.midi).map(place).join('; ') : undefined}>
+      <p className="field-hint live-positions" data-testid="live-positions" title={note ? positionsOf(note.midi, tuning).map(place).join('; ') : undefined}>
         {note && where
-          ? `${nameOfMidi(note.midi)} si suona in ${where.all.length} ${where.all.length === 1 ? 'punto' : 'punti'}: ${positionsOf(note.midi).map(place).join('; ')}.`
+          ? `${nameOfMidi(note.midi)} si suona in ${where.all.length} ${where.all.length === 1 ? 'punto' : 'punti'}: ${positionsOf(note.midi, tuning).map(place).join('; ')}.`
           : 'Un segnale solo dà l’altezza, non la corda: la tastiera mostra tutte le posizioni possibili e piena la più probabile, che resta una stima.'}
       </p>
       <p className={`live-feedback ${feedback ? `is-${feedback}` : ''}`} data-testid="live-feedback">
-        {feedback === 'giusto' ? 'Giusto' : feedback === 'ottava' ? `Nota giusta, ottava diversa (attesa ${nameOfMidi(expected?.midi ?? 0)})` : feedback === 'diverso' ? `Attesa ${nameOfMidi(expected?.midi ?? 0)}` : ' '}
+        {feedback === 'giusto' ? 'Giusto' : feedback === 'ottava' ? `Nota giusta, ottava diversa (attesa ${nameOfMidi(target ?? 0)})` : feedback === 'diverso' ? `Attesa ${nameOfMidi(target ?? 0)}` : ' '}
       </p>
       <Toggle checked={s.liveOnBoard} onChange={(liveOnBoard) => update({ liveOnBoard })}>Mostra la nota rilevata sulla tastiera</Toggle>
     </Panel>
@@ -226,10 +245,36 @@ export function TunerPanel() {
 }
 
 /** The full input deck: Live Monitor and Tuner share one input. */
+/** MIDI guitar or keyboard (D-37): exact notes for the Live Monitor, Start/Stop and the pedal for the transport. */
+function MidiPanel() {
+  const midi = useMidi();
+  const on = midi.status === 'on';
+  const message = {
+    off: 'Spento. Con una chitarra MIDI o una tastiera le note arrivano esatte, senza stima.',
+    asking: 'Chiedo al browser l’accesso ai dispositivi MIDI…',
+    on: midi.inputs.length ? `Collegati: ${midi.inputs.join(', ')}. Start/Stop MIDI e il pedale di sustain comandano Avvia e Pausa.` : 'Attivo, ma nessun dispositivo collegato.',
+    unsupported: 'Questo browser non supporta Web MIDI (Chrome ed Edge sì).',
+    denied: 'Accesso MIDI negato: consentilo dalle impostazioni del sito.',
+  }[midi.status];
+  return (
+    <Panel title="MIDI" className="midi-panel">
+      <div className="row">
+        <button type="button" className={`btn ${on ? '' : 'btn-accent'}`} data-testid="midi-toggle" aria-pressed={on} onClick={() => (on ? midiInput.stop() : void midiInput.start(engine))}>
+          {on ? 'Disattiva MIDI' : 'Attiva MIDI'}
+        </button>
+        <span className="live-detail" data-testid="midi-note">{midi.note ? `Nota MIDI ${nameOfMidi(midi.note.midi)}` : ' '}</span>
+      </div>
+      <p className="field-hint" data-testid="midi-status" role="status">{message}</p>
+    </Panel>
+  );
+}
+
 export function InputPanels() {
   return (
     <>
       <LiveMonitorPanel />
+      <MidiPanel />
+      <CalibrationPanel />
       <TunerPanel />
     </>
   );

@@ -11,6 +11,8 @@ import { useApp, usePlayhead } from '../../app/store';
 import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
 import { DrumPanel } from '../DrumMachine';
+import { ArrangementPanel } from '../ArrangementPanel';
+import { BackingPanel } from '../BackingPanel';
 import { ChordViewPanel } from '../ChordViewPanel';
 import { InputPanels } from '../LivePanels';
 import { Board } from '../Board';
@@ -95,7 +97,7 @@ function tabsFor(mode: AppMode): readonly DeckTab[] {
     case 'arpeggio':
       return [{ id: 'arpeggio', label: 'Arpeggi', content: <ArpeggioPanel /> }, views, scale, input, presets];
     case 'jam':
-      return [{ id: 'jam', label: 'Jam', content: <JamPanels /> }, views, { id: 'drums', label: 'Batteria', content: <DrumPanel /> }, scale, exercise, input, presets];
+      return [{ id: 'jam', label: 'Jam', content: <JamPanels /> }, { id: 'song', label: 'Arrangiamento', content: <><ArrangementPanel /><BackingPanel /></> }, views, { id: 'drums', label: 'Batteria', content: <DrumPanel /> }, scale, exercise, input, presets];
   }
 }
 

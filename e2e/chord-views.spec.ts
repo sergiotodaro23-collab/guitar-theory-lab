@@ -86,3 +86,40 @@ test('views are saved, shared with Jam Studio, and can be switched off at once',
   await page.getByRole('checkbox', { name: 'Cambia la tastiera con l’accordo' }).first().uncheck();
   await expect.poll(() => names(page)).toEqual(C_MAJOR);
 });
+
+test('a free stretch of frets, a chosen overlay colour, and the exercise that follows each chord', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  await page.getByTestId('appearance').getByRole('button', { name: 'Studio', exact: true }).click();
+  await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
+  await page.getByTestId('template').selectOption('ii-v-i');
+  // G7 on frets 12–15 only.
+  await page.getByTestId('view-chip-1').click();
+  await page.getByTestId('view-customize').click();
+  await page.getByRole('group', { name: 'Forma della vista' }).getByRole('button', { name: 'Tasti' }).click();
+  await page.getByTestId('view-range-low').selectOption('12');
+  await page.getByTestId('view-range-high').selectOption('15');
+  const frets = await page.locator('.fretboard .marker').evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-fret'))));
+  expect(frets.length).toBeGreaterThan(10);
+  expect(frets.filter((f) => f < 12 || f > 15)).toEqual([]);
+  // An overlay in rose.
+  await page.getByTestId('view-add-arpeggio').click();
+  await page.getByTestId('view-arp-color-0').selectOption('rose');
+  await expect(page.locator('[data-testid="legend-layer"].layer-rose')).toHaveCount(1);
+  expect(await page.locator('.fretboard .pip.layer-rose').count()).toBeGreaterThan(0);
+
+  // Play: during G7 the exercise stays in frets 12–15; Dm7 (no view) plays the general exercise elsewhere.
+  await expect(page.getByRole('checkbox', { name: 'L’esercizio segue la vista di ogni accordo' })).toBeChecked();
+  await page.getByRole('checkbox', { name: 'Evidenzia le note a tempo' }).check();
+  await page.getByTestId('bpm').fill('240');
+  await page.getByTestId('play').click();
+  await expect.poll(async () => page.evaluate(() => (window.__gtl?.debug.scheduled ?? []).filter((e) => e.kind === 'note' && e.tick >= 1920 && e.tick < 3840).length), { timeout: 8000 }).toBeGreaterThan(4);
+  await page.getByTestId('stop').click();
+  const g7 = await page.evaluate(() => (window.__gtl?.debug.scheduled ?? []).filter((e) => e.kind === 'note' && e.tick >= 1920 && e.tick < 3840).map((e) => e.midi as number));
+  expect(g7.every((m) => [0, 2, 4, 5, 7, 9, 11].includes(m % 12))).toBe(true);
+  // Frets 12–15: every pitch is between E3+12… on the neck that is MIDI 52 to 79.
+  expect(Math.min(...g7)).toBeGreaterThanOrEqual(52);
+  expect(errors).toEqual([]);
+});

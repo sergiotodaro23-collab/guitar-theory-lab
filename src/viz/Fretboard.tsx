@@ -184,7 +184,7 @@ export interface FretboardProps {
   readonly trail: readonly FretPosition[];
   readonly layerStyles?: readonly LayerStyle[];
   /** Detected pitch from the guitar input: every place it can be, the likely one, and how loud (fades with the level). */
-  readonly live?: { readonly all: readonly FretPosition[]; readonly likely: FretPosition | null; readonly intensity: number } | null;
+  readonly live?: { readonly all: readonly FretPosition[]; readonly likely: FretPosition | null; readonly intensity: number; readonly probabilities?: readonly number[] } | null;
   /** A rendered wood surface for the board (Studio); null keeps the flat fill. */
   readonly boardImage?: string | null;
   readonly onPick: (marker: Marker) => void;
@@ -287,9 +287,17 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
         ))}
         {live ? (
           <g className="live-layer" data-testid="live-layer" style={{ opacity: Math.max(0, Math.min(1, live.intensity)) }}>
-            {live.all.map((p) => (
+            {live.all.map((p, i) => (
               live.likely && p.string === live.likely.string && p.fret === live.likely.fret ? null
-                : <circle key={`${p.string}-${p.fret}`} className="live-possible" data-string={p.string} data-fret={p.fret} cx={noteX(p.fret)} cy={stringY(p.string)} r={RADIUS + 4} />
+                : (
+                  <circle
+                    key={`${p.string}-${p.fret}`} className="live-possible" data-string={p.string} data-fret={p.fret}
+                    data-probability={live.probabilities?.[i]?.toFixed(2)}
+                    // A more probable place is drawn a little firmer; none looks like the estimate.
+                    style={live.probabilities ? { opacity: 0.45 + 0.5 * Math.min(1, (live.probabilities[i] ?? 0) * 1.6) } : undefined}
+                    cx={noteX(p.fret)} cy={stringY(p.string)} r={RADIUS + 4}
+                  />
+                )
             ))}
             {live.likely ? <circle className="live-likely" data-testid="live-likely" data-string={live.likely.string} data-fret={live.likely.fret} cx={noteX(live.likely.fret)} cy={stringY(live.likely.string)} r={RADIUS + 1} /> : null}
           </g>

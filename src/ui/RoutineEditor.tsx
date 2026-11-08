@@ -3,7 +3,7 @@
  * routine; nothing reaches the app until "Applica".
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { meterOf } from '../app/settings';
+import { meterOf, tuningOf } from '../app/settings';
 import { useApp } from '../app/store';
 import {
   INTERVAL_NAMES,
@@ -136,10 +136,15 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
             <Segmented
               label={`Tipo di sequenza della fase ${n}`}
               value={phase.kind}
-              options={[{ value: 'scale', label: 'Scala' }, { value: 'interval', label: 'Intervalli' }, { value: 'custom', label: 'Pattern' }]}
+              options={[{ value: 'scale', label: 'Scala' }, { value: 'interval', label: 'Intervalli' }, { value: 'custom', label: 'Pattern' }, { value: 'arpeggio', label: 'Arpeggio' }]}
               onChange={(kind) => onChange({ kind })}
             />
           </Field>
+          {phase.kind === 'arpeggio' ? (
+            <Field label="Accordo" hint="Le sue note dentro la forma della fase: un accordo per fase segue la progressione (ii–V–I, blues…).">
+              <input className="text-input" aria-label={`Accordo della fase ${n}`} data-testid={`phase-chord-${n}`} value={phase.chord} onChange={(e) => onChange({ chord: e.target.value })} />
+            </Field>
+          ) : null}
           {phase.kind === 'interval' ? (
             <div className="row">
               <Field label="Intervallo">
@@ -202,7 +207,8 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
 function Preview({ draft, selected, onSelect }: { readonly draft: Routine; readonly selected: number; readonly onSelect: (i: number) => void }) {
   const settings = useApp((s) => s.settings);
   const meter = meterOf(settings);
-  const plan = useMemo(() => planRoutine(draft, meter), [draft, meter]);
+  const tuning = useApp((state) => tuningOf(state.settings));
+  const plan = useMemo(() => planRoutine(draft, meter, tuning), [draft, meter, tuning]);
   const bar = ticksPerBar(meter);
   const bars = plan.lengthTicks / bar;
   const seconds = (plan.lengthTicks / (bar / meter.beatsPerBar)) * (60 / settings.bpm);

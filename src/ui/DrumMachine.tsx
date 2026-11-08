@@ -14,7 +14,7 @@ import {
 import { Field, Panel, Segmented, Select, Toggle } from './controls';
 
 type Target = 0 | 1 | 2 | 3 | 'fill';
-const STEP_NAMES: Record<DrumStep, string> = { 0: 'spento', 1: 'acceso', 2: 'accento' };
+const STEP_NAMES: Record<DrumStep, string> = { 0: 'spento', 1: 'acceso', 2: 'accento', 3: 'nota fantasma' };
 const FILL_OPTIONS = [
   { value: 0 as const, label: 'Mai' },
   { value: 2 as const, label: 'Ogni 2 battute' },

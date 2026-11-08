@@ -590,6 +590,7 @@
 :root[data-theme='studio'] .ws-note .drum-step { border-color: #a8916c; }
 :root[data-theme='studio'] .ws-note .drum-step.step-1 { background: linear-gradient(to top, #9a4a00 55%, rgba(255, 255, 255, 0.55) 55%); }
 :root[data-theme='studio'] .ws-note .drum-step.step-2 { background: #9a4a00; border: 2px solid #2a2017; }
+:root[data-theme='studio'] .ws-note .drum-step.step-3 { background: linear-gradient(to top, #9a4a00 22%, rgba(255, 255, 255, 0.55) 22%); border-style: dashed; }
 :root[data-theme='studio'] .ws-note .drum-step.is-beat { border-left-color: #2a2017; }
 :root[data-theme='studio'] .ws-note .drum-step.is-now { outline-color: #1d7a35; }
 
@@ -736,4 +737,17 @@
 }
 @media (min-width: 1400px) and (min-height: 720px) {
   :root[data-theme='studio'] .ws-time .select { width: 150px; }
+}
+
+/* Desktop: the header stays one row whatever the text width (see the Simple look). */
+@media (min-width: 1200px) and (min-height: 720px) {
+  .ws-head { flex-wrap: nowrap; }
+  :root[data-theme='studio'] .ws-head .mode-nav .segmented { flex-wrap: nowrap; }
+  :root[data-theme='studio'] .ws-head .mode-nav .segment { white-space: nowrap; }
+  .ws-head .ws-sticker { min-width: 0; flex-shrink: 1; overflow: hidden; }
+  .ws-head .mode-nav, .ws-head .appearance { flex-shrink: 0; }
+}
+@media (min-width: 1200px) and (max-width: 1399px) and (min-height: 720px) {
+  :root[data-theme='studio'] .ws-head .mode-nav .segment { font-size: 16px; padding: 2px 12px 4px; }
+  .ws-head { gap: 10px; }
 }

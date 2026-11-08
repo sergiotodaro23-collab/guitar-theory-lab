@@ -465,6 +465,7 @@ button, select, input { font: inherit; color: inherit; }
 /* On fills half the key, accent fills it all with a light rim: readable without colour. */
 .drum-step.step-1 { background: linear-gradient(to top, #c9781a 55%, var(--deck-raised) 55%); }
 .drum-step.step-2 { background: #ffb347; border: 2px solid #fff1d6; }
+.drum-step.step-3 { background: linear-gradient(to top, #7b5a2c 22%, var(--deck-raised) 22%); border-style: dashed; }
 .drum-step.is-now { outline: 2px solid #5dff7e; outline-offset: -1px; }
 .drum-step:disabled { opacity: 0.25; cursor: not-allowed; }
 @media (max-width: 900px) {
@@ -544,8 +545,8 @@ button, select, input { font: inherit; color: inherit; }
 /* ---- Click / Accenti as a floating panel opened from the transport ---- */
 /*
  * The panel hangs from the transport, not from the key: the key can wrap to
- * the start of a second row when the system font is wider (fonts are not
- * bundled), and a panel aligned to its right edge would leave the window.
+ * the start of a second row when the text is wider (fallback font before the
+ * bundled ones load, different rendering), and a panel aligned to its right edge would leave the window.
  */
 .cs-transport, .ws-transport { position: relative; }
 .accent-toggle { min-height: 40px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--edge); background: var(--deck-raised); color: var(--ink); font: 600 14px/1 var(--display); cursor: pointer; }
@@ -575,3 +576,29 @@ button, select, input { font: inherit; color: inherit; }
 .view-mark { font-size: 11px; opacity: 0.8; }
 .chord-view-editor { display: grid; gap: 12px; }
 .chord-view-empty { align-items: flex-end; gap: 10px 16px; }
+
+/* ---- Harmony analysis (modal interchange) ---- */
+.analysis-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
+.analysis-row { display: grid; grid-template-columns: 5.5em 6.5em 11em 1fr; gap: 8px; align-items: baseline; font-size: 13px; }
+.analysis-numeral { font-weight: 700; }
+.analysis-row.origin-borrowed .analysis-kind { color: #d98a1c; font-weight: 600; }
+.analysis-row.origin-secondary .analysis-kind { color: #3fa0bf; font-weight: 600; }
+.analysis-row.origin-chromatic .analysis-kind { color: #c0504d; font-weight: 600; }
+@media (max-width: 899px) {
+  .analysis-row { grid-template-columns: 5em 6em 1fr; }
+  .analysis-text { grid-column: 1 / -1; }
+}
+
+/* ---- Live Monitor calibration ---- */
+.calibration-steps { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 6px; }
+.calibration-step { display: grid; grid-template-columns: 9em 1fr auto; gap: 8px; align-items: center; font-size: 13px; }
+.calibration-values { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 13px; margin: 8px 0; }
+.calibration-values dd { margin: 0; display: flex; align-items: center; gap: 8px; }
+.calibration-result { min-height: 1.4em; }
+.text-input.narrow { width: 6em; }
+@media (max-width: 599px) { .calibration-step { grid-template-columns: 1fr; } }
+
+/* ---- Jam arrangement ---- */
+.arrangement-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.arrangement-item { border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px; }
+.arrangement-item.is-now { border-color: var(--hot); box-shadow: 0 0 0 1px var(--hot); }

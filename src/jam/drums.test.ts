@@ -27,8 +27,8 @@ describe('drum patterns', () => {
     for (const p of [...DEFAULT_KIT.patterns, DEFAULT_KIT.fill]) for (const { voice } of DRUM_VOICES) expect(p[voice]).toHaveLength(DRUM_STEPS);
   });
 
-  it('a step goes off → on → accent → off', () => {
-    expect([0, 1, 2].map((s) => nextDrumStep(s as 0 | 1 | 2))).toEqual([1, 2, 0]);
+  it('a step goes off → on → accent → ghost → off', () => {
+    expect([0, 1, 2, 3].map((s) => nextDrumStep(s as 0 | 1 | 2 | 3))).toEqual([1, 2, 3, 0]);
   });
 });
 
