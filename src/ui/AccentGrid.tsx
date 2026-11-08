@@ -92,7 +92,7 @@ export function AccentGrid() {
     // Working the transport (metre, click, play) keeps it open: the grid follows the metre live.
     const onDown = (e: PointerEvent) => {
       const target = e.target as Element | null;
-      if (box.current?.contains(target) || target?.closest('.cs-transport, .ws-transport')) return;
+      if (box.current?.contains(target) || target?.closest('.cs-transport, .ws-transport, .v57-deck')) return;
       setOpen(false);
     };
     window.addEventListener('keydown', onKey);

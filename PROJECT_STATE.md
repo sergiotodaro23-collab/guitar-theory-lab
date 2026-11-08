@@ -1,17 +1,19 @@
 # Stato del progetto
 
-Versione 0.1.0 (package.json). Ultimo aggiornamento: 7 novembre 2026, branch `claude/serene-hopper-ubi687` (ripartito da `main` dopo la PR #9). Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
+Versione 0.1.0 (package.json). Ultimo aggiornamento: 8 novembre 2026, branch `claude/lucid-rubin-19dvsp`: integrazione della Studio V5.7 (D-40, D-41), partita dai due commit di Codex. Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 435 test unitari.
-- `npm run test:e2e`: verde, 96 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 455 test unitari (8 novembre 2026, con la Studio V5.7).
+- `npm run test:e2e`: verde, 117 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
 ## Funziona
+
+- **Studio V5.7** (D-41, `docs/STUDIO_V57_INTEGRATION.md`): rail con laboratori e dispositivi, console hi-fi con LCD ambra dallo store, tastiera di produzione con divisore salvato, taccuino con schede per laboratorio (pannelli esistenti), Next Fretboard dal motore, cassetto con mixer reale, accordatore e interfaccia sull'ingresso reale, amplificatore solo visivo e dichiarato. Semplificata invariata. Asset GPL-3.0-or-later (D-40).
 
 - Quattro modalità: Fretboard Lab, Harmony Lab (Harmonic Context Switch, sei focus, analisi con interscambio modale e scala di ogni accordo, D-30), Arpeggios Lab, Jam Studio (progressioni, comping, loop).
 - **Arpeggios Lab**: un accordo o la progressione, rivolti, quattro direzioni, pattern personalizzati, arpeggi collegati per nota più vicina o per grado target sul battere. Forme decise dal motore (D-27): posizione, CAGED, 1–3 ottave lungo il manico con cambi di posizione e diteggiatura, sweep, salto di corda, ritorno diverso dalla salita; le forme non suonabili vengono rifiutate.
@@ -32,7 +34,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Limiti noti
 
-- Aspetto **Studio** (banco da lavoro, predefinito su tablet e computer, materiali da validare) e **Semplificata** (console, unica su smartphone verticale). Due layout sullo stesso stato, vedi D-16 e D-17. Asset rigenerabili con `python3 tools/studio-assets/render.py`.
+- Aspetto **Studio** (console V5.7, predefinito su tablet e computer) e **Semplificata** (console, unica su smartphone verticale). Due layout sullo stesso stato, vedi D-16 e D-41. Render dei dispositivi in `GTL-V5.7-handoff/blender/` (scene e script); `tools/studio-assets/render.py` genera i pochi asset della base Studio rimasti (tasti, manopola, carta, telefono del tutor).
+- Amplificatore/NAM: solo visivo; contratto pronto in `src/audio/ampProcessor.ts`, studio in `docs/NAM_FEASIBILITY.md`.
 - Solo accordatura standard; nessuna vista per mancini.
 - Ingresso chitarra, ascolto, Live Monitor e accordatore: **testati con segnali sintetici** (WAV come microfono). La prova del proprietario con chitarra reale ha trovato tre problemi (layout, ascolto, accordi), corretti in D-22 ma **non ancora riverificati con l'hardware**. Diagnostica: `docs/AUDIO_DIAGNOSTICS.md`.
 - Layout desktop fisso (D-24) solo da 1200 × 720: sotto, la pagina scorre. A 1280 × 720 ai pannelli restano circa 150 px.
@@ -50,4 +53,6 @@ GPL-3.0-or-later, scelta dal proprietario (`LICENSE`, `CONTRIBUTING.md`, `docs/D
 
 ## Prossimo task
 
-In attesa del merge della PR P1-14. Poi P1-12c arpeggi avanzati, P3-06 groove, completamenti di P1-14, Live Monitor 2.0. Dettagli in `docs/ROADMAP.md`.
+Revisione della PR della Studio V5.7 da parte del proprietario (merge a sua cura). Poi: prova con hardware reale di accordatore e interfaccia nella Studio V5.7, studio di fattibilità NAM (P4-01).
+
+Dettagli in `docs/ROADMAP.md`.

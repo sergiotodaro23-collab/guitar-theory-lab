@@ -1,5 +1,34 @@
 # QA report
 
+## Studio V5.7 — 8 novembre 2026
+
+Branch `claude/lucid-rubin-19dvsp` (partito da `main` b36c008, con i due commit di Codex integrati per fast-forward). Ambiente: container cloud Linux, Chromium headless (Playwright 1.63).
+
+### Baseline prima dell'integrazione
+
+| Verifica | Risultato |
+|---|---|
+| `npm run check` | Rosso solo per il lint: 702 errori, tutti nel JS del prototipo in `GTL-V5.7-handoff/` (caricato su `main`). Typecheck, 435 unit e build verdi. Codex ha escluso l'archivio dal lint (`4e62cdd`). |
+| `npm run test:e2e` | 100/100 dopo i commit di Codex. |
+
+### Dopo l'integrazione
+
+| Verifica | Risultato |
+|---|---|
+| `npm run check` | Verde: lint, typecheck, 455 test unitari (34 file), build. |
+| `npm run test:e2e` | Verde: 117 casi su Chromium headless (build di produzione), 6,2 minuti. |
+| Asset | 24 render verificati contro `MANIFEST.json` (pixel, byte, hash): nessuna differenza. |
+
+Nuovi test: `src/ui/studio/v57/layout.test.ts` (20 unit: adattamento dei dispositivi, divisore, schede per laboratorio, LCD con numerali da manuale — Cmaj7 in Do = Imaj7, ii–V–I in Do, iv7 in La minore —, preferenze salvate con storage rotto, mappature delle manopole) e `e2e/studio-v57-shell.spec.ts` (17 casi: laboratori e stato condiviso, schede da tastiera, LCD e trasporto, Next Fretboard, divisore con tastiera, trascinamento, reload e doppio clic, cassetto con Esc e ritorno del focus, pagina e scheda ferme, taccuino alto e basso, riduzione del movimento, amplificatore dichiarato, accordatore e interfaccia senza ingresso, preferenze di visualizzazione, rail e impostazioni, cinque risoluzioni con screenshot in `test-results/visual/v57-*.png`).
+
+I test esistenti girano invariati nella logica: `e2e/studio.ts` (`chooseLook`, `openTab`, `openDevice`, `reveal`) porta i controlli in vista nella scheda, nel cassetto o nelle impostazioni della Studio. Adattati solo i test che misuravano il vecchio banco da lavoro (manopola BPM, note di carta, contrasti sui selettori `ws-*`, area di scorrimento): ora misurano gli elementi V5.7 equivalenti.
+
+Ispezione visiva a 1600×1000, 1440×900, 1366×768, 1280×800, 1100×720: nessuno scorrimento della pagina, LCD senza tagli verticali, 24 barrette e capotasto (25 posizioni), cassetto dentro il taccuino. A 1100×720 il taccuino è basso e i dispositivi scendono alla scala minima 0,45 dell'handoff: leggibili, più comodi alzando il divisore.
+
+### Non verificato
+
+Lettori di schermo, touch reale, Safari e Firefox (browser assenti), hardware audio reale (accordatore e interfaccia sono provati con WAV come microfono), contrasto delle schede misurato su un colore di fondo approssimato.
+
 ## Audit del 6 novembre 2026
 
 Ambiente: container cloud Linux, Node 22.23, npm 10.9, Chromium headless (Playwright 1.63). Firefox e WebKit non installati.

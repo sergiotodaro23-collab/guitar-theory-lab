@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook, reveal } from './studio';
 
 /** Click / Accenti: 16 steps, separate from the meter, heard by the scheduler. */
 
@@ -16,7 +17,8 @@ for (const look of ['Studio', 'Semplificata'] as const) {
   test(`${look}: the grid follows the meter until edited, and the edit is what plays`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const errors = await open(page);
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
+    await reveal(page, page.getByTestId('accent-toggle'));
     await page.getByTestId('accent-toggle').click();
     const grid = page.getByTestId('accent-grid');
     await expect(grid.getByRole('button', { name: /^Passo/ })).toHaveCount(16);
@@ -27,14 +29,18 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await expect(step(page, 1)).toHaveAttribute('data-level', '2');
     await expect(step(page, 4)).toBeDisabled();
     // Sixteenths fill all 16; 6/8 in eighths gives six, pulse on 1 and 4.
+    await reveal(page, page.getByLabel('Suddivisione del click'));
     await page.getByLabel('Suddivisione del click').first().selectOption('4');
     await expect(grid).toHaveAttribute('data-steps', '16');
     await expect(step(page, 15)).toBeEnabled();
+    await reveal(page, page.getByLabel('Suddivisione del click'));
     await page.getByLabel('Suddivisione del click').first().selectOption('1');
+    await reveal(page, page.getByTestId('meter'));
     await page.getByTestId('meter').first().selectOption('6/8');
     await expect(grid).toHaveAttribute('data-steps', '6');
     await expect(step(page, 3)).toHaveAttribute('data-level', '2');
     await expect(step(page, 1)).toHaveAttribute('data-level', '1');
+    await reveal(page, page.getByTestId('meter'));
     await page.getByTestId('meter').first().selectOption('4/4');
 
     // Edit: step 2 (normal) → accent → silent. The pattern is now personal.
@@ -42,6 +48,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await expect(step(page, 1)).toHaveAttribute('aria-label', 'Passo 2: accento');
     await step(page, 1).click();
     await expect(step(page, 1)).toHaveAttribute('data-level', '0');
+    await reveal(page, page.getByTestId('accent-source'));
     await expect(page.getByTestId('accent-source')).toHaveText('Pattern personale');
     // Keyboard: up raises, down lowers, right moves on.
     await step(page, 2).focus();
@@ -53,6 +60,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await expect(step(page, 3)).toHaveAttribute('data-level', '1');
 
     // What the scheduler hands to the audio follows the pattern.
+    await reveal(page, page.getByTestId('click-sound'));
     await page.getByTestId('click-sound').selectOption('wood');
     await page.getByTestId('bpm').fill('240');
     await page.getByTestId('play').click();
@@ -62,8 +70,10 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     for (const click of heard) expect(click.level).toBe([3, 0, 3, 1][click.step ?? 0]);
 
     // Back to the meter.
+    await reveal(page, page.getByRole('button', { name: 'Riporta alla metrica' }));
     await page.getByRole('button', { name: 'Riporta alla metrica' }).click();
     await expect(step(page, 1)).toHaveAttribute('data-level', '2');
+    await reveal(page, page.getByTestId('accent-source'));
     await expect(page.getByTestId('accent-source')).toHaveText('Dalla metrica');
     expect(errors).toEqual([]);
   });
@@ -72,7 +82,9 @@ for (const look of ['Studio', 'Semplificata'] as const) {
 test('on a phone the 16 steps sit in two rows of eight, all visible', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
+  await reveal(page, page.getByTestId('time-more-toggle'));
   await page.getByTestId('time-more-toggle').click();
+  await reveal(page, page.getByTestId('accent-toggle'));
   await page.getByTestId('accent-toggle').click();
   const first = await step(page, 0).boundingBox();
   const eighth = await step(page, 7).boundingBox();
@@ -92,8 +104,10 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await page.setViewportSize({ width: 1280, height: 800 });
     await open(page);
     await page.addStyleTag({ content: "*, :root { font-family: 'DejaVu Sans', 'Verdana', sans-serif !important; --display: 'DejaVu Sans', 'Verdana', sans-serif; --plate-font: 'DejaVu Sans', 'Verdana', sans-serif; }" });
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
+    await reveal(page, page.getByTestId('accent-toggle'));
     const key = await page.getByTestId('accent-toggle').boundingBox();
+    await reveal(page, page.getByTestId('accent-toggle'));
     await page.getByTestId('accent-toggle').click();
     for (const i of [0, 3, 15]) await expect(step(page, i)).toBeInViewport({ ratio: 1 });
     const before = await step(page, 1).boundingBox();

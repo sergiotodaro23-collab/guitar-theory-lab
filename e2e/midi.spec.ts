@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { chooseLook, reveal } from './studio';
 
 /**
  * P4-06: a MIDI device, simulated in the page (Chromium headless has no MIDI
@@ -21,16 +22,22 @@ test('MIDI notes show on the Live Monitor and the neck; Start, Stop and the peda
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await page.getByTestId('appearance').getByRole('button', { name: 'Studio', exact: true }).click();
+  await chooseLook(page, 'Studio');
+  await reveal(page, page.getByTestId('midi-toggle'));
   await page.getByTestId('midi-toggle').click();
+  await reveal(page, page.getByTestId('midi-status'));
   await expect(page.getByTestId('midi-status')).toContainText('Chitarra MIDI di prova');
 
   // A3 (57) pressed: exact note, every place on the neck shown.
   await send(page, [0x90, 57, 100]);
+  await reveal(page, page.getByTestId('midi-note'));
   await expect(page.getByTestId('midi-note')).toHaveText('Nota MIDI A3');
+  await reveal(page, page.getByTestId('live-note'));
   await expect(page.getByTestId('live-note')).toHaveText('A3');
+  await reveal(page, page.getByTestId('live-layer'));
   await expect(page.getByTestId('live-layer')).toBeVisible();
   await send(page, [0x80, 57, 0]);
+  await reveal(page, page.getByTestId('live-note'));
   await expect(page.getByTestId('live-note')).toHaveText('—');
 
   // Transport: MIDI Start plays, the pedal pauses, Stop stops.

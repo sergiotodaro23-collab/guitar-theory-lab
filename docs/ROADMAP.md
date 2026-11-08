@@ -64,15 +64,15 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 | ID | Requisito | Stato | Dip. | Moduli | Strategia · test · accettazione |
 |----|-----------|-------|------|--------|---------------------------------|
 | P2-01 | Editor avanzato a schermo ampio | IMPLEMENTED | P1-08 | ui | `<dialog>` modale (focus, Escape = annulla, scroll indipendenti, responsive a colonna sotto 900 px), blocchi fase con Scala/Posizione/Sequenza/Direzione e tempo, riordino, duplica, elimina, modelli, anteprima con striscia temporale, tastiera, note e transizione. e2e su desktop e tablet. |
-| P2-02 | Due aspetti: Semplificata e Studio | PARTIAL | — | ui | D-16: Semplificata = console (anche telefono), Studio = banco da lavoro con asset renderizzati, `look` auto/semplificata/studio, Studio predefinita su tablet e computer. Coperte le quattro modalità, editor, scale e accordi multipli, legenda, trasporto, mixer, preset. Da fare: revisione del proprietario sulla qualità dei materiali, Firefox/WebKit. |
+| P2-02 | Due aspetti: Semplificata e Studio | IMPLEMENTED | — | ui | D-16, D-41: Semplificata = console (anche telefono), invariata; Studio = console V5.7 (rail, console hi-fi con LCD, tastiera con divisore, taccuino per laboratorio, cassetto dei dispositivi) sullo stesso store e motore. Selettore d'aspetto nel pannello Impostazioni della Studio. e2e `studio-v57-shell.spec.ts` e suite esistente in entrambi gli aspetti. Non verificato: lettori di schermo, touch reale, Safari/Firefox. |
 | P2-03 | Tastiera in legno credibile | IMPLEMENTED | P2-02 | viz | Barrette come rettangoli (il gradiente su una linea di larghezza zero non veniva disegnato), 24 tasti più capotasto verificati da test strutturale e sui pixel in entrambi gli aspetti. Studio: acero renderizzato, segnatasti, marker con luce speculare. Frecce ‹ › e intervallo visibile quando la tastiera scorre. |
 | P2-04 | Legenda grande, adattiva, in basso a destra | IMPLEMENTED | — | ui | Solo le categorie presenti (tonica, scala, guide tone, accordo, tensione, avoid, esterna, scale aggiunte, forma, target, nota suonata), con forme oltre ai colori. In Studio sul post-it sotto il telefono. Note rilevate quando esisterà il Live Monitor. |
 | P2-05 | Barra etichette con "Intervalli" e layer indipendenti | PARTIAL | — | viz, ui | D-36: etichetta Intervallo (dalla fondamentale dell'accordo o dalla tonica). Mancano i layer di etichette indipendenti. |
 | P2-06 | Pannelli comprimibili, modalità Studio/Workbench/Focus | MISSING | — | ui | |
-| P2-07 | Mixer laterale | PARTIAL | P2-02 | ui, audio | Fader Click, Note, Accordi, Basso, Batteria, Mute per canale, meter d'uscita reale. Mancano master, solo, monitor chitarra e gain (dipendono dall'ingresso audio, non implementato). |
+| P2-07 | Mixer | IMPLEMENTED | P2-02 | ui, audio | Studio V5.7: mixer renderizzato a 7 canali nel cassetto (Codex `4a23ed2`): Click, Note, Accordi, Basso, Batteria, Chitarra (ascolto), Master; Mute e Solo reali (D-33), meter d'uscita reale. Nessun meter per bus (il motore non ne ha). |
 | P2-08 | Transport: stop/pausa, Click/Accenti 16 indicatori, timbri click | IMPLEMENTED | P0-07 | ui, timeline, audio | D-18: griglia di 16 passi a quattro livelli (2×8 su telefono), pattern dalla metrica o personale, tastiera, passo corrente evidenziato; 4 timbri sintetizzati. Test unitari sul modello e e2e sugli eventi programmati. |
 | P2-09 | Tutor pixel-art nel telefono | PARTIAL | P2-02 | ui, `tutor` | D-17: regole locali con test, sprite originale con sei espressioni, modalità Silenzioso/Contesto/Tutor, riducibile. Da fare: riposizionamento libero, più regole (esercizi, errori live). |
-| P2-11 | Requisiti per il redesign con Claude Design | MISSING | P2-02 | ui | Registrati in MASTER_SPEC §8.1: play/pausa con simboli standard, stop e reset distinti, BPM su display LED dedicato senza controlli ridondanti, tastiera sempre leggibile con marker grandi, legenda stabile, telefono con anteprima del prossimo accordo o mini-tastiera. Non ora: prima le funzioni. |
+| P2-11 | Redesign con Claude Design | IMPLEMENTED | P2-02 | ui | Handoff V5.7 integrato (D-40, D-41, `docs/STUDIO_V57_INTEGRATION.md`): play/pausa/stop distinti, BPM sull'LCD con −/+ e Tap, tastiera ridimensionabile e sempre leggibile, legenda nella sua scheda, anteprima del prossimo accordo (Next Fretboard). Classificazione di ogni controllo nel documento di integrazione. |
 | P2-10 | Quattro workspace in navigazione | IMPLEMENTED | P1-12 | ui | Fretboard, Harmony, Arpeggios, Jam; lo stato musicale resta condiviso. |
 
 ## P3 — Jam Studio e audio
@@ -97,7 +97,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 | ID | Requisito | Stato | Note |
 |----|-----------|-------|------|
-| P4-01 | Studio NAM / amp modeling (`docs/NAM_FEASIBILITY.md`) | MISSING | PoC isolata con AudioWorklet + WASM, misure di CPU e latenza, licenze. |
+| P4-01 | Studio NAM / amp modeling (`docs/NAM_FEASIBILITY.md`) | MISSING | PoC isolata con AudioWorklet + WASM, misure di CPU e latenza, licenze. Pronto il contratto `src/audio/ampProcessor.ts` e l'amplificatore V5.7 (solo visivo, dichiarato); punti d'ingresso in `docs/NAM_FEASIBILITY.md`. |
 | P4-02 | IR cabinet | MISSING | ConvolverNode, IR con licenza compatibile. |
 | P4-03 | Sequencer avanzato, MIDI, piano roll | MISSING | Le tracce sono già eventi su tick. |
 | P4-04 | Tutor evoluto | MISSING | |
@@ -115,4 +115,4 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 ## Prossimo intervento
 
-Su richiesta del proprietario gli incrementi avanzano senza attendere il merge, uno dopo l'altro sullo stesso branch (una PR aggiornata). Fatto: P1-12b, P1-12c (parziale), P3-06, P1-14, P1-11b, P3-10, P3-11 (parziale), P3-12, P3-07, P3-08, P3-09 (parziale), P1-10, P1-05, P2-05 (parziale), P4-06, P0-15, P3-11. Completati i punti locali. Restano le attività che richiedono internet (NAM, IR con licenza, browser aggiuntivi), lasciate per ultime.
+Su richiesta del proprietario gli incrementi avanzano senza attendere il merge, uno dopo l'altro sullo stesso branch (una PR aggiornata). Fatto: P1-12b, P1-12c (parziale), P3-06, P1-14, P1-11b, P3-10, P3-11 (parziale), P3-12, P3-07, P3-08, P3-09 (parziale), P1-10, P1-05, P2-05 (parziale), P4-06, P0-15, P3-11. Completati i punti locali. 8 novembre 2026: integrazione Studio V5.7 (P2-02, P2-07, P2-11) su `claude/lucid-rubin-19dvsp`, partita dal lavoro di Codex. Restano le attività che richiedono internet (NAM, IR con licenza, browser aggiuntivi), lasciate per ultime.

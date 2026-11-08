@@ -27,38 +27,53 @@ export function BeatLights() {
   );
 }
 
-export function CurrentChord() {
+/** The chord heard now (or shown while stopped) and the next one, as the transport names them. */
+export function useCurrentChordText(): { readonly current: string; readonly next: string | null; readonly none: boolean } {
   const settings = useApp((s) => s.settings);
   const chordIndex = usePlayhead((p) => p.chordIndex);
   const selected = useApp((s) => s.selectedChord);
   if (settings.mode === 'fretboard') {
-    return (
-      <div className="now-playing">
-        <span className="now-chord now-chord-text" data-testid="current-chord">{settings.chordLayers[settings.activeChord]?.symbol || 'Solo scala'}</span>
-      </div>
-    );
+    const symbol = settings.chordLayers[settings.activeChord]?.symbol;
+    return { current: symbol || 'Solo scala', next: null, none: !symbol };
   }
   if (settings.mode === 'arpeggio' && settings.arpSource === 'chord') {
-    return (
-      <div className="now-playing">
-        <span className="now-chord" data-testid="current-chord">{settings.arpSymbol || 'Nessun accordo'}</span>
-      </div>
-    );
+    return { current: settings.arpSymbol || 'Nessun accordo', next: null, none: !settings.arpSymbol };
   }
   const chords = activeChords(settings);
   const index = chordIndex ?? selected;
   const current = chords[index];
   const next = chords.length > 1 ? chords[(index + 1) % chords.length] : undefined;
+  return { current: current?.symbol ?? 'Nessun accordo', next: next?.symbol ?? null, none: !current };
+}
+
+export function CurrentChord() {
+  const mode = useApp((s) => s.settings.mode);
+  const arpSource = useApp((s) => s.settings.arpSource);
+  const { current, next } = useCurrentChordText();
+  if (mode === 'fretboard') {
+    return (
+      <div className="now-playing">
+        <span className="now-chord now-chord-text" data-testid="current-chord">{current}</span>
+      </div>
+    );
+  }
+  if (mode === 'arpeggio' && arpSource === 'chord') {
+    return (
+      <div className="now-playing">
+        <span className="now-chord" data-testid="current-chord">{current}</span>
+      </div>
+    );
+  }
   return (
     <div className="now-playing" aria-live="off">
-      <span className="now-chord" data-testid="current-chord">{current?.symbol ?? 'Nessun accordo'}</span>
-      {next ? <span className="next-chord">poi {next.symbol}</span> : null}
+      <span className="now-chord" data-testid="current-chord">{current}</span>
+      {next ? <span className="next-chord">poi {next}</span> : null}
     </div>
   );
 }
 
 /** Harmony modes are about chord functions; the scale lab is about degrees. */
-function withModeLabels(labelMode: LabelMode, mode: AppMode): { mode: AppMode; labelMode: LabelMode } {
+export function withModeLabels(labelMode: LabelMode, mode: AppMode): { mode: AppMode; labelMode: LabelMode } {
   if (mode === 'fretboard' && labelMode === 'function') return { mode, labelMode: 'degree' };
   if (mode !== 'fretboard' && labelMode === 'degree') return { mode, labelMode: 'function' };
   return { mode, labelMode };

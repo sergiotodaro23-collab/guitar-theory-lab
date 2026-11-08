@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook, reveal } from './studio';
 
 /** Jam genres and the bass line: a ready band in one choice. */
 
@@ -15,24 +16,35 @@ for (const look of ['Studio', 'Semplificata'] as const) {
   test(`${look}: a genre sets drums, bass, comping and swing; the bass follows the chords`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const errors = await open(page);
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
 
+    await reveal(page, page.getByTestId('template'));
     await page.getByTestId('template').selectOption('ii-v-i');
+    await reveal(page, page.getByTestId('jam-genre'));
     await page.getByTestId('jam-genre').selectOption('jazz');
+    await reveal(page, page.getByTestId('comp-pattern'));
     await expect(page.getByTestId('comp-pattern')).toHaveValue('charleston');
+    await reveal(page, page.getByTestId('bass-pattern'));
     await expect(page.getByTestId('bass-pattern').locator('option').first()).toHaveText('Walking in salita');
     if (look === 'Studio') await expect(page.getByTestId('knob-swing')).toHaveAttribute('aria-valuetext', '67%');
+    await reveal(page, page.getByRole('button', { name: 'Usa 140 BPM' }));
     await page.getByRole('button', { name: 'Usa 140 BPM' }).click();
     await expect(page.getByTestId('bpm')).toHaveValue('140');
     if (look === 'Semplificata') await page.getByRole('tab', { name: 'Batteria' }).click();
     // Jazz groove A: spang-a-lang on the ride (accent on one), hi-hat foot on two and four, feathered kick.
+    await reveal(page, page.getByTestId('drum-ride-0'));
     await expect(page.getByTestId('drum-ride-0')).toHaveAttribute('data-step', '2');
+    await reveal(page, page.getByTestId('drum-ride-6'));
     await expect(page.getByTestId('drum-ride-6')).toHaveAttribute('data-step', '1');
+    await reveal(page, page.getByTestId('drum-ride-2'));
     await expect(page.getByTestId('drum-ride-2')).toHaveAttribute('data-step', '0');
+    await reveal(page, page.getByTestId('drum-hat-4'));
     await expect(page.getByTestId('drum-hat-4')).toHaveAttribute('data-step', '1');
+    await reveal(page, page.getByTestId('drum-kick-0'));
     await expect(page.getByTestId('drum-kick-0')).toHaveAttribute('data-step', '3');
     // The genre also suggests the balance: brushes-quiet drums, the bass up front.
+    await reveal(page, page.getByRole('slider', { name: 'Volume Batteria' }));
     await expect(page.getByRole('slider', { name: 'Volume Batteria' }).first()).toHaveValue('0.5');
 
     await page.getByTestId('bpm').fill('240');
@@ -53,7 +65,9 @@ test('bass off: no bass notes; the Basso fader is in the mixer', async ({ page }
   await page.setViewportSize({ width: 1440, height: 900 });
   await open(page);
   await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
+  await reveal(page, page.getByTestId('fader-bass'));
   await expect(page.getByTestId('fader-bass')).toBeVisible();
+  await reveal(page, page.getByRole('checkbox', { name: 'Suona il basso' }));
   await page.getByRole('checkbox', { name: 'Suona il basso' }).uncheck();
   await page.getByTestId('play').click();
   await page.waitForTimeout(800);
@@ -65,7 +79,7 @@ test('five mixer channels and the output meter fit inside the mixer, in both loo
   for (const [look, width, height] of [['Studio', 1440, 900], ['Studio', 1280, 800], ['Semplificata', 1440, 900], ['Studio', 768, 1024]] as const) {
     await page.setViewportSize({ width, height });
     await open(page);
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     const [mixer, meter, fader] = await page.evaluate(() => ['.ws-mixer, .cs-mixer', '.meter', '[data-testid="fader-drums"]']
       .map((sel) => document.querySelector(sel)?.getBoundingClientRect().right ?? Infinity));
     expect(meter, `${look} ${width}`).toBeLessThanOrEqual(mixer ?? 0);
@@ -77,9 +91,13 @@ test('Fusion: chords and bass anticipate each change by an eighth, ghost notes o
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await open(page);
   await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
+  await reveal(page, page.getByTestId('template'));
   await page.getByTestId('template').selectOption('ii-v-i');
+  await reveal(page, page.getByTestId('jam-genre'));
   await page.getByTestId('jam-genre').selectOption('fusion');
+  await reveal(page, page.getByTestId('comp-pattern'));
   await expect(page.getByTestId('comp-pattern')).toHaveValue('push');
+  await reveal(page, page.getByTestId('drum-snare-2'));
   await expect(page.getByTestId('drum-snare-2')).toHaveAttribute('data-step', '3');
   await page.getByTestId('bpm').fill('240');
   await page.getByTestId('play').click();
@@ -99,17 +117,26 @@ test('timbres: a genre sets kit, bass and chord sounds; every sound actually pla
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await open(page);
   await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
+  await reveal(page, page.getByTestId('jam-genre'));
   await page.getByTestId('jam-genre').selectOption('ambient');
+  await reveal(page, page.getByTestId('drum-sound'));
   await expect(page.getByTestId('drum-sound')).toHaveValue('electronic');
+  await reveal(page, page.getByTestId('bass-timbre'));
   await expect(page.getByTestId('bass-timbre')).toHaveValue('synth');
+  await reveal(page, page.getByTestId('comp-timbre'));
   await expect(page.getByTestId('comp-timbre')).toHaveValue('pad');
+  await reveal(page, page.getByTestId('jam-genre'));
   await page.getByTestId('jam-genre').selectOption('jazz');
+  await reveal(page, page.getByTestId('drum-sound'));
   await expect(page.getByTestId('drum-sound')).toHaveValue('brushes');
+  await reveal(page, page.getByTestId('bass-timbre'));
   await expect(page.getByTestId('bass-timbre')).toHaveValue('upright');
   // Only the chords: mute drums, bass and click, so the meter hears the comping timbre alone.
+  await reveal(page, page.getByTestId('mute-click'));
   for (const channel of ['drums', 'bass', 'click']) await page.getByTestId(`mute-${channel}`).click();
   await page.getByTestId('play').click();
   for (const comp of ['keys', 'epiano', 'organ', 'clean', 'pad']) {
+    await reveal(page, page.getByTestId('comp-timbre'));
     await page.getByTestId('comp-timbre').selectOption(comp);
     const peak = await page.evaluate(async () => {
       let p = 0;

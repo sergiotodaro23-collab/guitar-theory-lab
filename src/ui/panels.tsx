@@ -141,6 +141,13 @@ const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 
 const midiName = (m: number) => `${NOTE_NAMES[m % 12]}${Math.floor(m / 12) - 1}`;
 const OPEN_OPTIONS = Array.from({ length: 76 - 23 + 1 }, (_, i) => ({ value: 23 + i, label: midiName(23 + i) }));
 
+/** Preset tunings and "custom", for every tuning selector of the neck. */
+export const neckTuningOptions = [...TUNINGS.map((t) => ({ value: t.id, label: t.name })), { value: 'custom', label: 'Personalizzata' }];
+/** Choosing a tuning: a preset also sets the tuner; "custom" starts from the strings in use. */
+export const neckTuningChange = (neckTuning: string, strings: readonly number[]): Partial<Settings> => (neckTuning === 'custom'
+  ? { neckTuning, customTuning: [...strings] }
+  : { neckTuning, tunerTuning: neckTuning });
+
 /** Tuning of the neck (P1-05, D-36): presets, or six open strings of your own. */
 export function TuningField() {
   const s = useApp((state) => state.settings);
@@ -152,10 +159,8 @@ export function TuningField() {
       <Field label="Accordatura" hint={standard ? undefined : 'CAGED e 3NPS sono pensate per l’accordatura standard: qui restano suonabili ma non sono le forme classiche. Tasti e Tutta la tastiera sono esatti.'}>
         <Select<string>
           label="Accordatura della tastiera" testId="neck-tuning" value={s.neckTuning}
-          options={[...TUNINGS.map((t) => ({ value: t.id, label: t.name })), { value: 'custom', label: 'Personalizzata' }]}
-          onChange={(neckTuning) => update(neckTuning === 'custom'
-            ? { neckTuning, customTuning: [...strings] }
-            : { neckTuning, tunerTuning: neckTuning })}
+          options={neckTuningOptions}
+          onChange={(neckTuning) => update(neckTuningChange(neckTuning, strings))}
         />
       </Field>
       {s.neckTuning === 'custom' ? (
@@ -909,14 +914,31 @@ const MIXER_KEYS = new Set(['volClick', 'volNotes', 'volComp', 'muteClick', 'mut
 const pickStudy = (s: Settings): Partial<Settings> =>
   Object.fromEntries(Object.entries(s).filter(([key]) => !MIXER_KEYS.has(key))) as Partial<Settings>;
 
+type SavedPreset = ReturnType<typeof presetRepository.list>[number];
+
+/** Built-in and saved study presets, as select options ('__' is the prompt). */
+export const presetLoadOptions = (saved: readonly SavedPreset[]) => [
+  { value: '__', label: 'Scegli…' },
+  ...STUDY_PRESETS.map((p) => ({ value: p.id, label: p.name })),
+  ...saved.map((p) => ({ value: p.id, label: `Tuo: ${p.name}` })),
+];
+
+/** Loads a preset over the current settings (mixer and look stay); returns its name, or null. */
+export function loadStudyPreset(id: string, saved: readonly SavedPreset[]): string | null {
+  const builtin = STUDY_PRESETS.find((p) => p.id === id);
+  const own = saved.find((p) => p.id === id);
+  const data = builtin?.data ?? own?.data;
+  if (!data) return null;
+  const { settings, update } = useApp.getState();
+  update(sanitizeSettings({ ...settings, ...(data as object) }));
+  return builtin?.name ?? own?.name ?? null;
+}
+
 export function PresetsPanel() {
   const settings = useApp((state) => state.settings);
-  const update = useApp((state) => state.update);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(() => presetRepository.list('study'));
-
-  const applyPreset = (data: unknown) => update(sanitizeSettings({ ...settings, ...(data as object) }));
 
   return (
     <Panel title="Preset di studio">
@@ -925,17 +947,9 @@ export function PresetsPanel() {
           label="Carica un preset"
           testId="preset-load"
           value="__"
-          options={[
-            { value: '__', label: 'Scegli…' },
-            ...STUDY_PRESETS.map((p) => ({ value: p.id, label: p.name })),
-            ...saved.map((p) => ({ value: p.id, label: `Tuo: ${p.name}` })),
-          ]}
+          options={presetLoadOptions(saved)}
           onChange={(id) => {
-            const builtin = STUDY_PRESETS.find((p) => p.id === id);
-            const own = saved.find((p) => p.id === id);
-            if (builtin) applyPreset(builtin.data);
-            if (own) applyPreset(own.data);
-            const label = builtin?.name ?? own?.name;
+            const label = loadStudyPreset(id, saved);
             if (label) setMessage(`Caricato: ${label}`);
           }}
         />
