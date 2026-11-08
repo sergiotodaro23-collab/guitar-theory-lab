@@ -7,7 +7,7 @@
  */
 import { useState, type ReactNode } from 'react';
 import { engine } from '../../app/engine';
-import { BPM_MAX, BPM_MIN, type AppMode, type MixChannel } from '../../app/settings';
+import { BPM_MAX, BPM_MIN, type AppMode } from '../../app/settings';
 import { useApp, usePlayhead } from '../../app/store';
 import { AccentGrid } from '../AccentGrid';
 import { AppFooter } from '../AppFooter';
@@ -17,13 +17,14 @@ import { BackingPanel } from '../BackingPanel';
 import { ChordViewPanel } from '../ChordViewPanel';
 import { InputPanels } from '../LivePanels';
 import { Board } from '../Board';
-import { Fader, GuitarChannel, Knob, MasterFader, OutputMeter } from '../hardware';
+import { Knob } from '../hardware';
 import {
   AppearanceToggle, BeatLights, BpmInput, ClickSelect, CurrentChord, MeterSelect, ModeNav, Nameplate, PlayControls, useTap,
 } from '../Transport';
 import { ArpeggioPanel, ChordsPanel, ExercisePanel, HarmonyPanel, JamPanels, LabelModeSelector, MixerShown, PresetsPanel, ScalePanel } from '../panels';
 import { TutorPhone } from './TutorPhone';
 import maple from './assets/maple.webp';
+import { MixerDevice } from './v57/MixerDevice';
 
 function Screws() {
   return (
@@ -74,40 +75,6 @@ function TransportPlate() {
         <ClickSelect />
       </div>
       <AccentGrid />
-    </section>
-  );
-}
-
-const CHANNELS: readonly { channel: MixChannel; label: string; vol: 'volClick' | 'volNotes' | 'volComp' | 'volBass' | 'volDrums'; mute: 'muteClick' | 'muteNotes' | 'muteComp' | 'muteBass' | 'muteDrums' }[] = [
-  { channel: 'click', label: 'Click', vol: 'volClick', mute: 'muteClick' },
-  { channel: 'notes', label: 'Note', vol: 'volNotes', mute: 'muteNotes' },
-  { channel: 'comp', label: 'Accordi', vol: 'volComp', mute: 'muteComp' },
-  { channel: 'bass', label: 'Basso', vol: 'volBass', mute: 'muteBass' },
-  { channel: 'drums', label: 'Batteria', vol: 'volDrums', mute: 'muteDrums' },
-];
-
-function MixerPlate() {
-  const s = useApp((state) => state.settings);
-  const update = useApp((state) => state.update);
-  return (
-    <section className="ws-plate ws-mixer" aria-label="Mixer">
-      <Screws />
-      <h2 className="ws-engraved ws-plate-title">Mixer</h2>
-      <div className="ws-channels">
-        {CHANNELS.map(({ channel, label, vol, mute }) => (
-          <div className="ws-channel" key={channel}>
-            <Fader label={label} value={s[vol]} onChange={(v) => update({ [vol]: v })} testId={`fader-${channel}`} />
-            <button type="button" className="ws-mute" aria-pressed={s[mute]} aria-label={`Muto ${label}`} data-testid={`mute-${channel}`} onClick={() => update({ [mute]: !s[mute] })}>
-              Mute
-            </button>
-          </div>
-        ))}
-        <GuitarChannel keyClass="ws-mute" />
-        <div className="ws-channel ws-master">
-          <MasterFader />
-          <OutputMeter />
-        </div>
-      </div>
     </section>
   );
 }
@@ -171,7 +138,7 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
         */}
         <div className="ws-scroll" data-testid="scroll-panels">
           <Notes mode={mode} />
-          <MixerPlate />
+          <MixerDevice />
           <section className="ws-plate ws-drawer" aria-label="Preset">
             <Screws />
             <PresetsPanel />
