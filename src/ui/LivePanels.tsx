@@ -139,6 +139,7 @@ function InputDiagnostics() {
           <dt>Frequenza di campionamento</dt><dd>{d.sampleRate} Hz{d.trackSampleRate && d.trackSampleRate !== d.sampleRate ? ` (ingresso ${d.trackSampleRate} Hz, ricampionato)` : ''}</dd>
           <dt>Dispositivo</dt><dd>{d.deviceLabel || 'senza nome'}</dd>
           <dt>Canali d’ingresso</dt><dd>{d.inputChannels ?? 'non dichiarati'}</dd>
+          <dt>Analisi</dt><dd data-testid="diag-analysis">{d.analysis === 'worklet' ? 'AudioWorklet, campioni continui' : 'Analyser e timer (browser senza AudioWorklet)'}</dd>
           <dt>Latenza di base dichiarata</dt><dd>{ms(d.baseLatency)}</dd>
           <dt>Latenza d’uscita dichiarata</dt><dd>{ms(d.outputLatency)}</dd>
         </dl>

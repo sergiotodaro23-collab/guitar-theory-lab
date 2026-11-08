@@ -18,6 +18,9 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await expect(page.getByTestId('live-positions')).toContainText('in 2 punti');
     await expect(page.locator('.live-possible, .live-likely')).toHaveCount(2);
     await expect(page.getByTestId('legend').locator('[data-kind^="live"]').first()).toBeVisible();
+    // The samples reach the analysis through the capture worklet (D-38).
+    await page.getByTestId('live-diagnostics').locator('summary').click();
+    await expect(page.getByTestId('diag-analysis')).toContainText('AudioWorklet');
     // Never monitoring by itself.
     await expect(page.getByTestId('monitor-toggle')).toHaveAttribute('aria-pressed', 'false');
     await expect(page.getByTestId('live-level')).not.toHaveAttribute('aria-valuenow', '0');
