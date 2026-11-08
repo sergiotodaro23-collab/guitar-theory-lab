@@ -99,7 +99,7 @@ export function Console() {
   const update = useApp((s) => s.update);
   const tap = useTap();
   return (
-    <section className="v57-plate v57-deck ws-transport" data-lcdx={lcdExpanded ? '1' : '0'} aria-label="Trasporto e display">
+    <section className="v57-plate v57-deck" data-lcdx={lcdExpanded ? '1' : '0'} aria-label="Trasporto e display">
       <Transport />
       <div className="v57-plate v57-lcdframe">
         <Lcd />

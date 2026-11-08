@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** Jam genres and the bass line: a ready band in one choice. */
 
@@ -15,7 +16,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
   test(`${look}: a genre sets drums, bass, comping and swing; the bass follows the chords`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const errors = await open(page);
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
 
     await page.getByTestId('template').selectOption('ii-v-i');
@@ -65,7 +66,7 @@ test('five mixer channels and the output meter fit inside the mixer, in both loo
   for (const [look, width, height] of [['Studio', 1440, 900], ['Studio', 1280, 800], ['Semplificata', 1440, 900], ['Studio', 768, 1024]] as const) {
     await page.setViewportSize({ width, height });
     await open(page);
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     const [mixer, meter, fader] = await page.evaluate(() => ['.ws-mixer, .cs-mixer', '.meter', '[data-testid="fader-drums"]']
       .map((sel) => document.querySelector(sel)?.getBoundingClientRect().right ?? Infinity));
     expect(meter, `${look} ${width}`).toBeLessThanOrEqual(mixer ?? 0);

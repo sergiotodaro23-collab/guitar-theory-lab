@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** Arpeggios Lab, P1-12c: shapes along the neck decided by the engine (D-27). */
 
@@ -7,7 +8,7 @@ const open = async (page: Page, look: 'Studio' | 'Semplificata') => {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/?debug=1');
-  await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+  await chooseLook(page, look);
   await page.getByRole('button', { name: 'Arpeggios Lab', exact: true }).click();
   return errors;
 };

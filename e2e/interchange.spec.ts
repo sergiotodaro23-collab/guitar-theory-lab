@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** P1-11b: modal interchange — the analysis, the chord's own scale, and views that start from it. */
 
@@ -10,7 +11,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     page.on('pageerror', (e) => errors.push(e.message));
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
     await page.getByTestId('template').selectOption('interchange-iv');
     await expect(page.getByTestId('analysis-0')).toHaveAttribute('data-kind', 'diatonic');

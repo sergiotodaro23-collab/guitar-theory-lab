@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** P1-14: one view per chord of the progression, shared by Harmony, Arpeggios and Jam. */
 
@@ -10,7 +11,7 @@ const CMAJ7 = ['B', 'C', 'E', 'G'];
 async function setup(page: Page, look: 'Studio' | 'Semplificata') {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+  await chooseLook(page, look);
   await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
   await page.getByTestId('template').selectOption('ii-v-i');
   await page.getByRole('group', { name: 'Etichette' }).getByRole('button', { name: 'Nome' }).click();
@@ -92,7 +93,7 @@ test('a free stretch of frets, a chosen overlay colour, and the exercise that fo
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/?debug=1');
-  await page.getByTestId('appearance').getByRole('button', { name: 'Studio', exact: true }).click();
+  await chooseLook(page, 'Studio');
   await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
   await page.getByTestId('template').selectOption('ii-v-i');
   // G7 on frets 12–15 only.

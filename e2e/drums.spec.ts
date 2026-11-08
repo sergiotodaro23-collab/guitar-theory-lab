@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** Jam Studio drum step sequencer: 16 steps, patterns A–D, fill, on the shared clock. */
 
@@ -17,7 +18,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
   test(`${look}: pattern A plays on the beat, edits and pattern changes land on the next bar`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const errors = await open(page);
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
     if (look === 'Semplificata') await page.getByRole('tab', { name: 'Batteria' }).click();
 

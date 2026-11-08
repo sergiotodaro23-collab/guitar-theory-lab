@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /**
  * P0-14 desktop layout (D-24): from 1200 × 720 up, transport and neck stay in
@@ -12,7 +13,7 @@ const FIXED = ['[data-testid="play"]', '[data-testid="lcd"]', '.fretboard', '[da
 const open = async (page: Page, look: 'Studio' | 'Semplificata', width: number, height: number) => {
   await page.setViewportSize({ width, height });
   await page.goto('/');
-  await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+  await chooseLook(page, look);
   await expect(page.locator('html')).toHaveAttribute('data-theme', look === 'Studio' ? 'studio' : 'simple');
 };
 const boxes = (page: Page) => page.evaluate((selectors) => selectors.map((sel) => {

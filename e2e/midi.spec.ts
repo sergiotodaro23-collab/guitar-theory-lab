@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /**
  * P4-06: a MIDI device, simulated in the page (Chromium headless has no MIDI
@@ -21,7 +22,7 @@ test('MIDI notes show on the Live Monitor and the neck; Start, Stop and the peda
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await page.getByTestId('appearance').getByRole('button', { name: 'Studio', exact: true }).click();
+  await chooseLook(page, 'Studio');
   await page.getByTestId('midi-toggle').click();
   await expect(page.getByTestId('midi-status')).toContainText('Chitarra MIDI di prova');
 

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** P3-08: the progression as a song — sections with their own groove, band and dynamics. */
 
@@ -8,7 +9,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     page.on('pageerror', (e) => errors.push(e.message));
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/?debug=1');
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
     await page.getByTestId('template').selectOption('ii-v-i');
     if (look === 'Semplificata') await page.getByRole('tab', { name: 'Arrangiamento' }).click();

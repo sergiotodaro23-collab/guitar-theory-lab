@@ -275,7 +275,8 @@ html .v57 .v57-lctl-knob .accent-toggle[aria-expanded='true'] { color: #2a1606; 
 @media (prefers-reduced-motion: reduce) {
   .v57 * { transition: none !important; }
   .v57-fbpanel .active-halo, .v57-fbpanel .live-likely { animation: none !important; }
-  .v57-dv, .v57-dvx[data-out='1'] .v57-dv { animation: v57-fade .12s linear both; }
+  /* styles.css stops every animation with !important: the drawer keeps its 120 ms fade. */
+  html .v57 .v57-dv, html .v57 .v57-dvx[data-out='1'] .v57-dv { animation: v57-fade .12s linear both !important; }
   .v57-dvx::after, .v57-dvx[data-out='1']::after { animation: none; }
 }
 

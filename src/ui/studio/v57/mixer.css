@@ -30,7 +30,3 @@
 .v57-m-tick b { color: #e8e2d0; }
 .v57-output { position: absolute; left: 810px; top: 128px; width: 24px; }
 .v57-mixer-hint { margin: 0 20px; color: var(--muted); font-size: 12px; line-height: 1.4; }
-/* The 7-channel chassis needs the full centre column, including short laptops. */
-@media (min-width: 901px) and (max-width: 1199px), (min-width: 1200px) and (max-height: 719px) {
-  .ws-rig { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'head' 'trans' 'neck' 'notes' 'mixer' 'side' 'aside' 'drawer' 'foot'; }
-}

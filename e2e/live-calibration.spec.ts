@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { fakeMic, openInput, wav } from './liveHelpers';
+import { chooseLook } from './studio';
 
 /**
  * Live Monitor 2.0 calibration with a WAV as the microphone: the procedure
@@ -37,7 +38,7 @@ test('a profile is created, measured step by step, kept after a reload, and can 
   await expect(page.getByTestId('calibration-result')).toContainText(/Latenza misurata|non ho sentito abbastanza/i, { timeout: 10000 });
 
   await page.reload();
-  await page.getByTestId('appearance').getByRole('button', { name: 'Studio', exact: true }).click();
+  await chooseLook(page, 'Studio');
   await expect(page.getByTestId('live-profile').locator('option:checked')).toHaveText('Strat ponte · scheda USB');
   await expect(page.getByTestId('calibration-values')).toContainText('misurato');
   expect(errors).toEqual([]);

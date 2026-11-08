@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** Click / Accenti: 16 steps, separate from the meter, heard by the scheduler. */
 
@@ -16,7 +17,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
   test(`${look}: the grid follows the meter until edited, and the edit is what plays`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const errors = await open(page);
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     await page.getByTestId('accent-toggle').click();
     const grid = page.getByTestId('accent-grid');
     await expect(grid.getByRole('button', { name: /^Passo/ })).toHaveCount(16);
@@ -92,7 +93,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await page.setViewportSize({ width: 1280, height: 800 });
     await open(page);
     await page.addStyleTag({ content: "*, :root { font-family: 'DejaVu Sans', 'Verdana', sans-serif !important; --display: 'DejaVu Sans', 'Verdana', sans-serif; --plate-font: 'DejaVu Sans', 'Verdana', sans-serif; }" });
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     const key = await page.getByTestId('accent-toggle').boundingBox();
     await page.getByTestId('accent-toggle').click();
     for (const i of [0, 3, 15]) await expect(step(page, i)).toBeInViewport({ ratio: 1 });

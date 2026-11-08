@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** P1-05: the neck follows the tuning — presets, a custom tuning, and labels by interval. */
 
@@ -10,7 +11,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     page.on('pageerror', (e) => errors.push(e.message));
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     if (look === 'Semplificata') await page.getByRole('tab', { name: 'Scale' }).click();
     await page.getByTestId('tonic').selectOption('D');
     await page.getByRole('group', { name: 'Etichette' }).first().getByRole('button', { name: 'Nome' }).click();

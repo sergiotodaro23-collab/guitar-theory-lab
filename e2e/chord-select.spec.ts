@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** Choosing chords while the transport runs (owner report, real-guitar session). */
 
@@ -12,7 +13,7 @@ const chordEvents = (page: Page) => page.evaluate(() => (window.__gtl?.debug.sch
 for (const look of ['Studio', 'Semplificata'] as const) {
   test(`${look}: manual changes — quick picks keep only the last, N N moves two chords`, async ({ page }) => {
     await open(page);
-    await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
+    await chooseLook(page, look);
     await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
     await page.getByRole('button', { name: 'Manuale', exact: true }).click();
     await page.getByTestId('bpm').fill('60');

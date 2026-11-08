@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, type Page } from '@playwright/test';
+import { chooseLook, openTab } from './studio';
 
 /**
  * Live Monitor and Tuner end to end: Chromium reads a WAV file as its
@@ -34,8 +35,8 @@ export const fakeMic = (file: string) => ({
 export const openInput = async (page: Page, look: 'Studio' | 'Semplificata') => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/?debug=1');
-  await page.getByTestId('appearance').getByRole('button', { name: look, exact: true }).click();
-  if (look === 'Semplificata') await page.getByRole('tab', { name: 'Ingresso' }).click();
+  await chooseLook(page, look);
+  await openTab(page, 'Ingresso');
   await page.getByTestId('live-toggle').click();
   await expect(page.getByTestId('live-status')).toHaveText('Ingresso attivo');
 };

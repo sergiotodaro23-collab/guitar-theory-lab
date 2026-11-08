@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
+import { chooseLook } from './studio';
 
 /** P3-09: a local audio file plays in time with the jam (synthetic clicks, not music). */
 
@@ -29,7 +30,7 @@ test('a click track at 120 BPM with bar 1 at 0.5 s starts there, loops with the 
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/?debug=1');
-  await page.getByTestId('appearance').getByRole('button', { name: 'Studio', exact: true }).click();
+  await chooseLook(page, 'Studio');
   await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
   await page.getByTestId('backing-file').setInputFiles(clickTrack('backing-120.wav', 120, 0.5, 14));
   await expect(page.getByTestId('backing-status')).toContainText('backing-120.wav · 14.0 s');
@@ -65,7 +66,7 @@ test('a click track at 120 BPM with bar 1 at 0.5 s starts there, loops with the 
 
   // After a reload the file is still in this browser.
   await page.reload();
-  await page.getByTestId('appearance').getByRole('button', { name: 'Studio', exact: true }).click();
+  await chooseLook(page, 'Studio');
   await expect(page.getByTestId('backing-status')).toContainText('backing-120.wav');
   await page.getByTestId('play').click();
   await expect(page.getByTestId('backing-status')).toContainText('in riproduzione', { timeout: 5000 });
