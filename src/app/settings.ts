@@ -12,6 +12,7 @@ import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from 
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
 import { sanitizeChordViews, type ChordViews } from './chordViews';
 import { clampActive, sanitizeChordLayers, type ChordLayer } from './chordLayers';
+import { DEFAULT_RIG, sanitizeRig, type RigSettings } from './rig';
 
 export type AppMode = 'fretboard' | 'harmony' | 'arpeggio' | 'jam';
 export const APP_MODES: readonly AppMode[] = ['fretboard', 'harmony', 'arpeggio', 'jam'];
@@ -128,6 +129,8 @@ export interface HarmonySettings {
   readonly liveProfileId: string;
   /** Master output level, after every channel including the guitar monitor. */
   readonly volMaster: number;
+  /** Guitar Rig on the listening branch (D-42): pedals, amp head, cabinet. */
+  readonly rig: RigSettings;
   /** Click accents, 16 steps from the downbeat; null follows the meter (D-18). */
   readonly clickAccents: readonly AccentLevel[] | null;
   readonly clickSound: ClickSound;
@@ -255,6 +258,7 @@ export const DEFAULT_SETTINGS: Settings = {
   liveProfiles: [],
   liveProfileId: '',
   volMaster: 0.85,
+  rig: DEFAULT_RIG,
   clickAccents: null,
   clickSound: 'beep',
   arpSource: 'chord',
@@ -373,6 +377,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     liveProfiles: sanitizeProfiles(r.liveProfiles),
     liveProfileId: typeof r.liveProfileId === 'string' && sanitizeProfiles(r.liveProfiles).some((p) => p.id === r.liveProfileId) ? r.liveProfileId : '',
     volMaster: number01(r.volMaster, d.volMaster),
+    rig: sanitizeRig(r.rig),
     clickAccents: sanitizeAccents(r.clickAccents),
     clickSound: oneOf(r.clickSound, CLICK_SOUNDS.map((c) => c.value), d.clickSound),
     arpSource: oneOf(r.arpSource, ['chord', 'progression'] as const, d.arpSource),

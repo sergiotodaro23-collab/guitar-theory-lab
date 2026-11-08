@@ -8,6 +8,8 @@
 import { create } from 'zustand';
 import { SENSITIVITY, detectPitch, PitchTracker, type Sensitivity, type TrackedPitch } from '../pitch';
 import { workerTimer } from './webAudioSink';
+import { DEFAULT_RIG, type RigSettings } from '../app/rig';
+import { GuitarRig, decodeImpulse, type RigState } from './guitarRig';
 
 export type LiveState = 'off' | 'starting' | 'on' | 'error';
 /** Which input channel carries the guitar. Many USB interfaces put the instrument input on channel 2. */
@@ -129,6 +131,10 @@ class LiveInput {
   /** The last FRAME samples, kept up to date by the worklet. */
   private ring = new Float32Array(FRAME);
   private monitor: GainNode | null = null;
+  /** Guitar Rig (D-42) on the listening branch only: the analysis keeps the dry signal. */
+  private rig: GuitarRig | null = null;
+  private rigSettings: RigSettings = DEFAULT_RIG;
+  private cabFile: AudioBuffer | null = null;
   private stopTimer: (() => void) | null = null;
   private tracker = new PitchTracker();
   private buffer = new Float32Array(FRAME);
@@ -167,7 +173,11 @@ class LiveInput {
       this.monitor.gain.value = 0;
       this.mono.connect(this.gain);
       this.gain.connect(this.analyser);
-      this.gain.connect(this.monitor).connect(destination);
+      this.rig = new GuitarRig(ctx);
+      this.rig.setCabFile(this.cabFile);
+      this.rig.apply(this.rigSettings);
+      this.gain.connect(this.rig.input);
+      this.rig.output.connect(this.monitor).connect(destination);
       this.sampleRate = ctx.sampleRate;
       await this.attachWorklet(ctx);
       this.configure(this.settings);
@@ -204,6 +214,8 @@ class LiveInput {
     this.sink = null;
     this.stream?.getTracks().forEach((t) => t.stop());
     for (const node of [this.source, this.splitter, this.mono, this.gain, this.analyser, this.monitor]) node?.disconnect();
+    this.rig?.dispose();
+    this.rig = null;
     this.stream = null;
     this.source = this.splitter = this.mono = this.gain = this.analyser = this.monitor = null;
     this.tracker.reset();
@@ -315,6 +327,23 @@ class LiveInput {
   setGain(value: number): void {
     this.inputGain = value;
     this.gain?.gain.setTargetAtTime(value, this.gain.context.currentTime, 0.02);
+  }
+
+  /** Rig settings from the store; applied at once when the input runs, and on the next start. */
+  setRig(settings: RigSettings): void {
+    this.rigSettings = settings;
+    this.rig?.apply(settings);
+  }
+
+  /** A cabinet impulse response chosen by the user (kept for this visit only). */
+  async loadCabinet(file: Blob, ctx: BaseAudioContext): Promise<void> {
+    this.cabFile = await decodeImpulse(file, ctx);
+    this.rig?.setCabFile(this.cabFile);
+  }
+
+  /** What the rig is doing now, for the device's status line and the tests; null while the input is off. */
+  rigState(): RigState | null {
+    return this.rig?.describe() ?? null;
   }
 
   /** Monitoring only on request; the level is the monitor fader. */
