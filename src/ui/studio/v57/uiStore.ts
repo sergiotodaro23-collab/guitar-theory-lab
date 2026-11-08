@@ -5,7 +5,7 @@
  */
 import { create } from 'zustand';
 import type { AppMode } from '../../../app/settings';
-import { loadPrefs, savePref, type DevicePrefs, type KeyValueStore, type TabId, type UiPrefs, type VizPrefs } from './layout';
+import { loadPrefs, savePref, type KeyValueStore, type TabId, type UiPrefs, type VizPrefs } from './layout';
 
 export type DeviceId = 'mixer' | 'amp' | 'tuner' | 'iface';
 
@@ -32,7 +32,6 @@ export interface StudioUi extends UiPrefs {
   readonly setRail: (railExpanded: boolean) => void;
   readonly setLcd: (lcdExpanded: boolean) => void;
   readonly setViz: (change: Partial<VizPrefs>) => void;
-  readonly setDevices: (change: Partial<DevicePrefs>) => void;
   readonly openDevice: (device: DeviceId, launcher: HTMLElement | null) => void;
   readonly closeDevice: () => void;
   readonly pickTab: (mode: AppMode, tab: TabId) => void;
@@ -54,7 +53,6 @@ export const useStudioUi = create<StudioUi>((set, get) => ({
   setRail: (railExpanded) => { set({ railExpanded }); savePref(storage(), 'railExpanded', railExpanded); },
   setLcd: (lcdExpanded) => { set({ lcdExpanded }); savePref(storage(), 'lcdExpanded', lcdExpanded); },
   setViz: (change) => { const viz = { ...get().viz, ...change }; set({ viz }); savePref(storage(), 'viz', viz); },
-  setDevices: (change) => { const devices = { ...get().devices, ...change }; set({ devices }); savePref(storage(), 'devices', devices); },
   // A device replaces the open one at once (no exit animation), as in the handoff.
   openDevice: (device, launcher) => set({ device, launcher, settingsOpen: false, vizOpen: false }),
   closeDevice: () => set({ device: null }),

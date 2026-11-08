@@ -31,7 +31,7 @@ export const LABS: readonly { id: AppMode; label: string }[] = [
 
 export const DEVICES: readonly { id: DeviceId; label: string }[] = [
   { id: 'iface', label: 'Ingresso chitarra' },
-  { id: 'amp', label: 'Amplificatore e NAM' },
+  { id: 'amp', label: 'Guitar Rig: amplificatore e pedaliera' },
   { id: 'tuner', label: 'Accordatore cromatico' },
   { id: 'mixer', label: 'Mixer analogico' },
 ];

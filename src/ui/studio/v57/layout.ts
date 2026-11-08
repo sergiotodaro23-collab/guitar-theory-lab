@@ -6,7 +6,6 @@
 import type { AppMode, Settings } from '../../../app/settings';
 import { numeralOf } from '../../../harmony';
 import { buildScale, type Chord } from '../../../theory';
-import type { AmpKnobId } from '../../../audio/ampProcessor';
 
 /* ---------------- geometry ---------------- */
 
@@ -148,35 +147,16 @@ export interface VizPrefs {
 
 export const VIZ_DEFAULTS: VizPrefs = { layerMarks: 'bars', anim: 'pulse', showTargets: true, showPlayback: true, showArrows: true, showOverlays: true };
 
-/** Device panel states that are not part of the musical settings. */
-export interface DevicePrefs {
-  /** Amplifier: visual demo only until a real DSP/NAM chain exists (processing stays false). */
-  readonly ampKnobs: Readonly<Record<AmpKnobId, number>>;
-  readonly ampPower: boolean;
-  readonly ampBypass: boolean;
-}
-
-export type { AmpKnobId };
-export const AMP_KNOBS: readonly (readonly [AmpKnobId, string, number])[] = [
-  ['gain', 'Gain', 55], ['bass', 'Bass', 50], ['mid', 'Middle', 60], ['treble', 'Treble', 58], ['presence', 'Presence', 45], ['out', 'Output', 62],
-];
-export const DEVICE_DEFAULTS: DevicePrefs = {
-  ampKnobs: Object.fromEntries(AMP_KNOBS.map(([id, , v]) => [id, v])) as Record<AmpKnobId, number>,
-  ampPower: false,
-  ampBypass: false,
-};
-
 export interface UiPrefs {
   readonly split: number;
   readonly railExpanded: boolean;
   readonly lcdExpanded: boolean;
   readonly viz: VizPrefs;
-  readonly devices: DevicePrefs;
 }
 
-/** Storage keys of the handoff (`STORAGE_KEYS`). Live monitor and tuner on/off are never stored. */
+/** Storage keys of the handoff (`STORAGE_KEYS`). Live monitor and tuner on/off are never stored; the rig lives in the session settings. */
 export const STORAGE_KEYS = {
-  split: 'gtl.v5.fbR', railExpanded: 'gtl.v5.railX', lcdExpanded: 'gtl.v5.lcdX', viz: 'gtl.v5.vz', devices: 'gtl.v5.dev',
+  split: 'gtl.v5.fbR', railExpanded: 'gtl.v5.railX', lcdExpanded: 'gtl.v5.lcdX', viz: 'gtl.v5.vz',
 } as const;
 
 export interface KeyValueStore {
@@ -184,7 +164,6 @@ export interface KeyValueStore {
   setItem(key: string, value: string): void;
 }
 
-const pct = (v: unknown, fallback: number): number => (typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.min(100, Math.round(v))) : fallback);
 const bool = (v: unknown, fallback: boolean): boolean => (typeof v === 'boolean' ? v : fallback);
 const oneOf = <T extends string>(v: unknown, options: readonly T[], fallback: T): T => (options.includes(v as T) ? (v as T) : fallback);
 
@@ -200,8 +179,6 @@ function read(store: KeyValueStore, key: string): unknown {
 /** Reads every preference, repairing anything missing or malformed with the defaults. */
 export function loadPrefs(store: KeyValueStore): UiPrefs {
   const viz = (read(store, STORAGE_KEYS.viz) ?? {}) as Record<string, unknown>;
-  const dev = (read(store, STORAGE_KEYS.devices) ?? {}) as Record<string, unknown>;
-  const knobs = (typeof dev.ampKnobs === 'object' && dev.ampKnobs !== null ? dev.ampKnobs : {}) as Record<string, unknown>;
   const split = read(store, STORAGE_KEYS.split);
   return {
     split: clampRatio(typeof split === 'number' ? split : DEFAULT_SPLIT),
@@ -214,11 +191,6 @@ export function loadPrefs(store: KeyValueStore): UiPrefs {
       showPlayback: bool(viz.showPlayback, true),
       showArrows: bool(viz.showArrows, true),
       showOverlays: bool(viz.showOverlays, true),
-    },
-    devices: {
-      ampKnobs: Object.fromEntries(AMP_KNOBS.map(([id, , v]) => [id, pct(knobs[id], v)])) as Record<AmpKnobId, number>,
-      ampPower: bool(dev.ampPower, false),
-      ampBypass: bool(dev.ampBypass, false),
     },
   };
 }
