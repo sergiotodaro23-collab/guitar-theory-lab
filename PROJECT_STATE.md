@@ -6,8 +6,8 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 
 ## Verificato in questa sessione
 
-- `npm run check`: verde, 433 test unitari.
-- `npm run test:e2e`: verde, 95 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
+- `npm run check`: verde, 435 test unitari.
+- `npm run test:e2e`: verde, 96 casi su Chromium headless (`e2e/*.spec.ts`; gli e2e dell'ingresso usano un WAV come microfono finto; screenshot di confronto in `test-results/visual/`).
 - CI GitHub: run #1 su `main` verde.
 - Dettagli e limiti in `docs/QA_REPORT.md`.
 
@@ -22,7 +22,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 - **Cambio di metrica in riproduzione**: il transport non si ferma, la nuova metrica parte alla stanghetta successiva (anche verso 6/8, dove il BPM conta gli ottavi).
 - **Accordi multipli**: fino a 8 accordi con builder (fondamentale, qualità, basso), slash chord e rivolti, forme eseguibili cercate sul manico e contornate sulla tastiera, diagrammi, invio a Harmony Lab come progressione.
 - **Scale multiple**: fino a 5 scale (principale + 4) con `+ Aggiungi scala`, visibilità, colore, opacità, zona, riordino e confronto delle note.
-- **Jam Studio**: step sequencer con note fantasma e ride (D-19, D-28), otto generi con bilanciamento e suoni propri (tre kit, quattro bassi, cinque suoni d'accordo sintetizzati, D-32) e Fusion riscritta, comping e basso con anticipi, basso generato (D-20), arrangiamenti a sezioni e solo (D-33), backing track locale a tempo (D-34), mixer con Click, Note, Accordi, Basso, Batteria, Chitarra, Master e mute.
+- **Jam Studio**: step sequencer con note fantasma e ride (D-19, D-28), otto generi con bilanciamento e suoni propri (tre kit, quattro bassi, cinque suoni d'accordo sintetizzati, D-32) e Fusion riscritta, comping e basso con anticipi, basso generato (D-20), arrangiamenti a sezioni, anche con accordi propri, e solo (D-33, D-39), backing track locale a tempo (D-34), mixer con Click, Note, Accordi, Basso, Batteria, Chitarra, Master e mute.
 - **Vista per accordo** (D-26): ogni accordo della progressione può avere la sua tastiera (arpeggio o scala, forma, focus, scale e arpeggi sovrapposti), che cambia con l'accordo in manuale e in automatico; condivisa da Harmony, Jam e Arpeggios; intervallo di tasti libero, colori a scelta, esercizio che segue la vista di ogni accordo (D-29).
 - **Layout desktop** (D-24): da 1200 × 720 trasporto e tastiera fissi, pannelli e colonna destra con scorrimento proprio; Click/Accenti in un pannello sovrapposto.
 - **Live Monitor 2.0** (D-31): posizione stimata dalla mano (la forma è solo un indizio), sensibilità Precisa/Bilanciata/Rapida, calibrazione in quattro passi e profili per strumento, latenza usata nel riscontro, ingresso MIDI (D-37). Solo segnali sintetici: da provare con la chitarra.

@@ -56,3 +56,26 @@ test('solo: one channel plays, the others fall silent', async ({ page }) => {
   expect(await peak()).toBeLessThan(0.01);
   await page.getByTestId('stop').click();
 });
+
+test('a section with its own chords: the chorus plays them, the display names them', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
+  await page.getByTestId('template').selectOption('ii-v-i');
+  await page.getByTestId('arrangement-preset').selectOption('practice');
+  // Intro and verse on ii–V–I (four bars each), the chorus on its own two chords.
+  await page.getByTestId('section-chords-0').fill('Fmaj7 G7');
+  await page.getByTestId('section-chords-0').fill('');
+  await page.getByTestId('section-chords-2').fill('Fmaj7 G7');
+  await expect(page.getByTestId('arrangement-now')).toContainText('3 sezioni, 12 battute');
+  await page.getByTestId('bpm').fill('240');
+  await page.getByTestId('play').click();
+  await expect(page.getByTestId('current-chord')).toHaveText('Fmaj7', { timeout: 15000 });
+  await page.getByTestId('stop').click();
+  const changes = await page.evaluate(() => (window.__gtl?.debug.scheduled ?? []).filter((e) => e.kind === 'chord').map((e) => [e.tick / 1920, e.chord]));
+  // ii–V–I is chords 0–2; the chorus chords come after them, at bar 8 and 9.
+  expect(changes).toContainEqual([8, 3]);
+  expect(errors).toEqual([]);
+});

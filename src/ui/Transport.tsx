@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { engine } from '../app/engine';
-import { BPM_MAX, BPM_MIN, METERS, meterOf, type AppMode, type Appearance, type LabelMode } from '../app/settings';
+import { BPM_MAX, BPM_MIN, METERS, activeChords, meterOf, type AppMode, type Appearance, type LabelMode } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { Select, Segmented } from './controls';
 
@@ -45,7 +45,7 @@ export function CurrentChord() {
       </div>
     );
   }
-  const chords = settings.progression.chords;
+  const chords = activeChords(settings);
   const index = chordIndex ?? selected;
   const current = chords[index];
   const next = chords.length > 1 ? chords[(index + 1) % chords.length] : undefined;

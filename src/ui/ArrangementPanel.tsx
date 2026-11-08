@@ -5,7 +5,7 @@
  */
 import { useApp, usePlayhead } from '../app/store';
 import {
-  ARRANGEMENT_PRESETS, DYNAMICS, MAX_REPEATS, MAX_SECTIONS, PATTERN_NAMES, SECTION_NAMES, section, sectionAtBar, sectionSpans,
+  ARRANGEMENT_PRESETS, DYNAMICS, MAX_REPEATS, MAX_SECTIONS, PATTERN_NAMES, SECTION_NAMES, section, sectionAtBar, sectionSpans, sectionSymbols,
   type Dynamics, type Section, type SectionKind,
 } from '../jam';
 import { meterOf, type MixChannel } from '../app/settings';
@@ -67,6 +67,13 @@ export function ArrangementPanel() {
               <Segmented<number> label={`Groove della sezione ${i + 1}`} value={x.pattern} options={PATTERN_NAMES.map((n, k) => ({ value: k, label: n }))} onChange={(pattern) => change(x.id, { pattern })} />
               <Select<Dynamics> label={`Dinamica della sezione ${i + 1}`} value={x.dynamics} options={DYN_OPTIONS} onChange={(dynamics) => change(x.id, { dynamics })} />
             </div>
+            <Field label="Accordi della sezione" hint={x.chords.trim() && !sectionSymbols(x.chords) ? 'Un accordo non si legge: la sezione usa la progressione condivisa.' : 'Vuoto: la progressione condivisa. Altrimenti un accordo per battuta, es. Am7 D7 Gmaj7.'}>
+              <input
+                className={`text-input ${x.chords.trim() && !sectionSymbols(x.chords) ? 'is-invalid' : ''}`}
+                aria-label={`Accordi della sezione ${i + 1}`} data-testid={`section-chords-${i}`} value={x.chords} placeholder="progressione condivisa"
+                onChange={(e) => change(x.id, { chords: e.target.value.slice(0, 160) })}
+              />
+            </Field>
             <div className="row">
               <Toggle checked={x.drums} onChange={(drums) => change(x.id, { drums })}>Batteria</Toggle>
               <Toggle checked={x.bass} onChange={(bass) => change(x.id, { bass })}>Basso</Toggle>

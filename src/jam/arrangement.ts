@@ -8,7 +8,8 @@
 import type { BassPattern } from './bass';
 import { bassTrack } from './bass';
 import { drumTrack, type DrumKit } from './drums';
-import { chordTrack, compTrack, progressionLength, type CompPattern, type Progression } from './progression';
+import { chordTrack, compTrack, progressionLength, withChord, type CompPattern, type Progression } from './progression';
+import { tryParseChord } from '../theory';
 import { ticksPerBar, type BassPayload, type ChordChangePayload, type CompPayload, type DrumPayload, type Meter, type Track, type TrackPayload } from '../timeline';
 
 export type SectionKind = 'intro' | 'verse' | 'chorus' | 'bridge' | 'solo' | 'outro';
@@ -33,6 +34,8 @@ export interface Section {
   readonly drums: boolean;
   readonly bass: boolean;
   readonly comp: boolean;
+  /** The section's own chords, a bar each ("Am7 D7 Gmaj7"); empty plays the shared progression. */
+  readonly chords: string;
 }
 
 export const MAX_SECTIONS = 12;
@@ -42,7 +45,7 @@ let counter = 0;
 export const newSectionId = (): string => `s${Date.now().toString(36)}${(counter++).toString(36)}`;
 
 export const section = (kind: SectionKind, over: Partial<Omit<Section, 'id' | 'kind'>> = {}): Section => ({
-  id: newSectionId(), kind, repeats: 1, pattern: 0, fill: true, dynamics: 'medium', drums: true, bass: true, comp: true, ...over,
+  id: newSectionId(), kind, repeats: 1, pattern: 0, fill: true, dynamics: 'medium', drums: true, bass: true, comp: true, chords: '', ...over,
 });
 
 export interface ArrangementPreset {
@@ -104,12 +107,41 @@ export interface SectionSpan {
   readonly bars: number;
 }
 
+/** The symbols of a section's own chords, when every one of them reads; null plays the shared progression. */
+export function sectionSymbols(text: string): readonly string[] | null {
+  const symbols = text.split(/[\s|,]+/).map((x) => x.trim()).filter(Boolean);
+  return symbols.length > 0 && symbols.every((x) => tryParseChord(x)) ? symbols : null;
+}
+
+/** The progression a section plays: its own chords (a bar each) or the shared one. */
+export function sectionProgression(section: Section, main: Progression): Progression {
+  const symbols = sectionSymbols(section.chords);
+  if (!symbols) return main;
+  return { name: main.name, chords: symbols.map((symbol, i) => ({ ...withChord(symbol), id: `${section.id}:${i}` })) };
+}
+
+/**
+ * Every chord the song can play, in one list: the shared progression first,
+ * then each section's own chords. The chord track's indices point here.
+ */
+export function songChords(main: Progression, sections: readonly Section[]): { readonly chords: Progression['chords']; readonly offsets: ReadonlyMap<string, number> } {
+  const chords = [...main.chords];
+  const offsets = new Map<string, number>();
+  for (const s of sections) {
+    const own = sectionProgression(s, main);
+    if (own === main) { offsets.set(s.id, 0); continue; }
+    offsets.set(s.id, chords.length);
+    chords.push(...own.chords);
+  }
+  return { chords, offsets };
+}
+
 /** Where each section starts and how long it lasts. */
 export function sectionSpans(sections: readonly Section[], progression: Progression, meter: Meter): readonly SectionSpan[] {
-  const length = progressionLength(progression, meter);
   const bar = ticksPerBar(meter);
   let tick = 0;
   return sections.map((s, index) => {
+    const length = progressionLength(sectionProgression(s, progression), meter);
     const lengthTicks = length * Math.max(1, s.repeats);
     const span = { section: s, index, tick, lengthTicks, firstBar: Math.floor(tick / bar), bars: Math.ceil(lengthTicks / bar) };
     tick += lengthTicks;
@@ -154,15 +186,18 @@ export function arrangementTracks(a: ArrangementInput): ArrangementTracks {
   const spans = sectionSpans(a.sections, a.progression, a.meter);
   const lengthTicks = spans.reduce((sum, s) => sum + s.lengthTicks, 0);
   const bar = ticksPerBar(a.meter);
-  const chords = chordTrack(a.progression, a.meter, true);
-  const comp = compTrack(a.progression, a.meter, a.compPattern, true, true);
-  const compNoBass = compTrack(a.progression, a.meter, a.compPattern, true, false);
-  const bass = bassTrack(a.progression, a.meter, a.bass, true);
+  const { offsets } = songChords(a.progression, a.sections);
   const events = { chords: [] as { tick: number; payload: ChordChangePayload }[], comp: [] as { tick: number; payload: CompPayload }[], bass: [] as { tick: number; payload: BassPayload }[], drums: [] as { tick: number; payload: DrumPayload }[] };
   for (const span of spans) {
     const s = span.section;
     const scale = DYNAMICS[s.dynamics].scale;
-    events.chords.push(...place(chords, span.tick, span.lengthTicks));
+    const progression = sectionProgression(s, a.progression);
+    const offset = offsets.get(s.id) ?? 0;
+    const chords = chordTrack(progression, a.meter, true);
+    const comp = compTrack(progression, a.meter, a.compPattern, true, true);
+    const compNoBass = compTrack(progression, a.meter, a.compPattern, true, false);
+    const bass = bassTrack(progression, a.meter, a.bass, true);
+    events.chords.push(...place(chords, span.tick, span.lengthTicks, (p) => ({ ...p, chordIndex: p.chordIndex + offset })));
     if (s.comp) events.comp.push(...place(s.bass ? comp : compNoBass, span.tick, span.lengthTicks, (p) => ({ ...p, velocity: p.velocity * scale })));
     if (s.bass) events.bass.push(...place(bass, span.tick, span.lengthTicks, (p) => ({ ...p, velocity: p.velocity * scale })));
     if (s.drums) {
@@ -195,6 +230,7 @@ export function sanitizeSections(raw: unknown): readonly Section[] {
       fill: r.fill !== false,
       dynamics: r.dynamics === 'soft' || r.dynamics === 'loud' ? r.dynamics : 'medium',
       drums: r.drums !== false, bass: r.bass !== false, comp: r.comp !== false,
+      chords: typeof r.chords === 'string' ? r.chords.slice(0, 160) : '',
     }];
   });
 }

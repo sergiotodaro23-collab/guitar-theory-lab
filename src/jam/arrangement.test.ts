@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PPQ } from '../timeline';
-import { ARRANGEMENT_PRESETS, arrangementTracks, sanitizeSections, section, sectionAtBar, sectionSpans } from './arrangement';
+import { ARRANGEMENT_PRESETS, arrangementTracks, sanitizeSections, section, sectionAtBar, sectionSpans, sectionSymbols, songChords } from './arrangement';
 import { DEFAULT_KIT, pattern } from './drums';
 import { genreOf } from './genres';
 import { withChord, type Progression } from './progression';
@@ -56,5 +56,23 @@ describe('arrangements (P3-08)', () => {
     for (const p of ARRANGEMENT_PRESETS) expect(sanitizeSections(p.sections())).toHaveLength(p.sections().length);
     expect(sanitizeSections([{ kind: 'chorus', repeats: 99, pattern: 7, dynamics: 'x' }, { kind: 'nope' }, null])).toMatchObject([{ kind: 'chorus', repeats: 8, pattern: 3, dynamics: 'medium', fill: true }]);
     expect(DEFAULT_KIT.patterns).toHaveLength(4);
+  });
+});
+
+describe('a progression per section (P3-08)', () => {
+  it('a chorus with its own chords: one bar each, its own length, indices after the shared ones', () => {
+    const sections = [section('verse'), section('chorus', { chords: 'Fmaj7 G7 Em7 Am7' })];
+    const spans = sectionSpans(sections, prog, m44);
+    expect(spans.map((s) => s.bars)).toEqual([2, 4]);
+    const song = arrangementTracks(input(sections));
+    expect(song.chords.events.map((e) => [e.tick / BAR, e.payload.chordIndex])).toEqual([[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]);
+    const all = songChords(prog, sections).chords.map((c) => c.symbol);
+    expect(all).toEqual(['Am7', 'D7', 'Fmaj7', 'G7', 'Em7', 'Am7']);
+    // The bass follows the section's chords: F on the chorus downbeat.
+    expect((song.bass.events.find((e) => e.tick === 2 * BAR)?.payload.midi ?? 0) % 12).toBe(5);
+  });
+  it('an unreadable chord falls back to the shared progression', () => {
+    expect(sectionSymbols('Am7 Xyz')).toBeNull();
+    expect(sectionSpans([section('verse', { chords: 'Am7 Xyz' })], prog, m44)[0]?.bars).toBe(2);
   });
 });

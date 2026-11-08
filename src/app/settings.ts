@@ -6,7 +6,7 @@ import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
 import { TUTOR_MODES, type TutorMode } from '../tutor/tutor';
 import { SENSITIVITIES, TUNINGS, sanitizeProfiles, type LiveProfile, type Sensitivity } from '../pitch';
-import { COMP_PATTERNS, DEFAULT_BACKING, DEFAULT_KIT, GENRES, sanitizeBacking, sanitizeSections, type BackingSettings, type Section, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
+import { COMP_PATTERNS, DEFAULT_BACKING, DEFAULT_KIT, GENRES, sanitizeBacking, sanitizeSections, songChords, type BackingSettings, type Section, PROGRESSION_TEMPLATES, instantiateTemplate, isValidProgression, sanitizeKit, type CompPattern, type DrumKit, type GenreId, type Progression } from '../jam';
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
@@ -511,4 +511,12 @@ export function genreSettings(id: GenreId): Partial<Settings> {
 export function analysisSettingsOf(s: Pick<Settings, 'liveSensitivity' | 'liveProfiles' | 'liveProfileId'>): { sensitivity: Sensitivity; minRms: number; minConfidence: number | null } {
   const profile = s.liveProfiles.find((p) => p.id === s.liveProfileId);
   return { sensitivity: s.liveSensitivity, minRms: profile?.minRms ?? 0.01, minConfidence: profile ? profile.minConfidence : null };
+}
+
+/**
+ * The chords the playhead's index points into: in Jam Studio with an
+ * arrangement, the shared progression followed by each section's own chords.
+ */
+export function activeChords(s: Pick<Settings, 'mode' | 'arrangementOn' | 'arrangement' | 'progression'>): Progression['chords'] {
+  return s.mode === 'jam' && s.arrangementOn && s.arrangement.length > 0 ? songChords(s.progression, s.arrangement).chords : s.progression.chords;
 }

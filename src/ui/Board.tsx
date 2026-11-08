@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { engine } from '../app/engine';
-import { arpeggioPlanOf, boardContext, tuningOf } from '../app/settings';
+import { activeChords, arpeggioPlanOf, boardContext, tuningOf } from '../app/settings';
 import { useApp, usePlayhead } from '../app/store';
 import { AVOID_PROFILES, chordOrigin, classifyTone, functionsAcross } from '../harmony';
 import { parsedChords } from '../jam';
@@ -22,6 +22,8 @@ export function useHarmonyContext() {
   const selected = useApp((s) => s.selectedChord);
   const playheadChord = usePlayhead((p) => p.chordIndex);
   const tuning = tuningOf(settings);
+  const { mode, arrangementOn, arrangement, progression } = settings;
+  const song = useMemo(() => activeChords({ mode, arrangementOn, arrangement, progression }), [mode, arrangementOn, arrangement, progression]);
   return useMemo(() => {
     if (settings.mode === 'fretboard') {
       // Only the active chord is drawn; the visible ones feed the note inspector.
@@ -41,12 +43,12 @@ export function useHarmonyContext() {
       const chord = tryParseChord(settings.arpSymbol);
       return { chords: chord ? [chord] : [], chord, nextChord: null as Chord | null, chordIndex: 0, voicing: null };
     }
-    const chords = parsedChords(settings.progression);
+    const chords = parsedChords({ ...settings.progression, chords: song });
     const chordIndex = Math.min(playheadChord ?? selected, Math.max(0, chords.length - 1));
     const chord = chords[chordIndex] ?? null;
     const nextChord = chords.length > 1 ? chords[(chordIndex + 1) % chords.length] ?? null : null;
     return { chords, chord, nextChord, chordIndex, voicing: null };
-  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, settings.arpSource, settings.arpSymbol, playheadChord, selected, tuning]);
+  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, settings.arpSource, settings.arpSymbol, song, playheadChord, selected, tuning]);
 }
 
 /** Colour, opacity and readable name of every overlay, by list position. */
