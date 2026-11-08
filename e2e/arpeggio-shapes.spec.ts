@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseLook } from './studio';
+import { chooseLook, reveal } from './studio';
 
 /** Arpeggios Lab, P1-12c: shapes along the neck decided by the engine (D-27). */
 
@@ -31,13 +31,16 @@ for (const look of ['Studio', 'Semplificata'] as const) {
   test(`${look}: three octaves of Cmaj7 along the neck, fingered, and what plays climbs three octaves`, async ({ page }) => {
     const errors = await open(page, look);
     await shape(page, 'Ottave');
+    await reveal(page, page.getByRole('group', { name: 'Numero di ottave' }));
     await page.getByRole('group', { name: 'Numero di ottave' }).getByRole('button', { name: '3', exact: true }).click();
+    await reveal(page, page.getByTestId('arp-route'));
     await expect(page.getByTestId('arp-route')).toContainText('25 note');
     const drawn = await markers(page);
     expect(drawn).toHaveLength(13);
     const frets = drawn.map((m) => m.fret);
     expect(Math.max(...frets) - Math.min(...frets)).toBeGreaterThan(8);
     // Fingers from the engine, 1 to 4 on every note.
+    await reveal(page, page.getByRole('group', { name: 'Etichette' }));
     await page.getByRole('group', { name: 'Etichette' }).first().getByRole('button', { name: 'Dito' }).click();
     for (const m of await markers(page)) expect(['1', '2', '3', '4']).toContain(m.label);
 
@@ -54,22 +57,28 @@ for (const look of ['Studio', 'Semplificata'] as const) {
 
 test('a shape the hand cannot play is refused, not drawn', async ({ page }) => {
   const errors = await open(page, 'Studio');
+  await reveal(page, page.getByTestId('arp-symbol'));
   await page.getByTestId('arp-symbol').fill('G');
   await shape(page, 'Ottave');
+  await reveal(page, page.getByTestId('arp-low'));
   await page.getByTestId('arp-low').fill('15');
   const three = page.getByRole('group', { name: 'Numero di ottave' }).getByRole('button', { name: '3', exact: true });
   await expect(three).toBeDisabled();
+  await reveal(page, page.getByTestId('arp-low'));
   await page.getByTestId('arp-low').fill('3');
   await expect(three).toBeEnabled();
   await three.click();
+  await reveal(page, page.getByTestId('arp-route'));
   await expect(page.getByTestId('arp-route')).toContainText('note');
   expect(errors).toEqual([]);
 });
 
 test('sweep across five strings and string skipping keep their rules on the board', async ({ page }) => {
   const errors = await open(page, 'Semplificata');
+  await reveal(page, page.getByTestId('arp-symbol'));
   await page.getByTestId('arp-symbol').fill('A');
   await shape(page, 'Sweep');
+  await reveal(page, page.getByTestId('arp-low'));
   await page.getByTestId('arp-low').fill('12');
   const sweep = await markers(page);
   expect(sweep).toHaveLength(6);
@@ -86,6 +95,7 @@ test('on the way down another route: more places drawn, same pitches', async ({ 
   const errors = await open(page, 'Studio');
   await shape(page, 'Ottave');
   const before = (await markers(page)).length;
+  await reveal(page, page.getByRole('group', { name: 'Percorso di ritorno' }));
   await page.getByRole('group', { name: 'Percorso di ritorno' }).getByRole('button', { name: 'Strada diversa' }).click();
   expect((await markers(page)).length).toBeGreaterThan(before);
   expect(errors).toEqual([]);
@@ -93,9 +103,12 @@ test('on the way down another route: more places drawn, same pitches', async ({ 
 
 test('over the progression with CAGED shapes, each change lands on the third', async ({ page }) => {
   const errors = await open(page, 'Studio');
+  await reveal(page, page.getByRole('button', { name: 'La progressione' }));
   await page.getByRole('button', { name: 'La progressione' }).click();
   await shape(page, 'CAGED');
+  await reveal(page, page.getByRole('group', { name: 'Collegamento tra arpeggi' }));
   await page.getByRole('group', { name: 'Collegamento tra arpeggi' }).getByRole('button', { name: 'Arriva su un grado' }).click();
+  await reveal(page, page.getByTestId('arp-target'));
   await page.getByTestId('arp-target').selectOption({ label: 'Terza' });
   await page.getByTestId('bpm').fill('240');
   await page.getByTestId('play').click();

@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { chooseLook } from './studio';
+import { chooseLook, reveal } from './studio';
 
 /** P3-09: a local audio file plays in time with the jam (synthetic clicks, not music). */
 
@@ -32,17 +32,24 @@ test('a click track at 120 BPM with bar 1 at 0.5 s starts there, loops with the 
   await page.goto('/?debug=1');
   await chooseLook(page, 'Studio');
   await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
+  await reveal(page, page.getByTestId('backing-file'));
   await page.getByTestId('backing-file').setInputFiles(clickTrack('backing-120.wav', 120, 0.5, 14));
+  await reveal(page, page.getByTestId('backing-status'));
   await expect(page.getByTestId('backing-status')).toContainText('backing-120.wav · 14.0 s');
+  await reveal(page, page.getByTestId('backing-bpm'));
   await page.getByTestId('backing-bpm').fill('120');
+  await reveal(page, page.getByTestId('backing-offset'));
   await page.getByTestId('backing-offset').fill('0.5');
+  await reveal(page, page.getByTestId('backing-use-bpm'));
   await page.getByTestId('backing-use-bpm').click();
   await expect(page.getByTestId('bpm')).toHaveValue('120');
   await expect(page.getByTestId('backing-bpm-warning')).toHaveCount(0);
   // Only the backing: the band is muted.
+  await reveal(page, page.getByTestId('mute-click'));
   for (const channel of ['click', 'notes', 'comp', 'bass', 'drums']) await page.getByTestId(`mute-${channel}`).click();
 
   await page.getByTestId('play').click();
+  await reveal(page, page.getByTestId('backing-status'));
   await expect(page.getByTestId('backing-status')).toContainText('in riproduzione');
   const start = await page.evaluate(() => window.__gtl?.backing?.lastStart);
   expect(start?.offset).toBeCloseTo(0.5, 2);
@@ -67,8 +74,10 @@ test('a click track at 120 BPM with bar 1 at 0.5 s starts there, loops with the 
   // After a reload the file is still in this browser.
   await page.reload();
   await chooseLook(page, 'Studio');
+  await reveal(page, page.getByTestId('backing-status'));
   await expect(page.getByTestId('backing-status')).toContainText('backing-120.wav');
   await page.getByTestId('play').click();
+  await reveal(page, page.getByTestId('backing-status'));
   await expect(page.getByTestId('backing-status')).toContainText('in riproduzione', { timeout: 5000 });
   await page.getByTestId('stop').click();
   expect(errors).toEqual([]);

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fakeMic, openInput, wavSequence } from './liveHelpers';
+import { reveal } from './studio';
 
 /**
  * Owner report from a real-guitar session: the page moved whenever a note was
@@ -24,7 +25,8 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     // Let the first reading arrive, then watch for three seconds: notes, silences, new notes.
     await expect(page.getByTestId('live-note')).not.toHaveText('—', { timeout: 5000 });
     const reference = await boxes(page);
-    expect(reference.every((b) => b !== null)).toBe(true);
+    // In Studio the legend lives on its own notebook page, not beside the input panels.
+    expect(reference.every((b, i) => b !== null || (look === 'Studio' && CRITICAL[i] === '[data-testid="legend"]'))).toBe(true);
     const seen = new Set<string>();
     for (let i = 0; i < 25; i += 1) {
       await page.waitForTimeout(120);
@@ -54,25 +56,37 @@ test('the guitar reaches the output only when listening is switched on, at the m
     return peak;
   });
   // Off at start: the input is analysed but not heard.
+  await reveal(page, page.getByTestId('monitor-toggle'));
   await expect(page.getByTestId('monitor-toggle')).toHaveAttribute('aria-pressed', 'false');
+  await reveal(page, page.getByTestId('mixer-listen'));
   await expect(page.getByTestId('mixer-listen')).toHaveAttribute('aria-pressed', 'false');
   expect(await out()).toBeLessThan(0.002);
   // On from the mixer key: the guitar is in the output.
+  await reveal(page, page.getByTestId('mixer-listen'));
   await page.getByTestId('mixer-listen').click();
+  await reveal(page, page.getByTestId('monitor-toggle'));
   await expect(page.getByTestId('monitor-toggle')).toHaveAttribute('aria-pressed', 'true');
   expect(await out()).toBeGreaterThan(0.02);
   // The guitar fader at zero, then the master at zero: silent again.
+  await reveal(page, page.getByTestId('fader-guitar'));
   await page.getByTestId('fader-guitar').fill('0');
   expect(await out()).toBeLessThan(0.002);
+  await reveal(page, page.getByTestId('fader-guitar'));
   await page.getByTestId('fader-guitar').fill('0.8');
   expect(await out()).toBeGreaterThan(0.02);
+  await reveal(page, page.getByTestId('fader-master'));
   await page.getByTestId('fader-master').fill('0');
   expect(await out()).toBeLessThan(0.002);
+  await reveal(page, page.getByTestId('fader-master'));
   await page.getByTestId('fader-master').fill('0.85');
   // Stopping the input turns listening off; starting again keeps it off.
+  await reveal(page, page.getByTestId('live-toggle'));
   await page.getByTestId('live-toggle').click();
+  await reveal(page, page.getByTestId('live-toggle'));
   await page.getByTestId('live-toggle').click();
+  await reveal(page, page.getByTestId('live-status'));
   await expect(page.getByTestId('live-status')).toHaveText('Ingresso attivo');
+  await reveal(page, page.getByTestId('mixer-listen'));
   await expect(page.getByTestId('mixer-listen')).toHaveAttribute('aria-pressed', 'false');
   expect(await out()).toBeLessThan(0.002);
 });

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { reveal } from './studio';
 
 /** P1-10: arpeggio phases in the routine editor — one chord per phase, on the downbeat. */
 
@@ -7,6 +8,7 @@ test('ii–V–I arpeggiated: each phase plays only its chord, and a wrong chord
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/?debug=1');
+  await reveal(page, page.getByTestId('open-editor'));
   await page.getByTestId('open-editor').click();
   const editor = page.getByTestId('routine-editor');
   await editor.getByLabel('Parti da un modello').selectOption({ label: 'ii–V–I in Do arpeggiato, forma E: un accordo per fase' });
@@ -18,8 +20,10 @@ test('ii–V–I arpeggiated: each phase plays only its chord, and a wrong chord
   await editor.getByRole('button', { name: 'Usa Dm7' }).click();
   await expect(editor.getByTestId('phase-chord-1')).toHaveValue('Dm7');
   await editor.getByTestId('routine-apply').click();
+  await reveal(page, page.getByTestId('routine-summary'));
   await expect(page.getByTestId('routine-summary')).toContainText('Arpeggio Dm7');
 
+  await reveal(page, page.getByRole('checkbox', { name: 'Evidenzia le note a tempo' }));
   await page.getByRole('checkbox', { name: 'Evidenzia le note a tempo' }).check();
   await page.getByTestId('bpm').fill('240');
   await page.getByTestId('play').click();

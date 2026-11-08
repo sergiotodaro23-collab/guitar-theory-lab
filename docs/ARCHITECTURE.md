@@ -52,7 +52,9 @@ Le avoid notes non sono una verità assoluta. `AvoidProfile` sceglie la tradizio
 
 - `src/ui/App.tsx` sceglie l'aspetto (`look` + `src/ui/appearance.ts`, per dimensione della finestra) e monta `simple/SimpleShell.tsx` o `studio/StudioShell.tsx`; l'editor avanzato è montato sopra entrambi.
 - Le shell compongono gli stessi componenti: `Transport.tsx` (pezzi del trasporto), `Board.tsx` (tastiera, legenda, ispettore), `panels.tsx` (pannelli di studio), `AccentGrid.tsx`, `DrumMachine.tsx`, `LivePanels.tsx`, `hardware.tsx` (manopole, fader, meter, canale Chitarra, Master). Nessuna logica musicale nelle shell.
-- Layout desktop (D-24): da 1200 × 720 le shell fissano intestazione, trasporto e tastiera; lo scorrimento sta in `[data-testid="scroll-panels"]` (e `scroll-side` in Studio). Tutto in CSS (`simple/simple.css`, `studio/studio.css`); sotto soglia i contenitori di Studio sono `display: contents`.
+- Layout desktop (D-24): da 1200 × 720 la Semplificata fissa intestazione, trasporto e tastiera; lo scorrimento sta in `[data-testid="scroll-panels"]` (`simple/simple.css`).
+- Studio V5.7 (D-41, `docs/STUDIO_V57_INTEGRATION.md`): `studio/StudioShell.tsx` compone rail, console con LCD, tastiera con divisore e taccuino; i pezzi stanno in `studio/v57/` (regole pure in `layout.ts` con test, stato solo d'interfaccia in `uiStore.ts`, dispositivi nel cassetto in `devices.tsx` e `MixerDevice.tsx`). La finestra non scorre: scorre la pagina del taccuino. Asset e font in `studio/v57/assets` e `studio/v57/fonts` (D-40). `studio/studio.css` tiene la base condivisa (token, tastiera, carta, tutor, editor).
+- `src/audio/ampProcessor.ts`: contratto per un futuro processore d'amplificatore (NAM, `docs/NAM_FEASIBILITY.md`), oggi solo `NO_AMP_PROCESSOR`.
 - Ingresso audio: `src/audio/liveInput.ts` (catena, stato in `useLive`), analisi pura in `src/pitch/`.
 
 ## Forme di arpeggio

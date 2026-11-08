@@ -38,6 +38,8 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
   const [deckRef, deck] = useBox<HTMLDivElement>();
   const [legendHost, setLegendHost] = useState<HTMLElement | null>(null);
   const [dragging, setDragging] = useState(false);
+  // Leaving Studio closes its panels and drawer, so coming back starts clean (no exit animation on mount).
+  useEffect(() => () => { useStudioUi.setState({ settingsOpen: false, vizOpen: false, device: null, launcher: null }); }, []);
   const drag = useRef<{ y: number; h: number } | null>(null);
 
   // Space under the console shared by the neck and the notebook.

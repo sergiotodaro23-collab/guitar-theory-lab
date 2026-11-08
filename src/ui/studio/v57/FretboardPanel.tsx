@@ -12,8 +12,6 @@ import { Select } from '../../controls';
 import { useStudioUi } from './uiStore';
 import type { VizPrefs } from './layout';
 
-const LABEL_TEXT = { degree: 'Grado', note: 'Nome', function: 'Funzione', interval: 'Intervallo', finger: 'Dito', none: 'Nessuna etichetta' } as const;
-
 function Pill({ on, label, onClick, testId }: { readonly on: boolean; readonly label: string; readonly onClick: () => void; readonly testId?: string }) {
   return (
     <button type="button" className="v57-pill" aria-pressed={on} data-on={on ? '1' : '0'} data-testid={testId} onClick={onClick}>
@@ -49,8 +47,6 @@ function VizPopover() {
     <>
       <button type="button" className="v57-scrim" aria-label="Chiudi visualizzazione" tabIndex={-1} onClick={() => ui.setVizOpen(false)} />
       <div className="v57-pop" role="dialog" aria-label="Visualizzazione della tastiera" ref={pop} data-testid="viz-popover">
-        <h4>Etichette sulle note</h4>
-        <LabelModeSelector />
         <h4>Mostra sulla tastiera</h4>
         <div className="v57-row">
           <Pill on={viz.showTargets} label="Note target" onClick={() => toggle('showTargets')} testId="viz-targets" />
@@ -75,7 +71,6 @@ function Toolbar() {
   const update = useApp((state) => state.update);
   const vizOpen = useStudioUi((u) => u.vizOpen);
   const setVizOpen = useStudioUi((u) => u.setVizOpen);
-  const viz = useStudioUi((u) => u.viz);
   const [saved] = useState(() => presetRepository.list('study'));
   const [loaded, setLoaded] = useState('__');
   const vizKey = useRef<HTMLButtonElement>(null);
@@ -90,7 +85,7 @@ function Toolbar() {
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" /></svg>
         Visualizzazione
       </button>
-      <span className="v57-vzread" aria-live="polite">{LABEL_TEXT[s.labelMode]} · {viz.layerMarks === 'bars' ? 'barrette' : 'puntini'}</span>
+      <span className="v57-labels"><LabelModeSelector /></span>
       <span className="v57-flex" />
       <span className="v57-silk" aria-hidden="true">Accordatura</span>
       <span className="v57-lsel">

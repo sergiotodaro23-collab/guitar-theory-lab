@@ -78,6 +78,7 @@ test('LCD: key, chord numeral, next chord, tempo and transport from the engine',
   // Compact display: one row, the meter beside the tempo.
   await page.getByTestId('lcd-size').click();
   await expect(page.getByTestId('lcd-context')).toHaveCount(0);
+  await page.waitForTimeout(400);
   await page.reload();
   await expect(page.getByTestId('lcd-context')).toHaveCount(0);
   await expect(page.getByTestId('bpm')).toHaveValue('132');
@@ -218,9 +219,9 @@ test('visualisation: labels, overlay marks and display filters, saved', async ({
   await open(page);
   await page.getByTestId('add-scale').click();
   await expect(page.locator('.v57-board .pip-bar').first()).toBeVisible();
+  await page.getByTestId('fretboard-panel').getByRole('group', { name: 'Etichette' }).getByRole('button', { name: 'Nome', exact: true }).click();
   await page.getByTestId('viz-toggle').click();
   await expect(page.getByTestId('viz-popover')).toBeVisible();
-  await page.getByTestId('viz-popover').getByRole('button', { name: 'Nome', exact: true }).click();
   await page.getByTestId('viz-popover').getByRole('radio', { name: 'Puntini agli angoli' }).click();
   await expect(page.locator('.v57-board .pip-bar')).toHaveCount(0);
   await page.getByTestId('viz-overlays').click();

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseLook } from './studio';
+import { chooseLook, reveal } from './studio';
 
 /** Choosing chords while the transport runs (owner report, real-guitar session). */
 
@@ -15,6 +15,7 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await open(page);
     await chooseLook(page, look);
     await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
+    await reveal(page, page.getByRole('button', { name: 'Manuale', exact: true }));
     await page.getByRole('button', { name: 'Manuale', exact: true }).click();
     await page.getByTestId('bpm').fill('60');
     await page.getByTestId('play').click();
@@ -46,15 +47,18 @@ test('automatic changes: while playing, chips explain why they wait instead of s
   await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
   const hint = page.getByTestId('chord-strip-hint');
   await expect(hint).toHaveText('Scegli l’accordo da cui partire.');
+  await reveal(page, page.getByTestId('chord-strip'));
   const before = await page.getByTestId('chord-strip').boundingBox();
   await page.getByTestId('play').click();
   await expect(page.getByTestId('chip-1')).toBeDisabled();
   await expect(hint).toContainText('passa a Cambio accordi: Manuale');
   // The hint line is reserved: the strip does not move when its text changes.
+  await reveal(page, page.getByTestId('chord-strip'));
   expect(await page.getByTestId('chord-strip').boundingBox()).toEqual(before);
   // N while the progression drives does not move a hidden selection.
   await page.locator('body').click({ position: { x: 5, y: 5 } });
   await page.keyboard.press('n');
   await page.getByTestId('stop').click();
+  await reveal(page, page.getByTestId('chip-0'));
   await expect(page.getByTestId('chip-0')).toHaveAttribute('aria-current', 'true');
 });

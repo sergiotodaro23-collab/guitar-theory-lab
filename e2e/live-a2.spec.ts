@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { centsShown, fakeMic, openInput, wav } from './liveHelpers';
+import { reveal } from './studio';
 
 /** Live Monitor and Tuner on a known signal: an A2 at 110 Hz as the microphone (see liveHelpers.ts). */
 
@@ -8,24 +9,36 @@ test.use(fakeMic(wav('a2.wav', 110)));
 for (const look of ['Studio', 'Semplificata'] as const) {
   test(`${look}: the tuner reads the fifth string in tune; the monitor shows A2 and where it can be`, async ({ page }) => {
     await openInput(page, look);
+    await reveal(page, page.getByTestId('tuner-string'));
     await expect(page.getByTestId('tuner-string')).toHaveText('5ª corda · A2', { timeout: 5000 });
     await expect.poll(() => centsShown(page)).toBeLessThanOrEqual(2);
     expect(Math.abs(await centsShown(page))).toBeLessThanOrEqual(2);
+    await reveal(page, page.getByTestId('tuner-advice'));
     await expect(page.getByTestId('tuner-advice')).toHaveText('Intonata');
+    await reveal(page, page.getByTestId('live-note'));
     await expect(page.getByTestId('live-note')).toHaveText('A2');
+    await reveal(page, page.getByTestId('live-frequency'));
     await expect(page.getByTestId('live-frequency')).toHaveText(/^1(09|10)\.\d Hz$/);
     // A2 is playable in two places on 24 frets: fifth string open, sixth string fifth fret.
+    await reveal(page, page.getByTestId('live-positions'));
     await expect(page.getByTestId('live-positions')).toContainText('in 2 punti');
     await expect(page.locator('.live-possible, .live-likely')).toHaveCount(2);
+    await reveal(page, page.getByTestId('legend'));
     await expect(page.getByTestId('legend').locator('[data-kind^="live"]').first()).toBeVisible();
     // The samples reach the analysis through the capture worklet (D-38).
+    await reveal(page, page.getByTestId('live-diagnostics'));
     await page.getByTestId('live-diagnostics').locator('summary').click();
+    await reveal(page, page.getByTestId('diag-analysis'));
     await expect(page.getByTestId('diag-analysis')).toContainText('AudioWorklet');
     // Never monitoring by itself.
+    await reveal(page, page.getByTestId('monitor-toggle'));
     await expect(page.getByTestId('monitor-toggle')).toHaveAttribute('aria-pressed', 'false');
     await expect(page.getByTestId('live-level')).not.toHaveAttribute('aria-valuenow', '0');
+    await reveal(page, page.getByTestId('live-toggle'));
     await page.getByTestId('live-toggle').click();
+    await reveal(page, page.getByTestId('live-status'));
     await expect(page.getByTestId('live-status')).toHaveText('Ingresso spento');
+    await reveal(page, page.getByTestId('live-note'));
     await expect(page.getByTestId('live-note')).toHaveText('—');
   });
 }
@@ -38,8 +51,12 @@ test('a refused microphone is explained, and nothing pretends to listen', async 
   });
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
+  await reveal(page, page.getByTestId('live-toggle'));
   await page.getByTestId('live-toggle').click();
+  await reveal(page, page.getByTestId('live-error'));
   await expect(page.getByTestId('live-error')).toContainText('Permesso al microfono negato');
+  await reveal(page, page.getByTestId('live-status'));
   await expect(page.getByTestId('live-status')).toHaveText('Errore');
+  await reveal(page, page.getByTestId('tuner-string'));
   await expect(page.getByTestId('tuner-string')).toHaveText('—');
 });

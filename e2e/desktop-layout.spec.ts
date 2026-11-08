@@ -1,10 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseLook } from './studio';
+import { chooseLook, openTab } from './studio';
 
 /**
  * P0-14 desktop layout (D-24): from 1200 × 720 up, transport and neck stay in
  * view while the panels scroll on their own, and nothing moves while playing,
  * switching workspace or scrolling. Smaller windows scroll the page instead.
+ * In Studio V5.7 (D-41) the scrolling area is the notebook page and the
+ * transport is the console.
  */
 
 const SIZES: readonly (readonly [number, number])[] = [[1920, 1080], [1440, 900], [1366, 768], [1280, 720]];
@@ -32,15 +34,17 @@ for (const look of ['Semplificata', 'Studio'] as const) {
       // The page itself does not scroll; transport and the whole neck are on screen.
       expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(0);
       for (const sel of ['[data-testid="play"]', '.fretboard']) expect(await inView(page, sel), sel).toBe(true);
-      const panels = page.getByTestId('scroll-panels');
+      // The longest page (guitar input) so there is something to scroll.
+      if (look === 'Studio') await openTab(page, 'Ingresso');
+      const panels = page.getByTestId(look === 'Studio' ? 'notebook-page' : 'scroll-panels');
       const room = await panels.evaluate((el) => ({ overflow: getComputedStyle(el).overflowY, height: el.clientHeight }));
       expect(room.overflow).toBe('auto');
       expect(room.height).toBeGreaterThanOrEqual(140);
       // Every transport control sits inside the transport, uncovered.
       const spill = await page.evaluate(() => {
-        const bar = document.querySelector('.cs-transport, .ws-transport')?.getBoundingClientRect();
+        const bar = document.querySelector('.cs-transport, .v57-deck')?.getBoundingClientRect();
         if (!bar) return ['no transport'];
-        return [...document.querySelectorAll('.cs-transport button, .ws-transport button, .cs-transport select, .ws-transport select, .ws-transport [role="slider"], .cs-transport [role="slider"]')]
+        return [...document.querySelectorAll('.cs-transport button, .v57-deck button, .cs-transport select, .v57-deck select, .v57-deck [role="slider"], .cs-transport [role="slider"]')]
           .filter((el) => (el as HTMLElement).offsetParent !== null && !el.closest('.accent-pop'))
           .filter((el) => {
             const r = el.getBoundingClientRect();
@@ -112,6 +116,6 @@ for (const look of ['Semplificata', 'Studio'] as const) {
     await page.addStyleTag({ content: "*, :root { font-family: 'DejaVu Sans', 'Verdana', sans-serif !important; --display: 'DejaVu Sans', 'Verdana', sans-serif; --plate-font: 'DejaVu Sans', 'Verdana', sans-serif; }" });
     expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(0);
     for (const sel of ['[data-testid="play"]', '.fretboard', '[data-testid="accent-toggle"]']) expect(await inView(page, sel), sel).toBe(true);
-    expect(await page.getByTestId('scroll-panels').evaluate((el) => el.clientHeight)).toBeGreaterThanOrEqual(140);
+    expect(await page.getByTestId(look === 'Studio' ? 'notebook-page' : 'scroll-panels').evaluate((el) => el.clientHeight)).toBeGreaterThanOrEqual(140);
   });
 }

@@ -139,15 +139,17 @@
 .v57-lcr { display: flex; gap: 5px; align-items: center; justify-content: flex-end; }
 .v57-lcr .select { height: 28px; padding: 0 8px; border: 0; border-radius: 2px; background: #0c0d0f; color: var(--ink-primary); font: 600 13px/20px 'Barlow Condensed', sans-serif; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 0 0 1px rgba(140, 147, 155, .42); }
 .v57-lcr .select:last-child { max-width: 140px; }
-.v57-lctl-knob { flex-direction: row; align-items: center; gap: 8px; position: relative; padding-right: 2px; }
+.v57-lctl-knob { flex-direction: row; align-items: center; gap: 8px; position: static; padding-right: 2px; }
 html .v57 .v57-knob { display: grid; justify-items: center; gap: 0; min-width: 0; }
 html .v57 .v57-knob .knob-dial { width: 36px; height: 36px; }
 html .v57 .v57-knob .knob-label { font: 600 10px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); }
 html .v57 .v57-knob .knob-readout { font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--led-amber); }
-html .v57 .v57-lctl-knob .accent-toggle { border-image: none; min-height: 0; height: 28px; padding: 0 10px; border: 1px solid #0b0c0e; border-radius: 4px; cursor: pointer; color: var(--ink-primary); font: 600 12px/1 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; background: linear-gradient(180deg, #464a51, #2b2d31 52%, #1f2024); }
+html .v57 .v57-lctl-knob .accent-toggle { white-space: nowrap; border-image: none; min-height: 0; height: 28px; padding: 0 10px; border: 1px solid #0b0c0e; border-radius: 4px; cursor: pointer; color: var(--ink-primary); font: 600 12px/1 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; background: linear-gradient(180deg, #464a51, #2b2d31 52%, #1f2024); }
 html .v57 .v57-lctl-knob .accent-toggle[aria-expanded='true'] { color: #2a1606; background: linear-gradient(180deg, #ff9a5c, var(--accent-orange) 55%, #c94e12); }
 .v57-lctl-knob .accent-control { position: static; }
-.v57-lctl-knob .accent-pop { position: absolute; right: 0; top: calc(100% + 18px); z-index: 45; width: min(640px, 70vw); padding: 12px; border-radius: 4px; background: linear-gradient(135deg, #34373d, #222427); box-shadow: 0 0 0 1px #090a0b, 0 12px 26px rgba(0, 0, 0, .65); }
+.v57 .v57-lcdframe { position: static; }
+/* The grid hangs from the console's bottom edge: edits never move it. */
+.v57-lctl-knob .accent-pop { position: absolute; right: 0; top: calc(100% + 18px); z-index: 45; width: min(780px, 80vw); padding: 12px; border-radius: 4px; background: linear-gradient(135deg, #34373d, #222427); box-shadow: 0 0 0 1px #090a0b, 0 12px 26px rgba(0, 0, 0, .65); }
 
 /* ---------- fretboard panel ---------- */
 .v57-fbpanel { position: relative; flex: none; padding: 0; display: flex; flex-direction: column; gap: 4px; z-index: 5; border-width: 16px 14px 12px; }
@@ -338,3 +340,11 @@ html .v57 .v57-page .panel-title { font: 600 13px/16px 'Barlow Condensed', sans-
 .v57-knob-hit { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; border: 0; padding: 0; background: transparent; cursor: ns-resize; touch-action: none; }
 .v57-knob-hit:disabled { cursor: not-allowed; }
 .v57-knob-hit:focus-visible { outline: 2px solid #ffd23f; outline-offset: 2px; }
+
+/* Labels on the notes: one row of keys in the neck toolbar, as on the LCD readouts. */
+.v57-labels .field { display: flex; align-items: center; gap: 0; }
+.v57-labels .field-label { display: none; }
+html .v57 .v57-labels .segmented { display: flex; gap: 2px; padding: 2px; border-radius: 6px; background: #0f1012; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 0 0 1px rgba(140, 147, 155, .4); }
+html .v57 .v57-labels .segment { height: 24px; min-height: 0; padding: 0 9px; border: 0; border-image: none; border-radius: 4px; color: var(--ink-primary); background: transparent; font: 600 13px/1 'Barlow Condensed', sans-serif; letter-spacing: .05em; text-shadow: none; }
+html .v57 .v57-labels .segment[aria-pressed='true'] { color: #2a2418; background: linear-gradient(180deg, #ff9a5c, var(--accent-orange) 55%, #c94e12); }
+@media (max-width: 1250px) { html .v57 .v57-labels .segment { padding: 0 6px; font-size: 12px; } }

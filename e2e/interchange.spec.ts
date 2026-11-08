@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseLook } from './studio';
+import { chooseLook, reveal } from './studio';
 
 /** P1-11b: modal interchange — the analysis, the chord's own scale, and views that start from it. */
 
@@ -13,24 +13,36 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await page.goto('/');
     await chooseLook(page, look);
     await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
+    await reveal(page, page.getByTestId('template'));
     await page.getByTestId('template').selectOption('interchange-iv');
+    await reveal(page, page.getByTestId('analysis-0'));
     await expect(page.getByTestId('analysis-0')).toHaveAttribute('data-kind', 'diatonic');
+    await reveal(page, page.getByTestId('analysis-2'));
     await expect(page.getByTestId('analysis-2')).toHaveAttribute('data-kind', 'borrowed');
+    await reveal(page, page.getByTestId('analysis-2'));
     await expect(page.getByTestId('analysis-2')).toContainText('iv7');
+    await reveal(page, page.getByTestId('analysis-2'));
     await expect(page.getByTestId('analysis-2')).toContainText('F dorica');
 
+    await reveal(page, page.getByRole('group', { name: 'Etichette' }));
     await page.getByRole('group', { name: 'Etichette' }).getByRole('button', { name: 'Nome' }).click();
+    await reveal(page, page.getByTestId('chip-2'));
     await page.getByTestId('chip-2').click();
     // Until the switch: C major, with Fm7's Ab and Eb drawn as tones outside the scale; then F dorian alone.
     await expect.poll(() => names(page)).toEqual(['A', 'Ab', 'B', 'C', 'D', 'E', 'Eb', 'F', 'G']);
+    await reveal(page, page.getByRole('checkbox', { name: /Scala di ogni accordo dall’analisi/ }));
     await page.getByRole('checkbox', { name: /Scala di ogni accordo dall’analisi/ }).check();
     await expect.poll(() => names(page)).toEqual(['Ab', 'Bb', 'C', 'D', 'Eb', 'F', 'G']);
 
     // A new view for Fm7 starts from the same proposal.
     if (look === 'Semplificata') await page.getByRole('tab', { name: 'Per accordo' }).click();
+    await reveal(page, page.getByTestId('view-chip-2'));
     await page.getByTestId('view-chip-2').click();
+    await reveal(page, page.getByTestId('view-customize'));
     await page.getByTestId('view-customize').click();
+    await reveal(page, page.getByTestId('view-scale'));
     await expect(page.getByTestId('view-scale')).toHaveValue('dorian');
+    await reveal(page, page.getByTestId('view-tonic'));
     await expect(page.getByTestId('view-tonic')).toHaveValue('F');
     expect(errors).toEqual([]);
   });
@@ -40,11 +52,17 @@ test('the backdoor progression: bVI and bVII7 borrowed from aeolian; the key can
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
+  await reveal(page, page.getByTestId('template'));
   await page.getByTestId('template').selectOption('interchange-backdoor');
+  await reveal(page, page.getByTestId('analysis-1'));
   await expect(page.getByTestId('analysis-1')).toContainText('bVImaj7');
+  await reveal(page, page.getByTestId('analysis-2'));
   await expect(page.getByTestId('analysis-2')).toContainText('bVII7');
+  await reveal(page, page.getByTestId('analysis-2'));
   await expect(page.getByTestId('analysis-2')).toHaveAttribute('data-kind', 'borrowed');
   // Read in C aeolian, the same chords are at home.
+  await reveal(page, page.getByTestId('analysis-mode'));
   await page.getByTestId('analysis-mode').selectOption('aeolian');
+  await reveal(page, page.getByTestId('analysis-1'));
   await expect(page.getByTestId('analysis-1')).toHaveAttribute('data-kind', 'diatonic');
 });
