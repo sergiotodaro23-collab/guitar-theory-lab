@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>GTLFader</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/guitar-theory-lab/tokens.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+body{margin:0}
+.gf{display:inline-flex;flex-direction:column;align-items:center;gap:8px;width:84px;font-family:"Barlow Condensed","Arial Narrow",sans-serif}
+.gf-cap{font:600 14px/16px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-primary,#f2ead8)}
+.gf-row{position:relative;width:84px;flex:none}
+.gf-lab{position:absolute;left:0;width:21px;height:14px;font:600 11px/14px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.04em;color:var(--ink-muted,#a79f8f);text-align:right;white-space:nowrap}
+.gf-tk{position:absolute;left:22px;width:4px;height:1px;background:var(--ink-muted,#a79f8f)}
+.gf-slot{position:absolute;left:36px;width:6px;border-radius:3px;background:#07080a;box-shadow:var(--shadow-inset,inset 0 1px 2px rgba(0,0,0,.6)),0 1px 0 rgba(245,247,250,.12);pointer-events:none}
+.gf-capk{position:absolute;left:28px;width:22px;height:30px;border-radius:var(--radius-sm,2px);pointer-events:none;
+  background:linear-gradient(180deg,#4d5159 0%,var(--metal-dark,#2b2d31) 48%,#1b1c1f 100%);
+  box-shadow:0 0 0 1px #08090a,inset 0 1px 0 rgba(245,247,250,.45),var(--shadow-contact,0 1px 1px rgba(0,0,0,.5),0 3px 6px rgba(0,0,0,.35))}
+.gf-capk::after{content:"";position:absolute;left:3px;right:3px;top:14px;height:2px;background:var(--ink-primary,#f2ead8);border-radius:1px}
+.gf-capk[data-muted="1"]{background:linear-gradient(180deg,#ff9a5c 0%,var(--accent-orange,#f26b1d) 52%,#c94e12 100%)}
+.gf-capk[data-muted="1"]::after{background:var(--paper-ink,#2a2418)}
+.gf-capk[data-drag="1"]{transform:translateY(1px)}
+.gf-hit{position:absolute;left:26px;width:26px;padding:0;margin:0;border:0;background:transparent;cursor:ns-resize;touch-action:none;border-radius:var(--radius-sm,2px)}
+.gf-hit:focus-visible{outline:2px solid var(--focus-ring,#ffd23f);outline-offset:1px}
+.gf-num{position:absolute;left:56px;width:13px;height:12px;font:600 11px/12px "Barlow Condensed","Arial Narrow",sans-serif;color:var(--ink-muted,#a79f8f);text-align:right}
+.gf-seg{position:absolute;left:71px;width:10px;border-radius:1px}
+.gf-lcd{display:inline-flex;align-items:center;justify-content:center;width:78px;height:24px;box-sizing:border-box;border-radius:var(--radius-sm,2px);
+  background:var(--lcd-glass,#06131f);color:var(--lcd-blue,#4fb2ff);box-shadow:var(--shadow-inset,inset 0 1px 2px rgba(0,0,0,.6)),0 0 0 1px #0a0b0d;
+  font:500 12px/16px "IBM Plex Mono",ui-monospace,monospace;text-shadow:0 0 2px rgba(79,178,255,.65);white-space:nowrap}
+</style>
+</helmet>
+<div class="gf">
+<span class="gf-cap">{{caption}}</span>
+<div class="gf-row" style="height:{{rowH}}px">
+<sc-for list="{{scale}}" as="s" hint-placeholder-count="7"><span class="gf-lab" style="top:{{s.labTop}}px">{{s.label}}</span><span class="gf-tk" style="top:{{s.tkTop}}px"></span></sc-for>
+<div class="gf-slot" style="top:15px;height:{{travel}}px"></div>
+<sc-for list="{{segs}}" as="g" hint-placeholder-count="12"><span class="gf-num" style="top:{{g.numTop}}px">{{g.n}}</span><span class="gf-seg" style="{{g.style}}"></span></sc-for>
+<span class="gf-capk" data-muted="{{mutedAttr}}" data-drag="{{dragAttr}}" style="top:{{capTop}}px"></span>
+<button type="button" class="gf-hit" role="slider" aria-orientation="vertical" aria-label="{{aria}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{val}}" aria-valuetext="{{readout}}" onPointerDown="{{down}}" onPointerMove="{{move}}" onPointerUp="{{up}}" onPointerCancel="{{up}}" onKeyDown="{{key}}" onDoubleClick="{{reset}}" style="top:0;height:{{rowH}}px"></button>
+</div>
+<span class="gf-lcd">{{readout}}</span>
+<dc-import name="GTLKey" text="MUTE" size="mini" w="60" h="32" toggle="{{true}}" active="{{muted}}" on-press="{{toggleMute}}" a11y="{{muteAria}}" hint-size="60px,32px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"caption":{"editor":"text","default":"Click"},"value":{"editor":"range","default":67,"min":0,"max":100,"step":1},"muted":{"editor":"boolean","default":false},"level":{"editor":"range","default":0.6,"min":0,"max":1,"step":0.05},"travel":{"editor":"int","default":120,"min":100,"max":260},"defaultValue":{"editor":"int","default":67},"a11y":{"editor":"text","default":"Livello Click"},"onChange":{"editor":null},"onMute":{"editor":null},"$preview":{"width":120,"height":360}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { v: null, m: null, drag: false }; this._d = false; }
+  val() {
+    const p = this.props;
+    if (p.onChange) return p.value == null ? 67 : Number(p.value);
+    return this.state.v != null ? this.state.v : (p.value == null ? 67 : Number(p.value));
+  }
+  isMuted() {
+    const p = this.props;
+    if (p.onMute) return !!p.muted;
+    return this.state.m != null ? this.state.m : !!p.muted;
+  }
+  set(v) {
+    const n = Math.max(0, Math.min(100, Math.round(v)));
+    if (this.props.onChange) this.props.onChange(n); else this.setState({ v: n });
+  }
+  fromEvent(e) {
+    const T = Number(this.props.travel) || 120;
+    const r = e.currentTarget.getBoundingClientRect();
+    const k = r.height / (T + 30);
+    return (r.bottom - e.clientY - 15 * k) / (T * k) * 100;
+  }
+  renderVals() {
+    const p = this.props;
+    const T = Number(p.travel) || 120;
+    const v = this.val();
+    const muted = this.isMuted();
+    const db = v <= 1.5 ? null : -30 + v * 0.36;
+    const readout = db == null ? '−∞ dB' : ((db > 0.05 ? '+' : (db < -0.05 ? '−' : '')) + Math.abs(db).toFixed(1) + ' dB');
+    const labels = ['+6', '0', '−6', '−12', '−18', '−24', '−∞'];
+    const scale = labels.map((l, i) => {
+      const pos = 100 - i * (100 / 6);
+      const y = 15 + T * (1 - pos / 100);
+      return { label: l, labTop: (y - 7).toFixed(1), tkTop: y.toFixed(1) };
+    });
+    const lv = Math.max(0, Math.min(1, Number(p.level) || 0));
+    const lit = muted ? 0 : Math.round(lv * 12);
+    const pitch = T / 12;
+    const segs = [];
+    for (let i = 12; i >= 1; i--) {
+      const y0 = 15 + T * (1 - i / 12);
+      const col = i >= 11 ? 'var(--led-red,#ff3b2f)' : (i >= 9 ? 'var(--led-amber,#ffb23f)' : 'var(--led-green,#7dff6a)');
+      const on = i <= lit;
+      segs.push({
+        n: String(i),
+        numTop: (y0 + pitch / 2 - 6).toFixed(1),
+        style: 'top:' + (y0 + 1).toFixed(1) + 'px;height:' + (pitch - 3).toFixed(1) + 'px;background:' + col + ';opacity:' + (on ? 1 : 0.16) + ';box-shadow:' + (on ? '0 0 5px ' + col : 'none')
+      });
+    }
+    return {
+      caption: p.caption || '', travel: T, rowH: T + 30,
+      scale, segs, val: v, readout,
+      capTop: (T * (1 - v / 100)).toFixed(1),
+      muted, mutedAttr: muted ? '1' : '0', dragAttr: this.state.drag ? '1' : '0',
+      aria: p.a11y || (p.caption || 'Canale') + ' fader',
+      muteAria: 'Muto ' + (p.caption || ''),
+      toggleMute: () => { if (this.props.onMute) this.props.onMute(); else this.setState({ m: !this.isMuted() }); },
+      down: (e) => { this._d = true; this.setState({ drag: true }); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {} this.set(this.fromEvent(e)); },
+      move: (e) => { if (this._d) this.set(this.fromEvent(e)); },
+      up: (e) => { this._d = false; this.setState({ drag: false }); try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (x) {} },
+      key: (e) => {
+        const st = e.shiftKey ? 10 : 2; let v2 = this.val();
+        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') v2 += st;
+        else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') v2 -= st;
+        else if (e.key === 'PageUp') v2 += 10;
+        else if (e.key === 'PageDown') v2 -= 10;
+        else if (e.key === 'Home') v2 = 0;
+        else if (e.key === 'End') v2 = 100;
+        else return;
+        e.preventDefault(); this.set(v2);
+      },
+      reset: () => this.set(p.defaultValue == null ? 67 : Number(p.defaultValue))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Hardware renderizzato V5.6</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/guitar-theory-lab/tokens.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=Cormorant+Garamond:wght@500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+body{margin:0}
+.as,.as *{box-sizing:border-box}
+.as{width:1600px;height:2780px;padding:40px 48px;color:var(--ink-primary,#f2ead8);background:var(--surface-ground,#14110e);font:400 13px/18px "Barlow",system-ui,sans-serif;display:flex;flex-direction:column;gap:20px}
+.as h1{margin:0;font:500 38px/42px "Cormorant Garamond",Georgia,serif;letter-spacing:.02em}
+.as .sub{margin:4px 0 0;color:var(--ink-muted,#a79f8f);font-size:14px;line-height:20px}
+.warn{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-md,6px);border:1px solid var(--led-amber,#ffb23f);background:rgba(255,178,63,.08);font-size:14px;line-height:20px}
+.warn i{flex:none;width:10px;height:10px;border-radius:50%;background:var(--led-amber,#ffb23f);box-shadow:0 0 6px var(--led-amber,#ffb23f)}
+.brief{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:16px}
+.card{padding:14px 16px;border-radius:var(--radius-md,6px);background:var(--metal-dark,#2b2d31);box-shadow:inset 0 0 0 1px rgba(140,147,155,.4)}
+.card h2{margin:0 0 6px;font:600 13px/16px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-orange,#f26b1d)}
+.card p,.card li{margin:0;font-size:13px;line-height:19px}
+.card ul,.card ol{margin:0;padding-left:18px}
+.code{font:500 12px/16px "IBM Plex Mono",ui-monospace,monospace;color:var(--lcd-blue,#4fb2ff)}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{padding:8px 10px;text-align:left;font:600 11px/14px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted,#a79f8f);background:#0f1012;border-bottom:2px solid var(--metal-brushed,#8c939b)}
+td{padding:8px 10px;vertical-align:top;border-bottom:1px solid rgba(140,147,155,.28);font-size:12.5px;line-height:17px}
+td.n{font:600 14px/18px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-primary,#f2ead8)}
+td.n small{display:block;margin-top:2px;font:500 11px/14px "IBM Plex Mono",ui-monospace,monospace;letter-spacing:0;text-transform:none;color:var(--ink-muted,#a79f8f)}
+tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.tag{display:inline-block;padding:0 6px;border-radius:9999px;font:600 11px/16px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.tag.ext{background:var(--accent-orange,#f26b1d);color:var(--paper-ink,#2a2418)}
+.tag.px{background:var(--lcd-blue,#4fb2ff);color:var(--paper-ink,#2a2418)}
+.tag.opq{background:var(--metal-brushed,#8c939b);color:var(--paper-ink,#2a2418)}
+.foot{margin-top:auto;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-md,6px);background:var(--paper-cream,#efe3bd);color:var(--paper-ink,#2a2418);font-size:13px;line-height:18px}
+.v{display:inline-block;padding:1px 8px;border-radius:9999px;font:600 11px/17px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;color:#1a140c}
+.v.r{background:var(--led-green,#7dff6a)}.v.f{background:var(--led-amber,#ffb23f)}.v.d{background:var(--accent-orange,#f26b1d)}
+.bl{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.bl dl{margin:0;display:grid;grid-template-columns:92px 1fr;gap:4px 10px}
+.bl dt{font:600 11px/16px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted,#a79f8f)}
+.bl dd{margin:0;font-size:12px;line-height:16px}
+.bl .card h2{display:flex;justify-content:space-between;align-items:center}
+</style>
+</helmet>
+<div class="as">
+<div><h1>Fretboard Lab — Studio V5.6–V5.7 · Hardware renderizzato</h1>
+<p class="sub">Pipeline ibrida: superfici e controlli renderizzati in Blender/Cycles, testi, valori, scale, LED e aree interattive vivi nel DOM. Il repository di produzione non è stato toccato.</p></div>
+<div class="warn"><i></i><span><b>Onestà del risultato:</b> gli asset sono render 3D reali (Blender 5.2.3, motore Cycles), non generati da IA e non fotografie. I materiali sono procedurali: senza texture scansionate né HDRI di studio, la resa è chiaramente più fisica della V5.5 ma ancora sotto i riferimenti fotografici, soprattutto per tolex, oro spazzolato e usura.</span></div>
+<div class="card" style="box-shadow:inset 0 0 0 2px var(--accent-orange,#f26b1d)"><h2>V5.7 · Causa delle immagini mancanti e correzione</h2><ul>
+<li><b>Causa:</b> in V5.6 i render erano pubblicati come file del progetto (<span class="code">project/assets/…</span>) e richiamati con percorsi relativi. Il canvas Design esegue ogni artboard nel proprio runtime e serve alle immagini solo il suo archivio asset: i percorsi relativi non vengono risolti, quindi nell'artifact pubblicato le immagini risultavano mancanti. Blender non c'entra; nell'anteprima locale funzionava perché lì i file erano sul disco.</li>
+<li><b>Correzione:</b> i 25 render sono stati caricati nell'archivio asset dell'artifact e ogni riferimento (img, url() nel CSS dell'helmet, border-image) punta ora a un indirizzo <span class="code">/_blob/&lt;id&gt;</span>. Il build controlla che non resti alcun percorso relativo.</li>
+<li><b>Fallback:</b> se un'immagine non arriva restano visibili controlli, testi, LED e aree interattive (sono DOM); le piastre ricadono sul fondo scuro.</li></ul></div>
+<div class="brief" style="grid-template-columns:1fr 1fr 1fr">
+<div class="card"><h2>Pipeline</h2><ul>
+<li>bpy 5.2.3 (Blender come modulo Python) installato nell'ambiente, render CPU</li>
+<li>Camera ortografica perfettamente dall'alto: 1 px CSS = 0,01 unità, nessuna prospettiva</li>
+<li>Luce chiave area in alto a sinistra (calda) + riempimento debole; stessa direzione per tutti gli oggetti</li>
+<li>Shadow catcher: le ombre di contatto sono nell'alfa dell'asset e si muovono con l'oggetto</li>
+<li>64–96 campioni, denoise, AgX; export @2x, corpi in WebP (q90), parti in PNG</li></ul></div>
+<div class="card"><h2>Separazione dei livelli</h2><ul>
+<li><b>Chassis statico</b>: un render per dispositivo</li>
+<li><b>Hardware mobile</b>: cappucci fader, tasti, interruttori, corpi manopola</li>
+<li><b>Display e testi</b>: sempre DOM (nomi canali, dB, nota, Hz, stato)</li>
+<li><b>Indicatori</b>: LED, aloni, spia, puntatori in CSS sopra il render</li>
+<li><b>Aree interattive</b>: pulsanti e slider DOM con ruoli ARIA e tastiera</li></ul></div>
+<div class="card"><h2>Cosa è cosa</h2><ul>
+<li><b>Render raster</b>: chassis di mixer, amp, accordatore, interfaccia; cappucci, tasti, manopole, interruttori, pedale; piastre, cornice LCD, tasti della console e della rotaia</li>
+<li><b>CSS/SVG</b>: tastiera musicale e marker, quaderno, divisore, scale stampate, LED, testi</li>
+<li><b>Approssimazioni</b>: trama della griglia amp, crinkle del pedale, tolex (rumore procedurale); i nine-slice si allungano al centro</li></ul></div>
+</div>
+<div class="card"><h2>Prima / dopo a 1440×900 (stessa viewport) e riferimenti forniti</h2><img src="/_blob/ae48b43c01781d6dbab9ce86d3779d13" alt="Confronto V5.5, V5.6 e riferimenti per mixer, amplificatore, accordatore e interfaccia" style="width:100%;display:block;border-radius:3px"></div>
+<div class="card"><h2>Inventario degli asset renderizzati (23 file · 909 KB in tutto)</h2><table><colgroup><col style="width:380px"><col style="width:150px"><col style="width:720px"><col style="width:250px"></colgroup><thead><tr><th>File</th><th>Pixel</th><th>Contenuto e stati</th><th>Usato da</th></tr></thead><tbody><tr><td class='n'>mixer-body@2x.webp</td><td>1656×864</td><td>Chassis statico mixer (vernice, faceplate, fessure, pozzetti, viti, targa GTL MIXER, ombra)</td><td>Mixer</td></tr><tr><td class='n'>fader-cap@2x.png · fader-cap-master@2x.png</td><td>120×144</td><td>Cappuccio fader con nervature e ombra propria; si sposta lungo la fessura</td><td>Mixer (7 cursori)</td></tr><tr><td class='n'>btn-off · btn-mute-on · btn-solo-on @2x.png</td><td>132×76</td><td>Tasto in gomma, stati spento / acceso rosso / acceso ambra (solo non usato: Solo è disabilitato)</td><td>Mixer</td></tr><tr><td class='n'>amp-body@2x.webp</td><td>1736×688</td><td>Testata: tolex, griglia a trama, piping, logo GTL · 45, piastra dorata, presa, gemma spia, angoli cromati</td><td>Amp</td></tr><tr><td class='n'>knob-gold · knob-black · knob-alu @2x.png</td><td>144 / 112 / 168</td><td>Corpo manopola zigrinato statico; il puntatore è un livello separato che ruota (la luce non ruota)</td><td>Amp, accordatore, interfaccia</td></tr><tr><td class='n'>rocker-on/off · toggle-up/down @2x.png</td><td>100×124 · 80×120</td><td>Interruttore Power a bilanciere e levetta Bypass, due stati ciascuno</td><td>Amp</td></tr><tr><td class='n'>tuner-body@2x.webp</td><td>856×808</td><td>Pedale: vernice raggrinzita, cornice e vetro display, ghiere LED, targa GTL · TUNE, viti</td><td>Accordatore</td></tr><tr><td class='n'>footswitch@2x.png</td><td>220×220</td><td>Pulsante a pedale con dado esagonale</td><td>Accordatore</td></tr><tr><td class='n'>iface-body@2x.webp</td><td>1336×508</td><td>Interfaccia: alluminio anodizzato, guance in gomma, prese combo, finestra display, targa GTL · 2i</td><td>Interfaccia</td></tr><tr><td class='n'>plate9@2x.webp · lcd9@2x.webp</td><td>800×320 · 600×200</td><td>Piastra anodizzata con viti e cornice LCD con vetro, usate come nine-slice (border-image)</td><td>Console, rotaia, pannello tastiera</td></tr><tr><td class='n'>key-up · key-down · key-lit @2x.png</td><td>120×104</td><td>Tasto hardware a tre stati, nine-slice</td><td>Trasporto, BPM, TAP, rotaia</td></tr></tbody></table></div>
+<div class="card"><h2>Test reali di render e interazione (Chromium, 5 viewport)</h2><table><thead><tr><th>Viewport</th><th>Senza scroll</th><th>Console</th><th>Scala mixer</th><th>Fader</th><th>Mute / Solo disab.</th><th>Bordi mixer visibili</th><th>Manopola amp</th><th>Pedale</th><th>Interfaccia (monitor spento)</th><th>Esc + focus</th><th>Reduced motion</th><th>Caricamento</th></tr></thead><tbody><tr><td class='n'>1600×1000</td><td>✓</td><td>122 px · clip 0</td><td>1</td><td>67→87 (drag) →85 (tastiera) ✓</td><td>✓ / ✓</td><td>✓</td><td>55→62 ✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>2170 ms</td></tr><tr><td class='n'>1440×900</td><td>✓</td><td>119 px · clip 0</td><td>0.942</td><td>67→87 (drag) →85 (tastiera) ✓</td><td>✓ / ✓</td><td>✓</td><td>55→62 ✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>2026 ms</td></tr><tr><td class='n'>1366×768</td><td>✓</td><td>117 px · clip 0</td><td>0.729</td><td>67→87 (drag) →85 (tastiera) ✓</td><td>✓ / ✓</td><td>✓</td><td>55→61 ✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>2020 ms</td></tr><tr><td class='n'>1280×800</td><td>✓</td><td>117 px · clip 0</td><td>0.803</td><td>67→87 (drag) →85 (tastiera) ✓</td><td>✓ / ✓</td><td>✓</td><td>55→61 ✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>2157 ms</td></tr><tr><td class='n'>1100×720</td><td>✓</td><td>116 px · clip 0</td><td>0.62</td><td>67→87 (drag) →85 (tastiera) ✓</td><td>✓ / ✓</td><td>✓</td><td>55→61 ✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>2184 ms</td></tr></tbody></table></div>
+<div class="brief" style="grid-template-columns:1fr 1fr">
+<div class="card"><h2>Limiti rimasti</h2><ul>
+<li>Nessuna texture scansionata né HDRI: la rete dell'ambiente consente solo i registri di pacchetti, quindi niente librerie di materiali.</li>
+<li>A 1100×720 e 1366×768 i dispositivi sono scalati (mixer 0,62–0,73): le etichette scendono a circa 9 px.</li>
+<li>Il pannello della tastiera e il quaderno restano CSS/SVG; la tastiera è volutamente non fotografica per non spostare i marker.</li>
+<li>Le piastre nine-slice si allungano al centro: niente usura localizzata possibile.</li>
+<li>Manopole: il corpo non ruota (luce coerente), ruota solo il puntatore; la zigrinatura quindi resta ferma.</li>
+<li>Nessuna IA generativa di immagini usata in questa sessione.</li></ul></div>
+<div class="card"><h2>Per arrivare al livello dei riferimenti</h2><ul>
+<li>Texture PBR reali (tolex, oro spazzolato, vernice raggrinzita, gomma) e un HDRI da studio, scaricati fuori da questo ambiente.</li>
+<li>Più modellazione: cappucci fader più alti, connettori XLR completi, cornice pressofusa del pedale, usura sugli spigoli con mappe di curvatura.</li>
+<li>Render a 3× per gli schermi ad alta densità e filmstrip per le manopole se si vuole la zigrinatura che ruota.</li>
+<li>Gli script Blender (gtl3d.py, mixer.py, devices.py, parts.py, panels.py) sono nell'area di lavoro di questa sessione e rigenerano tutti gli asset.</li></ul></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":2780}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

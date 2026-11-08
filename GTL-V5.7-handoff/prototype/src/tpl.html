@@ -1,0 +1,416 @@
+<div class="gtl" style="--fbh:{{fbh}}px" data-drag="0">
+<div class="desk">
+
+<nav class="plate screws rail" aria-label="Navigazione principale" data-x="{{railAttr}}">
+<ul class="rlist" aria-label="Laboratori">
+<sc-for list="{{railLabs}}" as="r" hint-placeholder-count="4"><li><button type="button" class="rb" data-on="{{r.on}}" aria-label="{{r.label}}" aria-current="{{r.cur}}" onClick="{{r.pick}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{r.d}}" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"></path></svg><span class="rl">{{r.label}}</span><span class="tip" role="tooltip">{{r.label}}</span></button></li></sc-for>
+</ul>
+<div class="hsep" role="presentation"></div>
+<ul class="rlist" aria-label="Dispositivi audio">
+<sc-for list="{{railDevs}}" as="r" hint-placeholder-count="4"><li><button type="button" class="rb" data-dev="1" data-on="{{r.on}}" aria-label="{{r.label}}" aria-pressed="{{r.pressed}}" onClick="{{r.pick}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{r.d}}" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"></path></svg><span class="rl">{{r.label}}</span><span class="tip" role="tooltip">{{r.label}}</span></button></li></sc-for>
+</ul>
+<div class="rspacer"></div>
+<ul class="rlist" aria-label="Impostazioni">
+<li><button type="button" class="rb" data-on="{{setAttr}}" aria-label="Impostazioni e aspetto" aria-haspopup="dialog" aria-expanded="{{setAria}}" onClick="{{toggleSet}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" style="fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"></path></svg><span class="rl">Impostazioni e aspetto</span><span class="tip" role="tooltip">Impostazioni e aspetto</span></button></li>
+<li><button type="button" class="rb rtog" aria-label="{{railToggleLabel}}" aria-expanded="{{railAria}}" onClick="{{toggleRail}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"></path></svg><span class="rl">Comprimi barra</span><span class="tip" role="tooltip">{{railToggleLabel}}</span></button></li>
+</ul>
+<div class="np" title="Guitar Theory Lab v0.1.0 — by Sergio Todaro"><span class="nps"><b>GTL</b><span>v0.1.0</span></span><span class="npl"><b>Guitar Theory Lab</b><span>v0.1.0 — by Sergio Todaro</span></span></div>
+</nav>
+
+<sc-if value="{{setOpen}}" hint-placeholder-val="{{false}}">
+<button type="button" class="scrim" aria-label="Chiudi impostazioni" tabindex="-1" onClick="{{closeSet}}"></button>
+<div class="setpop" role="dialog" aria-label="Impostazioni e aspetto">
+<h4>Aspetto dell'interfaccia</h4>
+<div class="pbrow" style="gap:6px">
+<sc-for list="{{uiModes}}" as="u" hint-placeholder-count="2"><button type="button" class="segbtn" data-on="{{u.on}}" aria-pressed="{{u.checked}}" title="{{u.title}}" onClick="{{u.pick}}">{{u.label}}</button></sc-for>
+</div>
+<p>«Semplificata» è un'interfaccia separata dell'app reale: qui è solo un segnaposto di navigazione, non viene ridisegnata.</p>
+<h4>Temi e preferenze</h4>
+<p>Pannello Impostazioni non ancora progettato in questa fase. Nel prodotto raccoglierà aspetto, audio e dispositivi.</p>
+<div><button type="button" class="textbtn" onClick="{{closeSet}}">Chiudi</button></div>
+</div>
+</sc-if>
+
+<div class="work">
+
+<section class="plate screws deck" data-lcdx="{{lcdXAttr}}" aria-label="Transport e display">
+<div class="tp" role="group" aria-label="Transport">
+<div class="tw"><dc-import name="GTLKey" icon="play" size="transport" w="46" h="42" toggle="{{true}}" active="{{playing}}" a11y="Play" on-press="{{playPress}}" hint-size="46px,42px"></dc-import><span class="tip" role="tooltip">Play</span></div>
+<div class="tw"><dc-import name="GTLKey" icon="pause" size="transport" w="46" h="42" toggle="{{true}}" active="{{paused}}" a11y="Pausa" on-press="{{pausePress}}" hint-size="46px,42px"></dc-import><span class="tip" role="tooltip">Pausa</span></div>
+<div class="tw"><dc-import name="GTLKey" icon="stop" size="transport" w="46" h="42" a11y="Stop" on-press="{{stopPress}}" hint-size="46px,42px"></dc-import><span class="tip" role="tooltip">Stop</span></div>
+<div class="tw tsep"><dc-import name="GTLKey" icon="{{lcdXIcon}}" size="transport" w="40" h="42" a11y="{{lcdXLabel}}" on-press="{{toggleLcdX}}" hint-size="40px,42px"></dc-import><span class="tip" role="tooltip">{{lcdXLabel}}</span></div>
+</div>
+
+<div class="plate lcdframe">
+<div class="lcdscreen" role="group" aria-label="Display principale: tonalità e scala, accordo, tempo">
+<div class="lmain">
+<div class="lz" aria-label="Tonalità e scala">
+<div class="lval"><span class="lbig">{{lcdTonic}}</span><span class="lscale">{{lcdScale}}</span></div>
+<span class="lsub">{{lcdNotes}}</span>
+</div>
+<div class="lz" aria-label="Accordo">
+<div class="lval"><span class="lmid" data-len="{{lcdChordLen}}" data-none="{{lcdChordNone}}">{{lcdChord}}</span></div>
+<span class="lsub">{{lcdFunc}}</span>
+</div>
+<div class="lz" aria-label="Tempo">
+<div class="lval"><span class="lbpm" role="status" aria-label="Tempo in battiti al minuto"><span class="ghost" aria-hidden="true">888</span><span class="num">{{bpmText}}</span></span><span class="lunit">BPM</span><span class="lmeter">{{lcdMetricShort}}</span></div>
+<div class="lsub lrow2"><span>{{lcdMetric}}</span><span class="lamps" aria-hidden="true"><sc-for list="{{lamps}}" as="l" hint-placeholder-count="4"><i style="{{l.style}}"></i></sc-for></span></div>
+</div>
+</div>
+<sc-if value="{{lcdX}}" hint-placeholder-val="{{true}}">
+<div class="lctx" role="status" aria-live="polite"><span class="lstate"><i class="sled" style="{{ledStyle}}"></i>{{lcdState}}</span><sc-for list="{{lcdItems}}" as="it" hint-placeholder-count="4"><span class="lit"><b class="lkey">{{it.k}}</b> {{it.v}}</span></sc-for></div>
+</sc-if>
+</div>
+<div class="lctl" role="group" aria-label="Tempo, metrica e click">
+<div class="lcr">
+<div class="tw"><dc-import name="GTLKey" icon="minus" size="mini" w="32" h="28" a11y="Diminuisci BPM" on-press="{{bpmDown}}" hint-size="32px,28px"></dc-import><span class="tip" role="tooltip">BPM −1</span></div>
+<div class="tw"><dc-import name="GTLKey" icon="plus" size="mini" w="32" h="28" a11y="Aumenta BPM" on-press="{{bpmUp}}" hint-size="32px,28px"></dc-import><span class="tip" role="tooltip">BPM +1</span></div>
+<div class="tw"><dc-import name="GTLKey" text="TAP" size="transport" w="44" h="28" a11y="Tap tempo" on-press="{{tapPress}}" hint-size="44px,28px"></dc-import><span class="tip" role="tooltip">Tap tempo</span></div>
+</div>
+<sc-if value="{{lcdX}}" hint-placeholder-val="{{true}}">
+<div class="lcr">
+<label class="sel lsel cmp" style="width:62px" title="Metrica"><select value="{{metricVal}}" onChange="{{onMetric}}" aria-label="Tempo in chiave (metrica)"><sc-for list="{{metricOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></label>
+<label class="sel lsel cmp" style="width:86px" title="Click del metronomo"><select value="{{clickVal}}" onChange="{{onClickMode}}" aria-label="Modalità click"><sc-for list="{{clickOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></label>
+</div>
+</sc-if>
+</div>
+</div>
+</section>
+
+<section class="plate screws fbpanel" aria-label="Tastiera">
+<div class="fbtool">
+<button type="button" class="vzbtn" aria-haspopup="dialog" aria-expanded="{{vizAria}}" onClick="{{toggleViz}}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"></path></svg>Visualizzazione<svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M1 2l4 4 4-4" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"></path></svg></button>
+<span class="vzread" aria-live="polite">{{vizSummary}}</span>
+<span style="flex:1"></span>
+<span class="silk">Accordatura</span>
+<label class="sel lsel" style="width:210px"><select value="{{tuningVal}}" onChange="{{onTuning}}" aria-label="Accordatura"><sc-for list="{{tuningOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></label>
+<span class="silk">Preset</span>
+<label class="sel lsel" style="width:170px"><select value="{{presetVal}}" onChange="{{onPreset}}" aria-label="Preset"><sc-for list="{{presetOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></label>
+<sc-if value="{{vizOpen}}" hint-placeholder-val="{{false}}">
+<button type="button" class="scrim" aria-label="Chiudi visualizzazione" tabindex="-1" onClick="{{closeViz}}"></button>
+<div class="pop" role="dialog" aria-label="Visualizzazione della tastiera">
+<h4>Densità</h4>
+<div class="row" role="radiogroup" aria-label="Densità visiva">
+<sc-for list="{{densOpts}}" as="d" hint-placeholder-count="2"><button type="button" class="segbtn" role="radio" aria-checked="{{d.checked}}" data-on="{{d.on}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for>
+</div>
+<p>{{densNote}}</p>
+<h4>Etichette sui marker</h4>
+<div class="row" role="radiogroup" aria-label="Etichette">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="6"><button type="button" class="segbtn" role="radio" aria-checked="{{m.checked}}" data-on="{{m.on}}" onClick="{{m.pick}}">{{m.label}}</button></sc-for>
+</div>
+<h4>Livelli visibili</h4>
+<div class="row">
+<sc-for list="{{toggles}}" as="t" hint-placeholder-count="4"><button type="button" class="pill" aria-pressed="{{t.pressed}}" data-on="{{t.on}}" disabled="{{t.dis}}" onClick="{{t.pick}}"><i></i>{{t.label}}</button></sc-for>
+</div>
+<h4>Mostra sulla tastiera</h4>
+<div class="row"><sc-for list="{{vzShow}}" as="t" hint-placeholder-count="6"><button type="button" class="pill" aria-pressed="{{t.pressed}}" data-on="{{t.on}}" onClick="{{t.pick}}"><i></i>{{t.label}}</button></sc-for></div>
+<h4>Scala e accordo sulla stessa nota</h4>
+<div class="row" role="radiogroup" aria-label="Sovrapposizione scala e accordo"><sc-for list="{{vzOverlap}}" as="d" hint-placeholder-count="2"><button type="button" class="segbtn" role="radio" aria-checked="{{d.checked}}" data-on="{{d.on}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for></div>
+<h4>Livelli sovrapposti</h4>
+<div class="row" role="radiogroup" aria-label="Stile dei livelli"><sc-for list="{{vzLayers}}" as="d" hint-placeholder-count="2"><button type="button" class="segbtn" role="radio" aria-checked="{{d.checked}}" data-on="{{d.on}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for></div>
+<h4>Evidenziazione animata</h4>
+<div class="row" role="radiogroup" aria-label="Stile degli anelli animati"><sc-for list="{{vzAnim}}" as="d" hint-placeholder-count="3"><button type="button" class="segbtn" role="radio" aria-checked="{{d.checked}}" data-on="{{d.on}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for></div>
+<p>Sono preferenze di visualizzazione: non cambiano scala, accordi, progressione o esercizio. In Performance i livelli d'analisi sono sospesi, non azzerati.</p>
+</div>
+</sc-if>
+</div>
+<div class="fbwrap">
+<div class="fbrow">
+<div class="gutter"><sc-for list="{{gutter}}" as="g" hint-placeholder-count="6"><span class="disc" style="top:{{g.top}}">{{g.label}}</span></sc-for></div>
+<div class="fbscroll">
+<div class="fbinner">
+<div class="board" data-anim="{{boardAnim}}" role="img" aria-label="Tastiera a sei corde e ventiquattro tasti">
+<div class="openzone"></div>
+<sc-for list="{{inlays}}" as="i" hint-placeholder-count="12"><span class="inlay" style="{{i.style}}"></span></sc-for>
+<sc-for list="{{frets}}" as="f" hint-placeholder-count="24"><span class="fretw" style="left:{{f.left}}"></span></sc-for>
+<span class="nut"></span>
+<sc-for list="{{strings}}" as="s" hint-placeholder-count="6"><span class="str" style="{{s.style}}"></span></sc-for>
+<sc-for list="{{markers}}" as="m" hint-placeholder-count="30"><div class="mk" data-pl="{{m.plA}}" data-dt="{{m.dtA}}" style="{{m.wrap}}"><dc-import name="GTLMarker" role="{{m.role}}" label="{{m.label}}" fill="{{true}}" chord-root="{{m.cr}}" guide="{{m.gd}}" avoid="{{m.av}}" outside="{{m.ot}}" target="{{m.tg}}" playing="{{m.pl}}" detected="{{m.dt}}" sl="{{m.sl}}" cl="{{m.cl}}" cring="{{m.cring}}" seq="{{m.seq}}" lstyle="{{mkStyle}}" anim="{{boardAnim}}" hint-size="44px,44px"></dc-import></div></sc-for>
+</div>
+<div class="nums" aria-hidden="true"><sc-for list="{{numbers}}" as="n" hint-placeholder-count="25"><span style="{{n.style}}">{{n.n}}</span></sc-for></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="split" role="separator" aria-orientation="horizontal" aria-label="Divisore tra tastiera e taccuino: trascina o usa le frecce su e giù" tabindex="0" aria-valuemin="{{splitMin}}" aria-valuemax="{{splitMax}}" aria-valuenow="{{splitNow}}" aria-valuetext="{{splitText}}" onPointerDown="{{splitDown}}" onPointerMove="{{splitMove}}" onPointerUp="{{splitUp}}" onPointerCancel="{{splitUp}}" onKeyDown="{{splitKey}}" onDoubleClick="{{splitReset}}"><i></i></div>
+
+<section class="nb" aria-label="Taccuino">
+<div class="tabs" role="tablist" aria-label="Schede del taccuino">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5"><button type="button" class="tab" role="tab" id="{{t.id}}" aria-selected="{{t.sel}}" aria-controls="gtl-page" tabindex="{{t.tab}}" style="--tc:{{t.color}}" onClick="{{t.pick}}" onKeyDown="{{tabKey}}"><span class="tlbl">{{t.label}}</span></button></sc-for>
+</div>
+<div class="pg" id="gtl-page" role="tabpanel" aria-labelledby="{{tabLabelId}}" tabindex="0" style="--tc:{{tabColor}}">
+
+<sc-if value="{{tabScale}}" hint-placeholder-val="{{true}}">
+<div class="sc">
+<h4 class="sh">Tonalità e scala</h4>
+<label class="prow"><span class="plab">Tonica</span><span class="sel psel"><select value="{{tonicVal}}" onChange="{{onTonic}}" aria-label="Tonica"><sc-for list="{{tonicOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<label class="prow"><span class="plab">Scala</span><span class="sel psel"><select value="{{scaleVal}}" onChange="{{onScale}}" aria-label="Scala o modo"><sc-for list="{{scaleOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<div class="prow"><span class="plab">Note</span><div class="chips"><sc-for list="{{noteChips}}" as="c" hint-placeholder-count="7"><span class="chip" data-t="{{c.t}}">{{c.v}}</span></sc-for></div></div>
+<div class="prow"><span class="plab">Gradi</span><div class="chips"><sc-for list="{{ivChips}}" as="c" hint-placeholder-count="7"><span class="chip" data-t="{{c.t}}">{{c.v}}</span></sc-for></div></div>
+</div>
+<div class="sc">
+<h4 class="sh">Posizione</h4>
+<div class="pbrow" role="radiogroup" aria-label="Sistema di posizioni">
+<sc-for list="{{posSys}}" as="p" hint-placeholder-count="3"><button type="button" class="pb" role="radio" aria-checked="{{p.checked}}" data-on="{{p.on}}" disabled="{{p.dis}}" title="{{p.title}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for>
+</div>
+<div class="pbrow" role="radiogroup" aria-label="Forma">
+<sc-for list="{{posShapes}}" as="p" hint-placeholder-count="7"><button type="button" class="pb" role="radio" aria-checked="{{p.checked}}" data-on="{{p.on}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for>
+</div>
+<div class="dgrow">
+<div class="pdiag" role="img" aria-label="Diagramma della posizione">
+<sc-if value="{{sd.nut}}" hint-placeholder-val="{{true}}"><span class="dg-n" style="top:{{sd.top}}px"></span></sc-if>
+<sc-for list="{{sd.strings}}" as="x" hint-placeholder-count="6"><span class="dg-s" style="left:{{x.left}}px;top:{{sd.top}}px;height:{{sd.h}}px"></span></sc-for>
+<sc-for list="{{sd.lines}}" as="f" hint-placeholder-count="5"><span class="dg-f" style="top:{{f.top}}px"></span></sc-for>
+<sc-for list="{{sd.dots}}" as="d" hint-placeholder-count="10"><span class="dg-d" style="{{d.style}}"></span></sc-for>
+<sc-if value="{{sd.hasLab}}" hint-placeholder-val="{{false}}"><span class="dg-l" style="top:{{sd.labTop}}px">{{sd.lab}}</span></sc-if>
+</div>
+<p class="note">{{posNote}}</p>
+</div>
+</div>
+<div class="sc w">
+<h4 class="sh">Livelli di scala sovrapposti</h4>
+<div class="lyr"><span class="sw" style="background:var(--marker-scale,#4a9fe8)"></span><span class="note"><b>Principale</b></span><span class="note">{{primaryLayerText}}</span><span class="note tag">fissa</span><span></span></div>
+<sc-if value="{{perfNote}}" hint-placeholder-val="{{false}}"><p class="note perfn">{{perfNote}}</p></sc-if>
+<sc-for list="{{scLayers}}" as="l" hint-placeholder-count="2"><div class="lyr"><span class="sw" style="background:{{l.color}}"></span><span class="sel psel"><select value="{{l.tonic}}" onChange="{{l.onTonic}}" aria-label="Tonica del livello"><sc-for list="{{tonicOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span><span class="sel psel"><select value="{{l.scale}}" onChange="{{l.onScale}}" aria-label="Scala del livello"><sc-for list="{{scaleOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span><button type="button" class="eye" aria-pressed="{{l.vis}}" aria-label="Mostra o nascondi livello" title="Mostra o nascondi" onClick="{{l.toggle}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" style="fill:none;stroke:currentColor;stroke-width:2"></path></svg></button><button type="button" class="xbtn" aria-label="Rimuovi livello" onClick="{{l.remove}}">×</button></div></sc-for>
+<div class="pbrow"><button type="button" class="pb" disabled="{{scAddDis}}" onClick="{{addScaleLayer}}">+ Aggiungi livello</button></div>
+<p class="note">I livelli aggiuntivi compaiono come barrette colorate sotto la nota (o puntini, dal menu Visualizzazione), senza cambiare il colore di base. Fino a 5 scale in tutto, al massimo 3 livelli visibili insieme.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{tabChords}}" hint-placeholder-val="{{false}}">
+<div class="sc">
+<h4 class="sh">Accordo attivo</h4>
+<label class="prow"><span class="plab">Accordo</span><span class="sel psel"><select value="{{chordVal}}" onChange="{{onChord}}" aria-label="Accordo attivo"><sc-for list="{{chordOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<div class="prow"><span class="plab">Inversione</span><div class="pbrow" role="radiogroup" aria-label="Inversione"><sc-for list="{{invOpts}}" as="p" hint-placeholder-count="4"><button type="button" class="pb" role="radio" aria-checked="{{p.checked}}" data-on="{{p.on}}" disabled="{{p.dis}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for></div></div>
+<label class="prow"><span class="plab">Voicing</span><span class="sel psel"><select value="{{voicingVal}}" onChange="{{onVoicing}}" aria-label="Voicing"><sc-for list="{{voicingOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<div class="dgrow">
+<div class="pdiag" role="img" aria-label="Diagramma dell'accordo">
+<sc-for list="{{cd.marks}}" as="x" hint-placeholder-count="6"><span class="dg-x" style="{{x.style}}">{{x.ch}}</span></sc-for>
+<sc-if value="{{cd.nut}}" hint-placeholder-val="{{true}}"><span class="dg-n" style="top:{{cd.top}}px"></span></sc-if>
+<sc-for list="{{cd.strings}}" as="x" hint-placeholder-count="6"><span class="dg-s" style="left:{{x.left}}px;top:{{cd.top}}px;height:{{cd.h}}px"></span></sc-for>
+<sc-for list="{{cd.lines}}" as="f" hint-placeholder-count="5"><span class="dg-f" style="top:{{f.top}}px"></span></sc-for>
+<sc-for list="{{cd.dots}}" as="d" hint-placeholder-count="5"><span class="dg-d" style="{{d.style}}"></span></sc-for>
+<sc-if value="{{cd.hasLab}}" hint-placeholder-val="{{false}}"><span class="dg-l" style="top:{{cd.labTop}}px">{{cd.lab}}</span></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div class="chips"><sc-for list="{{chNoteChips}}" as="c" hint-placeholder-count="4"><span class="chip" data-t="{{c.t}}">{{c.v}}</span></sc-for></div>
+<div class="chips"><sc-for list="{{chIvChips}}" as="c" hint-placeholder-count="4"><span class="chip" data-t="{{c.t}}">{{c.v}}</span></sc-for></div>
+<p class="note">{{chordNote}}</p>
+</div>
+</div>
+</div>
+<div class="sc">
+<h4 class="sh">Chord Builder</h4>
+<label class="prow"><span class="plab">Fondamentale</span><span class="sel psel"><select value="{{cusRootVal}}" onChange="{{onCusRoot}}" aria-label="Fondamentale"><sc-for list="{{tonicOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<label class="prow"><span class="plab">Qualità</span><span class="sel psel"><select value="{{cusQualVal}}" onChange="{{onCusQual}}" aria-label="Qualità"><sc-for list="{{qualOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<div class="pbrow"><button type="button" class="pb" onClick="{{applyBuilder}}">Imposta come accordo attivo</button><button type="button" class="pb" onClick="{{clearChord}}">Nessun accordo</button></div>
+<h4 class="sh" style="margin-top:6px">Progressione</h4>
+<div class="pbrow"><sc-for list="{{progChips}}" as="p" hint-placeholder-count="4"><button type="button" class="pb nc" data-on="{{p.on}}" aria-pressed="{{p.on}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for><span class="note" style="align-self:center">{{progEmpty}}</span></div>
+<div class="pbrow" role="group" aria-label="Progressioni tipiche nella tonalità"><span class="note" style="align-self:center">Tipiche:</span><sc-for list="{{progPresets}}" as="p" hint-placeholder-count="3"><button type="button" class="pb nc" onClick="{{p.pick}}">{{p.label}}</button></sc-for></div>
+<div class="pbrow"><button type="button" class="pb" onClick="{{progAdd}}">+ Accordo attivo</button><button type="button" class="pb" onClick="{{progRemove}}">Rimuovi selezionato</button></div>
+<p class="note">Il prossimo accordo mostrato su LCD e «Next Fretboard» è il successivo in questa lista. L'avanzamento automatico durante il Play non è ancora implementato.</p>
+</div>
+<div class="sc">
+<h4 class="sh">Livelli accordo</h4>
+<div class="lyr"><span class="sw sq" style="background:var(--marker-chord,#3cc27a)"></span><span class="note"><b>Attivo</b></span><span class="note">{{activeChordText}}</span><span class="note tag">fisso</span><span></span></div>
+<sc-if value="{{perfNote}}" hint-placeholder-val="{{false}}"><p class="note perfn">{{perfNote}}</p></sc-if>
+<sc-for list="{{chLayers}}" as="l" hint-placeholder-count="2"><div class="lyr"><span class="sw sq" style="background:{{l.color}}"></span><span class="sel psel"><select value="{{l.root}}" onChange="{{l.onRoot}}" aria-label="Fondamentale del livello"><sc-for list="{{tonicOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span><span class="sel psel"><select value="{{l.qual}}" onChange="{{l.onQual}}" aria-label="Qualità del livello"><sc-for list="{{qualOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span><button type="button" class="eye" aria-pressed="{{l.vis}}" aria-label="Mostra o nascondi livello" onClick="{{l.toggle}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" style="fill:none;stroke:currentColor;stroke-width:2"></path></svg></button><button type="button" class="xbtn" aria-label="Rimuovi livello" onClick="{{l.remove}}">×</button></div></sc-for>
+<div class="pbrow"><button type="button" class="pb" disabled="{{chAddDis}}" onClick="{{addChordLayer}}">+ Aggiungi livello</button></div>
+<p class="note">I livelli accordo aggiuntivi appaiono come barrette colorate sopra la nota. Fino a 8 accordi in tutto, al massimo 3 livelli visibili insieme.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{tabEx}}" hint-placeholder-val="{{false}}">
+<div class="sc">
+<h4 class="sh">Esercizio</h4>
+<label class="prow"><span class="plab">Tipo</span><span class="sel psel"><select value="{{exTypeVal}}" onChange="{{onExType}}" aria-label="Tipo di esercizio"><sc-for list="{{exTypeOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<label class="prow"><span class="plab">Direzione</span><span class="sel psel"><select value="{{exDirVal}}" onChange="{{onExDir}}" aria-label="Direzione"><sc-for list="{{exDirOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<label class="prow"><span class="plab">Suddivisione</span><span class="sel psel"><select value="{{exTempoVal}}" onChange="{{onExTempo}}" aria-label="Suddivisione"><sc-for list="{{exTempoOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+<label class="prow"><span class="plab">Ripetizioni</span><span class="sel psel"><select value="{{exRepsVal}}" onChange="{{onExReps}}" aria-label="Ripetizioni"><sc-for list="{{exRepsOpts}}" as="o"><option value="{{o.v}}">{{o.l}}</option></sc-for></select><svg width="10" height="8" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 1h10M2 4h6M4 7h2" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"></path></svg></span></label>
+</div>
+<div class="sc">
+<h4 class="sh">Esecuzione e ritmo</h4>
+<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+<dc-import name="GTLKey" icon="play" size="transport" toggle="{{true}}" active="{{playing}}" a11y="Riproduci esercizio" on-press="{{playPress}}" w="56" h="40" hint-size="56px,40px"></dc-import>
+<dc-import name="GTLKey" icon="loop" size="transport" w="48" h="40" toggle="{{true}}" active="{{loopOn}}" a11y="Loop dell'esercizio" on-press="{{loopPress}}" hint-size="48px,40px"></dc-import>
+<dc-import name="GTLKey" icon="clipboard" size="std" a11y="Salva esercizio nel quaderno (demo)" on-press="{{saveEx}}" hint-size="40px,32px"></dc-import>
+<span class="note">Passo<br><span class="stepbox">{{stepLabel}}</span></span>
+<dc-import name="GTLKnob" caption="Swing" value="{{swing}}" size="28" readout="{{swingRead}}" default-value="0" a11y="Swing" on-change="{{setSwing}}" hint-size="80px,100px"></dc-import>
+</div>
+<div class="pbrow"><button type="button" class="pb" disabled title="Accenti per battuta: funzione futura">Accenti avanzati · futuro</button><button type="button" class="pb" aria-expanded="{{routineAria}}" onClick="{{toggleRoutine}}">Editor routine avanzato</button></div>
+<p class="note">Il click usa la metrica scelta nella console. L'editing degli accenti per battuta non è ancora progettato.</p>
+</div>
+<sc-if value="{{routineOpen}}" hint-placeholder-val="{{false}}">
+<div class="sc w">
+<h4 class="sh">Editor routine <span class="note tag">dimostrazione di design</span></h4>
+<table class="rtn"><thead><tr><th>#</th><th>Blocco</th><th>Posizione</th><th>BPM</th><th>Rip.</th></tr></thead><tbody>
+<sc-for list="{{routineRows}}" as="r" hint-placeholder-count="3"><tr><td>{{r.n}}</td><td>{{r.b}}</td><td>{{r.p}}</td><td>{{r.t}}</td><td>{{r.r}}</td></tr></sc-for>
+</tbody></table>
+<p class="note">Righe di esempio costruite dall'esercizio corrente. L'editor completo (riordino, durata, ripetizioni per blocco) è l'area di lavoro successiva.</p>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{tabLegend}}" hint-placeholder-val="{{false}}">
+<div class="sc w">
+<h4 class="sh">Legenda · solo ciò che è visibile ora</h4>
+<p class="note" style="margin:0 0 4px"><b>{{legendMode}}</b></p>
+<div class="lgcats" role="group" aria-label="Categorie visibili sulla tastiera"><span class="note">Mostra:</span><sc-for list="{{vzShow}}" as="t" hint-placeholder-count="6"><button type="button" class="pb nc lgt" aria-pressed="{{t.pressed}}" data-on="{{t.on}}" onClick="{{t.pick}}">{{t.label}}</button></sc-for><sc-for list="{{toggles}}" as="t" hint-placeholder-count="4"><button type="button" class="pb nc lgt" aria-pressed="{{t.pressed}}" data-on="{{t.on}}" disabled="{{t.dis}}" onClick="{{t.pick}}">{{t.label}}</button></sc-for></div>
+<sc-for list="{{legend}}" as="l" hint-placeholder-count="6"><div class="lgrow"><span class="mkw"><dc-import name="GTLMarker" role="{{l.role}}" label="{{l.label}}" fill="{{true}}" chord-root="{{l.cr}}" guide="{{l.gd}}" avoid="{{l.av}}" outside="{{l.ot}}" target="{{l.tg}}" playing="{{l.pl}}" detected="{{l.dt}}" sl="{{l.sl}}" cl="{{l.cl}}" cring="{{l.cring}}" seq="{{l.seq}}" lstyle="{{mkStyle}}" anim="static" hint-size="30px,30px"></dc-import></span><span>{{l.text}}</span></div></sc-for>
+<h4 class="sh" style="margin-top:10px">Regole di priorità quando più informazioni coincidono</h4>
+<sc-for list="{{legendRules}}" as="r" hint-placeholder-count="5"><div class="lgrow"><span class="rn">{{r.n}}</span><span>{{r.t}}</span></div></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{tabNext}}" hint-placeholder-val="{{false}}">
+<div class="sc w nxw">
+<h4 class="sh">Next Fretboard · {{nextLab}} · anteprima</h4>
+<div class="nxctx">
+<div class="nxc"><small>Ora</small><b>{{nxNow}}</b><i>{{nxNowSub}}</i></div>
+<span class="nxa" aria-hidden="true">→</span>
+<div class="nxc nxt"><small>Prossimo</small><b>{{nxNext}}</b><i>{{nxNextSub}}</i></div>
+<p class="nxp">Anteprima del materiale in arrivo, non la riproduzione: durante Play l'avanzamento automatico non è ancora implementato.</p>
+</div>
+<div class="nxb" role="img" aria-label="{{nextAria}}" style="{{nxStyle}}">
+<sc-for list="{{nextStrings}}" as="s" hint-placeholder-count="6"><span class="nxg" style="top:{{s.nameTop}}">{{s.name}}</span></sc-for>
+<sc-for list="{{nextFrets}}" as="f" hint-placeholder-count="12"><span class="nf {{f.cls}}" style="left:{{f.left}}"></span></sc-for>
+<sc-for list="{{nextStrings}}" as="s" hint-placeholder-count="6"><span class="ns" style="{{s.style}}"></span></sc-for>
+<sc-for list="{{nextGhosts}}" as="d" hint-placeholder-count="2"><span class="nghost" style="{{d.wrap}}"></span></sc-for>
+<sc-for list="{{nextDots}}" as="d" hint-placeholder-count="10"><div class="nmk" style="{{d.wrap}}"><dc-import name="GTLMarker" role="{{d.role}}" label="{{d.label}}" fill="{{true}}" guide="{{d.gd}}" chord-root="{{d.cr}}" target="{{d.tg}}" hint-size="22px,22px"></dc-import></div></sc-for>
+<sc-for list="{{nextNums}}" as="n" hint-placeholder-count="12"><span class="nnum" style="left:{{n.left}}">{{n.n}}</span></sc-for>
+<sc-if value="{{nxHasMsg}}" hint-placeholder-val="{{false}}"><div class="nxmsg"><p>{{nxMsg}}</p><sc-if value="{{nxCanLoad}}" hint-placeholder-val="{{false}}"><button type="button" class="pb nc" onClick="{{nxLoad}}">Carica ii–V–I nella tonalità</button></sc-if></div></sc-if>
+</div>
+<sc-if value="{{nxHasHint}}" hint-placeholder-val="{{true}}"><p class="note nxh">{{nxHint}}</p></sc-if>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ovAny}}" hint-placeholder-val="{{false}}">
+<div class="dvx" data-out="{{ovOut}}" data-c="{{ovC}}">
+<button type="button" class="dvscrim" tabindex="-1" aria-label="Chiudi il dispositivo" onClick="{{closeOv}}"></button>
+<div class="dvl">
+
+<sc-if value="{{ovMixer}}" hint-placeholder-val="{{false}}">
+<section class="dv dvm6" role="dialog" aria-label="Mixer analogico a sette canali">
+<div class="m6wrap" style="width:{{mxW}};height:{{mxH}}">
+<div class="m6" style="transform:scale({{mxScale}})">
+<img class="m6body" src="assets/mixer-body@2x.webp" alt="" draggable="false">
+<svg class="m6print" viewBox="0 0 828 432" aria-hidden="true"><g class="sep"><line x1="158" y1="78" x2="158" y2="378"></line><line x1="256" y1="78" x2="256" y2="378"></line><line x1="354" y1="78" x2="354" y2="378"></line><line x1="452" y1="78" x2="452" y2="378"></line><line x1="550" y1="78" x2="550" y2="378"></line><line x1="648" y1="78" x2="648" y2="378"></line></g><rect class="mst" x="656" y="78" width="120" height="304" rx="7"></rect></svg>
+<span class="m6tape" title="Canali con audio reale nel prototipo">Click · Notes · Master collegati</span>
+<button type="button" class="dclose m6x" aria-label="Chiudi mixer" onClick="{{closeOv}}"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" style="stroke:currentColor;stroke-width:2.6;stroke-linecap:round"></path></svg></button>
+<sc-for list="{{mixer6}}" as="c" hint-placeholder-count="7">
+<div class="m6ch" style="left:{{c.left}}" role="group" aria-label="{{c.name}}">
+<span class="m6name">{{c.name}}</span>
+<sc-if value="{{c.tagShow}}" hint-placeholder-val="{{false}}"><span class="m6proto">proto · senza audio</span></sc-if>
+<span class="m6led" data-s="{{c.led}}" title="{{c.ledTitle}}"></span>
+<div class="m6scale" aria-hidden="true"><span class="m6t" style="top:112px"><b>+6</b><i></i></span><span class="m6t" style="top:134.7px"><b>0</b><i></i></span><span class="m6t" style="top:157.3px"><b>−6</b><i></i></span><span class="m6t" style="top:180px"><b>−12</b><i></i></span><span class="m6t" style="top:202.7px"><b>−18</b><i></i></span><span class="m6t" style="top:225.3px"><b>−24</b><i></i></span><span class="m6t" style="top:248px"><b>−∞</b><i></i></span></div>
+<span class="m6cap" data-m="{{c.isM}}" style="top:{{c.capTop}}"></span>
+<button type="button" class="m6hit" role="slider" aria-orientation="vertical" aria-label="{{c.aria}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{c.val}}" aria-valuetext="{{c.read}}" onPointerDown="{{c.down}}" onPointerMove="{{c.move}}" onPointerUp="{{c.up}}" onPointerCancel="{{c.up}}" onKeyDown="{{c.key}}"></button>
+<button type="button" class="m6btn mute" aria-pressed="{{c.mOn}}" aria-label="Mute {{c.name}}" data-lit="{{c.mLit}}" onClick="{{c.mute}}"><i class="m6bi"></i><span>Mute</span></button>
+<button type="button" class="m6btn solo" disabled aria-disabled="true" aria-label="Solo {{c.name}}: funzione futura" title="Solo: funzione futura, non attiva"><i class="m6bi"></i><span>Solo</span></button>
+<span class="m6read">{{c.read}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ovAmp}}" hint-placeholder-val="{{false}}">
+<section class="dv dvr" role="dialog" aria-label="Amplificatore e NAM">
+<div class="rwrap" style="width:{{ampW}};height:{{ampH}}"><div class="a6" style="transform:scale({{ampScale}})">
+<img class="rbody" src="assets/amp-body@2x.webp" alt="" draggable="false">
+<svg class="rprint" viewBox="0 0 868 344" aria-hidden="true"><g class="tk"><line x1="248.1" y1="289.9" x2="245.3" y2="292.7"></line><line x1="240.5" y1="277.6" x2="236.7" y2="278.8"></line><line x1="239.4" y1="263.2" x2="235.4" y2="262.5"></line><line x1="244.9" y1="249.8" x2="241.7" y2="247.4"></line><line x1="255.9" y1="240.4" x2="254.1" y2="236.8"></line><line x1="270.0" y1="237.0" x2="270.0" y2="233.0"></line><line x1="284.1" y1="240.4" x2="285.9" y2="236.8"></line><line x1="295.1" y1="249.8" x2="298.3" y2="247.4"></line><line x1="300.6" y1="263.2" x2="304.6" y2="262.5"></line><line x1="299.5" y1="277.6" x2="303.3" y2="278.8"></line><line x1="291.9" y1="289.9" x2="294.7" y2="292.7"></line><line x1="328.1" y1="289.9" x2="325.3" y2="292.7"></line><line x1="320.5" y1="277.6" x2="316.7" y2="278.8"></line><line x1="319.4" y1="263.2" x2="315.4" y2="262.5"></line><line x1="324.9" y1="249.8" x2="321.7" y2="247.4"></line><line x1="335.9" y1="240.4" x2="334.1" y2="236.8"></line><line x1="350.0" y1="237.0" x2="350.0" y2="233.0"></line><line x1="364.1" y1="240.4" x2="365.9" y2="236.8"></line><line x1="375.1" y1="249.8" x2="378.3" y2="247.4"></line><line x1="380.6" y1="263.2" x2="384.6" y2="262.5"></line><line x1="379.5" y1="277.6" x2="383.3" y2="278.8"></line><line x1="371.9" y1="289.9" x2="374.7" y2="292.7"></line><line x1="408.1" y1="289.9" x2="405.3" y2="292.7"></line><line x1="400.5" y1="277.6" x2="396.7" y2="278.8"></line><line x1="399.4" y1="263.2" x2="395.4" y2="262.5"></line><line x1="404.9" y1="249.8" x2="401.7" y2="247.4"></line><line x1="415.9" y1="240.4" x2="414.1" y2="236.8"></line><line x1="430.0" y1="237.0" x2="430.0" y2="233.0"></line><line x1="444.1" y1="240.4" x2="445.9" y2="236.8"></line><line x1="455.1" y1="249.8" x2="458.3" y2="247.4"></line><line x1="460.6" y1="263.2" x2="464.6" y2="262.5"></line><line x1="459.5" y1="277.6" x2="463.3" y2="278.8"></line><line x1="451.9" y1="289.9" x2="454.7" y2="292.7"></line><line x1="488.1" y1="289.9" x2="485.3" y2="292.7"></line><line x1="480.5" y1="277.6" x2="476.7" y2="278.8"></line><line x1="479.4" y1="263.2" x2="475.4" y2="262.5"></line><line x1="484.9" y1="249.8" x2="481.7" y2="247.4"></line><line x1="495.9" y1="240.4" x2="494.1" y2="236.8"></line><line x1="510.0" y1="237.0" x2="510.0" y2="233.0"></line><line x1="524.1" y1="240.4" x2="525.9" y2="236.8"></line><line x1="535.1" y1="249.8" x2="538.3" y2="247.4"></line><line x1="540.6" y1="263.2" x2="544.6" y2="262.5"></line><line x1="539.5" y1="277.6" x2="543.3" y2="278.8"></line><line x1="531.9" y1="289.9" x2="534.7" y2="292.7"></line><line x1="568.1" y1="289.9" x2="565.3" y2="292.7"></line><line x1="560.5" y1="277.6" x2="556.7" y2="278.8"></line><line x1="559.4" y1="263.2" x2="555.4" y2="262.5"></line><line x1="564.9" y1="249.8" x2="561.7" y2="247.4"></line><line x1="575.9" y1="240.4" x2="574.1" y2="236.8"></line><line x1="590.0" y1="237.0" x2="590.0" y2="233.0"></line><line x1="604.1" y1="240.4" x2="605.9" y2="236.8"></line><line x1="615.1" y1="249.8" x2="618.3" y2="247.4"></line><line x1="620.6" y1="263.2" x2="624.6" y2="262.5"></line><line x1="619.5" y1="277.6" x2="623.3" y2="278.8"></line><line x1="611.9" y1="289.9" x2="614.7" y2="292.7"></line><line x1="648.1" y1="289.9" x2="645.3" y2="292.7"></line><line x1="640.5" y1="277.6" x2="636.7" y2="278.8"></line><line x1="639.4" y1="263.2" x2="635.4" y2="262.5"></line><line x1="644.9" y1="249.8" x2="641.7" y2="247.4"></line><line x1="655.9" y1="240.4" x2="654.1" y2="236.8"></line><line x1="670.0" y1="237.0" x2="670.0" y2="233.0"></line><line x1="684.1" y1="240.4" x2="685.9" y2="236.8"></line><line x1="695.1" y1="249.8" x2="698.3" y2="247.4"></line><line x1="700.6" y1="263.2" x2="704.6" y2="262.5"></line><line x1="699.5" y1="277.6" x2="703.3" y2="278.8"></line><line x1="691.9" y1="289.9" x2="694.7" y2="292.7"></line></g><g class="nm"><text x="244" y="298">0</text><text x="296" y="298">10</text><text x="324" y="298">0</text><text x="376" y="298">10</text><text x="404" y="298">0</text><text x="456" y="298">10</text><text x="484" y="298">0</text><text x="536" y="298">10</text><text x="564" y="298">0</text><text x="616" y="298">10</text><text x="644" y="298">0</text><text x="696" y="298">10</text></g></svg>
+<span class="rtape" style="left:86px;top:26px">Design demo · nessun DSP · NAM futuro</span>
+<button type="button" class="dclose" style="left:752px;top:23px;right:auto" aria-label="Chiudi amplificatore" onClick="{{closeOv}}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" style="stroke:currentColor;stroke-width:2.6;stroke-linecap:round"></path></svg></button>
+<span class="alab" style="left:89px">Power</span><span class="alab" style="left:134px">On</span><span class="alab" style="left:182px">Input</span><span class="alab" style="left:752px">Bypass</span>
+<span class="a6sw pw" data-on="{{ampLamp}}" style="left:64px;top:239px;width:50px;height:62px"></span>
+<button type="button" class="a6hit" style="left:70px;top:244px;width:38px;height:52px" aria-pressed="{{namOn}}" aria-label="Accensione dell'amplificatore (stato di design)" onClick="{{toggleAmp}}"></button>
+<span class="a6lamp" data-on="{{ampLamp}}" role="img" aria-label="{{ampLampAria}}"></span>
+<span class="a6sw bp" data-on="{{bypassOn}}" style="left:732px;top:238px;width:40px;height:60px"></span>
+<button type="button" class="a6hit" style="left:734px;top:240px;width:36px;height:56px" aria-pressed="{{ampBypass}}" aria-label="Bypass dell'amplificatore (stato di design)" onClick="{{toggleBypass}}"></button>
+<sc-for list="{{amp6}}" as="k" hint-placeholder-count="6">
+<span class="alab" style="left:{{k.cx}}">{{k.name}}</span>
+<img class="rk-img" src="assets/knob-gold@2x.png" alt="" draggable="false" style="left:{{k.left}};top:232px;width:72px;height:72px">
+<span class="rk-ptr gold" style="left:{{k.cx}};top:268px;transform:rotate({{k.angle}}deg)"></span>
+<button type="button" class="rk-hit" style="left:{{k.cx}};top:268px;width:52px;height:52px" role="slider" aria-label="{{k.aria}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{k.val}}" aria-valuetext="{{k.read}} su 10" onPointerDown="{{k.down}}" onPointerMove="{{k.move}}" onPointerUp="{{k.up}}" onPointerCancel="{{k.up}}" onKeyDown="{{k.key}}" onDoubleClick="{{k.reset}}"></button>
+</sc-for>
+</div></div>
+<p class="dvnote">Manopole e interruttori cambiano solo il loro stato visivo: nessuna elaborazione audio, nessun modello NAM collegato. Stato: {{ampStatus}}.</p>
+</section>
+</sc-if>
+
+<sc-if value="{{ovTuner}}" hint-placeholder-val="{{false}}">
+<section class="dv dvr" role="dialog" aria-label="Accordatore cromatico">
+<div class="rwrap" style="width:{{tunW}};height:{{tunH}}"><div class="t6" style="transform:scale({{tunScale}})">
+<img class="rbody" src="assets/tuner-body@2x.webp" alt="" draggable="false">
+<div class="t6disp" data-on="{{tunerLit}}" role="status" aria-live="polite" aria-label="{{tunerAria}}">
+<sc-for list="{{arc}}" as="c" hint-placeholder-count="21"><i class="t6seg" style="left:{{c.left}};top:{{c.top}};transform:rotate({{c.rot}});{{c.style}}"></i></sc-for>
+<span class="t6c0">0</span>
+<span class="t6note">{{tnNote}}<small>{{tnOct}}</small></span>
+<span class="t6hz">{{hzText}}</span><span class="t6ct">{{tnCents}}</span>
+</div>
+<span class="rtape" style="left:150px;top:24px">{{tunerBadge}}</span>
+<button type="button" class="dclose" style="left:336px;top:21px;right:auto;width:26px;height:24px" aria-label="Chiudi accordatore" onClick="{{closeOv}}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" style="stroke:currentColor;stroke-width:2.6;stroke-linecap:round"></path></svg></button>
+<div class="t6refs" role="group" aria-label="Note di riferimento cromatiche"><sc-for list="{{tnRefs}}" as="r" hint-placeholder-count="12"><button type="button" class="t6rf" data-on="{{r.on}}" aria-pressed="{{r.on}}" aria-label="{{r.aria}}" onClick="{{r.pick}}">{{r.label}}</button></sc-for></div>
+<span class="tlab" style="left:102px;top:230px">Calib</span><span class="tlab sm" style="left:72px;top:296px">435</span><span class="tlab sm" style="left:132px;top:296px">445</span>
+<img class="rk-img" src="assets/knob-black@2x.png" alt="" draggable="false" style="left:74px;top:242px;width:56px;height:56px">
+<span class="rk-ptr wht sm" style="left:102px;top:270px;transform:rotate({{calibK.angle}}deg)"></span>
+<button type="button" class="rk-hit" style="left:102px;top:270px;width:40px;height:40px" role="slider" aria-label="{{calibK.aria}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{calibK.val}}" aria-valuetext="{{calibK.read}}" onPointerDown="{{calibK.down}}" onPointerMove="{{calibK.move}}" onPointerUp="{{calibK.up}}" onPointerCancel="{{calibK.up}}" onKeyDown="{{calibK.key}}" onDoubleClick="{{calibK.reset}}"></button>
+<span class="t6led g" data-on="{{tnLed.tune}}" style="top:236px"></span><span class="tlab l" style="top:240px">In tune</span>
+<span class="t6led a" data-on="{{tnLed.sharp}}" style="top:262px"></span><span class="tlab l" style="top:266px">Sharp</span>
+<span class="t6led r" data-on="{{tnLed.flat}}" style="top:288px"></span><span class="tlab l" style="top:292px">Flat</span>
+<img class="t6fs" src="assets/footswitch@2x.png" alt="" draggable="false" data-on="{{tunerLit}}">
+<button type="button" class="t6fsh" aria-pressed="{{tunerOn}}" aria-label="Interruttore a pedale: attiva o disattiva l'accordatore" onClick="{{toggleTuner}}"></button>
+</div></div>
+<p class="dvnote">{{tunerNote}}</p>
+</section>
+</sc-if>
+
+<sc-if value="{{ovIface}}" hint-placeholder-val="{{false}}">
+<section class="dv dvr" role="dialog" aria-label="Ingresso chitarra e interfaccia audio">
+<div class="rwrap" style="width:{{ifW}};height:{{ifH}}"><div class="i6" style="transform:scale({{ifScale}})">
+<img class="rbody" src="assets/iface-body@2x.webp" alt="" draggable="false">
+<span class="rtape" style="left:190px;top:44px">Nessun dispositivo reale collegato</span>
+<button type="button" class="dclose" style="left:590px;top:26px;right:auto;width:26px;height:24px" aria-label="Chiudi interfaccia" onClick="{{closeOv}}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" style="stroke:currentColor;stroke-width:2.6;stroke-linecap:round"></path></svg></button>
+<span class="ilab" style="left:94px;top:150px">Input 1</span><span class="ilab" style="left:184px;top:150px">Input 2</span>
+<div class="i6sel" role="radiogroup" aria-label="Canale di ingresso"><sc-for list="{{ioChans}}" as="c" hint-placeholder-count="2"><button type="button" class="i6ch" role="radio" aria-checked="{{c.checked}}" data-on="{{c.on}}" data-clip="{{c.clip}}" aria-label="{{c.label}}" onClick="{{c.pick}}">{{c.n}}</button></sc-for></div>
+<span class="i6halo" data-s="{{halo}}"></span>
+<img class="rk-img" src="assets/knob-alu@2x.png" alt="" draggable="false" style="left:252px;top:78px;width:84px;height:84px">
+<span class="rk-ptr wht" style="left:294px;top:120px;transform:rotate({{gainK.angle}}deg)"></span>
+<button type="button" class="rk-hit" style="left:294px;top:120px;width:60px;height:60px" role="slider" aria-label="{{gainK.aria}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{gainK.val}}" aria-valuetext="{{gainK.read}}" onPointerDown="{{gainK.down}}" onPointerMove="{{gainK.move}}" onPointerUp="{{gainK.up}}" onPointerCancel="{{gainK.up}}" onKeyDown="{{gainK.key}}" onDoubleClick="{{gainK.reset}}"></button>
+<span class="ilab" style="left:294px;top:172px">Gain {{gainK.read}}</span>
+<div class="i6mon"><button type="button" class="i6btn" aria-pressed="{{liveOn}}" data-lit="{{liveLit}}" onClick="{{livePress}}"><i></i>Live monitor</button><button type="button" class="i6btn" aria-pressed="{{demoOn}}" data-lit="{{demoLit}}" onClick="{{toggleDemo}}"><i></i>Segnale test DEMO</button></div>
+<div class="i6met" role="img" aria-label="{{ioMeterAria}}"><sc-for list="{{ioMeter}}" as="m" hint-placeholder-count="14"><i style="{{m.style}}"></i></sc-for></div>
+<div class="i6lcd"><b>{{ioStatus}}</b><span>{{ioPath}} · Rilevato: {{ioDetected}}</span></div>
+</div></div>
+<p class="dvnote">Input gain, live monitor, amplificatore e master restano controlli separati. Aprire il pannello non attiva il monitoraggio. Il segnale di test è una simulazione dichiarata.</p>
+</section>
+</sc-if>
+
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{toast}}" hint-placeholder-val="{{false}}"><div class="toast" role="status">{{toastText}}</div></sc-if>
+</section>
+
+<sc-if value="{{simple}}" hint-placeholder-val="{{false}}">
+<div class="simpleov" role="dialog" aria-label="Aspetto Semplificata: segnaposto di navigazione del prototipo">
+<section class="paper">
+<div class="phead"><h3 class="ptitle">Semplificata</h3><span class="pspace"></span><span class="silk" style="color:rgba(42,36,24,.7)">Segnaposto di navigazione</span></div>
+<div class="pbody">
+<p class="dg-note" style="margin:0">Nell'app reale la <b>Semplificata</b> è un'interfaccia separata e completa, con le sue funzioni. Nel prodotto questo comando apre quell'interfaccia esistente.</p>
+<p class="dg-note" style="margin:0">In questo artboard non viene ridisegnata né ricreata come «Studio con funzioni nascoste»: il prototipo resta su Studio.</p>
+<div><button type="button" class="textbtn" onClick="{{backToStudio}}">Torna a Studio</button></div>
+</div>
+</section>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>

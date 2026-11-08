@@ -1,0 +1,141 @@
+/* Guitar Theory Lab — generated from tokens.json */
+:root, [data-theme="dark"] {
+  --surface-ground: #14110e; /* Piano di lavoro e sfondo della finestra Studio. Testo ink-primary sopra. */
+  --metal-brushed: #8c939b; /* Alluminio spazzolato dei pannelli principali. Testo su questo fondo solo con ink-primary del tema. */
+  --metal-dark: #2b2d31; /* Acciaio scuro: manopole, cornici, interni dei fader. */
+  --metal-highlight: #f5f7fa; /* Riflesso speculare sui bordi metallici e sulle manopole. Solo decorativo. */
+  --wood-walnut: #4a2c1a; /* Cornice in noce dell'apparecchio. Decorativo, mai sfondo di testo interattivo. */
+  --wood-walnut-hi: #6e4426; /* Venatura chiara e bordi lucidi della cornice. */
+  --paper-cream: #efe3bd; /* Fondo dei foglietti Scale, Chords, Exercise e della legenda. */
+  --paper-shade: #d6c48f; /* Piega, angolo sollevato e ombra interna dei foglietti. */
+  --paper-ink: #2a2418; /* Testo su paper-cream. Contrasto superiore a 12:1. */
+  --ink-primary: #f2ead8; /* Testo primario su superfici non carta: etichette di pannello, display, controlli. */
+  --ink-muted: #a79f8f; /* Testo secondario (sottotitoli, unità, tick). Minimo 4.5:1 su surface-ground e metal-brushed. */
+  --lcd-glass: #06131f; /* Vetro del display LCD e dello strumento Gyro. Fondo dei readout. */
+  --lcd-blue: #4fb2ff; /* Segmenti e scala illuminati del display. Sempre su lcd-glass. */
+  --led-amber: #ffb23f; /* LED di stato e indicatore di livello del mixer. */
+  --led-red: #ff3b2f; /* LED di registrazione o errore. Accompagnato sempre da testo o forma. */
+  --led-green: #7dff6a; /* LED di riproduzione attiva e metronomo sincronizzato. */
+  --accent-orange: #f26b1d; /* Stato attivo di pulsanti, selettori di workspace e Play. Ereditato dalla Semplificata. */
+  --focus-ring: #ffd23f; /* Anello di focus da tastiera, spessore 2px, offset 2px. Mai nascosto. */
+  --marker-tonic: #f08a24; /* Tonica. Marker pieno con cerchio spesso. */
+  --marker-scale: #4a9fe8; /* Nota della scala. Marker pieno con cerchio. */
+  --marker-chord: #3cc27a; /* Nota dell'accordo. Marker pieno con quadrato arrotondato. */
+  --marker-tension: #a77bf0; /* Tensione (9, 11, 13). Marker a losanga. */
+  --marker-avoid: #ff5a5f; /* Nota da evitare sul contesto. Marker con barra diagonale. */
+  --marker-external: #8a8a8a; /* Nota esterna alla scala. Marker vuoto con contorno. */
+  --shadow-contact: 0 1px 1px rgba(0,0,0,0.5), 0 3px 6px rgba(0,0,0,0.35); /* Ombra di contatto di manopole e pulsanti sul pannello. */
+  --shadow-paper: 0 2px 3px rgba(0,0,0,0.45), 0 10px 18px rgba(0,0,0,0.35); /* Foglietti appoggiati sul piano. Unica ombra portata grande. */
+  --shadow-inset: inset 0 1px 2px rgba(0,0,0,0.6); /* Incavi: fessure dei fader, sede dei display. */
+}
+[data-theme="light"] {
+  --surface-ground: #e6e1d8;
+  --metal-brushed: #d3d8de;
+  --metal-dark: #4a4e55;
+  --metal-highlight: #ffffff;
+  --wood-walnut: #5a3520;
+  --wood-walnut-hi: #7a4a2a;
+  --paper-cream: #f4ebcc;
+  --paper-shade: #dccb93;
+  --paper-ink: #2a2418;
+  --ink-primary: #1d1a16;
+  --ink-muted: #5b5448;
+  --lcd-glass: #0b1c2c;
+  --lcd-blue: #2f8fe0;
+  --led-amber: #e8912b;
+  --led-red: #d92a20;
+  --led-green: #2ea043;
+  --accent-orange: #d9561a;
+  --focus-ring: #1f5fbf;
+  --marker-tonic: #c96a10;
+  --marker-scale: #1f6fc0;
+  --marker-chord: #1d8a4f;
+  --marker-tension: #6a3fc0;
+  --marker-avoid: #c8323c;
+  --marker-external: #5c5c5c;
+  --shadow-contact: 0 1px 1px rgba(0,0,0,0.25), 0 3px 5px rgba(0,0,0,0.2);
+  --shadow-paper: 0 2px 3px rgba(0,0,0,0.2), 0 8px 14px rgba(0,0,0,0.18);
+  --shadow-inset: inset 0 1px 2px rgba(0,0,0,0.25);
+}
+:root {
+  --space-1: 4px; /* Spazio minimo tra etichetta e controllo. */
+  --space-2: 8px; /* Spazio interno dei pulsanti piccoli. */
+  --space-3: 12px; /* Spazio tra controlli adiacenti. */
+  --space-4: 16px; /* Padding dei pannelli e dei foglietti. */
+  --space-6: 24px; /* Separazione tra gruppi funzionali. */
+  --space-8: 32px; /* Margine tra sezioni maggiori della console. */
+  --space-12: 48px; /* Margine esterno del workstation su desktop. */
+  --radius-sm: 2px; /* Piastre metalliche, bordi dei pannelli. */
+  --radius-md: 6px; /* Pulsanti meccanici e selettori a tasti. */
+  --radius-lg: 14px; /* Cornice dello smartphone tutor. */
+  --radius-knob: 50%; /* Manopole rotative e LED. */
+  --radius-pill: 9999px; /* Interruttori a pillola e segmenti. */
+  --font-sans: "Barlow", system-ui, sans-serif;
+  --font-label: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --text-silk-label: 600 11px/14px var(--font-label); /* Serigrafia dei controlli, in maiuscolo. */
+  --text-silk-label-large: 600 14px/18px var(--font-label); /* Titoli di sezione stampati sul pannello. */
+  --text-wordmark: 600 64px/60px var(--font-display); /* Nome del prodotto nella copertina e nell'intestazione. */
+  --text-panel-title: 500 24px/28px var(--font-display); /* Titoli dei fogli carta e delle schede. */
+  --text-body: 400 14px/20px var(--font-sans); /* Testo corrente, anche sulla carta. */
+  --text-body-small: 400 12px/16px var(--font-sans); /* Note, legenda, tooltip. */
+  --text-lcd: 500 16px/20px var(--font-mono); /* Valori numerici su display (BPM, frequenza, nota). */
+  --text-lcd-small: 500 12px/16px var(--font-mono); /* Unità e indici sul display. */
+}
+.silk-label {
+  font-family: var(--font-label);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.silk-label-large {
+  font-family: var(--font-label);
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 64px;
+  line-height: 60px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body-small {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.lcd {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.lcd-small {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+}

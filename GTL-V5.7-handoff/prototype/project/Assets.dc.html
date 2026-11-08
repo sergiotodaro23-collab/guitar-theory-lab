@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Componenti e valutazione 3D</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/guitar-theory-lab/tokens.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=Cormorant+Garamond:wght@500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+body{margin:0}
+.as,.as *{box-sizing:border-box}
+.as{width:1600px;height:2480px;padding:40px 48px;color:var(--ink-primary,#f2ead8);background:var(--surface-ground,#14110e);font:400 13px/18px "Barlow",system-ui,sans-serif;display:flex;flex-direction:column;gap:20px}
+.as h1{margin:0;font:500 38px/42px "Cormorant Garamond",Georgia,serif;letter-spacing:.02em}
+.as .sub{margin:4px 0 0;color:var(--ink-muted,#a79f8f);font-size:14px;line-height:20px}
+.warn{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-md,6px);border:1px solid var(--led-amber,#ffb23f);background:rgba(255,178,63,.08);font-size:14px;line-height:20px}
+.warn i{flex:none;width:10px;height:10px;border-radius:50%;background:var(--led-amber,#ffb23f);box-shadow:0 0 6px var(--led-amber,#ffb23f)}
+.brief{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:16px}
+.card{padding:14px 16px;border-radius:var(--radius-md,6px);background:var(--metal-dark,#2b2d31);box-shadow:inset 0 0 0 1px rgba(140,147,155,.4)}
+.card h2{margin:0 0 6px;font:600 13px/16px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-orange,#f26b1d)}
+.card p,.card li{margin:0;font-size:13px;line-height:19px}
+.card ul,.card ol{margin:0;padding-left:18px}
+.code{font:500 12px/16px "IBM Plex Mono",ui-monospace,monospace;color:var(--lcd-blue,#4fb2ff)}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{padding:8px 10px;text-align:left;font:600 11px/14px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted,#a79f8f);background:#0f1012;border-bottom:2px solid var(--metal-brushed,#8c939b)}
+td{padding:8px 10px;vertical-align:top;border-bottom:1px solid rgba(140,147,155,.28);font-size:12.5px;line-height:17px}
+td.n{font:600 14px/18px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-primary,#f2ead8)}
+td.n small{display:block;margin-top:2px;font:500 11px/14px "IBM Plex Mono",ui-monospace,monospace;letter-spacing:0;text-transform:none;color:var(--ink-muted,#a79f8f)}
+tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.tag{display:inline-block;padding:0 6px;border-radius:9999px;font:600 11px/16px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.tag.ext{background:var(--accent-orange,#f26b1d);color:var(--paper-ink,#2a2418)}
+.tag.px{background:var(--lcd-blue,#4fb2ff);color:var(--paper-ink,#2a2418)}
+.tag.opq{background:var(--metal-brushed,#8c939b);color:var(--paper-ink,#2a2418)}
+.foot{margin-top:auto;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-md,6px);background:var(--paper-cream,#efe3bd);color:var(--paper-ink,#2a2418);font-size:13px;line-height:18px}
+.v{display:inline-block;padding:1px 8px;border-radius:9999px;font:600 11px/17px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;color:#1a140c}
+.v.r{background:var(--led-green,#7dff6a)}.v.f{background:var(--led-amber,#ffb23f)}.v.d{background:var(--accent-orange,#f26b1d)}
+.bl{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.bl dl{margin:0;display:grid;grid-template-columns:92px 1fr;gap:4px 10px}
+.bl dt{font:600 11px/16px "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted,#a79f8f)}
+.bl dd{margin:0;font-size:12px;line-height:16px}
+.bl .card h2{display:flex;justify-content:space-between;align-items:center}
+</style>
+</helmet>
+<div class="as">
+<div>
+<h1>Fretboard Lab — Studio V5.5 · Componenti e valutazione 3D</h1>
+<p class="sub">Classificazione dei componenti principali, brief Blender prioritizzati e inventario riusabile. I verdetti riguardano la qualità visiva del prototipo, non la prontezza di produzione dell'intera applicazione.</p>
+</div>
+<div class="warn"><i></i><span><b>Nessun asset 3D è stato modellato né renderizzato.</b> Blender non è stato usato. Tutti i materiali sono SVG e CSS (rumore procedurale feTurbulence per spazzolato, tolex, carta, legno). I brief sotto sono pronti da consegnare a chi farà i render.</span></div>
+<table>
+<colgroup><col style="width:330px"><col style="width:190px"><col style="width:830px"><col style="width:200px"></colgroup>
+<thead><tr><th>Componente</th><th>Verdetto</th><th>Motivazione</th><th>Priorità Blender</th></tr></thead>
+<tbody><tr><td class="n">Rotary knobs<small>GTLKnob · input gain, swing</small></td><td><span class="v d">3D recommended</span></td><td>Il cappuccio CSS ha zigrinatura e riflesso credibili da lontano, ma a 40–56 px il bordo smussato e il lucido restano piatti: è il componente più ripetuto e più guardato.</td><td>1 · asset condiviso con le manopole amp</td></tr><tr><td class="n">Amp knobs<small>GTLAmpKnob · 6 manopole crema</small></td><td><span class="v d">3D recommended</span></td><td>Il cappuccio crema con gonna a campana (stile da testata) non si ottiene con gradienti: servono altezza reale, scanalatura e ombra di contatto.</td><td>1</td></tr><tr><td class="n">Amp enclosure<small>tolex, piping, angoli, maniglia</small></td><td><span class="v d">3D recommended</span></td><td>Oggi: rumore SVG per il rilievo del tolex, piping crema, angoli metallici in CSS. Il rilievo del tolex e il bordo cucito reggono solo a distanza.</td><td>2</td></tr><tr><td class="n">Jack sockets<small>jk · presa combo grafica</small></td><td><span class="v d">3D recommended</span></td><td>Asset piccolo e a basso costo: filettatura, anello cromato e contatti si leggono male in CSS. Ottimo rapporto effetto/lavoro.</td><td>3</td></tr><tr><td class="n">Mixer chassis<small>.dvm · pannello, fianchi in noce</small></td><td><span class="v f">Refinement needed</span></td><td>Pannello spazzolato (rumore SVG), guance in legno, viti e fessure di ventilazione funzionano. Mancano giunzioni di pannello e un leggero effetto «piegato».</td><td>—</td></tr><tr><td class="n">Fader caps<small>GTLChannel</small></td><td><span class="v f">Refinement needed</span></td><td>Cappuccio con righe e fascia colore leggibile a 22×30 px. Il 3D porterebbe poco.</td><td>— (opzionale)</td></tr><tr><td class="n">Tuner pedal<small>.dvt · corpo, display, pedale</small></td><td><span class="v f">Refinement needed</span></td><td>Corpo verniciato con grana, orecchie per i jack, display incassato e interruttore gommato sono credibili. Migliorabile con bordo pressofuso e vite sul coperchio.</td><td>— (opzionale: pedale)</td></tr><tr><td class="n">Audio interface<small>.dvi · rack con guance arancio</small></td><td><span class="v f">Refinement needed</span></td><td>Alluminio spazzolato, anelli luminosi, jack e display OK. Manca la mascherina di plastica sopra i LED.</td><td>—</td></tr><tr><td class="n">Fretboard materials<small>acero, tasti, capotasto, corde</small></td><td><span class="v f">Refinement needed</span></td><td>Venatura SVG sotto i marker (geometria invariata), tasti a gradiente metallico. Una texture di acero fotografica migliorerebbe, ma la leggibilità ha la priorità.</td><td>— (texture 2D opzionale)</td></tr><tr><td class="n">Notebook and paper<small>.pg · carta, righe, margine, schede</small></td><td><span class="v r">Ready</span></td><td>Fibra di carta SVG, righe, margine rosso, fori e schede colorate a cartoncino: già sufficienti per la produzione.</td><td>—</td></tr><tr><td class="n">LCD display<small>bezel, vetro, ambra</small></td><td><span class="v r">Ready</span></td><td>Testo vivo, vetro con riflesso e cornice incassata: da non appiattire in un'immagine.</td><td>—</td></tr><tr><td class="n">Rail, plates, divider<small>piastre spazzolate, divisore</small></td><td><span class="v r">Ready</span></td><td>Rumore spazzolato sotto i bordi, viti, divisore con impugnatura: sufficiente.</td><td>—</td></tr></tbody>
+</table>
+<div class="bl"><div class="card"><h2><span>Priorità 1 · Manopole (rotary + amp)</span><span class="v d">3D</span></h2><dl><dt>Asset</dt><dd>Due famiglie: cappuccio crema con gonna (amp) e cappuccio nero zigrinato 40/56 px (GTLKnob). Senza puntatore.</dd><dt>Perché</dt><dd>Il CSS non dà altezza, smusso e ombra di contatto veri. Sono le parti più ripetute dell'interfaccia.</dd><dt>Geometria</dt><dd>Cilindro 24–28 mm, gonna di 3–4 mm, zigrinatura 60 denti, smusso 0,4 mm. 2.000–4.000 poligoni, tutto sottodivisione.</dd><dt>Materiali</dt><dd>Plastica crema satinata (roughness 0,45), gomma nera opaca, metallo spazzolato per l'anello. Nessun testo.</dd><dt>Camera</dt><dd>Ortografica dall'alto, perpendicolare, senza prospettiva.</dd><dt>Luci</dt><dd>Chiave in alto a sinistra a 30°, 3200 K. Debole riempimento frontale. Nessuna ombra cotta nello sprite.</dd><dt>Stati</dt><dd>Riposo, hover (luminosità in CSS), trascinamento (ombra di contatto in CSS). Puntatore come livello separato che ruota in codice.</dd><dt>Render</dt><dd>224 / 160 / 112 px a 2× (1× = 112/80/56). PNG con alfa, 3 livelli: gonna, cappuccio, puntatore.</dd><dt>Export</dt><dd>PNG-24 con alfa (WebP lossless come alternativa). Nome: gtl-knob-&lt;tipo&gt;-&lt;livello&gt;@2x.png</dd><dt>Integrazione</dt><dd>Sostituire i gradienti conici in GTLKnob/GTLAmpKnob con background-image; rotazione, focus e tastiera restano nel componente.</dd></dl></div><div class="card"><h2><span>Priorità 2 · Testata amplificatore</span><span class="v d">3D</span></h2><dl><dt>Asset</dt><dd>Corpo della testata (tolex, piping, angoli, maniglia) senza pannello comandi. Pannello comandi e manopole restano vivi.</dd><dt>Perché</dt><dd>Il rilievo del tolex e il bordo cucito in CSS reggono solo a distanza.</dd><dt>Geometria</dt><dd>Box 820×~190 mm con smusso 4 mm, bordino piping, 4 angoli in lamiera, maniglia in pelle sagomata.</dd><dt>Materiali</dt><dd>Tolex verde profondo (normal map a ciottoli), piping crema, metallo spazzolato, pelle opaca. Griglia a tela separata.</dd><dt>Camera</dt><dd>Ortografica frontale, leggermente (2°) dall'alto per mostrare il bordo superiore.</dd><dt>Luci</dt><dd>Come la famiglia manopole. Una sola luce riflessa sul tolex.</dd><dt>Stati</dt><dd>Statico. Lampada, interruttori e manopole sovrapposti vivi.</dd><dt>Render</dt><dd>1640×~420 px (2×) del corpo + angoli e maniglia come PNG alfa separati.</dd><dt>Export</dt><dd>PNG-24 alfa; tolex ripetibile 512×512 seamless (JPEG ok).</dd><dt>Integrazione</dt><dd>Il corpo diventa lo sfondo di .dva; face e grille restano DOM con focus e aria.</dd></dl></div><div class="card"><h2><span>Priorità 3 · Presa jack</span><span class="v d">3D</span></h2><dl><dt>Asset</dt><dd>Presa combo (anello cromato, filettatura, contatto interno).</dd><dt>Perché</dt><dd>Il dettaglio filettato e il riflesso del cromo non si disegnano bene in CSS a 54 px.</dd><dt>Geometria</dt><dd>Anello 9,5 mm, foro 6,35 mm, filettatura 12 passi, contatti in ottone.</dd><dt>Materiali</dt><dd>Cromo satinato, plastica nera, ottone.</dd><dt>Camera</dt><dd>Ortografica dall'alto.</dd><dt>Luci</dt><dd>Come le manopole.</dd><dt>Stati</dt><dd>Statico. L'anello luminoso attorno ai pulsanti selettori resta in CSS.</dd><dt>Render</dt><dd>108×108 px (2×), PNG alfa, 1 variante.</dd><dt>Export</dt><dd>PNG-24 alfa.</dd><dt>Integrazione</dt><dd>Sostituire .jk (box-shadow e gradienti) con background-image.</dd></dl></div></div>
+<div class="brief" style="grid-template-columns:1fr 1fr 1fr">
+<div class="card"><h2>Inventario componenti riusabili</h2><ul>
+<li><b>GTLKey</b> · tasto hardware (4 dimensioni, su/giù/attivo/disabilitato)</li>
+<li><b>GTLKnob</b> · manopola con puntatore, readout, tastiera</li>
+<li><b>GTLAmpKnob</b> · manopola crema da testata</li>
+<li><b>GTLFader</b> · cursore generico</li>
+<li><b>GTLChannel</b> · canale mixer (scribble, fascia colore, fader, meter, mute)</li>
+<li><b>GTLMarker v2</b> · marker componibile (vedi specifica)</li></ul></div>
+<div class="card"><h2>Pattern dentro Main (da estrarre)</h2><ul>
+<li>Rotaia con tooltip su hover e focus</li>
+<li>Console LCD a tre livelli e tasti trasporto</li>
+<li>Pulsante Visualizzazione e popover (Performance / Analisi)</li>
+<li>Divisore metallico trascinabile (.split)</li>
+<li>Quaderno a cinque schede (.tab, .pg)</li>
+<li>Guscio dei dispositivi (.dvx, .dvl, .dv, .dclose, .dvnote)</li>
+<li>Dispositivi: .dvm mixer, .dva amp, .dvt pedale, .dvi interfaccia</li></ul></div>
+<div class="card"><h2>Token e materiali</h2><ul>
+<li><span class="code">--txb-l / --txb-d</span> · alluminio spazzolato (chiaro, scuro)</li>
+<li><span class="code">--txp-l / --txp-d</span> · tolex e vernice a ciottoli</li>
+<li><span class="code">--txwood</span> · noce delle guance · <span class="code">--txmaple</span> · acero</li>
+<li><span class="code">--txpaper</span> · fibra di carta</li>
+<li>Colori: noce #4a2c1a, metallo #2b2d31, spazzolato #8c939b, carta #efe3bd, arancio #f26b1d</li>
+<li>Caratteri: Barlow, Barlow Condensed, Cormorant Garamond, IBM Plex Mono</li></ul></div>
+</div>
+<div class="foot"><b>Sintesi (12 righe):</b> 3 READY, 5 REFINEMENT NEEDED, 4 consigliati in 3D (manopole rotary, manopole amp, testata amp, jack). Ordine consigliato: manopole, testata, jack.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":2480}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+[
+ {
+  "file": "amp-body@2x.webp",
+  "px": [
+   1860,
+   804
+  ],
+  "css_px": [
+   930,
+   402
+  ],
+  "format": "WEBP",
+  "bytes": 60406,
+  "sha256_16": "0c8cf53fd30428f8",
+  "blend": "blender/blend/amp-body.blend",
+  "artifact_blob": "/_blob/8cc2e5d8b4d2e1886fe34e8d81bb454f",
+  "use": "Amp head chassis"
+ },
+ {
+  "file": "btn-mute-on@2x.png",
+  "px": [
+   132,
+   76
+  ],
+  "css_px": [
+   66,
+   38
+  ],
+  "format": "PNG",
+  "bytes": 12691,
+  "sha256_16": "975ae991af2d1020",
+  "blend": "blender/blend/btn-mute-on.blend",
+  "artifact_blob": "/_blob/ba8fb4c2977c2f0154d8e6b87152f6e3",
+  "use": "Mixer Mute on"
+ },
+ {
+  "file": "btn-off@2x.png",
+  "px": [
+   132,
+   76
+  ],
+  "css_px": [
+   66,
+   38
+  ],
+  "format": "PNG",
+  "bytes": 12068,
+  "sha256_16": "d4a65fccd032901f",
+  "blend": "blender/blend/btn-off.blend",
+  "artifact_blob": "/_blob/8d8d44a6400f4ff29901e5e7b6d76655",
+  "use": "Mixer Mute/Solo off"
+ },
+ {
+  "file": "btn-solo-on@2x.png",
+  "px": [
+   132,
+   76
+  ],
+  "css_px": [
+   66,
+   38
+  ],
+  "format": "PNG",
+  "bytes": 12031,
+  "sha256_16": "0669e1a4f8e604ad",
+  "blend": "blender/blend/btn-solo-on.blend",
+  "artifact_blob": "/_blob/ec92e3694245642da7ae1549f36f4fff",
+  "use": "Mixer Solo on (reserved; Solo disabled)"
+ },
+ {
+  "file": "coil@2x.png",
+  "px": [
+   56,
+   48
+  ],
+  "css_px": [
+   28,
+   24
+  ],
+  "format": "PNG",
+  "bytes": 2844,
+  "sha256_16": "a697217b0c5c43a6",
+  "blend": "blender/blend/coil.blend",
+  "artifact_blob": "/_blob/911af6bd20bc4747f9e6d4612ffcc8ea",
+  "use": "Notebook spiral (repeat-y 28\u00d724 css px)"
+ },
+ {
+  "file": "fader-cap-master@2x.png",
+  "px": [
+   120,
+   144
+  ],
+  "css_px": [
+   60,
+   72
+  ],
+  "format": "PNG",
+  "bytes": 19031,
+  "sha256_16": "55dc7a2d68f24e5b",
+  "blend": "blender/blend/fader-cap-master.blend",
+  "artifact_blob": "/_blob/5add20d0f92b6c60508d83f8f9567488",
+  "use": "Mixer fader cap Master"
+ },
+ {
+  "file": "fader-cap@2x.png",
+  "px": [
+   120,
+   144
+  ],
+  "css_px": [
+   60,
+   72
+  ],
+  "format": "PNG",
+  "bytes": 17840,
+  "sha256_16": "488e0a96ddb60ff2",
+  "blend": "blender/blend/fader-cap.blend",
+  "artifact_blob": "/_blob/bcae09c002a28bab39c00316cf96b92e",
+  "use": "Mixer fader cap (6 ch)"
+ },
+ {
+  "file": "footswitch@2x.png",
+  "px": [
+   220,
+   220
+  ],
+  "css_px": [
+   110,
+   110
+  ],
+  "format": "PNG",
+  "bytes": 43396,
+  "sha256_16": "9a20e116dcfe07f0",
+  "blend": "blender/blend/footswitch.blend",
+  "artifact_blob": "/_blob/8cb47652bd739e8019b2221fc21d547f",
+  "use": "Tuner footswitch"
+ },
+ {
+  "file": "iface-body@2x.webp",
+  "px": [
+   1460,
+   624
+  ],
+  "css_px": [
+   730,
+   312
+  ],
+  "format": "WEBP",
+  "bytes": 42824,
+  "sha256_16": "6bc248e92385093e",
+  "blend": "blender/blend/iface-body.blend",
+  "artifact_blob": "/_blob/20c4073b623db861b06966e4ecda1123",
+  "use": "Interface chassis"
+ },
+ {
+  "file": "key-down@2x.png",
+  "px": [
+   120,
+   104
+  ],
+  "css_px": [
+   60,
+   52
+  ],
+  "format": "PNG",
+  "bytes": 13670,
+  "sha256_16": "4eb5535188aa9a62",
+  "blend": "blender/blend/key-down.blend",
+  "artifact_blob": "/_blob/ae96fd43df638947b3c459964bb49da6",
+  "use": "Hardware key pressed"
+ },
+ {
+  "file": "key-lit@2x.png",
+  "px": [
+   120,
+   104
+  ],
+  "css_px": [
+   60,
+   52
+  ],
+  "format": "PNG",
+  "bytes": 14113,
+  "sha256_16": "f69d5d68a31373a3",
+  "blend": "blender/blend/key-lit.blend",
+  "artifact_blob": "/_blob/c377e141c763e6f172796931cd39aaaf",
+  "use": "Hardware key active (amber)"
+ },
+ {
+  "file": "key-up@2x.png",
+  "px": [
+   120,
+   104
+  ],
+  "css_px": [
+   60,
+   52
+  ],
+  "format": "PNG",
+  "bytes": 14348,
+  "sha256_16": "57a019088bb8dedf",
+  "blend": "blender/blend/key-up.blend",
+  "artifact_blob": "/_blob/1fcb7e65a23410941071c384a59cde60",
+  "use": "Hardware key idle (nine-slice 30px / 13 css px)"
+ },
+ {
+  "file": "knob-alu@2x.png",
+  "px": [
+   168,
+   168
+  ],
+  "css_px": [
+   84,
+   84
+  ],
+  "format": "PNG",
+  "bytes": 33019,
+  "sha256_16": "fa7bcb5fc41e5758",
+  "blend": "blender/blend/knob-alu.blend",
+  "artifact_blob": "/_blob/cd9cf08a158e52f1a7b6de809e2e7d03",
+  "use": "Interface gain knob body"
+ },
+ {
+  "file": "knob-black@2x.png",
+  "px": [
+   112,
+   112
+  ],
+  "css_px": [
+   56,
+   56
+  ],
+  "format": "PNG",
+  "bytes": 15415,
+  "sha256_16": "bf1b30640635ff4b",
+  "blend": "blender/blend/knob-black.blend",
+  "artifact_blob": "/_blob/6944b845aa4b1130f1d53be27ab9baeb",
+  "use": "Tuner calib knob body"
+ },
+ {
+  "file": "knob-gold@2x.png",
+  "px": [
+   144,
+   144
+  ],
+  "css_px": [
+   72,
+   72
+  ],
+  "format": "PNG",
+  "bytes": 25870,
+  "sha256_16": "5df343460d5a9b5d",
+  "blend": "blender/blend/knob-gold.blend",
+  "artifact_blob": "/_blob/6777c1a96d3fd2962ed4aa6e59c2433c",
+  "use": "Amp knob body"
+ },
+ {
+  "file": "lcd9@2x.webp",
+  "px": [
+   600,
+   200
+  ],
+  "css_px": [
+   300,
+   100
+  ],
+  "format": "WEBP",
+  "bytes": 1604,
+  "sha256_16": "709eece375fe2090",
+  "blend": "blender/blend/lcd9.blend",
+  "artifact_blob": "/_blob/480b43dba62e6815ab1bfcff84833cee",
+  "use": "LCD bezel+glass (nine-slice 26px / 13 css px)"
+ },
+ {
+  "file": "mixer-body@2x.webp",
+  "px": [
+   1780,
+   980
+  ],
+  "css_px": [
+   890,
+   490
+  ],
+  "format": "WEBP",
+  "bytes": 63418,
+  "sha256_16": "1f314cdd4febca85",
+  "blend": "blender/blend/mixer-body.blend",
+  "artifact_blob": "/_blob/d4dacce8de151145c1fa80bc67dc0701",
+  "use": "Mixer chassis"
+ },
+ {
+  "file": "plate9@2x.webp",
+  "px": [
+   800,
+   320
+  ],
+  "css_px": [
+   400,
+   160
+  ],
+  "format": "WEBP",
+  "bytes": 3610,
+  "sha256_16": "0f2c0ba8510abe91",
+  "blend": "blender/blend/plate9.blend",
+  "artifact_blob": "/_blob/15cce8cf8a85e653f36cdca00f6cdc9b",
+  "use": "Console/fretboard plate (nine-slice 44px / 22 css px)"
+ },
+ {
+  "file": "rail-wood9@2x.webp",
+  "px": [
+   240,
+   1200
+  ],
+  "css_px": [
+   120,
+   600
+  ],
+  "format": "WEBP",
+  "bytes": 13928,
+  "sha256_16": "d57cc7f395c928b4",
+  "blend": "blender/blend/rail-wood9.blend",
+  "artifact_blob": "/_blob/8d2cf2bc5e0eef865a425a47ddc02ab4",
+  "use": "Rosewood rail (nine-slice 40px / 20 css px)"
+ },
+ {
+  "file": "rocker-off@2x.png",
+  "px": [
+   100,
+   124
+  ],
+  "css_px": [
+   50,
+   62
+  ],
+  "format": "PNG",
+  "bytes": 14589,
+  "sha256_16": "ca633812971fbf52",
+  "blend": "blender/blend/rocker-off.blend",
+  "artifact_blob": "/_blob/f79c1a876a9b85c5eaf1708af31562f5",
+  "use": "Amp power off"
+ },
+ {
+  "file": "rocker-on@2x.png",
+  "px": [
+   100,
+   124
+  ],
+  "css_px": [
+   50,
+   62
+  ],
+  "format": "PNG",
+  "bytes": 15028,
+  "sha256_16": "47843501c10be710",
+  "blend": "blender/blend/rocker-on.blend",
+  "artifact_blob": "/_blob/ef5689008ac325e0c52a2393a03a0bd8",
+  "use": "Amp power on"
+ },
+ {
+  "file": "toggle-down@2x.png",
+  "px": [
+   80,
+   120
+  ],
+  "css_px": [
+   40,
+   60
+  ],
+  "format": "PNG",
+  "bytes": 9329,
+  "sha256_16": "c42ffaba225b61e0",
+  "blend": "blender/blend/toggle-down.blend",
+  "artifact_blob": "/_blob/118cd0360525126525648d3a135e5bf9",
+  "use": "Amp bypass on"
+ },
+ {
+  "file": "toggle-up@2x.png",
+  "px": [
+   80,
+   120
+  ],
+  "css_px": [
+   40,
+   60
+  ],
+  "format": "PNG",
+  "bytes": 9264,
+  "sha256_16": "3b23c9171383a863",
+  "blend": "blender/blend/toggle-up.blend",
+  "artifact_blob": "/_blob/a62f132b8153ddbf959026a8c822cc72",
+  "use": "Amp bypass off"
+ },
+ {
+  "file": "tuner-body@2x.webp",
+  "px": [
+   980,
+   924
+  ],
+  "css_px": [
+   490,
+   462
+  ],
+  "format": "WEBP",
+  "bytes": 42784,
+  "sha256_16": "4eec92c0c121fc09",
+  "blend": "blender/blend/tuner-body.blend",
+  "artifact_blob": "/_blob/5c0e0ad20669734b6d7f5a8b4cbcfb9e",
+  "use": "Tuner pedal chassis"
+ }
+]

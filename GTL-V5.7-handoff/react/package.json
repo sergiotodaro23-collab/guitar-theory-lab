@@ -1,0 +1,11 @@
+{
+  "name": "@gtl/hardware-overlays-handoff",
+  "version": "0.5.7",
+  "private": true,
+  "description": "Guitar Theory Lab V5.7 hardware overlay components (design handoff, not wired to audio).",
+  "type": "module",
+  "main": "src/index.ts",
+  "peerDependencies": { "react": ">=18" },
+  "devDependencies": { "typescript": "^5.6.3", "@types/react": "^18.3.12" },
+  "scripts": { "typecheck": "tsc --noEmit" }
+}

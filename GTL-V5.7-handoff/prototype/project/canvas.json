@@ -1,0 +1,143 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-07T15:40:00Z"
+  },
+  "title": "Fretboard Lab — Studio V5.7",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 1000,
+      "title": "V5.7 Studio 1600×1000 (interattivo)",
+      "is_interactive": true
+    },
+    "Assets.dc.html": {
+      "x": 3040,
+      "y": 0,
+      "w": 1600,
+      "h": 2480,
+      "title": "Componenti e valutazione 3D"
+    },
+    "Main1440.dc.html": {
+      "x": 0,
+      "y": 1080,
+      "w": 1440,
+      "h": 900,
+      "title": "V5.7 Studio 1440×900 (reflow reale)",
+      "is_interactive": true
+    },
+    "Main1366.dc.html": {
+      "x": 1520,
+      "y": 1080,
+      "w": 1366,
+      "h": 768,
+      "title": "V5.7 Studio 1366×768 (reflow reale)",
+      "is_interactive": true
+    },
+    "Main1280.dc.html": {
+      "x": 0,
+      "y": 2060,
+      "w": 1280,
+      "h": 800,
+      "title": "V5.7 Studio 1280×800 (reflow reale)",
+      "is_interactive": true
+    },
+    "Main1100.dc.html": {
+      "x": 1360,
+      "y": 2060,
+      "w": 1100,
+      "h": 720,
+      "title": "V5.7 Studio 1100×720 (vincolato)",
+      "is_interactive": true
+    },
+    "GTLKey.dc.html": {
+      "x": 0,
+      "y": 2940,
+      "w": 120,
+      "h": 86,
+      "title": "GTLKey"
+    },
+    "GTLKnob.dc.html": {
+      "x": 200,
+      "y": 2940,
+      "w": 120,
+      "h": 150,
+      "title": "GTLKnob"
+    },
+    "GTLAmpKnob.dc.html": {
+      "x": 400,
+      "y": 2940,
+      "w": 120,
+      "h": 150,
+      "title": "GTLAmpKnob"
+    },
+    "GTLFader.dc.html": {
+      "x": 600,
+      "y": 2940,
+      "w": 120,
+      "h": 360,
+      "title": "GTLFader"
+    },
+    "GTLChannel.dc.html": {
+      "x": 800,
+      "y": 2940,
+      "w": 130,
+      "h": 410,
+      "title": "GTLChannel"
+    },
+    "GTLMarker.dc.html": {
+      "x": 1010,
+      "y": 2940,
+      "w": 72,
+      "h": 72,
+      "title": "GTLMarker v2"
+    },
+    "Spec.dc.html": {
+      "x": 4720,
+      "y": 0,
+      "w": 1600,
+      "h": 2330,
+      "title": "Specifiche, audit e handoff"
+    },
+    "Hardware.dc.html": {
+      "x": 6400,
+      "y": 0,
+      "w": 1600,
+      "h": 2780,
+      "title": "V5.6–V5.7 · Hardware renderizzato"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Main1440.dc.html",
+    "Main1366.dc.html",
+    "Main1280.dc.html",
+    "Main1100.dc.html",
+    "Hardware.dc.html",
+    "Assets.dc.html",
+    "Spec.dc.html",
+    "GTLKey.dc.html",
+    "GTLKnob.dc.html",
+    "GTLAmpKnob.dc.html",
+    "GTLFader.dc.html",
+    "GTLChannel.dc.html",
+    "GTLMarker.dc.html"
+  ],
+  "notes": {},
+  "designSystems": [
+    {
+      "title": "Guitar Theory Lab",
+      "namespace": "guitar-theory-lab",
+      "artifact": "https://claude.ai/code/artifact/99b78d3f-97cb-4810-a644-790047994f35",
+      "version": "1794060699-ee66",
+      "copiedAt": "2026-11-07T15:40:00Z"
+    }
+  ]
+}
