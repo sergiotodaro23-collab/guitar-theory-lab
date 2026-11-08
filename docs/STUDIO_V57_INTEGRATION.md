@@ -33,7 +33,7 @@ Il README dell'handoff dichiara render originali/procedurali e font SIL OFL, con
 | `Rail.tsx`, `Console.tsx`, `FretboardPanel.tsx`, `Notebook.tsx`, `NextFretboard.tsx` | Le parti della shell, tutte sullo store e sul motore esistenti. |
 | `DeviceDrawer.tsx`, `RotaryKnob.tsx`, `devices.tsx`, `MixerDevice.tsx` | Cassetto e dispositivi (porting dei componenti React dell'handoff). |
 | `v57.css`, `devices.css`, `fonts.css` | Stile portato dal prototipo con prefisso `v57-`/`gtl-`; immagini a nove fette dai render. |
-| `src/audio/ampProcessor.ts` | Contratto per un futuro processore d'amplificatore; oggi solo `NO_AMP_PROCESSOR`. |
+| `src/app/rig.ts`, `src/audio/guitarRig.ts`, `src/ui/studio/v57/rig.tsx` | Guitar Rig (D-42): modello puro con test, grafo Web Audio sul ramo d'ascolto, cassetto con testata, Cabinet IR e pedaliera. |
 
 Modifiche ai componenti condivisi, solo di presentazione: `Board` accetta `foot="external"` (legenda e ispettore resi altrove) e `layerMarks`; `Fretboard` disegna le scale sovrapposte come barrette sotto la nota (`layerMarks="bars"`) oltre ai puntini d'angolo (predefiniti, Semplificata invariata). `Transport` espone `useCurrentChordText` e `withModeLabels`; `panels` espone le opzioni di accordatura e il caricamento dei preset, così la barra della tastiera non duplica la logica.
 
@@ -70,7 +70,9 @@ Categorie: **1** collegato a una funzione di produzione esistente; **2** richied
 | Next Fretboard | 2 | Anteprima di sola lettura dal motore dei marker per l'accordo successivo (vista per accordo inclusa). Nel prodotto l'avanzamento automatico esiste già (`changeMode`), quindi la nota del prototipo «non implementato» non è stata copiata. |
 | Mixer: fader, mute, solo, master, ascolto chitarra | 1 | Codex, `4a23ed2`: livelli reali 0..1, Solo esistente (D-33). |
 | Mixer: LED e Out | 1/2 | LED = canale aperto (non presenza di segnale); Out = livello reale dell'analizzatore. Nessun meter per bus: il motore non ne ha. |
-| Amplificatore: manopole, power, bypass | 3 | Stato visivo salvato in `gtl.v5.dev`; etichetta «Solo visivo · nessun DSP · NAM futuro»; chiamate al contratto `NO_AMP_PROCESSOR` (no-op). |
+| Guitar Rig: testata (gain, bass, middle, treble, presence, output, power, bypass) | 2 | D-42: DSP interno reale (clipper morbido e tone stack) sul ramo d'ascolto; power spento = silenzio, bypass = amp e cabinet esclusi. Il modello NAM è la fase P4-01: etichetta «DSP interno · modello NAM: fase P4-01». |
+| Guitar Rig: Cabinet IR | 2 | Convoluzione reale: 4x12 e 1x12 sintetizzati (non misurati) o un file IR scelto dall'utente (in memoria per la visita). |
+| Guitar Rig: pedali Compressor, Overdrive (pre), Chorus, Delay, Reverb (post) | 2 | Nodi Web Audio reali; interruttore a pedale con LED, manopole con tastiera, trascinamento e doppio clic. |
 | Accordatore: lettura | 1 | `useLive().pitch` → `tunerReading` con l'accordatura e il La scelti; LED «in accordo» a ±`IN_TUNE_CENTS` e lettura stabile. |
 | Accordatore: interruttore a pedale | 2 | Attiva la lettura; se l'ingresso è spento lo avvia (l'ascolto resta spento). Mai ripristinato al ricaricamento. |
 | Accordatore: calibrazione | 1 | `tunerA4`, manopola 435–445 Hz (il campo numerico della scheda Ingresso copre 415–466). |
@@ -81,11 +83,15 @@ Categorie: **1** collegato a una funzione di produzione esistente; **2** richied
 | Interfaccia: ascolto | 1 | `liveInput.setMonitor`, disattivato a ingresso spento; mai acceso all'apertura. |
 | Interfaccia: meter e display | 1 | Livello RMS, saturazione, dispositivo e frequenza dalla diagnostica, nota rilevata. |
 
-## NAM: punti d'ingresso per lo studio di fattibilità (fase futura, non implementata)
+## Guitar Rig e NAM
+
+Il rig (D-42) è descritto in `docs/DECISIONS.md` e la fattibilità del NAM in `docs/NAM_FEASIBILITY.md`. Sotto, lo stato dei punti d'ingresso prima del rig, mantenuto per la storia.
+
+### NAM: punti d'ingresso per lo studio di fattibilità (fase futura, non implementata)
 
 Nessun codice NAM, nessun modello scaricato, nessuna modifica alla catena audio in questa integrazione.
 
-- **Contratto**: `src/audio/ampProcessor.ts` (`AmpProcessor`, `AmpProcessorStatus`). Il dispositivo Amplificatore legge `status.connected` per l'etichetta e inoltra manopole, power e bypass. Sostituire `NO_AMP_PROCESSOR` con un'implementazione reale è l'unico cambiamento richiesto alla UI.
+- **Punto d'innesto (aggiornato con D-42)**: lo stadio `amp` di `src/audio/guitarRig.ts`. Un modello NAM sostituisce il preamp interno (waveshaper + tone stack) dentro lo stesso stadio, con dry/wet, power e bypass già gestiti; `AmpModel` in `src/app/rig.ts` riceve il valore `'nam'`.
 - **Posizione nel grafo**: in `src/audio/liveInput.ts` il segnale va `source → splitter → mono → gain → analyser/worklet` (analisi, sempre sul segnale secco) e `gain → monitor → destinazione`. Il processore va inserito solo sul ramo d'ascolto, tra `gain` e `monitor`: l'analisi dell'altezza deve restare sul segnale secco.
 - **WebAssembly + AudioWorklet**: il core NAM (C++) compilato in WASM ed eseguito in un `AudioWorkletProcessor` con blocchi di 128 campioni; il caricamento del worklet può seguire lo schema di `gtl-capture` (modulo come testo, `Blob`). Pesi del modello caricati dall'utente da file locale (nessun download, app local-first).
 - **Compatibilità dei modelli**: verificare architetture supportate (WaveNet, LSTM), frequenza di campionamento del modello (tipicamente 48 kHz) rispetto a quella del contesto, ricampionamento se diverse, e la licenza di ogni modello prima di distribuirlo (deve essere compatibile con GPL-3.0, D-08).

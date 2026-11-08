@@ -97,8 +97,9 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 | ID | Requisito | Stato | Note |
 |----|-----------|-------|------|
-| P4-01 | Studio NAM / amp modeling (`docs/NAM_FEASIBILITY.md`) | MISSING | PoC isolata con AudioWorklet + WASM, misure di CPU e latenza, licenze. Pronto il contratto `src/audio/ampProcessor.ts` e l'amplificatore V5.7 (solo visivo, dichiarato); punti d'ingresso in `docs/NAM_FEASIBILITY.md`. |
-| P4-02 | IR cabinet | MISSING | ConvolverNode, IR con licenza compatibile. |
+| P4-01 | Studio NAM / amp modeling (`docs/NAM_FEASIBILITY.md`) | PARTIAL | Pronti la UI (Guitar Rig, D-42) e lo stadio `amp` del grafo in cui innestare il modello. Manca l'inferenza NAM (WASM + AudioWorklet), con misure di CPU e latenza e verifica delle licenze dei modelli. |
+| P4-02 | IR cabinet | IMPLEMENTED | D-42: ConvolverNode con due cabinet sintetizzati (unit: energia unitaria, taglio delle alte) o un file IR dell'utente, in memoria per la visita. Nessuna IR di terzi distribuita. |
+| P4-07 | Guitar Rig con pedaliera | IMPLEMENTED | D-42: testata DSP interna, Cabinet IR, Compressor, Overdrive, Chorus, Delay, Reverb sul ramo d'ascolto della chitarra, in un unico cassetto della Studio. Unit 9, e2e 3 (controlli, salvataggio, livelli reali con WAV come microfono). Non provato con chitarra e cuffie reali. |
 | P4-03 | Sequencer avanzato, MIDI, piano roll | MISSING | Le tracce sono già eventi su tick. |
 | P4-04 | Tutor evoluto | MISSING | |
 | P4-05 | Studio sperimentale sulla polifonia (accordi, note simultanee) | MISSING | YIN è monofonico: nessuna promessa. Prototipi isolati DSP o ML con misure di precisione, CPU, memoria e latenza; integrazione solo se i risultati lo giustificano. |

@@ -1,12 +1,14 @@
 # NAM — studio di fattibilità (fase futura, P4-01)
 
-Stato: **non implementato**. Nessun codice NAM, nessun modello scaricato, nessuna modifica alla catena audio. L'amplificatore della Studio V5.7 è un dispositivo visivo e lo dichiara («Solo visivo · nessun DSP · NAM futuro»).
+Stato: **inferenza NAM non implementata**. Nessun modello scaricato. Dal D-42 esiste il Guitar Rig con una testata DSP interna (non NAM) e la sua UI: il modello NAM andrà nello stadio `amp` già pronto.
 
 ## Punti d'ingresso già pronti
 
-- **Contratto UI ↔ processore**: `src/audio/ampProcessor.ts` definisce `AmpProcessor` (`setKnob`, `setPower`, `setBypass`) e `AmpProcessorStatus` (`connected`, `model`, `latencyMs`). Oggi esiste solo `NO_AMP_PROCESSOR` (no-op, `connected: false`). Il dispositivo Amplificatore (`src/ui/studio/v57/devices.tsx`) inoltra già manopole, power e bypass al contratto e mostra l'etichetta d'onestà finché `connected` è falso.
-- **Posizione nel grafo audio** (`src/audio/liveInput.ts`): `source → splitter → mono → gain → analyser / worklet gtl-capture` (analisi dell'altezza, sempre sul segnale secco) e `gain → monitor → destinazione` (ascolto). Il processore va inserito solo sul ramo d'ascolto, tra `gain` e `monitor`.
+- **Stadio d'innesto**: `amp` in `src/audio/guitarRig.ts` (percorsi secco/bagnato, power e bypass già gestiti). Oggi contiene il preamp interno (`WaveShaperNode` con `softClipCurve` e tone stack di `BiquadFilterNode`). Un `AudioWorkletNode` con il modello NAM sostituirebbe il waveshaper, lasciando o no il tone stack dopo di sé.
+- **Impostazioni**: `AmpModel` in `src/app/rig.ts` vale oggi solo `'internal'`; un valore `'nam'` con il nome del file del modello abiliterebbe il nuovo percorso. Il file del modello va scelto dall'utente come i file IR del cabinet (`liveInput.loadCabinet` è lo schema), tenuto in memoria.
+- **Posizione nel grafo audio** (`src/audio/liveInput.ts`): `source → splitter → mono → gain → analyser / worklet gtl-capture` (analisi, sempre sul segnale secco) e `gain → rig → monitor → destinazione` (ascolto).
 - **Caricamento di un worklet**: lo schema di `gtl-capture` (modulo come testo, `Blob`, `audioWorklet.addModule`) vale anche per un modulo WASM.
+- **UI**: la testata del Guitar Rig mostra «DSP interno · modello NAM: fase P4-01»; l'etichetta va cambiata solo quando l'audio passa davvero dal modello.
 
 ## Domande per la fattibilità
 
