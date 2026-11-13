@@ -13,11 +13,15 @@ import '@fontsource/caveat/latin-700.css';
 import './ui/simple/simple.css';
 import './ui/studio/studio.css';
 import { App } from './ui/App';
+import { relayTone3000Callback } from './app/tone3000Client';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Elemento root mancante');
-createRoot(root).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+// A window that TONE3000 sent back with an OAuth answer only relays it to the page that asked, and closes: the app does not start there.
+if (!relayTone3000Callback()) {
+  createRoot(root).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}

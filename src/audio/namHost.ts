@@ -45,10 +45,17 @@ export interface NamMeasure {
   readonly sampleRate: number;
 }
 
-/** Where the model came from. A TONE3000 model keeps what its attribution needs; never a download address or a token. */
+/**
+ * Where the model came from. A TONE3000 model keeps what its attribution
+ * needs (tone, creator, the tone's page and picture); never a download
+ * address or a token. Kept in memory with the model, not in the settings.
+ */
 export type NamOrigin =
   | { readonly kind: 'file' }
-  | { readonly kind: 'tone3000'; readonly toneId: number; readonly title: string; readonly author: string; readonly toneUrl: string };
+  | {
+    readonly kind: 'tone3000'; readonly toneId: number; readonly modelId: number; readonly title: string; readonly author: string;
+    readonly toneUrl: string; readonly gear: string; readonly imageUrl: string;
+  };
 
 export interface NamStatus {
   readonly phase: NamPhase;

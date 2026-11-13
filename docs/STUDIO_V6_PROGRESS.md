@@ -134,6 +134,7 @@ Limiti dichiarati del lotto 6:
 | Lotto 6 | verde, 502 unit | 140 su 140 in locale (incluse le 7 prove della pedaliera) |
 | Consolidamento (D-50) | verde, 502 unit | rig e pedaliera 12 su 12 in locale (nuova prova: cambio di catena nel silenzio); corsa completa verde in CI sulla PR #21 |
 | Lotto 9, parte NAM (D-51) | verde, 516 unit | 148 su 148 in locale (7 prove nuove in `e2e/nam.spec.ts`) |
+| TONE3000 (D-52) | verde, 537 unit | 153 su 153 in locale (4 prove nuove in `e2e/tone3000.spec.ts` contro un servizio simulato, 1 nuova sulla latenza del motore) |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
@@ -159,6 +160,15 @@ PR #20 (pedaliera configurabile) unita in `main` come `8768765` dopo verifica lo
 | Misure: caricamento, costo per blocco, latenza, continuità, memoria | misurate su questa macchina | `npm run perf:nam`, `docs/NAM_INTEGRATION.md` |
 
 Limiti dichiarati: nessuna prova con chitarra, scheda audio e capture reali; nessun ricampionamento; lo scambio di modello interrompe l'audio per decine di millisecondi; il modello non viene conservato tra le visite; catalogo TONE3000 nella PR successiva.
+
+## TONE3000 (D-52) — cosa c'è
+
+| Funzione | Stato | Prova |
+|---|---|---|
+| «Sfoglia TONE3000» nella testata: flusso Select in una finestra, OAuth 2.0 con PKCE e `state` | implementato, **testato contro un servizio simulato** | unit `tone3000.test.ts`, `e2e/tone3000.spec.ts` |
+| Dettagli del tone, selettore dei modelli, caricamento nel motore NAM, attribuzione sulla testata | implementato, testato contro un servizio simulato | e2e |
+| Niente token, codici, indirizzi di download o modelli in memoria permanente | implementato | e2e (contenuto di `localStorage` e `sessionStorage`) |
+| Flusso con il servizio TONE3000 reale | **non eseguito**: manca la chiave pubblicabile | — |
 
 ## Baseline
 

@@ -232,7 +232,16 @@ export class GuitarRig {
    */
   private rewire(order: readonly ChainStage[]): void {
     const live = typeof AudioContext !== 'undefined' && this.ctx instanceof AudioContext && this.ctx.state === 'running';
-    if (!live) { this.wire(order); return; }
+    if (!live) {
+      // No running clock: drop a rewiring still waiting from when the context ran, or it would bring back an older order.
+      if (this.rewireTimer !== null) clearTimeout(this.rewireTimer);
+      this.rewireTimer = null;
+      this.pendingOrder = null;
+      this.output.gain.cancelScheduledValues(this.ctx.currentTime);
+      this.output.gain.setValueAtTime(1, this.ctx.currentTime);
+      this.wire(order);
+      return;
+    }
     this.pendingOrder = order;
     if (this.rewireTimer !== null) return;
     const gain = this.output.gain;
