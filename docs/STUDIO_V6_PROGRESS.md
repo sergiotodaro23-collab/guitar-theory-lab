@@ -4,7 +4,7 @@ Stati come in `CLAUDE.md`: implementato, testato con segnali sintetici, verifica
 
 ## Fase corrente
 
-P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino). Prossimo: lotto 4, mixer a fader lunghi.
+P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lotto 4 (mixer) fatto. Prossimo: lotto 5, Preset Library.
 
 ## Lotti
 
@@ -13,8 +13,8 @@ P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino). Pro
 | Mappa Graphify | `claude/hopeful-…` | #13 | unita | fatto |
 | 1 · Shell V6 | `claude/peaceful-galileo-9ukuvh` | #14 | unita (CI verde) | implementato |
 | 2 · Rack destro | `claude/studio-v6-rack` | #15 | unita (CI verde) | implementato; audio testato con segnale sintetico |
-| 3 · Taccuino V6 | `claude/studio-v6-notebook` | #16 | vedi PR | parziale: ordine, Dettagli, Voice leading; legenda a doppia pagina nel lotto 7 |
-| 4 · Mixer a fader lunghi | — | — | — | mancante |
+| 3 · Taccuino V6 | `claude/studio-v6-notebook` | #16 | unita (CI verde) | parziale: ordine, Dettagli, Voice leading; legenda a doppia pagina nel lotto 7 |
+| 4 · Mixer a fader lunghi | `claude/studio-v6-mixer` | #17 | vedi PR | implementato |
 | 5 · Libreria preset | — | — | — | mancante |
 | 6 · Rig: fuzz, EQ, riordino, preset | — | — | — | mancante |
 | 7 · Legenda a simboli | — | — | — | mancante |
@@ -37,8 +37,7 @@ P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino). Pro
 
 Limiti dichiarati del lotto 1 ancora aperti:
 
-- Nessun «Solo» del backing e nessun tasto «Preset Library» nell'header: arrivano con i lotti 4 e 5. I preset restano nel pannello Impostazioni.
-- A 1280 × 720 il mixer nel cassetto scala fino a 0,45: si risolve con il mixer a fader lunghi (lotto 4).
+- Nessun tasto «Preset Library» nell'header: arriva con il lotto 5. I preset restano nel pannello Impostazioni.
 - Il metronomo ha quattro timbri; il quinto è nel lotto 6.
 
 ## Lotto 2 — cosa c'è
@@ -78,6 +77,18 @@ Limiti dichiarati del lotto 3:
 - Tastiera secondaria: è l'anteprima del prossimo accordo (acero come la principale); palissandro e scelta indipendente dell'overlay nel lotto 7.
 - Con dieci o undici schede la linguetta scorre in orizzontale sotto 1440 px con il rack aperto.
 
+## Lotto 4 — cosa c'è
+
+| Funzione | Stato | Prova |
+|---|---|---|
+| Mixer largo quanto il taccuino, fader lunghi anche a 1280 × 720 (corsa ≥ 90 px) | implementato | `e2e/studio-v6-shell.spec.ts` |
+| Misuratore reale per canale (Click, Note, Accordi, Basso, Batteria) e Master | implementato | e2e: si muovono in riproduzione, si spengono col muto, restano spenti i canali senza traccia |
+| Misuratore della chitarra (ingresso, prima dell'ascolto) | implementato, non misurato in e2e | — |
+| Fader, muto e solo sui guadagni reali | implementato (già coperto) | `e2e/studio-v57.spec.ts` (livello in uscita) |
+| Solo del backing, nel mixer e nella rail | implementato | unit `appearance.test.ts`, e2e |
+
+Limiti dichiarati del lotto 4: nessun misuratore per il gruppo Backing né per la backing track importata; il Solo non include la backing track importata.
+
 ## Test
 
 | Momento | `npm run check` | `npm run test:e2e` |
@@ -85,7 +96,8 @@ Limiti dichiarati del lotto 3:
 | Baseline su `c034a9c` | verde, 464 unit | 118 su 119: instabile `studio-v57-shell` «tuner and interface without input» (corsa tra il focus del cassetto e la pressione del tasto) |
 | Lotto 1 (PR #14) | verde, 465 unit | 128 su 128 in esecuzioni per file e ripetute; nella corsa completa un caso instabile di lettura dell'accordatore (`live-a2`, attesa sul segno invece che sul valore assoluto) corretto nel test |
 | Lotto 2 (PR #15) | verde, 467 unit | 128 su 128 in locale e in CI |
-| Lotto 3 | verde, 473 unit | corsa completa locale 129 su 130 (un test degli arpeggi cercava la striscia degli accordi sulla scheda Esercizi: aggiunta lì); i file toccati rieseguiti verdi; corsa completa di riferimento in CI sulla PR #16 |
+| Lotto 3 | verde, 473 unit | corsa completa locale 129 su 130 (un test degli arpeggi cercava la striscia degli accordi sulla scheda Esercizi: aggiunta lì); i file toccati rieseguiti verdi; corsa completa verde in CI sulla PR #16 |
+| Lotto 4 | verde, 473 unit | 131 su 131 in locale; CI sulla PR #17 |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
@@ -95,4 +107,4 @@ Nessuno.
 
 ## Prossimo lotto consigliato
 
-Lotto 4: mixer a tutta larghezza con fader lunghi e misuratori per canale (oggi il cassetto scala il telaio renderizzato fino a 0,45 nelle finestre basse), Solo del backing. Servono analizzatori per canale in `src/audio/webAudioSink.ts`: oggi è misurato solo il Master. Poi lotto 5 (Preset Library) e lotto 7 (legenda a doppia pagina, tastiera secondaria in palissandro).
+Lotto 5: Preset Library globale (finestra dall'header con ricerca e filtri per laboratorio, difficoltà, tonalità, tipo; salvataggio, modifica, cancellazione) sopra `presetRepository` e `STUDY_PRESETS`. Poi lotto 7 (legenda a doppia pagina, tastiera secondaria in palissandro) e lotto 6 (fuzz, EQ, riordino dei pedali, preset di suono, quinto timbro del metronomo).

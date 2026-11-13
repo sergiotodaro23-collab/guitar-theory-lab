@@ -23,6 +23,9 @@ export class WebAudioSink {
   private readonly buses: Record<AudioBus, GainNode>;
   private voices: Voice[] = [];
   readonly analyser: AnalyserNode;
+  /** One analyser per channel, after its fader: what the mixer's channel meters read. They feed nothing. */
+  private readonly taps: Record<AudioBus, AnalyserNode>;
+  private readonly tapData = new Float32Array(512);
 
   constructor(private readonly ctx: AudioContext, private readonly secondsPerTick: () => number) {
     this.master = ctx.createGain();
@@ -37,6 +40,21 @@ export class WebAudioSink {
       return gain;
     };
     this.buses = { click: bus(), notes: bus(), comp: bus(), bass: bus(), drums: bus() };
+    const tap = (from: GainNode): AnalyserNode => {
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      from.connect(analyser);
+      return analyser;
+    };
+    this.taps = { click: tap(this.buses.click), notes: tap(this.buses.notes), comp: tap(this.buses.comp), bass: tap(this.buses.bass), drums: tap(this.buses.drums) };
+  }
+
+  /** RMS of a channel after its fader and mute, before the master. */
+  busLevel(bus: AudioBus): number {
+    this.taps[bus].getFloatTimeDomainData(this.tapData);
+    let sum = 0;
+    for (const v of this.tapData) sum += v * v;
+    return Math.sqrt(sum / this.tapData.length);
   }
 
   /** Where the guitar monitor connects: after the buses, before the limiter. */

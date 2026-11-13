@@ -234,3 +234,48 @@ test('Dettagli and Voice leading read the engine: ii–V–I in C', async ({ pag
   await page.keyboard.press('n');
   await expect(page.getByTestId('voice-motion')).toContainText('F (b7) → E (3): scende di 1 semitono');
 });
+
+test('mixer: full width with long faders at every size; channel meters read the real channels; backing solo', async ({ page }) => {
+  for (const [width, height] of [[1440, 900], [1280, 720]] as const) {
+    await open(page, width, height);
+    await page.getByTestId('device-mixer').click();
+    await page.waitForTimeout(450);
+    const [zone, mixer] = [await rect(page, '[data-testid="notebook-zone"]'), await rect(page, '[data-testid="v57-mixer"]')];
+    // The console takes the notebook's width, and the fader travel is long even in the shortest window.
+    expect(mixer.right - mixer.left).toBeGreaterThan((zone.right - zone.left) * 0.85);
+    const travel = await page.getByTestId('fader-click').evaluate((el) => el.getBoundingClientRect().height);
+    expect(travel, `${width}×${height}`).toBeGreaterThanOrEqual(90);
+    for (const id of ['click', 'notes', 'comp', 'bass', 'drums', 'backing', 'guitar', 'master']) await expect(page.getByTestId(`fader-${id}`)).toBeVisible();
+  }
+  // Fretboard Lab plays the click and the exercise notes: their meters move, the band's stay dark.
+  const meter = (id: string) => page.getByTestId(`meter-${id}`);
+  const peak = async (id: string) => {
+    let top = 0;
+    for (let i = 0; i < 40; i += 1) {
+      top = Math.max(top, Number(await meter(id).getAttribute('aria-valuenow')));
+      await page.waitForTimeout(25);
+    }
+    return top;
+  };
+  for (const id of ['click', 'drums', 'master']) await expect(meter(id)).toHaveAttribute('aria-valuenow', '0');
+  await page.getByTestId('bpm').fill('200');
+  await page.getByTestId('play').click();
+  expect(await peak('click')).toBeGreaterThan(0);
+  expect(await peak('master')).toBeGreaterThan(0);
+  expect(await peak('drums')).toBe(0);
+  // Muting the click darkens its meter: the meter is after the fader.
+  await page.getByTestId('mute-click').click();
+  await page.waitForTimeout(500);
+  expect(await peak('click')).toBe(0);
+  await page.getByTestId('mute-click').click();
+  // Backing solo silences click and notes (no band in this lab): everything goes quiet, and it is one solo at a time.
+  await page.getByTestId('solo-backing').click();
+  await expect(page.getByTestId('solo-backing')).toHaveAttribute('aria-pressed', 'true');
+  await page.waitForTimeout(500);
+  expect(await peak('click')).toBe(0);
+  expect(await peak('master')).toBe(0);
+  await page.getByTestId('solo-click').click();
+  await expect(page.getByTestId('solo-backing')).toHaveAttribute('aria-pressed', 'false');
+  expect(await peak('click')).toBeGreaterThan(0);
+  await page.getByTestId('stop').click();
+});

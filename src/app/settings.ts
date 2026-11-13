@@ -109,8 +109,8 @@ export interface HarmonySettings {
   readonly backing: BackingSettings;
   readonly arrangementOn: boolean;
   readonly arrangement: readonly Section[];
-  /** One channel alone ('' none): the others fall silent, the guitar monitor is not touched. */
-  readonly soloChannel: MixChannel | '';
+  /** One channel alone, or the whole backing group ('' none): the others fall silent, the guitar monitor is not touched. */
+  readonly soloChannel: SoloTarget;
   readonly drumSound: DrumKitSound;
   readonly bassTimbre: BassTimbre;
   readonly compTimbre: CompTimbre;
@@ -366,7 +366,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     backing: sanitizeBacking(r.backing),
     arrangementOn: typeof r.arrangementOn === 'boolean' ? r.arrangementOn : d.arrangementOn,
     arrangement: sanitizeSections(r.arrangement),
-    soloChannel: oneOf(r.soloChannel, ['', 'click', 'notes', 'comp', 'bass', 'drums'] as const, d.soloChannel),
+    soloChannel: oneOf(r.soloChannel, ['', 'click', 'notes', 'comp', 'bass', 'drums', 'backing'] as const, d.soloChannel),
     drumSound: oneOf(r.drumSound, Object.keys(DRUM_KIT_SOUNDS) as DrumKitSound[], d.drumSound),
     bassTimbre: oneOf(r.bassTimbre, Object.keys(BASS_TIMBRES) as BassTimbre[], d.bassTimbre),
     compTimbre: oneOf(r.compTimbre, Object.keys(COMP_TIMBRES) as CompTimbre[], d.compTimbre),
@@ -492,13 +492,15 @@ export const meterOf = (s: Pick<StudySettings, 'meterId'>): Meter => METERS[s.me
 
 export type MixChannel = 'click' | 'notes' | 'comp' | 'bass' | 'drums';
 export const MIX_CHANNELS: readonly MixChannel[] = ['click', 'notes', 'comp', 'bass', 'drums'];
+/** What Solo can isolate: one channel, or the backing group (comping, bass and drums together). */
+export type SoloTarget = MixChannel | 'backing' | '';
 
 /** The accompaniment: the channels the backing trim and mute act on. Click and study notes are not part of it. */
 export const BACKING_CHANNELS: readonly MixChannel[] = ['comp', 'bass', 'drums'];
 
 /** The level a channel actually plays at: its fader, or silence while muted; the band also follows the backing trim. */
 export function channelVolume(s: Settings, channel: MixChannel): number {
-  if (s.soloChannel && s.soloChannel !== channel) return 0;
+  if (s.soloChannel === 'backing' ? !BACKING_CHANNELS.includes(channel) : s.soloChannel && s.soloChannel !== channel) return 0;
   const backing = s.muteBacking ? 0 : s.volBacking;
   switch (channel) {
     case 'click': return s.muteClick ? 0 : s.volClick;
