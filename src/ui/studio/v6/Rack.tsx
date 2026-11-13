@@ -12,6 +12,8 @@ import { AMP_KNOB_IDS, PEDAL_SPECS, RIG_PRESETS, matchingRigPreset, type CabMode
 import { PEDAL_IDS, addPedal, availablePedals, defaultChain, isDefaultChain, movePedal, removePedal, wiredOrder, type ChainStage, type PedalChain } from '../../../app/pedalChain';
 import { useApp } from '../../../app/store';
 import { liveInput, useLive, type InputChannel } from '../../../audio/liveInput';
+import { namHost, useNam, type NamStatus } from '../../../audio/namHost';
+import { describeNamModel } from '../../../app/namModel';
 import { useMidi } from '../../../audio/midi';
 import { noteOf } from '../../../pitch';
 import { startInput } from '../../LivePanels';
@@ -114,26 +116,100 @@ function InputModule() {
 const AMP_W = 300;
 const KNOB_PITCH = AMP_W / AMP_KNOB_IDS.length;
 
+/** True when the settings ask for the model, the engine holds one, and it includes its cabinet: the rig's cabinet is skipped. */
+const namSkipsCab = (rig: { readonly amp: { readonly model: string; readonly namCab: boolean } }, nam: NamStatus): boolean => rig.amp.model === 'nam' && rig.amp.namCab && nam.phase === 'ready';
+
+const percent = (v: number): string => `${Math.round(v * 100)}%`;
+
+/** The NAM side of the amp head: engine choice, model file, what the engine reported and measured. */
+function NamPanel() {
+  const [rig, setRig] = useRig();
+  const nam = useNam();
+  const live = useLive();
+  const file = useRef<HTMLInputElement>(null);
+  const [engineNow, setEngineNow] = useState<'internal' | 'nam' | null>(null);
+  useEffect(() => { setEngineNow(liveInput.rigState()?.ampEngine ?? null); }, [rig, live.state, live.rigRevision, nam.phase]);
+  const wanted = rig.amp.model === 'nam';
+  const pick = (model: 'internal' | 'nam') => setRig((r) => ({ ...r, amp: { ...r.amp, model } }));
+  const onFile = async (f: File | undefined) => {
+    if (!f) return;
+    const ok = await namHost.loadFile(f, engine.audioOut().ctx);
+    if (file.current) file.current.value = '';
+    if (!ok) return;
+    // The metadata's hint about the cabinet is applied once, at load; the switch stays the user's.
+    const includesCab = useNam.getState().summary?.includesCab ?? false;
+    setRig((r) => ({ ...r, amp: { ...r.amp, model: 'nam', namCab: includesCab } }));
+  };
+  const busy = nam.phase === 'checking' || nam.phase === 'loading' || nam.pending !== '';
+  const s = nam.summary;
+  const m = nam.measure;
+  let status: string;
+  if (nam.pending) status = nam.phase === 'loading' ? `Caricamento nel motore: ${nam.pending}…` : `Verifica e misura: ${nam.pending}…`;
+  else if (nam.phase === 'ready' && s) {
+    status = engineNow === 'nam'
+      ? `Modello attivo nello stadio amplificatore: ${s.name}.`
+      : !wanted ? `Modello caricato nel motore: ${s.name}. Scegli NAM per usarlo.`
+      : live.state === 'on' ? `Modello caricato: ${s.name}.` : `Modello caricato nel motore: ${s.name}. Avvia l’ingresso per usarlo.`;
+  } else if (nam.phase === 'error') status = 'Nessun modello caricato: suona il DSP interno.';
+  else status = wanted ? 'Nessun modello caricato: suona il DSP interno.' : 'Motore NAM non in uso.';
+  return (
+    <div className="v6-nam" data-testid="nam-panel">
+      <div className="v6-line">
+        <span className="v6-silk">Motore</span>
+        <div className="v6-seg" role="radiogroup" aria-label="Motore dell’amplificatore">
+          <button type="button" role="radio" className="v6-minikey" aria-checked={!wanted} data-on={!wanted ? '1' : '0'} data-testid="amp-engine-internal" onClick={() => pick('internal')}>DSP interno</button>
+          <button type="button" role="radio" className="v6-minikey" aria-checked={wanted} data-on={wanted ? '1' : '0'} data-testid="amp-engine-nam" onClick={() => pick('nam')}>NAM</button>
+        </div>
+      </div>
+      <p className="v6-note v6-status" role="status" data-testid="nam-status" data-phase={nam.phase} data-engine={engineNow ?? 'off'}>{status}</p>
+      <div className="v6-line">
+        <button type="button" className="v6-minikey" data-testid="nam-load" disabled={busy} onClick={() => file.current?.click()}>Carica file .nam</button>
+        <button type="button" className="v6-minikey" data-testid="nam-unload" disabled={busy || nam.phase !== 'ready'} onClick={() => namHost.unload()}>Rimuovi modello</button>
+      </div>
+      <input ref={file} type="file" accept=".nam,application/json" hidden data-testid="nam-file" onChange={(e) => void onFile(e.target.files?.[0])} />
+      {nam.error ? <p className="v6-note v6-alert" role="alert" data-testid="nam-error">{nam.error}</p> : null}
+      {nam.phase === 'ready' && s ? (
+        <dl className="v6-nam-facts" data-testid="nam-facts">
+          <div><dt>Modello</dt><dd>{describeNamModel(s)}</dd></div>
+          <div><dt>File</dt><dd>{s.fileName} · {(s.sizeBytes / 1024).toFixed(0)} kB · formato {s.version}</dd></div>
+          {m ? <div><dt>Misurato qui</dt><dd data-testid="nam-measure">caricato in {Math.round(m.loadMs)} ms · costo stimato {percent(m.realtimeFactor)} del tempo audio ({Math.round(m.microsPerBlock)} µs per blocco su {Math.round(m.budgetMicros)}) · latenza aggiunta 0 campioni</dd></div> : null}
+          <div><dt>Livello</dt><dd>{nam.info?.hasLoudness ? `normalizzato dal motore (il file dichiara ${nam.info.loudness.toFixed(1)} dB)` : 'non normalizzato: il file non dichiara il suo livello'}</dd></div>
+        </dl>
+      ) : null}
+      {nam.phase === 'ready' && m?.verdict === 'heavy' ? <p className="v6-note v6-alert" role="status" data-testid="nam-heavy">Modello pesante per questo computer: l’audio può interrompersi. Se succede torna al DSP interno.</p> : null}
+      {nam.phase === 'ready' && nam.rateNote ? <p className="v6-note v6-alert" role="status" data-testid="nam-rate">{nam.rateNote}</p> : null}
+      <div className="v6-line">
+        <span className="v6-silk">Il capture include il cabinet</span>
+        <Switch on={rig.amp.namCab} label="Il capture NAM include già il cabinet: salta il Cabinet del rig" testId="nam-cab" onClick={() => setRig((r) => ({ ...r, amp: { ...r.amp, namCab: !r.amp.namCab } }))} />
+      </div>
+      <p className="v6-note">Formati: NAM A1 (WaveNet, LSTM, Linear) e A2. Il modello gira alla frequenza dell’audio, senza ricampionamento. Gain regola l’ingresso del modello (±12 dB), i toni lavorano dopo il modello. Il file resta in memoria solo per questa visita.</p>
+    </div>
+  );
+}
+
 function AmpModule() {
   const [rig, setRig] = useRig();
+  const nam = useNam();
   const amp = rig.amp;
   const heard = amp.power && !amp.bypass;
+  const namReady = amp.model === 'nam' && nam.phase === 'ready' && nam.summary !== null;
   return (
     <Module id="amp" title="Amplificatore" lit={heard}
       power={<Switch on={amp.power} label="Accensione dell’amplificatore" testId="amp-power" onClick={() => setRig((r) => ({ ...r, amp: { ...r.amp, power: !r.amp.power } }))} />}>
       <div className="v6-amp" data-on={amp.power ? '1' : '0'}>
         <div className="v6-amp-top">
-          <span className="v6-amp-name">GTL Clean</span>
-          <span className="v6-amp-tape">DSP interno · nessun modello NAM</span>
+          <span className="v6-amp-name">{namReady ? 'GTL NAM' : 'GTL Clean'}</span>
+          <span className="v6-amp-tape" data-testid="amp-tape">{namReady ? `NAM · ${nam.summary?.name ?? ''}` : amp.model === 'nam' ? 'DSP interno · NAM senza modello' : 'DSP interno'}</span>
         </div>
         <div className="v6-amp-panel" style={{ width: AMP_W }}>
           <span className="v6-amp-lamp" data-on={amp.power ? 1 : 0} data-testid="amp-lamp" role="img" aria-label={amp.power ? 'Amplificatore acceso' : 'Amplificatore spento'} />
           {AMP_KNOB_IDS.map((id, i) => {
             const cx = KNOB_PITCH * (i + 0.5);
+            const label = namReady && id === 'gain' ? 'Input' : AMP_LABELS[id];
             return (
               <Fragment key={id}>
-                <span className="v6-amp-lab" style={{ left: cx }}>{AMP_LABELS[id]}</span>
-                <RotaryKnob value={amp.knobs[id]} label={`Amplificatore ${AMP_LABELS[id]}`} valueText={`${Math.round(amp.knobs[id] / 10)} su 10`}
+                <span className="v6-amp-lab" style={{ left: cx }}>{label}</span>
+                <RotaryKnob value={amp.knobs[id]} label={`Amplificatore ${label}`} valueText={`${Math.round(amp.knobs[id] / 10)} su 10`}
                   onChange={(v) => setRig((r) => ({ ...r, amp: { ...r.amp, knobs: { ...r.amp.knobs, [id]: v } } }))}
                   bodySrc={knobGold} bodySize={50} hitSize={38} pointer={{ length: 7, offset: 3, color: '#efe3bd', width: 2.5 }} cx={cx} cy={44} defaultValue={50} testId={`amp-${id}`} />
               </Fragment>
@@ -141,6 +217,7 @@ function AmpModule() {
           })}
         </div>
       </div>
+      <NamPanel />
       <div className="v6-line">
         <span className="v6-silk">Bypass ampli e cabinet</span>
         <Switch on={amp.bypass} label="Bypass di amplificatore e cabinet" testId="amp-bypass" onClick={() => setRig((r) => ({ ...r, amp: { ...r.amp, bypass: !r.amp.bypass } }))} />
@@ -155,6 +232,7 @@ function CabModule() {
   const [rig, setRig] = useRig();
   const file = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
+  const skipped = namSkipsCab(rig, useNam());
   const loaded = rig.cab.model === 'file' && rig.cab.fileName;
   const choose = (model: CabModel) => {
     if (model === 'file') { file.current?.click(); return; }
@@ -171,7 +249,7 @@ function CabModule() {
     }
   };
   return (
-    <Module id="cab" title="Cabinet / IR" lit={rig.cab.on && !rig.amp.bypass} testId="rig-cab"
+    <Module id="cab" title="Cabinet / IR" lit={rig.cab.on && !rig.amp.bypass && !skipped} testId="rig-cab"
       power={<button type="button" className="v6-toggle" aria-pressed={rig.cab.on} aria-label="Cabinet" title={rig.cab.on ? 'Cabinet attivo' : 'Cabinet escluso'} data-testid="rig-cab-switch"
         onClick={() => setRig((r) => ({ ...r, cab: { ...r.cab, on: !r.cab.on } }))}><i aria-hidden="true" /></button>}>
       <div className="v6-cab">
@@ -186,6 +264,7 @@ function CabModule() {
       </div>
       <input ref={file} type="file" accept="audio/*,.wav,.aif,.aiff" hidden data-testid="rig-cab-file" onChange={(e) => void onFile(e.target.files?.[0])} />
       {message ? <p className="v6-note v6-alert" role="alert">{message}</p> : null}
+      {skipped ? <p className="v6-note" role="status" data-testid="cab-skipped">Escluso: il modello NAM include già il cabinet (interruttore nella testata).</p> : null}
     </Module>
   );
 }
@@ -373,10 +452,11 @@ function useModuleLit(): Record<RackModuleId, boolean> {
   const rig = useApp((s) => s.settings.rig);
   const inputOn = useLive((l) => l.state === 'on');
   const monitorOn = useLive((l) => l.monitorOn);
+  const nam = useNam();
   return {
     input: inputOn,
     amp: rig.amp.power && !rig.amp.bypass,
-    cab: rig.cab.on && !rig.amp.bypass,
+    cab: rig.cab.on && !rig.amp.bypass && !namSkipsCab(rig, nam),
     pedals: Object.values(rig.pedals).some((p) => p.on),
     routing: inputOn && monitorOn,
   };

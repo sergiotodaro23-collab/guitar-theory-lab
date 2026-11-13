@@ -19,7 +19,7 @@ P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lot
 | 6 · Rig: fuzz, EQ, riordino, preset | `feat/studio-v6-pedal-order` | vedi PR | — | implementato: fuzz, EQ, suoni, quinto timbro (PR #19); pedaliera configurabile (D-49) |
 | 7 · Legenda a simboli | — | — | — | mancante |
 | 8 · Motore esercizi condiviso | — | — | — | mancante |
-| 9 · NAM, calibrazione, MIDI | — | — | — | mancante |
+| 9 · NAM, calibrazione, MIDI | `claude/charming-einstein-erno4u` | vedi PR | — | parziale: NAM con file locale implementato e testato con segnali e modelli sintetici (D-51); calibrazione e MIDI mancanti |
 | 10 · Rifinitura e QA | — | — | — | mancante |
 
 ## Lotto 1 — cosa c'è
@@ -132,7 +132,8 @@ Limiti dichiarati del lotto 6:
 | Lotto 4 (PR #17) | verde, 473 unit | 131 su 131 in locale |
 | Lotto 5 (PR #18) | verde, 478 unit | 132 su 132 in locale e in CI |
 | Lotto 6 | verde, 502 unit | 140 su 140 in locale (incluse le 7 prove della pedaliera) |
-| Consolidamento (D-50) | verde, 502 unit | rig e pedaliera 12 su 12 in locale (nuova prova: cambio di catena nel silenzio); corsa completa in CI sulla PR |
+| Consolidamento (D-50) | verde, 502 unit | rig e pedaliera 12 su 12 in locale (nuova prova: cambio di catena nel silenzio); corsa completa verde in CI sulla PR #21 |
+| Lotto 9, parte NAM (D-51) | verde, 516 unit | 148 su 148 in locale (7 prove nuove in `e2e/nam.spec.ts`) |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
@@ -144,6 +145,24 @@ PR #20 (pedaliera configurabile) unita in `main` come `8768765` dopo verifica lo
 |---|---|---|
 | Cambio di catena senza click: dissolvenza, riconnessione nel silenzio, risalita | implementato, testato con segnale sintetico | `e2e/pedal-chain.spec.ts` (guadagno d'uscita sotto 0,02 al momento della riconnessione, tre cambi in una dissolvenza, il suono torna) |
 | Il modulo Routing segue il grafo dopo una riconnessione differita | implementato | idem |
+
+## Lotto 9 (parte NAM) — cosa c'è
+
+| Funzione | Stato | Prova |
+|---|---|---|
+| Motore NAM vero (WASM in AudioWorklet) nello stadio amplificatore, DSP interno come ripiego | implementato, testato con segnali e modelli sintetici | `e2e/nam.spec.ts` (motore attivo letto dal grafo, linearità: metà guadagno, metà livello) |
+| Selettore DSP interno / NAM nella testata, modello caricato, metadati, misure, limiti | implementato | e2e |
+| Caricamento di file `.nam` locali: A1 (WaveNet, LSTM, Linear) e A2 | implementato; ConvNet non provato | unit `namModel.test.ts`, e2e |
+| Rifiuto di file sbagliati, formati non supportati, modelli troppo pesanti; il modello precedente resta | implementato | unit, e2e |
+| Cabinet saltato quando il capture lo include | implementato | e2e (catena attiva letta dal grafo) |
+| PRE prima dell'ampli, POST dopo il cabinet; analisi sul segnale secco; ascolto mai acceso da solo | implementato | e2e |
+| Misure: caricamento, costo per blocco, latenza, continuità, memoria | misurate su questa macchina | `npm run perf:nam`, `docs/NAM_INTEGRATION.md` |
+
+Limiti dichiarati: nessuna prova con chitarra, scheda audio e capture reali; nessun ricampionamento; lo scambio di modello interrompe l'audio per decine di millisecondi; il modello non viene conservato tra le visite; catalogo TONE3000 nella PR successiva.
+
+## Baseline
+
+Baseline consolidata della V6 per il lavoro su NAM: `main` a `6c493be692dfe5c3b521d9339047e2e9366b5441` (13 novembre 2026, dopo le PR #20 e #21).
 
 ## Blocchi
 

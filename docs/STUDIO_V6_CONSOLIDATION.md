@@ -30,9 +30,8 @@ Branch remoti al momento dell'audit: `main`, i branch `claude/*` dei lotti già 
 - **Code di delay e riverbero di un pedale rimosso**: uno stadio fuori catena non viene più elaborato dal browser, quindi il suo buffer resta fermo. Rimettendo il pedale in catena con l'effetto acceso può sentirsi per un attimo la coda rimasta. Non corretto qui.
 - **Cambio di catena**: al posto del click c'è un buco di circa 35 ms nell'ascolto (code comprese).
 - `matchingRigPreset` serializza i sette suoni a ogni disegno del selettore: costo piccolo, non misurato come problema.
-- `scripts/build-single.mjs` prende il primo file `.js` della cartella: regge finché il bundle ha un solo chunk.
 - Nessuna prova con chitarra e scheda audio reali: tutto il rig è **testato con segnali sintetici** (un WAV come microfono).
 
 ## Baseline
 
-Dopo l'unione della PR di consolidamento, lo SHA di `main` è la baseline per il lavoro su NAM: è riportato in `docs/STUDIO_V6_PROGRESS.md`.
+Baseline per il lavoro su NAM: `main` a `6c493be692dfe5c3b521d9339047e2e9366b5441` (PR #20 e #21 unite, CI verde).

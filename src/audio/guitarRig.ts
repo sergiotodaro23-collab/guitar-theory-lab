@@ -5,15 +5,18 @@
  * bypass and parameter moves never click. The analysis keeps the dry signal:
  * the rig sits after the input gain, before the monitor level.
  *
- * The amp head is a built-in DSP preamp (soft clipper and tone stack). A NAM
- * model would replace that preamp (P4-01, docs/NAM_FEASIBILITY.md); nothing
- * here claims to be NAM.
+ * The amp head has two engines in front of the same tone stack: the built-in
+ * DSP preamp (a soft clipper) and a Neural Amp Modeler node (D-51,
+ * docs/NAM_INTEGRATION.md). The NAM node is handed in by its host only when
+ * the engine has confirmed a loaded model; without it the built-in preamp
+ * plays, whatever the settings ask, and `describe()` says which one is heard.
  */
 import { PEDAL_IDS, defaultChain, wiredOrder, type ChainStage } from '../app/pedalChain';
 import {
-  CHORUS_BASE_DELAY, EQ_BANDS, ampDrive, ampOutGain, cabinetImpulse, chorusDepth, chorusRate, compMakeup, compThreshold, delayFeedback,
+  CHORUS_BASE_DELAY, EQ_BANDS, ampDrive, dbToGain, ampOutGain, cabinetImpulse, chorusDepth, chorusRate, compMakeup, compThreshold, delayFeedback,
   delayTime, eqDb, fuzzCurve, fuzzDrive, fuzzLevel, fuzzTone, mix01, odDrive, odLevel, odTone, presenceDb, reverbDecay, reverbImpulse, softClipCurve, toneDb, type PedalId, type RigSettings,
 } from '../app/rig';
+import { namInputDb } from '../app/namModel';
 
 const GLIDE = 0.02;
 /** Rewiring the chain while it sounds: the rig's output dips to silence for this long on each side of the change. */
@@ -45,6 +48,10 @@ export interface RigState {
   /** Stages whose wet path is heard now. */
   readonly active: readonly string[];
   readonly ampHeard: boolean;
+  /** Which engine the amp stage runs now: 'nam' only with a model loaded in the engine and the settings asking for it. */
+  readonly ampEngine: 'internal' | 'nam';
+  /** The NAM node is fed (it costs CPU only then): the model is selected and the guitar is being listened to. */
+  readonly namFed: boolean;
   readonly cab: string;
   readonly delaySeconds: number;
   readonly reverbSeconds: number;
@@ -70,6 +77,15 @@ export class GuitarRig {
   private readonly driveTone: BiquadFilterNode;
   private readonly driveLevel: GainNode;
   private readonly preamp: WaveShaperNode;
+  /** The two engines of the amp head meet at the tone stack through these gates (a short crossfade, never both). */
+  private readonly preGate: GainNode;
+  private readonly namIn: GainNode;
+  private readonly namGate: GainNode;
+  private readonly namGuard: WaveShaperNode;
+  private nam: AudioNode | null = null;
+  private namFed = false;
+  private listening = false;
+  private feedTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly bass: BiquadFilterNode;
   private readonly mid: BiquadFilterNode;
   private readonly treble: BiquadFilterNode;
@@ -144,7 +160,16 @@ export class GuitarRig {
     this.treble = filter('highshelf', 3200);
     this.presence = filter('highshelf', 5500);
     this.ampOut = ctx.createGain();
-    this.stages.amp.input.connect(this.preamp).connect(this.bass).connect(this.mid).connect(this.treble).connect(this.presence).connect(this.ampOut).connect(this.stages.amp.wet);
+    this.preGate = ctx.createGain();
+    this.stages.amp.input.connect(this.preamp).connect(this.preGate).connect(this.bass).connect(this.mid).connect(this.treble).connect(this.presence).connect(this.ampOut).connect(this.stages.amp.wet);
+    // NAM path: input trim → model (connected by setNam) → guard → gate → the same tone stack.
+    // The guard is a unity curve: a WaveShaper clamps its input to ±1, so a broken model cannot send a huge peak to the ears.
+    this.namIn = ctx.createGain();
+    this.namGate = ctx.createGain();
+    this.namGate.gain.value = 0;
+    this.namGuard = ctx.createWaveShaper();
+    this.namGuard.curve = new Float32Array([-1, 1]);
+    this.namGuard.connect(this.namGate).connect(this.bass);
 
     // Cabinet.
     this.cab = ctx.createConvolver();
@@ -241,6 +266,55 @@ export class GuitarRig {
     if (wet > 0) this.heard.add(id); else this.heard.delete(id);
   }
 
+  /**
+   * The NAM node with a model the engine has confirmed, or null (no model,
+   * loading, failed). The node is owned by its host: the rig only connects
+   * it. Handing over null first closes the gate, so a model being replaced
+   * is never heard half-loaded.
+   */
+  setNam(node: AudioNode | null): void {
+    if (node === this.nam) return;
+    if (this.nam) {
+      this.unfeed();
+      try { this.nam.disconnect(this.namGuard); } catch { /* was not connected */ }
+    }
+    this.nam = node;
+    if (node) node.connect(this.namGuard);
+    if (this.settings) this.apply(this.settings);
+  }
+
+  /**
+   * Whether the guitar is being listened to. With the listening off nobody
+   * hears the rig, so the model is not fed: a worklet without input writes
+   * silence and costs almost nothing. The cut waits for the monitor's fade.
+   */
+  setListening(on: boolean): void {
+    this.listening = on;
+    this.feed();
+  }
+
+  private unfeed(): void {
+    if (this.feedTimer !== null) clearTimeout(this.feedTimer);
+    this.feedTimer = null;
+    if (this.namFed && this.nam) { try { this.namIn.disconnect(this.nam); } catch { /* was not connected */ } }
+    this.namFed = false;
+  }
+
+  private feed(): void {
+    const want = this.listening && this.nam !== null && this.settings?.amp.model === 'nam' && this.settings.amp.power && !this.settings.amp.bypass;
+    if (this.feedTimer !== null) clearTimeout(this.feedTimer);
+    this.feedTimer = null;
+    if (want && !this.namFed && this.nam) {
+      this.stages.amp.input.connect(this.namIn);
+      this.namIn.connect(this.nam);
+      this.namFed = true;
+      this.onChange?.();
+    } else if (!want && this.namFed) {
+      // Let the gate and the monitor fade first (a few time constants), then stop feeding the model.
+      this.feedTimer = setTimeout(() => { this.unfeed(); this.onChange?.(); }, 200);
+    }
+  }
+
   /** A cabinet impulse response loaded from a file; kept in memory only. */
   setCabFile(buffer: AudioBuffer | null): void {
     this.fileCab = buffer;
@@ -278,6 +352,13 @@ export class GuitarRig {
     this.set(this.treble.gain, toneDb(a.treble));
     this.set(this.presence.gain, presenceDb(a.presence));
     this.set(this.ampOut.gain, ampOutGain(a.out));
+    // The model plays only when it is really there; otherwise the built-in preamp does, and describe() says so.
+    const useNam = r.amp.model === 'nam' && this.nam !== null;
+    this.set(this.preGate.gain, useNam ? 0 : 1);
+    this.set(this.namGate.gain, useNam ? 1 : 0);
+    this.set(this.namIn.gain, dbToGain(namInputDb(a.gain)));
+    if (useNam) this.heard.add('nam'); else this.heard.delete('nam');
+    this.feed();
     if (r.amp.bypass) this.route('amp', 1, 0);
     else if (!r.amp.power) this.route('amp', 0, 0);
     else this.route('amp', 0, 1);
@@ -294,7 +375,8 @@ export class GuitarRig {
         this.cab.buffer = buffer;
       }
     }
-    const cabOn = r.cab.on && !r.amp.bypass;
+    // A capture that already includes its cabinet must not go through a second one.
+    const cabOn = r.cab.on && !r.amp.bypass && !(useNam && r.amp.namCab);
     this.route('cab', cabOn ? 0 : 1, cabOn ? 1 : 0);
 
     // Post effects: dry always, wet added at the mix.
@@ -325,6 +407,8 @@ export class GuitarRig {
       rewireGain: this.rewireGain,
       active: this.order.filter((id) => this.heard.has(id)),
       ampHeard: this.heard.has('amp'),
+      ampEngine: this.heard.has('nam') ? 'nam' : 'internal',
+      namFed: this.namFed,
       cab: r ? (r.cab.model === 'file' && !this.fileCab ? '4x12' : r.cab.model) : '',
       delaySeconds: this.echo.delayTime.value,
       reverbSeconds: this.reverb.buffer ? this.reverb.buffer.duration : 0,
@@ -335,6 +419,9 @@ export class GuitarRig {
     if (this.rewireTimer !== null) clearTimeout(this.rewireTimer);
     this.rewireTimer = null;
     this.onChange = null;
+    this.unfeed();
+    if (this.nam) { try { this.nam.disconnect(this.namGuard); } catch { /* was not connected */ } }
+    this.nam = null;
     try { this.lfo.stop(); } catch { /* already stopped */ }
     this.input.disconnect();
     this.output.disconnect();

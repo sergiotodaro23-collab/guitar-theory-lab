@@ -4,7 +4,7 @@
  * curves, synthesised impulse responses). No Web Audio and no DOM here.
  *
  * Chain on the guitar's listening branch:
- *   comp → fuzz → drive → amp (preamp + tone stack) → cabinet IR → eq → chorus → delay → reverb
+ *   comp → fuzz → drive → amp (preamp or NAM model, then tone stack) → cabinet IR → eq → chorus → delay → reverb
  */
 
 import { DEFAULT_POST, DEFAULT_PRE, PEDAL_IDS, defaultChain, sanitizeChain, type PedalChain, type PedalId } from './pedalChain';
@@ -21,8 +21,13 @@ export const AMP_KNOB_IDS: readonly AmpKnob[] = ['gain', 'bass', 'mid', 'treble'
 
 /** Built-in cabinets are synthesised; 'file' is an impulse response loaded by the user (kept in memory only). */
 export type CabModel = '1x12' | '4x12' | 'file';
-/** The amp head's model: the built-in DSP preamp today; a loaded NAM model is the P4-01 feasibility phase. */
-export type AmpModel = 'internal';
+/**
+ * The amp head's engine: the built-in DSP preamp, or a Neural Amp Modeler
+ * capture loaded by the user (D-51). 'nam' is a request: the model runs only
+ * once the engine has loaded it, and until then the built-in preamp plays.
+ * The model file itself is never saved with the settings.
+ */
+export type AmpModel = 'internal' | 'nam';
 
 export interface PedalSpec {
   readonly name: string;
@@ -57,6 +62,8 @@ export interface RigSettings {
     /** Amp and cabinet bypassed: the pedals still work. */
     readonly bypass: boolean;
     readonly knobs: Readonly<Record<AmpKnob, number>>;
+    /** NAM only: the capture already includes its cabinet, so the rig's cabinet is skipped while the model plays. */
+    readonly namCab: boolean;
   };
   readonly cab: { readonly on: boolean; readonly model: CabModel; readonly fileName: string };
   readonly pedals: Readonly<Record<PedalId, PedalState>>;
@@ -66,7 +73,7 @@ const AMP_DEFAULTS: Record<AmpKnob, number> = { gain: 55, bass: 50, mid: 60, tre
 
 export const DEFAULT_RIG: RigSettings = {
   chain: defaultChain(),
-  amp: { model: 'internal', power: true, bypass: false, knobs: AMP_DEFAULTS },
+  amp: { model: 'internal', power: true, bypass: false, knobs: AMP_DEFAULTS, namCab: false },
   cab: { on: true, model: '4x12', fileName: '' },
   pedals: Object.fromEntries(PEDALS.map((id) => [id, { on: false, knobs: Object.fromEntries(PEDAL_SPECS[id].knobs.map(([k, , v]) => [k, v])) }])) as Record<PedalId, PedalState>,
 };
@@ -75,7 +82,10 @@ const pct = (v: unknown, fallback: number): number => (typeof v === 'number' && 
 const bool = (v: unknown, fallback: boolean): boolean => (typeof v === 'boolean' ? v : fallback);
 const obj = (v: unknown): Record<string, unknown> => (typeof v === 'object' && v !== null ? v as Record<string, unknown> : {});
 
-/** Repairs anything missing or out of range; a saved 'file' cabinet comes back as 4x12 (the file is not kept). */
+/**
+ * Repairs anything missing or out of range; a saved 'file' cabinet comes back as 4x12 (the file is not kept).
+ * The choice of the NAM engine is kept, the model is not: after a reload the built-in preamp plays until a file is loaded again.
+ */
 export function sanitizeRig(raw: unknown): RigSettings {
   const r = obj(raw);
   const amp = obj(r.amp);
@@ -85,10 +95,11 @@ export function sanitizeRig(raw: unknown): RigSettings {
   return {
     chain: sanitizeChain(r.chain),
     amp: {
-      model: 'internal',
+      model: amp.model === 'nam' ? 'nam' : 'internal',
       power: bool(amp.power, true),
       bypass: bool(amp.bypass, false),
       knobs: Object.fromEntries(AMP_KNOB_IDS.map((k) => [k, pct(knobs[k], AMP_DEFAULTS[k])])) as Record<AmpKnob, number>,
+      namCab: bool(amp.namCab, false),
     },
     cab: { on: bool(cab.on, true), model: cab.model === '1x12' ? '1x12' : '4x12', fileName: '' },
     pedals: Object.fromEntries(PEDALS.map((id) => {
@@ -277,7 +288,7 @@ function sound(id: string, name: string, amp: AmpKnobs, cab: '1x12' | '4x12', pe
     id, name,
     rig: {
       chain: defaultChain(),
-      amp: { model: 'internal', power: true, bypass: false, knobs: amp },
+      amp: { model: 'internal', power: true, bypass: false, knobs: amp, namCab: false },
       cab: { on: true, model: cab, fileName: '' },
       pedals: Object.fromEntries(PEDALS.map((p) => [p, { on: p in pedals, knobs: { ...DEFAULT_RIG.pedals[p].knobs, ...pedals[p] } }])) as Record<PedalId, PedalState>,
     },

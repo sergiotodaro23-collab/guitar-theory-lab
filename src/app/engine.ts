@@ -11,6 +11,7 @@ import {
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
 import { fileOffsetAt, loopRegion, progressionLength, sectionSpans, stepAt } from '../jam';
 import { backingTrack } from '../audio/backingTrack';
+import { benchmarkNam, namHost, namLatencySamples, useNam, type NamStatus } from '../audio/namHost';
 import { BPM_MAX, BPM_MIN, MIX_CHANNELS, backingTrackVolume, channelVolume, meterOf, type MixChannel, type Settings } from './settings';
 import { useApp, usePlayhead, type Playhead } from './store';
 
@@ -417,8 +418,8 @@ export const engine = new Engine();
 
 declare global {
   interface Window {
-    __gtl?: { engine: Engine; debug: DebugLog; backing?: typeof backingTrack; live?: typeof liveInput };
+    __gtl?: { engine: Engine; debug: DebugLog; backing?: typeof backingTrack; live?: typeof liveInput; nam?: () => NamStatus; namTools?: { bench: typeof benchmarkNam; latency: typeof namLatencySamples; host: typeof namHost } };
   }
 }
 
-if (engine.debug) window.__gtl = { engine, debug: engine.debug, backing: backingTrack, live: liveInput };
+if (engine.debug) window.__gtl = { engine, debug: engine.debug, backing: backingTrack, live: liveInput, nam: () => useNam.getState(), namTools: { bench: benchmarkNam, latency: namLatencySamples, host: namHost } };

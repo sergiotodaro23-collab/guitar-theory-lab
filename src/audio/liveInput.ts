@@ -10,6 +10,7 @@ import { SENSITIVITY, detectPitch, PitchTracker, type Sensitivity, type TrackedP
 import { workerTimer } from './webAudioSink';
 import { DEFAULT_RIG, type RigSettings } from '../app/rig';
 import { GuitarRig, decodeImpulse, type RigState } from './guitarRig';
+import { namHost } from './namHost';
 
 export type LiveState = 'off' | 'starting' | 'on' | 'error';
 /** Which input channel carries the guitar. Many USB interfaces put the instrument input on channel 2. */
@@ -176,7 +177,11 @@ class LiveInput {
       this.mono.connect(this.gain);
       this.gain.connect(this.analyser);
       this.rig = new GuitarRig(ctx);
-      this.rig.onChange = () => useLive.setState((s) => ({ rigRevision: s.rigRevision + 1 }));
+      const changed = () => useLive.setState((s) => ({ rigRevision: s.rigRevision + 1 }));
+      this.rig.onChange = changed;
+      // The NAM node reaches the rig only with a model the engine has confirmed (namHost).
+      namHost.onNode = (node) => { this.rig?.setNam(node); changed(); };
+      this.rig.setNam(namHost.nodeFor(ctx));
       this.rig.setCabFile(this.cabFile);
       this.rig.apply(this.rigSettings);
       this.gain.connect(this.rig.input);
@@ -202,6 +207,8 @@ class LiveInput {
       };
       if (ctx.state !== 'running') throw Object.assign(new Error('suspended'), { name: 'AudioSuspended' });
       useLive.setState({ state: 'on', devices, deviceId: settings?.deviceId ?? deviceId, monitorOn: false, diagnostics });
+      // A model loaded earlier in this visit comes back into the rig; the listening stays off.
+      void namHost.attach(ctx);
     } catch (error) {
       this.fail(error);
     }
@@ -217,6 +224,7 @@ class LiveInput {
     this.sink = null;
     this.stream?.getTracks().forEach((t) => t.stop());
     for (const node of [this.source, this.splitter, this.mono, this.gain, this.analyser, this.monitor]) node?.disconnect();
+    namHost.onNode = null;
     this.rig?.dispose();
     this.rig = null;
     this.stream = null;
@@ -353,6 +361,7 @@ class LiveInput {
   setMonitor(on: boolean, level = this.monitorLevel): void {
     this.monitorLevel = level;
     if (this.monitor) this.monitor.gain.setTargetAtTime(on ? level : 0, this.monitor.context.currentTime, 0.02);
+    this.rig?.setListening(on && this.monitor !== null);
     useLive.setState({ monitorOn: on && this.monitor !== null });
   }
 

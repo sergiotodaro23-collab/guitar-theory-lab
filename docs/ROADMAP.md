@@ -99,7 +99,7 @@ Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test
 
 | ID | Requisito | Stato | Note |
 |----|-----------|-------|------|
-| P4-01 | Studio NAM / amp modeling (`docs/NAM_FEASIBILITY.md`) | PARTIAL | Pronti la UI (Guitar Rig, D-42) e lo stadio `amp` del grafo in cui innestare il modello. Manca l'inferenza NAM (WASM + AudioWorklet), con misure di CPU e latenza e verifica delle licenze dei modelli. |
+| P4-01 | NAM / amp modeling (`docs/NAM_INTEGRATION.md`) | PARTIAL | Motore NAM vero nello stadio `amp` (D-51): file `.nam` locali A1 e A2, misure di costo e latenza, DSP interno come ripiego. Testato con segnali e modelli sintetici. Mancano: prova con chitarra e capture reali, conservazione del modello, calibrazione del livello. |
 | P4-02 | IR cabinet | IMPLEMENTED | D-42: ConvolverNode con due cabinet sintetizzati (unit: energia unitaria, taglio delle alte) o un file IR dell'utente, in memoria per la visita. Nessuna IR di terzi distribuita. |
 | P4-07 | Guitar Rig con pedaliera | IMPLEMENTED | D-42: testata DSP interna, Cabinet IR, Compressor, Overdrive, Chorus, Delay, Reverb sul ramo d'ascolto della chitarra, in un unico cassetto della Studio. Unit 9, e2e 3 (controlli, salvataggio, livelli reali con WAV come microfono). Non provato con chitarra e cuffie reali. |
 | P4-03 | Sequencer avanzato, MIDI, piano roll | MISSING | Le tracce sono già eventi su tick. |

@@ -345,3 +345,12 @@
 .v6-pedal-ctl .v6-minikey:disabled { opacity: .4; cursor: default; }
 .v6-chain-readout { margin: 0; font: 500 11.5px/16px 'IBM Plex Mono', ui-monospace, monospace; color: var(--led-amber); overflow-wrap: anywhere; }
 .v6-chain-add { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+
+/* NAM side of the amp head (D-51) */
+.v6-nam { display: grid; gap: 6px; padding: 8px; border: 1px solid #0b0c0e; border-radius: 6px; background: rgba(0, 0, 0, .22); }
+.v6-seg { display: flex; gap: 4px; }
+.v6-seg .v6-minikey[data-on='1'] { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); }
+.v6-nam-facts { display: grid; gap: 3px; margin: 0; font: 400 11.5px/15px 'Barlow', sans-serif; color: var(--ink-primary); }
+.v6-nam-facts div { display: grid; grid-template-columns: 78px 1fr; gap: 6px; }
+.v6-nam-facts dt { color: var(--ink-muted); font: 600 10px/15px 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.v6-nam-facts dd { margin: 0; overflow-wrap: anywhere; }

@@ -5,7 +5,10 @@ import { join } from 'node:path';
 const dist = 'dist';
 const assets = join(dist, 'assets');
 const files = readdirSync(assets);
-const js = readFileSync(join(assets, files.find((f) => f.endsWith('.js'))), 'utf8');
+// The entry script is the one index.html loads; other .js files are chunks loaded on demand (the NAM engine) and stay out.
+const index = readFileSync(join(dist, 'index.html'), 'utf8');
+const entry = /<script[^>]*src="[^"]*assets\/([^"]+\.js)"/.exec(index)?.[1] ?? files.find((f) => f.startsWith('index-') && f.endsWith('.js'));
+const js = readFileSync(join(assets, entry), 'utf8');
 let css = readFileSync(join(assets, files.find((f) => f.endsWith('.css'))), 'utf8');
 
 css = css.replace(/,?\s*url\([^)]*\.woff\)\s*format\(["']woff["']\)/g, '');
