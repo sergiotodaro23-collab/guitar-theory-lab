@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseLook, openDevice } from './studio';
+import { chooseLook, openDevice, openRack } from './studio';
 
 /**
  * Studio V5.7 shell (D-41): rail, console/LCD, neck and divider, notebook,
@@ -133,7 +133,7 @@ test('drawer: covers the whole notebook zone right of the rail; Escape closes, f
   const before = await pageBox.evaluate((el) => [el.getBoundingClientRect().top, el.scrollTop]);
   const neck = await rect(page, '[data-testid="fretboard-panel"]');
   const board = await rect(page, '.v57-board .fretboard');
-  for (const device of ['mixer', 'amp', 'tuner', 'iface'] as const) {
+  for (const device of ['mixer', 'tuner'] as const) {
     await page.getByTestId(`device-${device}`).click();
     await expect(page.getByTestId('device-drawer')).toHaveAttribute('data-device', device);
     await expect(page.getByTestId('device-close')).toBeFocused();
@@ -158,10 +158,10 @@ test('drawer: covers the whole notebook zone right of the rail; Escape closes, f
   await expect(page.getByTestId('device-drawer')).toHaveAttribute('data-device', 'tuner');
   await page.getByTestId('device-tuner').click();
   await expect(page.getByTestId('device-drawer')).toHaveCount(0);
-  await page.getByTestId('device-amp').click();
+  await page.getByTestId('device-mixer').click();
   await page.getByTestId('device-close').click();
   await expect(page.getByTestId('device-drawer')).toHaveCount(0);
-  await expect(page.getByTestId('device-amp')).toBeFocused();
+  await expect(page.getByTestId('device-mixer')).toBeFocused();
   expect(await pageBox.evaluate((el) => [el.getBoundingClientRect().top, el.scrollTop])).toEqual(before);
   await expect(tab(page, 'Esercizio')).toHaveAttribute('aria-selected', 'true');
 });
@@ -172,7 +172,7 @@ test('drawer: devices fit short and tall notebook zones', async ({ page }) => {
   for (const key of ['End', 'Home']) {
     await divider.focus();
     await page.keyboard.press(key);
-    for (const [device, canvas] of [['mixer', '[data-testid="v57-mixer"]'], ['amp', '[data-testid="rig"]']] as const) {
+    for (const [device, canvas] of [['mixer', '[data-testid="v57-mixer"]'], ['tuner', '.v57-dv .gtl-wrap']] as const) {
       await openDevice(page, device);
       await page.waitForTimeout(450);
       const [panel, box] = [await rect(page, '.v57-dv'), await rect(page, canvas)];
@@ -188,7 +188,7 @@ test('drawer: devices fit short and tall notebook zones', async ({ page }) => {
 test('reduced motion: the drawer fades and closes at once', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await open(page);
-  await page.getByTestId('device-amp').click();
+  await page.getByTestId('device-tuner').click();
   const animation = await page.locator('.v57-dv').evaluate((el) => getComputedStyle(el).animationName);
   expect(animation).toBe('v57-fade');
   await page.getByTestId('device-close').click();
@@ -204,12 +204,11 @@ test('tuner and interface without input: honest states, opening never starts mon
   await expect(page.getByTestId('tuner-calibration')).toHaveAttribute('aria-valuetext', '440 Hz');
   await page.keyboard.press('End');
   await expect(page.getByTestId('tuner-calibration')).toHaveAttribute('aria-valuetext', '445 Hz');
-  await openDevice(page, 'iface');
+  await page.getByTestId('device-close').click();
+  await openRack(page);
   await expect(page.getByTestId('iface-lcd')).toContainText('Ingresso spento');
   await expect(page.getByTestId('iface-monitor')).toBeDisabled();
   await expect(page.getByTestId('iface-monitor')).toHaveAttribute('aria-pressed', 'false');
-  // The drawer moves focus to its close key a moment after opening: wait for it, or the key press below lands there.
-  await expect(page.getByTestId('device-close')).toBeFocused();
   await page.getByTestId('iface-gain').focus();
   await page.keyboard.press('End');
   await expect(page.getByTestId('iface-gain')).toHaveAttribute('aria-valuetext', '+12.0 dB');

@@ -177,7 +177,7 @@ for (const [width, height] of [[1366, 768], [1280, 800], [1280, 720], [1024, 768
       expect(r.right, sel).toBeLessThanOrEqual(width);
     }
     // Every header tool is on screen and not covered.
-    for (const id of ['metronome-toggle', 'device-tuner', 'device-iface', 'device-amp']) await page.getByTestId(id).click({ trial: true });
+    for (const id of ['metronome-toggle', 'device-tuner', 'rack-toggle']) await page.getByTestId(id).click({ trial: true });
     expect(await page.getByTestId('notebook-page').evaluate((el) => el.clientHeight)).toBeGreaterThanOrEqual(120);
   });
 }
