@@ -11,7 +11,7 @@ import {
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
 import { fileOffsetAt, loopRegion, progressionLength, sectionSpans, stepAt } from '../jam';
 import { backingTrack } from '../audio/backingTrack';
-import { BPM_MAX, BPM_MIN, MIX_CHANNELS, channelVolume, meterOf, type Settings } from './settings';
+import { BPM_MAX, BPM_MIN, MIX_CHANNELS, backingTrackVolume, channelVolume, meterOf, type Settings } from './settings';
 import { useApp, usePlayhead, type Playhead } from './store';
 
 export interface DebugLog {
@@ -142,9 +142,9 @@ class Engine {
     if (backingChanged) {
       // Volume alone needs no restart.
       const onlyVolume = s.backing !== previous.backing && JSON.stringify({ ...s.backing, volume: 0 }) === JSON.stringify({ ...previous.backing, volume: 0 }) && s.bpm === previous.bpm && !meterChanged;
-      if (onlyVolume) backingTrack.setVolume(s.backing.volume);
+      if (onlyVolume) backingTrack.setVolume(backingTrackVolume(s));
       else this.syncBacking();
-    }
+    } else if (backingTrackVolume(s) !== backingTrackVolume(previous)) backingTrack.setVolume(backingTrackVolume(s));
     if (s.mode !== previous.mode || s.changeMode !== previous.changeMode) this.manualChanges = [];
     if (this.scheduler.transportState !== 'playing') this.publish();
   }
@@ -284,7 +284,7 @@ class Engine {
     const out = this.audio.monitorInput;
     void backingTrack.restore(ctx).then((ok) => {
       if (!ok || this.scheduler.transportState !== 'playing') return;
-      backingTrack.start(ctx, out, when, fileOffsetAt(s.backing, tick, meter, loopTicks), s.backing.volume, loopTicks ? loopRegion(s.backing, loopTicks, meter) : null);
+      backingTrack.start(ctx, out, when, fileOffsetAt(s.backing, tick, meter, loopTicks), backingTrackVolume(s), loopTicks ? loopRegion(s.backing, loopTicks, meter) : null);
     });
   }
 
