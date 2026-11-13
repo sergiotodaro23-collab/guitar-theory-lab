@@ -8,7 +8,6 @@ import { useEffect, useRef } from 'react';
 import type { AppMode } from '../../../app/settings';
 import { useApp } from '../../../app/store';
 import { AppFooter } from '../../AppFooter';
-import { PresetsPanel } from '../../panels';
 import { AppearanceToggle, withModeLabels } from '../../Transport';
 import { RailFaders } from '../v6/RailFaders';
 import { useStudioUi, type DeviceId } from './uiStore';
@@ -57,7 +56,7 @@ function SettingsPanel({ studioAllowed }: { readonly studioAllowed: boolean }) {
         <h4>Aspetto dell’interfaccia</h4>
         <AppearanceToggle studioAllowed={studioAllowed} current="studio" />
         <p>Semplificata è l’altra interfaccia dell’app: stessi laboratori, stesso stato e stessa riproduzione.</p>
-        <div className="v57-setpop-presets"><PresetsPanel /></div>
+        <p>I preset di studio sono nella Preset Library, dal tasto «Preset» in alto.</p>
         <AppFooter />
         <div><button type="button" className="v57-textbtn" onClick={() => close(false)}>Chiudi</button></div>
       </div>

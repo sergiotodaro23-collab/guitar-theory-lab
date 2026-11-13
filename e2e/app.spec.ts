@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { reveal } from './studio';
+import { reveal, loadPreset } from './studio';
 
 const open = async (page: Page) => {
   const errors: string[] = [];
@@ -298,10 +298,7 @@ test('presets and session survive a reload', async ({ page }) => {
   await expect(page.getByTestId('tonic')).toHaveValue('A');
   await expect(page.getByTestId('bpm')).toHaveValue('120');
 
-  await reveal(page, page.getByTestId('preset-load'));
-  const saved = page.getByTestId('preset-load').locator('option', { hasText: 'Tuo: Seste dorico' });
-  await reveal(page, page.getByTestId('preset-load'));
-  await page.getByTestId('preset-load').selectOption(await saved.getAttribute('value') as string);
+  await loadPreset(page, { name: 'Seste dorico' });
   await reveal(page, page.getByTestId('tonic'));
   await expect(page.getByTestId('tonic')).toHaveValue('Eb');
   await expect(page.getByTestId('bpm')).toHaveValue('93');
@@ -311,18 +308,17 @@ test('presets and session survive a reload', async ({ page }) => {
   await reveal(page, page.getByRole('button', { name: 'Elimina Seste dorico' }));
   await page.getByRole('button', { name: 'Elimina Seste dorico' }).click();
   await expect(page.getByTestId('saved-list')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Carica Seste dorico' })).toHaveCount(0);
 });
 
 test('built-in presets load, including one that changes mode', async ({ page }) => {
   await open(page);
-  await reveal(page, page.getByTestId('preset-load'));
-  await page.getByTestId('preset-load').selectOption('blues-a');
+  await loadPreset(page, { id: 'blues-a' });
   await reveal(page, page.getByTestId('builder'));
   await expect(page.getByTestId('builder')).toBeVisible();
   await reveal(page, page.getByTestId('chip-0'));
   await expect(page.getByTestId('chip-0')).toContainText('A7');
-  await reveal(page, page.getByTestId('preset-load'));
-  await page.getByTestId('preset-load').selectOption('fourths-dorian');
+  await loadPreset(page, { id: 'fourths-dorian' });
   await reveal(page, page.getByTestId('chord-spelling'));
   await expect(page.getByTestId('chord-spelling')).toContainText('D (1)');
 });

@@ -279,3 +279,60 @@ test('mixer: full width with long faders at every size; channel meters read the 
   expect(await peak('click')).toBeGreaterThan(0);
   await page.getByTestId('stop').click();
 });
+
+test('preset library: search and combined filters; load, save, rename and delete; Escape closes', async ({ page }) => {
+  const errors = await open(page);
+  const library = page.getByTestId('preset-library');
+  const cards = library.getByTestId('preset-card');
+  await page.getByTestId('preset-library-open').click();
+  await expect(library).toBeVisible();
+  await expect(page.getByTestId('preset-count')).toHaveText('11 di 11 preset');
+  // Filters combine; the search ignores case.
+  await page.getByTestId('preset-filter-lab').selectOption('fretboard');
+  await expect(cards).toHaveCount(6);
+  await page.getByTestId('preset-filter-level').selectOption('Base');
+  await expect(cards).toHaveCount(2);
+  await page.getByTestId('preset-search').fill('TERZE');
+  await expect(cards).toHaveCount(1);
+  await expect(cards.first()).toContainText('Terze in Do maggiore, forma E');
+  await expect(cards.first()).toContainText('Scales · Intervalli · C · Base');
+  await page.getByTestId('preset-filter-key').selectOption('A');
+  await expect(cards).toHaveCount(0);
+  await expect(library).toContainText('Nessun preset con questi filtri.');
+  // A fresh look at the whole library: a Jam preset changes laboratory and loads its progression.
+  await page.getByTestId('preset-search').fill('');
+  for (const id of ['preset-filter-lab', 'preset-filter-level', 'preset-filter-key']) await page.getByTestId(id).selectOption('');
+  await library.locator('[data-preset-id="blues-a"]').getByRole('button', { name: /^Carica / }).click();
+  await expect(library).toBeHidden();
+  await expect(page.getByTestId('studio-rail').getByRole('button', { name: 'Jam Studio', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByTestId('lcd-tonic')).toHaveText('A');
+  await expect(page.getByTestId('bpm')).toHaveValue('96');
+  // Save the current study, find it among "Tuoi", rename it, reload the page, delete it.
+  await page.getByTestId('bpm').fill('101');
+  await page.getByTestId('preset-library-open').click();
+  await page.getByTestId('preset-save').click();
+  await expect(page.getByTestId('preset-status')).toHaveText('Dai un nome al preset.');
+  await page.getByTestId('preset-name').fill('Blues a 101');
+  await page.getByTestId('preset-save').click();
+  await expect(page.getByTestId('preset-status')).toHaveText('Salvato: Blues a 101');
+  await page.getByTestId('preset-filter-source').selectOption('user');
+  await expect(cards).toHaveCount(1);
+  await expect(cards.first()).toContainText('Jam · Jam · A');
+  await library.getByRole('button', { name: 'Rinomina Blues a 101' }).click();
+  await library.getByRole('textbox', { name: 'Nuovo nome per Blues a 101' }).fill('Blues lento');
+  await library.getByRole('button', { name: 'Salva', exact: true }).click();
+  await expect(cards.first()).toContainText('Blues lento');
+  await page.keyboard.press('Escape');
+  await expect(library).toBeHidden();
+  await page.getByTestId('bpm').fill('140');
+  await page.reload();
+  await page.getByTestId('preset-library-open').click();
+  await library.getByRole('button', { name: 'Carica Blues lento' }).click();
+  await expect(page.getByTestId('bpm')).toHaveValue('101');
+  await page.getByTestId('preset-library-open').click();
+  await library.getByRole('button', { name: 'Elimina Blues lento' }).click();
+  await expect(page.getByTestId('preset-count')).toHaveText('11 di 11 preset');
+  await page.getByTestId('preset-library-close').click();
+  await expect(library).toBeHidden();
+  expect(errors).toEqual([]);
+});

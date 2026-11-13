@@ -1,20 +1,22 @@
 /**
  * Studio V6 global header: the brand strip across the whole window and the
- * keys of the global tools (metronome, tuner, the rig rack). It carries
+ * keys of the global tools (preset library, metronome, tuner, the rig rack). It carries
  * no transport: play, tempo and the LCD live in the console between the
  * sidebars.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CLICK_SOUNDS } from '../../../audio/clickSounds';
 import { useApp } from '../../../app/store';
 import { Select } from '../../controls';
 import { ClickSelect, MeterSelect } from '../../Transport';
 import { useStudioUi, type DeviceId } from '../v57/uiStore';
+import { PresetLibrary } from './PresetLibrary';
 
 const TOOLS: readonly { id: DeviceId; text: string; label: string; icon: string }[] = [
   { id: 'tuner', text: 'Accordatore', label: 'Accordatore cromatico', icon: 'M9 3v8a3 3 0 0 0 6 0V3M12 14v7M8 21h8' },
 ];
 const RIG_ICON = 'M3 6h18v12H3zM3 9.5h18M7 14h.01M11 14h.01M15 14h.01M18.5 14h.01';
+const LIBRARY_ICON = 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z';
 const METRO_ICON = 'M9 3h6l4 18H5zM12 17l4-10M7.5 13h9';
 
 function Glyph({ d }: { readonly d: string }) {
@@ -77,6 +79,7 @@ export function Header() {
   const ui = useStudioUi();
   const muteClick = useApp((s) => s.settings.muteClick);
   const metroKey = useRef<HTMLButtonElement>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const wasOpen = useRef(false);
   useEffect(() => {
     if (wasOpen.current && !ui.metroOpen) metroKey.current?.focus({ preventScroll: true });
@@ -89,6 +92,9 @@ export function Header() {
         <small>Studio V6</small>
       </div>
       <div className="v6-tools" role="toolbar" aria-label="Strumenti globali">
+        <button type="button" className="v6-tool" aria-haspopup="dialog" aria-label="Preset Library" data-testid="preset-library-open" onClick={() => setLibraryOpen(true)}>
+          <Glyph d={LIBRARY_ICON} /><span>Preset</span>
+        </button>
         <button type="button" ref={metroKey} className="v6-tool" data-on={ui.metroOpen ? '1' : '0'} aria-haspopup="dialog" aria-expanded={ui.metroOpen} aria-label="Metronomo"
           data-testid="metronome-toggle" onClick={() => ui.setMetroOpen(!ui.metroOpen)}>
           <Glyph d={METRO_ICON} /><span>Metronomo</span><i className="v6-tool-led" data-on={muteClick ? '0' : '1'} aria-hidden="true" />
@@ -106,6 +112,7 @@ export function Header() {
         </button>
         {ui.metroOpen ? <MetronomePanel /> : null}
       </div>
+      <PresetLibrary open={libraryOpen} onClose={() => setLibraryOpen(false)} />
     </header>
   );
 }

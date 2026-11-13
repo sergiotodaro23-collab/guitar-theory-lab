@@ -240,7 +240,7 @@ test('visualisation: labels, overlay marks and display filters, saved', async ({
   await expect(page.locator('.v57-board .marker[data-label="C"]').first()).toBeVisible();
 });
 
-test('rail: collapse, tooltips on focus, settings with look, presets and licence', async ({ page }) => {
+test('rail: collapse, tooltips on focus, settings with look and licence', async ({ page }) => {
   await open(page);
   await page.getByTestId('studio-rail').getByRole('button', { name: 'Espandi barra' }).click();
   await expect(page.getByTestId('studio-rail')).toHaveAttribute('data-x', '1');
@@ -253,7 +253,7 @@ test('rail: collapse, tooltips on focus, settings with look, presets and licence
   await expect(lab(page, 'Jam Studio').getByRole('tooltip')).toBeVisible();
   await page.getByTestId('studio-settings-toggle').click();
   await expect(page.getByTestId('studio-settings').getByTestId('license-notice')).toContainText('GNU GPL 3.0');
-  await expect(page.getByTestId('studio-settings').getByTestId('preset-load')).toBeVisible();
+  await expect(page.getByTestId('studio-settings')).toContainText('Preset Library');
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('studio-settings')).toHaveCount(0);
   await expect(page.getByTestId('studio-settings-toggle')).toBeFocused();
