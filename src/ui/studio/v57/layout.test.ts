@@ -47,8 +47,19 @@ describe('fretboard / notebook divider', () => {
 });
 
 describe('notebook tabs', () => {
-  it('Fretboard Lab has the five V5.7 pages plus the guitar input', () => {
-    expect(tabsFor('fretboard').map((t) => t.label)).toEqual(['Scala', 'Accordi', 'Esercizio', 'Legenda', 'Next Fretboard', 'Ingresso']);
+  const SHARED = ['Tastiera secondaria', 'Legenda e visualizzazione', 'Dettagli', 'Ingresso'];
+  it('Studio V6 order: each lab has its own pages, then the three shared ones and the guitar input', () => {
+    expect(tabsFor('fretboard').map((t) => t.label)).toEqual(['Scala', 'Accordi', 'Esercizi', ...SHARED]);
+    expect(tabsFor('arpeggio').map((t) => t.label)).toEqual(['Arpeggi', 'Accordi', 'Esercizi', ...SHARED]);
+    expect(tabsFor('harmony').map((t) => t.label)).toEqual(['Progressione', 'Accordo', 'Voice leading', 'Analisi', 'Esercizi', ...SHARED]);
+    // Jam keeps the per-chord view and the exercise after the pages of the V6 list: both hold working features.
+    expect(tabsFor('jam').map((t) => t.label)).toEqual(['Progressione', 'Arrangiamento', 'Batteria', 'Basso / Comping', 'Backing track', 'Accordo', 'Esercizi', ...SHARED]);
+  });
+  it('page ids are unique inside a lab, so a picked page is never ambiguous', () => {
+    for (const mode of ['fretboard', 'arpeggio', 'harmony', 'jam'] as const) {
+      const ids = tabsFor(mode).map((t) => t.id);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
   });
   it('each lab opens on the page it uses most', () => {
     expect(tabsFor('harmony')[0]?.id).toBe('harmony');
@@ -57,7 +68,9 @@ describe('notebook tabs', () => {
   });
   it('keeps the picked page per lab and falls back to the first', () => {
     expect(activeTab('fretboard', { fretboard: 'legend' }).id).toBe('legend');
-    expect(activeTab('jam', { jam: 'next' }).id).toBe('jam');
+    expect(activeTab('jam', { jam: 'next' }).id).toBe('next');
+    // A page the lab does not have falls back to its first.
+    expect(activeTab('jam', { jam: 'scale' }).id).toBe('jam');
   });
   it('moves focus with arrows, Home and End', () => {
     expect(tabKeyTarget('ArrowRight', 4, 5)).toBe(0);

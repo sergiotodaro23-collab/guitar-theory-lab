@@ -43,7 +43,7 @@ export const clampRatio = (ratio: number): number => Math.max(0.15, Math.min(0.8
 
 /* ---------------- notebook ---------------- */
 
-export type TabId = 'scale' | 'chords' | 'exercise' | 'legend' | 'next' | 'harmony' | 'views' | 'arpeggio' | 'jam' | 'song' | 'drums' | 'input';
+export type TabId = 'scale' | 'chords' | 'exercise' | 'legend' | 'next' | 'details' | 'harmony' | 'views' | 'voice' | 'analysis' | 'arpeggio' | 'arpex' | 'jam' | 'song' | 'drums' | 'band' | 'backing' | 'input';
 
 export interface TabSpec {
   readonly id: TabId;
@@ -55,27 +55,41 @@ export interface TabSpec {
 const TAB: Readonly<Record<TabId, TabSpec>> = {
   scale: { id: 'scale', label: 'Scala', color: '#7fb2e0' },
   chords: { id: 'chords', label: 'Accordi', color: '#74c795' },
-  exercise: { id: 'exercise', label: 'Esercizio', color: '#f0a05a' },
-  legend: { id: 'legend', label: 'Legenda', color: '#ae92e6' },
-  next: { id: 'next', label: 'Next Fretboard', color: '#dcbc4e' },
+  exercise: { id: 'exercise', label: 'Esercizi', color: '#f0a05a' },
+  legend: { id: 'legend', label: 'Legenda e visualizzazione', color: '#ae92e6' },
+  next: { id: 'next', label: 'Tastiera secondaria', color: '#dcbc4e' },
+  details: { id: 'details', label: 'Dettagli', color: '#c9b8a0' },
   harmony: { id: 'harmony', label: 'Progressione', color: '#74c795' },
-  views: { id: 'views', label: 'Per accordo', color: '#9fc9b0' },
+  views: { id: 'views', label: 'Accordo', color: '#9fc9b0' },
+  voice: { id: 'voice', label: 'Voice leading', color: '#8fc0d6' },
+  analysis: { id: 'analysis', label: 'Analisi', color: '#d6b98f' },
   arpeggio: { id: 'arpeggio', label: 'Arpeggi', color: '#74c795' },
-  jam: { id: 'jam', label: 'Jam', color: '#74c795' },
+  arpex: { id: 'arpex', label: 'Esercizi', color: '#f0a05a' },
+  jam: { id: 'jam', label: 'Progressione', color: '#74c795' },
   song: { id: 'song', label: 'Arrangiamento', color: '#e6b8a0' },
   drums: { id: 'drums', label: 'Batteria', color: '#d9a0a0' },
+  band: { id: 'band', label: 'Basso / Comping', color: '#a9c58a' },
+  backing: { id: 'backing', label: 'Backing track', color: '#c7a6d6' },
   input: { id: 'input', label: 'Ingresso', color: '#b8c4cf' },
 };
 
-/** Notebook pages per laboratory, the one used most first (same order as the Simple deck). */
+/** The pages every laboratory has, after its own (Studio V6). */
+export const SHARED_TABS: readonly TabId[] = ['next', 'legend', 'details'];
+
+/**
+ * Notebook pages per laboratory (Studio V6): the lab's own pages in working
+ * order, then the three shared ones, then the guitar input. Two pages the
+ * V6 list does not name stay in Jam Studio because they hold working
+ * features: the per-chord view and the exercise over the band.
+ */
 export function tabsFor(mode: AppMode): readonly TabSpec[] {
-  const ids: readonly TabId[] = {
-    fretboard: ['scale', 'chords', 'exercise', 'legend', 'next', 'input'],
-    harmony: ['harmony', 'views', 'scale', 'exercise', 'legend', 'next', 'input'],
-    arpeggio: ['arpeggio', 'views', 'scale', 'legend', 'next', 'input'],
-    jam: ['jam', 'song', 'drums', 'views', 'scale', 'exercise', 'legend', 'input'],
+  const own: readonly TabId[] = {
+    fretboard: ['scale', 'chords', 'exercise'],
+    arpeggio: ['arpeggio', 'views', 'arpex'],
+    harmony: ['harmony', 'views', 'voice', 'analysis', 'exercise'],
+    jam: ['jam', 'song', 'drums', 'band', 'backing', 'views', 'exercise'],
   }[mode] as readonly TabId[];
-  return ids.map((id) => TAB[id]);
+  return [...own, ...SHARED_TABS, 'input' as const].map((id) => (id === 'views' && mode === 'arpeggio' ? { ...TAB.views, label: 'Accordi' } : TAB[id]));
 }
 
 /** The tab to show: the one picked for this lab if it still exists, else the first. */
@@ -96,6 +110,17 @@ export function tabKeyTarget(key: string, index: number, count: number): number 
 }
 
 /* ---------------- LCD ---------------- */
+
+/** Where on the neck the lab is working, as the display and the details page read it. */
+export function positionText(s: Pick<Settings, 'mode' | 'arpShape' | 'arpLow' | 'arpForm' | 'arpOctaves' | 'arpStrings' | 'positionType' | 'npsStart' | 'cagedForm'>): string {
+  if (s.mode === 'arpeggio') {
+    const shape: Record<Settings['arpShape'], string> = { window: `posizione dal tasto ${s.arpLow}`, caged: `CAGED ${s.arpForm}`, octaves: `${s.arpOctaves} ottave`, sweep: `sweep su ${s.arpStrings} corde`, skip: 'salto di corda' };
+    return `arpeggio · ${shape[s.arpShape]}`;
+  }
+  if (s.positionType === 'neck') return 'tutta la tastiera';
+  if (s.positionType === '3nps') return `3NPS dal grado ${s.npsStart + 1}`;
+  return `CAGED ${s.cagedForm}`;
+}
 
 export interface LcdModel {
   /** Key zone: tonic name and scale/mode name, then its notes. */

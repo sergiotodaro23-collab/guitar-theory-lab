@@ -16,6 +16,7 @@ import { DeviceDrawer } from './DeviceDrawer';
 import { TUNER, TunerDevice } from './devices';
 import { MIXER_CANVAS, MixerDevice } from './MixerDevice';
 import { NextFretboard } from './NextFretboard';
+import { DetailsPage, VoiceLeadingPage } from '../v6/DetailsPage';
 import { DEVICES } from './Rail';
 import { activeTab, compactLevel, fitScale, tabKeyTarget, tabsFor, type TabId } from './layout';
 import { useStudioUi, type DeviceId } from './uiStore';
@@ -26,6 +27,7 @@ const CANVAS: Record<DeviceId, { w: number; h: number }> = {
 };
 
 function LegendPage({ onLegendHost }: { readonly onLegendHost: (el: HTMLElement | null) => void }) {
+  const mode = useApp((s) => s.settings.mode);
   return (
     <>
       <section className="v57-sc v57-sc-wide" aria-label="Legenda">
@@ -36,6 +38,9 @@ function LegendPage({ onLegendHost }: { readonly onLegendHost: (el: HTMLElement 
       <section className="v57-sc v57-sc-tutor" aria-label="Tutor">
         <TutorPhone />
       </section>
+      {/* Outside the scale lab, the scale and its overlays are what the neck shows under the chords: they are set here. */}
+      {mode === 'jam' ? <JamPanels part="aids" /> : null}
+      {mode !== 'fretboard' ? <ScalePanel showLabels={false} /> : null}
     </>
   );
 }
@@ -47,12 +52,18 @@ function page(id: TabId, onLegendHost: (el: HTMLElement | null) => void): ReactN
     case 'exercise': return <ExercisePanel />;
     case 'legend': return <LegendPage onLegendHost={onLegendHost} />;
     case 'next': return <NextFretboard />;
-    case 'harmony': return <HarmonyPanel />;
+    case 'details': return <DetailsPage />;
+    case 'harmony': return <HarmonyPanel part="progression" />;
     case 'views': return <ChordViewPanel />;
-    case 'arpeggio': return <ArpeggioPanel />;
-    case 'jam': return <JamPanels />;
-    case 'song': return <><ArrangementPanel /><BackingPanel /></>;
+    case 'voice': return <VoiceLeadingPage />;
+    case 'analysis': return <HarmonyPanel part="analysis" />;
+    case 'arpeggio': return <ArpeggioPanel part="shape" />;
+    case 'arpex': return <ArpeggioPanel part="practice" />;
+    case 'jam': return <JamPanels part="progression" />;
+    case 'song': return <ArrangementPanel />;
     case 'drums': return <DrumPanel />;
+    case 'band': return <JamPanels part="band" />;
+    case 'backing': return <BackingPanel />;
     case 'input': return <InputPanels />;
   }
 }

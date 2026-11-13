@@ -518,7 +518,14 @@ function AudioMix({ showComp }: { readonly showComp: boolean }) {
 
 const ARP_START_NAMES = ['Fondamentale', 'Terza', 'Quinta', 'Settima', 'Nona', 'Undicesima'];
 
-export function ArpeggioPanel() {
+/**
+ * Arpeggios Lab controls: one panel in Semplificata; in the Studio V6
+ * notebook `shape` is what is arpeggiated and where, `practice` is how it is
+ * played (start, direction, rhythm, links between chords, custom pattern).
+ */
+export function ArpeggioPanel({ part = 'all' }: { readonly part?: 'all' | 'shape' | 'practice' }) {
+  const shape = part !== 'practice';
+  const practice = part !== 'shape';
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const chord = tryParseChord(s.arpSymbol);
@@ -528,7 +535,8 @@ export function ArpeggioPanel() {
   const toneCount = progression ? 4 : chord?.tones.length ?? 4;
   const quick = s.chordLayers.map((l) => l.symbol).filter((symbol, i, all) => tryParseChord(symbol) && all.indexOf(symbol) === i);
   return (
-    <Panel title="Arpeggi" className="panel-arpeggio">
+    <Panel title={part === 'practice' ? 'Esercizi sugli arpeggi' : 'Arpeggi'} className="panel-arpeggio">
+      {shape ? (
       <Field label="Su cosa">
         <Segmented
           label="Sorgente degli arpeggi"
@@ -537,10 +545,13 @@ export function ArpeggioPanel() {
           onChange={(arpSource) => update({ arpSource })}
         />
       </Field>
+      ) : null}
       {progression ? (
         <>
           <ChordStrip />
-          <p className="field-hint">È la stessa progressione di Harmony Lab: modificala lì.</p>
+          {shape ? <p className="field-hint">È la stessa progressione di Harmony Lab: modificala lì.</p> : null}
+          {practice ? (
+          <>
           <Field label="Al cambio di accordo">
             <Segmented
               label="Collegamento tra arpeggi"
@@ -561,9 +572,11 @@ export function ArpeggioPanel() {
             </Field>
           ) : null}
           {s.arpLink === 'connect' ? <p className="field-hint">La linea non salta: ogni accordo parte dalla sua nota più vicina all’ultima suonata, poi prosegue e cambia verso ai bordi della posizione.</p> : null}
-          <Toggle checked={s.compOn} onChange={(compOn) => update({ compOn })}>Suona gli accordi</Toggle>
+          </>
+          ) : null}
+          {shape ? <Toggle checked={s.compOn} onChange={(compOn) => update({ compOn })}>Suona gli accordi</Toggle> : null}
         </>
-      ) : (
+      ) : shape ? (
         <>
           <Field label="Accordo" hint={invalid ? 'Accordo non riconosciuto. Prova Cmaj7, Dm7, G7, Am7b5, C/E.' : undefined}>
             <input className={`text-input ${invalid ? 'is-invalid' : ''}`} data-testid="arp-symbol" value={s.arpSymbol} aria-invalid={invalid} onChange={(e) => update({ arpSymbol: e.target.value })} />
@@ -582,8 +595,10 @@ export function ArpeggioPanel() {
             </p>
           ) : null}
         </>
-      )}
-      <ArpShapeControls />
+      ) : null}
+      {shape ? <ArpShapeControls /> : null}
+      {practice ? (
+      <>
       <div className="row">
         <Field label="Parti da">
           <Select<number>
@@ -616,6 +631,8 @@ export function ArpeggioPanel() {
         <Field label="Passi sulle note dell’accordo" hint={customValid ? (progression && s.arpLink === 'connect' ? 'Con “Collega” il pattern si applica solo ripartendo a ogni accordo.' : '1 3 2 4 su Cmaj7 fa Do Sol Mi Si, Mi Si Sol Do…') : 'Scrivi numeri da 1 a 24 separati da spazi.'}>
           <input className={`text-input ${customValid ? '' : 'is-invalid'}`} data-testid="arp-pattern" value={s.arpCustomText} aria-invalid={!customValid} onChange={(e) => update({ arpCustomText: e.target.value })} />
         </Field>
+      ) : null}
+      </>
       ) : null}
     </Panel>
   );
@@ -740,16 +757,24 @@ export function ProgressionLoader() {
   );
 }
 
-export function HarmonyPanel() {
+/**
+ * Harmony Lab controls. Semplificata shows them as one panel; the Studio V6
+ * notebook spreads the same controls over its pages (`part`): the progression
+ * and how it advances, what to watch between chords, the analysis.
+ */
+export function HarmonyPanel({ part = 'all' }: { readonly part?: 'all' | 'progression' | 'voice' | 'analysis' }) {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const help = FOCUS_OPTIONS.find((f) => f.value === s.focus)?.help;
+  const show = (...parts: readonly string[]) => part === 'all' || parts.includes(part);
+  const title = { all: 'Cambio di contesto armonico', progression: 'Progressione', voice: 'Voice leading', analysis: 'Analisi armonica' }[part];
   return (
     <>
-      <Panel title="Cambio di contesto armonico" className="panel-wide">
-        <ChordStrip />
-        <ProgressionLoader />
-        <HarmonyAnalysis />
+      <Panel title={title} className="panel-wide">
+        {show('progression', 'voice', 'analysis') ? <ChordStrip /> : null}
+        {show('progression') ? <ProgressionLoader /> : null}
+        {show('analysis') ? <HarmonyAnalysis /> : null}
+        {show('progression') ? (
         <div className="row">
           <Field label="Cambio accordi">
             <Segmented
@@ -776,9 +801,13 @@ export function HarmonyPanel() {
             </>
           ) : null}
         </div>
+        ) : null}
+        {show('voice') ? (
         <Field label="Cosa guardare" hint={help}>
           <Segmented label="Focus" value={s.focus} options={FOCUS_OPTIONS} onChange={(focus) => update({ focus })} />
         </Field>
+        ) : null}
+        {show('analysis') ? (
         <div className="row">
           <Field label="Avoid notes" hint={AVOID_PROFILES[s.avoidProfile].description}>
             <Select<AvoidProfile>
@@ -790,10 +819,13 @@ export function HarmonyPanel() {
             />
           </Field>
         </div>
+        ) : null}
+        {show('progression') ? (
         <div className="row">
           <Toggle checked={s.compOn} onChange={(compOn) => update({ compOn })}>Suona gli accordi</Toggle>
           <AudioMix showComp />
         </div>
+        ) : null}
       </Panel>
     </>
   );
@@ -836,12 +868,15 @@ function ChordRow({ index, progression, onChange }: { readonly index: number; re
   );
 }
 
-export function JamPanels() {
+/** Jam Studio controls: one deck page in Semplificata, three notebook pages in Studio V6 (`part`). */
+export function JamPanels({ part = 'all' }: { readonly part?: 'all' | 'progression' | 'band' | 'aids' }) {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   const onChange = (progression: Progression) => update({ progression });
+  const show = (name: string) => part === 'all' || part === name;
   return (
     <>
+      {show('progression') ? (
       <Panel title="Progressione" className="panel-wide">
         <ChordStrip />
         <ProgressionLoader />
@@ -857,6 +892,8 @@ export function JamPanels() {
           <Toggle checked={s.loop} onChange={(loop) => update({ loop })}>Ripeti in loop</Toggle>
         </div>
       </Panel>
+      ) : null}
+      {show('band') ? (
       <Panel title="Band">
         <Field label="Genere" hint={`Imposta batteria, basso, ritmo degli accordi e swing. Tempo tipico: ${genreOf(s.jamGenre).bpm} BPM.`}>
           <Select label="Genere" testId="jam-genre" value={s.jamGenre} options={GENRES.map((g) => ({ value: g.id, label: g.label }))} onChange={(id) => update(genreSettings(id))} />
@@ -897,6 +934,8 @@ export function JamPanels() {
         </Field>
         <AudioMix showComp />
       </Panel>
+      ) : null}
+      {show('aids') ? (
       <Panel title="Aiuti sulla tastiera">
         <Toggle checked={s.showAids} onChange={(showAids) => update({ showAids })}>Mostra gli aiuti visivi</Toggle>
         <Field label="Cosa guardare" hint={FOCUS_OPTIONS.find((f) => f.value === s.focus)?.help}>
@@ -904,6 +943,7 @@ export function JamPanels() {
         </Field>
         <p className="field-hint">Per sovrapporre altre scale usa “+ Aggiungi scala” nel pannello Scala.</p>
       </Panel>
+      ) : null}
     </>
   );
 }

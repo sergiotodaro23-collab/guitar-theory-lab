@@ -22,7 +22,7 @@ const fbHeight = (page: Page) => page.getByTestId('fretboard-panel').evaluate((e
 test('rail labs change the notebook pages and keep the musical state', async ({ page }) => {
   const errors = await open(page);
   await expect(lab(page, 'Fretboard Lab')).toHaveAttribute('aria-current', 'page');
-  await expect(page.getByTestId('notebook').getByRole('tab')).toHaveText(['Scala', 'Accordi', 'Esercizio', 'Legenda', 'Next Fretboard', 'Ingresso']);
+  await expect(page.getByTestId('notebook').getByRole('tab')).toHaveText(['Scala', 'Accordi', 'Esercizi', 'Tastiera secondaria', 'Legenda e visualizzazione', 'Dettagli', 'Ingresso']);
   await page.getByTestId('tonic').selectOption('G');
   await expect(page.getByTestId('lcd-tonic')).toHaveText('G');
   await expect(page.getByTestId('lcd-notes')).toHaveText('G A B C D E F#');
@@ -33,8 +33,8 @@ test('rail labs change the notebook pages and keep the musical state', async ({ 
   await lab(page, 'Arpeggios Lab').click();
   await expect(tab(page, 'Arpeggi')).toHaveAttribute('aria-selected', 'true');
   await lab(page, 'Jam Studio').click();
-  await expect(tab(page, 'Jam')).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByTestId('notebook').getByRole('tab')).toHaveCount(8);
+  await expect(tab(page, 'Progressione')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('notebook').getByRole('tab')).toHaveText(['Progressione', 'Arrangiamento', 'Batteria', 'Basso / Comping', 'Backing track', 'Accordo', 'Esercizi', 'Tastiera secondaria', 'Legenda e visualizzazione', 'Dettagli', 'Ingresso']);
 
   // Back in Fretboard Lab the scale is still G major.
   await lab(page, 'Fretboard Lab').click();
@@ -52,11 +52,11 @@ test('notebook tabs: arrows, Home and End; the picked page stays per lab', async
   await expect(tab(page, 'Ingresso')).toHaveAttribute('aria-selected', 'true');
   await page.keyboard.press('Home');
   await expect(tab(page, 'Scala')).toBeFocused();
-  await tab(page, 'Legenda').click();
+  await tab(page, 'Legenda e visualizzazione').click();
   await expect(page.getByTestId('notebook-legend').getByTestId('legend')).toBeVisible();
   await lab(page, 'Harmony Lab').click();
   await lab(page, 'Fretboard Lab').click();
-  await expect(tab(page, 'Legenda')).toHaveAttribute('aria-selected', 'true');
+  await expect(tab(page, 'Legenda e visualizzazione')).toHaveAttribute('aria-selected', 'true');
 });
 
 test('LCD: key, chord numeral, next chord, tempo and transport from the engine', async ({ page }) => {
@@ -88,7 +88,7 @@ test('Next Fretboard previews the next chord with engine markers, without playin
   await open(page);
   await lab(page, 'Harmony Lab').click();
   await page.getByTestId('template').selectOption('ii-v-i');
-  await tab(page, 'Next Fretboard').click();
+  await tab(page, 'Tastiera secondaria').click();
   await expect(page.getByTestId('next-now')).toHaveText('Dm7');
   await expect(page.getByTestId('next-chord')).toHaveText('G7');
   const preview = page.getByTestId('next-fretboard');
@@ -127,7 +127,7 @@ const rect = (page: Page, selector: string) => page.locator(selector).first().ev
 
 test('drawer: covers the whole notebook zone right of the rail; Escape closes, focus returns, neck and page stay', async ({ page }) => {
   await open(page);
-  await tab(page, 'Esercizio').click();
+  await tab(page, 'Esercizi').click();
   const pageBox = page.getByTestId('notebook-page');
   await pageBox.evaluate((el) => { el.scrollTop = 80; });
   const before = await pageBox.evaluate((el) => [el.getBoundingClientRect().top, el.scrollTop]);
@@ -163,7 +163,7 @@ test('drawer: covers the whole notebook zone right of the rail; Escape closes, f
   await expect(page.getByTestId('device-drawer')).toHaveCount(0);
   await expect(page.getByTestId('device-mixer')).toBeFocused();
   expect(await pageBox.evaluate((el) => [el.getBoundingClientRect().top, el.scrollTop])).toEqual(before);
-  await expect(tab(page, 'Esercizio')).toHaveAttribute('aria-selected', 'true');
+  await expect(tab(page, 'Esercizi')).toHaveAttribute('aria-selected', 'true');
 });
 
 test('drawer: devices fit short and tall notebook zones', async ({ page }) => {

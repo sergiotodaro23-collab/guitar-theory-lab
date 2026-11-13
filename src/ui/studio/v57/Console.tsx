@@ -5,27 +5,16 @@
  */
 import { useEffect, useRef, type PointerEvent, type ReactNode } from 'react';
 import { engine } from '../../../app/engine';
-import type { Settings } from '../../../app/settings';
 import { useApp, usePlayhead } from '../../../app/store';
 import { AccentGrid } from '../../AccentGrid';
 import { Knob } from '../../hardware';
 import { BeatLights, BpmInput, useCurrentChordText, useTap } from '../../Transport';
 import { HardwareKey } from './HardwareKey';
 import { useNowNext } from './hooks';
-import { lcdModel } from './layout';
+import { lcdModel, positionText } from './layout';
 import { useStudioUi } from './uiStore';
 
 const CLICK_TEXT: Record<number, string> = { 1: 'ogni battito', 2: 'ottavi', 3: 'terzine', 4: 'sedicesimi' };
-
-function positionText(s: Settings): string {
-  if (s.mode === 'arpeggio') {
-    const shape: Record<Settings['arpShape'], string> = { window: `posizione dal tasto ${s.arpLow}`, caged: `CAGED ${s.arpForm}`, octaves: `${s.arpOctaves} ottave`, sweep: `sweep su ${s.arpStrings} corde`, skip: 'salto di corda' };
-    return `arpeggio · ${shape[s.arpShape]}`;
-  }
-  if (s.positionType === 'neck') return 'tutta la tastiera';
-  if (s.positionType === '3nps') return `3NPS dal grado ${s.npsStart + 1}`;
-  return `CAGED ${s.cagedForm}`;
-}
 
 function Transport() {
   const state = usePlayhead((p) => p.state);
