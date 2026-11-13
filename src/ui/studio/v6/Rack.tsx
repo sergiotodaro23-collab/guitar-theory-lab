@@ -8,7 +8,8 @@
  */
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { engine } from '../../../app/engine';
-import { AMP_KNOB_IDS, PEDAL_SPECS, POST_PEDALS, PRE_PEDALS, RIG_PRESETS, matchingRigPreset, type CabModel, type PedalId } from '../../../app/rig';
+import { AMP_KNOB_IDS, PEDAL_SPECS, RIG_PRESETS, matchingRigPreset, type CabModel, type PedalId } from '../../../app/rig';
+import { PEDAL_IDS, addPedal, availablePedals, defaultChain, isDefaultChain, movePedal, removePedal, wiredOrder, type ChainStage, type PedalChain } from '../../../app/pedalChain';
 import { useApp } from '../../../app/store';
 import { liveInput, useLive, type InputChannel } from '../../../audio/liveInput';
 import { useMidi } from '../../../audio/midi';
@@ -193,27 +194,74 @@ function CabModule() {
 
 const PEDAL_GAP = 10;
 
+/** Width of the amplifier and cabinet marker between the two pedal zones, in CSS px. */
+const CHAIN_MARKER = 34;
+
+const STAGE_NAME = (id: ChainStage): string => (id === 'amp' ? 'Ampli' : id === 'cab' ? 'Cabinet' : PEDAL_SPECS[id].name);
+
+/**
+ * The pedal chain (configurable order, D-49): the pedals in the order the
+ * signal meets them, each with its own switch, knobs and the keys that move
+ * it, remove it, and add the ones that are out of the chain. Order and
+ * membership live in `settings.rig.chain`; parameters and switches stay put.
+ */
 function PedalsModule() {
   const [rig, setRig] = useRig();
-  const order: readonly PedalId[] = [...PRE_PEDALS, ...POST_PEDALS];
-  const anyOn = order.some((id) => rig.pedals[id].on);
-  const allOff = () => setRig((r) => ({ ...r, pedals: Object.fromEntries(order.map((id) => [id, { ...r.pedals[id], on: false }])) as typeof r.pedals }));
-  // Pre pedals, a marker where amp and cabinet sit in the chain, then the post pedals.
-  const marker = 34;
-  const x = (i: number) => i * (PEDAL_SIZE.w + PEDAL_GAP) + (i >= PRE_PEDALS.length ? marker : 0);
-  const width = x(order.length - 1) + PEDAL_SIZE.w;
+  const chain = rig.chain;
+  const stages = wiredOrder(chain);
+  const pedalsIn = stages.filter((id): id is PedalId => id !== 'amp' && id !== 'cab');
+  const anyOn = pedalsIn.some((id) => rig.pedals[id].on);
+  const setChain = (next: PedalChain) => setRig((r) => ({ ...r, chain: next }));
+  const allOff = () => setRig((r) => ({ ...r, pedals: Object.fromEntries(PEDAL_IDS.map((id) => [id, { ...r.pedals[id], on: false }])) as typeof r.pedals }));
+  const slot = PEDAL_SIZE.w + PEDAL_GAP;
+  // x of each stage: pre pedals, a marker for amp and cabinet, then the post pedals.
+  let cursor = 0;
+  const placed = stages.map((id) => {
+    const at = cursor;
+    if (id === 'amp') { cursor += CHAIN_MARKER; } else if (id === 'cab') { /* the marker covers both */ } else { cursor += slot; }
+    return { id, x: at };
+  });
+  const preLength = chain.pre.length;
+  const postX = preLength * slot + CHAIN_MARKER;
+  const width = Math.max(cursor, 1);
+  const available = availablePedals(chain);
+  const readout = stages.map((id) => (id === 'amp' || id === 'cab' ? STAGE_NAME(id) : `${STAGE_NAME(id)}${rig.pedals[id].on ? '' : ' (spento)'}`));
   return (
     <Module id="pedals" title="Pedaliera" lit={anyOn}
       power={<button type="button" className="v6-minikey" disabled={!anyOn} data-testid="pedals-all-off" title="Spegne tutti i pedali" onClick={allOff}>Tutti off</button>}>
       <div className="v6-board" role="group" aria-label="Catena dei pedali: prima e dopo l’amplificatore" tabIndex={0}>
-        <div className="v6-board-in" style={{ width, height: PEDAL_SIZE.h + 22 }}>
+        <div className="v6-board-in" style={{ width: Math.max(width, 124), height: PEDAL_SIZE.h + 60 }}>
           <span className="v6-board-lab" style={{ left: 0 }}>Pre</span>
-          <span className="v6-board-lab" style={{ left: x(PRE_PEDALS.length) }}>Post</span>
-          <span className="v6-board-amp" style={{ left: x(PRE_PEDALS.length) - marker + 2, width: marker - PEDAL_GAP + 6, height: PEDAL_SIZE.h }} aria-hidden="true">Ampli · Cab</span>
-          {order.map((id, i) => <Pedal key={id} id={id} x={x(i)} y={2} />)}
+          <span className="v6-board-lab" style={{ left: postX }}>Post</span>
+          <span className="v6-board-amp" style={{ left: preLength * slot + 2, width: CHAIN_MARKER - PEDAL_GAP + 6, height: PEDAL_SIZE.h }} aria-hidden="true">Ampli · Cab</span>
+          {placed.map(({ id, x }) => {
+            if (id === 'amp' || id === 'cab') return null;
+            const list = chain.pre.includes(id) ? chain.pre : chain.post;
+            const at = list.indexOf(id);
+            const name = PEDAL_SPECS[id].name;
+            return (
+              <Fragment key={id}>
+                <Pedal id={id} x={x} y={2} />
+                <div className="v6-pedal-ctl" style={{ left: x, top: PEDAL_SIZE.h + 16, width: PEDAL_SIZE.w }} role="group" aria-label={`Posizione di ${name}`}>
+                  <button type="button" className="v6-minikey" data-testid={`chain-left-${id}`} aria-label={`Sposta ${name} a sinistra`} title="Sposta a sinistra" disabled={at <= 0} onClick={() => setChain(movePedal(chain, id, -1))}>←</button>
+                  <button type="button" className="v6-minikey" data-testid={`chain-right-${id}`} aria-label={`Sposta ${name} a destra`} title="Sposta a destra" disabled={at >= list.length - 1} onClick={() => setChain(movePedal(chain, id, 1))}>→</button>
+                  <button type="button" className="v6-minikey" data-testid={`chain-remove-${id}`} aria-label={`Rimuovi ${name} dalla catena`} title="Rimuovi dalla catena: i parametri restano" onClick={() => setChain(removePedal(chain, id))}>×</button>
+                </div>
+              </Fragment>
+            );
+          })}
         </div>
       </div>
-      <p className="v6-note">{order.map((id) => PEDAL_SPECS[id].name).slice(0, PRE_PEDALS.length).join(' → ')} → ampli → cabinet → {POST_PEDALS.map((id) => PEDAL_SPECS[id].name).join(' → ')}. Ordine fisso in questa versione.</p>
+      <p className="v6-chain-readout" role="status" data-testid="chain-readout">Segnale: {readout.join(' → ')}</p>
+      <div className="v6-chain-add" role="group" aria-label="Pedali fuori catena">
+        <span className="v6-silk">Fuori catena</span>
+        {available.length === 0 ? <span className="v6-note">Tutti i pedali sono nella catena.</span> : null}
+        {available.map((id) => (
+          <button key={id} type="button" className="v6-minikey" data-testid={`chain-add-${id}`} aria-label={`Aggiungi ${PEDAL_SPECS[id].name} alla catena`} onClick={() => setChain(addPedal(chain, id))}>+ {PEDAL_SPECS[id].name}</button>
+        ))}
+        <button type="button" className="v6-minikey" data-testid="chain-reset" disabled={isDefaultChain(chain)} title="Riporta l’ordine e i pedali della catena predefinita; i parametri restano" onClick={() => setChain(defaultChain())}>Catena predefinita</button>
+      </div>
+      <p className="v6-note">Ordine nelle zone PRE e POST; amplificatore e cabinet restano fissi. Ogni pedale compare una sola volta. Spostare un pedale tra PRE e POST non è ancora possibile.</p>
     </Module>
   );
 }

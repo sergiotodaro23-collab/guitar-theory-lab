@@ -338,3 +338,10 @@
 @media (max-width: 900px) { .v6-pl-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } .v6-pl-search { grid-column: 1 / -1; } }
 .v6-sound { flex: none; display: flex; align-items: center; gap: 8px; padding: 0 2px; }
 .v6-sound .v6-select { flex: 1; }
+
+/* ---------- pedal chain: order and membership controls (D-49) ---------- */
+.v6-pedal-ctl { position: absolute; display: flex; justify-content: center; gap: 4px; }
+.v6-pedal-ctl .v6-minikey { min-width: 30px; padding: 0 4px; text-transform: none; font-size: 13px; }
+.v6-pedal-ctl .v6-minikey:disabled { opacity: .4; cursor: default; }
+.v6-chain-readout { margin: 0; font: 500 11.5px/16px 'IBM Plex Mono', ui-monospace, monospace; color: var(--led-amber); overflow-wrap: anywhere; }
+.v6-chain-add { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
