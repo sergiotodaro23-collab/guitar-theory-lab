@@ -132,8 +132,18 @@ Limiti dichiarati del lotto 6:
 | Lotto 4 (PR #17) | verde, 473 unit | 131 su 131 in locale |
 | Lotto 5 (PR #18) | verde, 478 unit | 132 su 132 in locale e in CI |
 | Lotto 6 | verde, 502 unit | 140 su 140 in locale (incluse le 7 prove della pedaliera) |
+| Consolidamento (D-50) | verde, 502 unit | rig e pedaliera 12 su 12 in locale (nuova prova: cambio di catena nel silenzio); corsa completa in CI sulla PR |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
+
+## Consolidamento (13 novembre 2026)
+
+PR #20 (pedaliera configurabile) unita in `main` come `8768765` dopo verifica locale e CI verde. Audit del rig in `docs/STUDIO_V6_CONSOLIDATION.md`: un difetto trovato e corretto (click al cambio di catena, D-50). Il lavoro di Antigravity (`fix/antigravity-v6-qa`, `studio_v6_qa_fixes`) non è sul remoto né in un worktree locale: non è integrato.
+
+| Funzione | Stato | Prova |
+|---|---|---|
+| Cambio di catena senza click: dissolvenza, riconnessione nel silenzio, risalita | implementato, testato con segnale sintetico | `e2e/pedal-chain.spec.ts` (guadagno d'uscita sotto 0,02 al momento della riconnessione, tre cambi in una dissolvenza, il suono torna) |
+| Il modulo Routing segue il grafo dopo una riconnessione differita | implementato | idem |
 
 ## Blocchi
 

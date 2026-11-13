@@ -177,3 +177,25 @@ test('the audio follows the order: fuzz before overdrive sounds different from o
   // Two clipping stages in series do not sum the same way in either order: the levels differ measurably.
   expect(Math.abs(fuzzThenDrive - driveThenFuzz) / Math.max(fuzzThenDrive, driveThenFuzz)).toBeGreaterThan(0.05);
 });
+
+test('a chain change under signal is rewired in silence: the output dips, the graph reconnects at zero gain, the sound comes back', async ({ page }) => {
+  const errors = await open(page);
+  await listen(page);
+  await expect.poll(() => out(page)).toBeGreaterThan(0.01);
+  const before = (await rigState(page))?.rewires ?? 0;
+  // Three changes in a row, faster than one fade: they end in the last order asked.
+  await page.getByTestId('chain-left-drive').click();
+  await page.getByTestId('chain-remove-eq').click();
+  await page.getByTestId('chain-right-chorus').click();
+  const wanted = ['comp', 'drive', 'fuzz', 'amp', 'cab', 'delay', 'chorus', 'reverb'];
+  await expect.poll(() => graphChain(page)).toEqual(wanted);
+  const state = await rigState(page);
+  expect(state?.rewiring).toBe(false);
+  expect(state?.rewires ?? 0).toBeGreaterThan(before);
+  // The reconnection happened with the rig's output faded out: no step in the waveform reaches the ears.
+  expect(state?.rewireGain ?? 1).toBeLessThan(0.02);
+  // The readout in the Routing module follows the graph, and the sound is back.
+  await expect(page.getByTestId('rig-status')).toContainText('Ampli → Cabinet');
+  expect(await out(page)).toBeGreaterThan(0.01);
+  expect(errors).toEqual([]);
+});

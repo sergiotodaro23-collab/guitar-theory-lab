@@ -294,7 +294,7 @@ function RoutingModule() {
   const live = useLive();
   const rig = useApp((s) => s.settings.rig);
   const [active, setActive] = useState<readonly string[]>([]);
-  useEffect(() => { setActive(liveInput.rigState()?.active ?? []); }, [rig, live.state]);
+  useEffect(() => { setActive(liveInput.rigState()?.active ?? []); }, [rig, live.state, live.rigRevision]);
   const on = live.state === 'on';
   const chain = active.length ? active.map((id) => STAGE[id] ?? id).join(' → ') : 'segnale diretto';
   return (
