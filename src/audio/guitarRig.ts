@@ -16,6 +16,8 @@ import {
 } from '../app/rig';
 
 const GLIDE = 0.02;
+/** Rewiring the chain while it sounds: the rig's output dips to silence for this long on each side of the change. */
+const REWIRE_FADE = 0.012;
 
 interface Stage {
   readonly input: GainNode;
@@ -35,6 +37,11 @@ function stage(ctx: BaseAudioContext): Stage {
 export interface RigState {
   /** Stage order, as wired. */
   readonly chain: readonly string[];
+  /** True between a chain change and the moment the graph is reconnected (the output is fading out). */
+  readonly rewiring: boolean;
+  /** How many times the running chain was reconnected, and the output gain at the last one (0 = done in silence). */
+  readonly rewires: number;
+  readonly rewireGain: number;
   /** Stages whose wet path is heard now. */
   readonly active: readonly string[];
   readonly ampHeard: boolean;
@@ -82,6 +89,12 @@ export class GuitarRig {
   private driveKey = -1;
   private preampKey = -1;
   private heard = new Set<string>();
+  private pendingOrder: readonly ChainStage[] | null = null;
+  private rewireTimer: ReturnType<typeof setTimeout> | null = null;
+  private rewires = 0;
+  private rewireGain = 0;
+  /** Called after the graph changed on its own (a deferred rewiring), so readers can refresh. */
+  onChange: (() => void) | null = null;
 
   constructor(ctx: BaseAudioContext) {
     this.ctx = ctx;
@@ -182,6 +195,41 @@ export class GuitarRig {
     this.order = order;
   }
 
+  /**
+   * Changes the order of a chain that may be sounding. Reconnecting nodes is
+   * instantaneous, so doing it under signal makes a step in the waveform (a
+   * click). The output fades to silence first, the chain is reconnected while
+   * nothing is heard, then the output fades back: a dip of about 30 ms
+   * instead of a click. The timer only waits for the fade; it is not a
+   * musical clock. Several changes during one fade end in a single rewiring,
+   * to the last order asked. Offline contexts have no running clock: there
+   * the chain is reconnected at once.
+   */
+  private rewire(order: readonly ChainStage[]): void {
+    const live = typeof AudioContext !== 'undefined' && this.ctx instanceof AudioContext && this.ctx.state === 'running';
+    if (!live) { this.wire(order); return; }
+    this.pendingOrder = order;
+    if (this.rewireTimer !== null) return;
+    const gain = this.output.gain;
+    const now = this.ctx.currentTime;
+    gain.cancelScheduledValues(now);
+    gain.setValueAtTime(gain.value, now);
+    gain.linearRampToValueAtTime(0, now + REWIRE_FADE);
+    this.rewireTimer = setTimeout(() => {
+      this.rewireTimer = null;
+      const next = this.pendingOrder;
+      this.pendingOrder = null;
+      this.rewireGain = gain.value;
+      this.rewires += 1;
+      if (next) this.wire(next);
+      const t = this.ctx.currentTime;
+      gain.cancelScheduledValues(t);
+      gain.setValueAtTime(0, t);
+      gain.linearRampToValueAtTime(1, t + REWIRE_FADE);
+      this.onChange?.();
+    }, REWIRE_FADE * 1000 + 10);
+  }
+
   private set(param: AudioParam, value: number): void {
     param.setTargetAtTime(value, this.ctx.currentTime, GLIDE);
   }
@@ -203,7 +251,7 @@ export class GuitarRig {
   apply(r: RigSettings): void {
     this.settings = r;
     const order = wiredOrder(r.chain);
-    if (order.join() !== this.order.join()) this.wire(order);
+    if (order.join() !== (this.pendingOrder ?? this.order).join()) this.rewire(order);
     const k = (id: PedalId, knob: string) => r.pedals[id].knobs[knob] ?? 50;
     // Inline pedals: wet only when on.
     this.set(this.comp.threshold, compThreshold(k('comp', 'sustain')));
@@ -272,6 +320,9 @@ export class GuitarRig {
     const r = this.settings;
     return {
       chain: [...this.order],
+      rewiring: this.pendingOrder !== null,
+      rewires: this.rewires,
+      rewireGain: this.rewireGain,
       active: this.order.filter((id) => this.heard.has(id)),
       ampHeard: this.heard.has('amp'),
       cab: r ? (r.cab.model === 'file' && !this.fileCab ? '4x12' : r.cab.model) : '',
@@ -281,6 +332,9 @@ export class GuitarRig {
   }
 
   dispose(): void {
+    if (this.rewireTimer !== null) clearTimeout(this.rewireTimer);
+    this.rewireTimer = null;
+    this.onChange = null;
     try { this.lfo.stop(); } catch { /* already stopped */ }
     this.input.disconnect();
     this.output.disconnect();

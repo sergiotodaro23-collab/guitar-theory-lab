@@ -2,7 +2,7 @@
 
 Versione 0.1.0 (package.json). Ultimo aggiornamento: 8 novembre 2026, branch `claude/lucid-rubin-19dvsp`: integrazione della Studio V5.7 (D-40, D-41), partita dai due commit di Codex. Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
 
-**Studio V6 in corso** (D-43, dal 13 novembre 2026): stato e prossimo lotto in `docs/STUDIO_V6_PROGRESS.md`.
+**Studio V6 in corso** (D-43, dal 13 novembre 2026): stato e prossimo lotto in `docs/STUDIO_V6_PROGRESS.md`. Consolidamento e audit del rig: `docs/STUDIO_V6_CONSOLIDATION.md`.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 

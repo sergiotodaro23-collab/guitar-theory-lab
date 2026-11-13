@@ -38,10 +38,12 @@ export interface LiveSnapshot {
   readonly pitch: TrackedPitch | null;
   readonly monitorOn: boolean;
   readonly diagnostics: LiveDiagnostics | null;
+  /** Grows when the rig's graph changed on its own (a deferred rewiring, a model that finished loading). */
+  readonly rigRevision: number;
 }
 
 export const useLive = create<LiveSnapshot>(() => ({
-  state: 'off', error: null, devices: [], deviceId: '', level: 0, clipping: false, pitch: null, monitorOn: false, diagnostics: null,
+  state: 'off', error: null, devices: [], deviceId: '', level: 0, clipping: false, pitch: null, monitorOn: false, diagnostics: null, rigRevision: 0,
 }));
 
 /** Readable Italian messages for what getUserMedia can throw. */
@@ -174,6 +176,7 @@ class LiveInput {
       this.mono.connect(this.gain);
       this.gain.connect(this.analyser);
       this.rig = new GuitarRig(ctx);
+      this.rig.onChange = () => useLive.setState((s) => ({ rigRevision: s.rigRevision + 1 }));
       this.rig.setCabFile(this.cabFile);
       this.rig.apply(this.rigSettings);
       this.gain.connect(this.rig.input);
