@@ -4,7 +4,7 @@ Stati come in `CLAUDE.md`: implementato, testato con segnali sintetici, verifica
 
 ## Fase corrente
 
-P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lotti 4 (mixer), 5 (Preset Library) e 6 (rig: fuzz, EQ, suoni, metronomo) fatti. Prossimo: riordino dei pedali (resto del lotto 6), poi lotto 7, legenda e tastiera secondaria.
+P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lotti 4 (mixer), 5 (Preset Library) e 6 (rig: fuzz, EQ, suoni, metronomo, pedaliera configurabile) fatti. Prossimo: lotto 7, legenda e tastiera secondaria.
 
 ## Lotti
 
@@ -16,7 +16,7 @@ P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lot
 | 3 · Taccuino V6 | `claude/studio-v6-notebook` | #16 | unita (CI verde) | parziale: ordine, Dettagli, Voice leading; legenda a doppia pagina nel lotto 7 |
 | 4 · Mixer a fader lunghi | `claude/studio-v6-mixer` | #17 | unita (CI verde) | implementato |
 | 5 · Libreria preset | `claude/studio-v6-presets` | #18 | vedi PR | implementato |
-| 6 · Rig: fuzz, EQ, riordino, preset | `claude/studio-v6-rig` | — | — | parziale: fuzz, EQ, suoni, quinto timbro; riordino mancante |
+| 6 · Rig: fuzz, EQ, riordino, preset | `feat/studio-v6-pedal-order` | vedi PR | — | implementato: fuzz, EQ, suoni, quinto timbro (PR #19); pedaliera configurabile (D-49) |
 | 7 · Legenda a simboli | — | — | — | mancante |
 | 8 · Motore esercizi condiviso | — | — | — | mancante |
 | 9 · NAM, calibrazione, MIDI | — | — | — | mancante |
@@ -55,9 +55,9 @@ Limiti dichiarati del lotto 1 ancora aperti:
 
 Limiti dichiarati del lotto 2:
 
-- Ordine dei pedali fisso; niente aggiunta, rimozione o riordino; niente fuzz ed EQ (lotto 6).
+- Ordine dei pedali fisso; niente aggiunta, rimozione o riordino; niente fuzz ed EQ (lotto 6). *Superato dal lotto 6 (D-49): riordino, aggiunta e rimozione ora ci sono; fuzz ed EQ anche.*
 - Il routing è descritto, non modificabile.
-- Nessun preset di suono del rig (lotto 6). Nessun modello NAM (lotto 9): la testata lo dichiara.
+- Nessun preset di suono del rig (lotto 6). Nessun modello NAM (lotto 9): la testata lo dichiara. *Superato dal lotto 6: i suoni di partenza ci sono (D-48).*
 - Nessuna prova con chitarra e scheda audio reali.
 
 ## Lotto 3 — cosa c'è
@@ -105,14 +105,19 @@ Limiti dichiarati del lotto 5: nessun filtro per tecnica e stile (i preset non p
 |---|---|---|
 | Fuzz: clipper asimmetrico, tono e livello, sul grafo prima dell'overdrive | implementato, testato con segnale sintetico (livello misurato a 30 dB di escursione) | unit `rig.test.ts` (curva limitata, monotona, zero a zero), `e2e/guitar-rig.spec.ts` |
 | EQ a tre bande dopo il cabinet | implementato, testato con segnale sintetico (taglio e boost misurati in uscita) | unit (manopole ±12 dB), e2e |
-| Catena letta dal grafo con i nuovi stadi | implementato | e2e (`chain`, `active`) |
 | Sette suoni di partenza con selettore nel rack; spostare un controllo torna a «Personale» | implementato | unit (ogni suono riconosciuto, cosa suona), e2e |
-| Sessioni salvate prima: pedali nuovi spenti, gli altri intatti | implementato | unit |
 | Quinto timbro del metronomo «Morbido» | implementato | unit (cinque timbri, forma del suono) |
+| Sessioni salvate prima: pedali nuovi spenti, gli altri intatti | implementato | unit |
+| Pedaliera configurabile (D-49): ordine dentro PRE e POST con «←» e «→» da tastiera | implementato, testato con segnale sintetico | unit `pedalChain.test.ts` (ordine iniziale, riordino valido e ai bordi, zone, duplicati, aggiunta e rimozione, salvataggio e ripristino, sessioni precedenti, catena danneggiata, catena vuota), e2e `e2e/pedal-chain.spec.ts` (ordine nel grafo, riordino, rimozione con parametri conservati, riaggiunta, ripristino, salvataggio al ricaricamento, pedale rimosso mai udibile, il suono cambia con l'ordine di circa il 29% sullo stesso segnale) |
+| Aggiunta e rimozione dalla catena; «Catena predefinita» riporta ordine e pedali, lascia i parametri | implementato | come sopra |
+| Sette suoni di partenza ancora validi e riconosciuti | verificato | unit e e2e (`rig-preset`) |
 
 Limiti dichiarati del lotto 6:
 
-- Riordino, aggiunta e rimozione dei pedali: mancanti. La catena è fissa.
+- Un pedale non passa tra PRE e POST, cioè non supera l'amplificatore: non è offerto.
+- Ogni tipo di pedale compare una volta sola: nessun secondo overdrive o secondo delay.
+- Il riordino è con pulsanti, non con trascinamento.
+- Quando la catena cambia mentre il segnale passa, il collegamento avviene subito: un piccolo scatto all'ascolto non è stato verificato con chitarra.
 - I suoni di partenza sono impostazioni del rig DSP interno, non modelli di amplificatori; nessun NAM (lotto 9).
 - Nessuna prova con chitarra e scheda audio reali.
 
@@ -126,7 +131,7 @@ Limiti dichiarati del lotto 6:
 | Lotto 3 | verde, 473 unit | corsa completa locale 129 su 130 (un test degli arpeggi cercava la striscia degli accordi sulla scheda Esercizi: aggiunta lì); i file toccati rieseguiti verdi; corsa completa verde in CI sulla PR #16 |
 | Lotto 4 (PR #17) | verde, 473 unit | 131 su 131 in locale |
 | Lotto 5 (PR #18) | verde, 478 unit | 132 su 132 in locale e in CI |
-| Lotto 6 | verde, 484 unit | 133 su 133 in locale; CI sulla PR #19 |
+| Lotto 6 | verde, 502 unit | 140 su 140 in locale (incluse le 7 prove della pedaliera) |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
@@ -136,4 +141,4 @@ Nessuno.
 
 ## Prossimo lotto consigliato
 
-Riordino dei pedali (resto del lotto 6): scelta dell'ordine dentro le due file pre e post, senza cambiare la posizione dell'amplificatore e del cabinet; poi il lotto 7: legenda a doppia pagina (Scale a sinistra, Accordi a destra) con numero, simbolo per ruolo, nome, colore tra 12 e visibilità, sopra `scaleLayers` e `chordLayers`; note sovrapposte composte; tastiera secondaria in palissandro con overlay indipendente. Poi lotto 8 (motore esercizi condiviso), lotto 9 (fattibilità NAM). Fuzz, EQ, suoni di partenza e quinto timbro sono già nel lotto 6 (D-48).
+Lotto 7: legenda a doppia pagina (Scale a sinistra, Accordi a destra) con numero, simbolo per ruolo, nome, colore tra 12 e visibilità, sopra `scaleLayers` e `chordLayers`; note sovrapposte composte; tastiera secondaria in palissandro con overlay indipendente. Poi lotto 8 (motore esercizi condiviso), lotto 9 (fattibilità NAM).
