@@ -3,6 +3,7 @@
  * strip. Every figure on the display comes from the store and the playhead;
  * the keys call the engine. No timer here: the lamps follow the audio clock.
  */
+import { useEffect, useRef, type PointerEvent, type ReactNode } from 'react';
 import { engine } from '../../../app/engine';
 import type { Settings } from '../../../app/settings';
 import { useApp, usePlayhead } from '../../../app/store';
@@ -56,6 +57,75 @@ function StateLed() {
   );
 }
 
+/** Wheel over an element without scrolling the page: one notch, one step. */
+function useWheel(onStep: (direction: 1 | -1) => void) {
+  const ref = useRef<HTMLDivElement>(null);
+  const step = useRef(onStep);
+  step.current = onStep;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const onWheel = (e: WheelEvent) => { e.preventDefault(); step.current(e.deltaY < 0 ? 1 : -1); };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+  return ref;
+}
+
+/**
+ * The tempo zone of the LCD: the wheel and a vertical drag nudge the BPM
+ * (4 px a beat, inside the engine's bounds); the number field stays typable
+ * and keeps its own arrow keys.
+ */
+function TempoZone({ children }: { readonly children: ReactNode }) {
+  const ref = useWheel((d) => engine.nudgeBpm(d));
+  const drag = useRef<{ y: number; moved: number } | null>(null);
+  const onDown = (e: PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('input')) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { y: e.clientY, moved: 0 };
+  };
+  const onMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!drag.current) return;
+    const steps = Math.trunc((drag.current.y - e.clientY) / 4) - drag.current.moved;
+    if (steps !== 0) { engine.nudgeBpm(steps); drag.current.moved += steps; }
+  };
+  const end = () => { drag.current = null; };
+  return (
+    <div className="v57-lz v6-tempo" ref={ref} aria-label="Tempo" title="Rotella o trascinamento verticale: cambia i BPM" data-testid="lcd-tempo"
+      onPointerDown={onDown} onPointerMove={onMove} onPointerUp={end} onPointerCancel={end}>
+      {children}
+    </div>
+  );
+}
+
+/** A knob that also answers the wheel. */
+function WheelKnob({ step, value, min, max, onChange, children }: { readonly step: number; readonly value: number; readonly min: number; readonly max: number; readonly onChange: (v: number) => void; readonly children: ReactNode }) {
+  const ref = useWheel((d) => onChange(Number(Math.min(max, Math.max(min, value + d * step)).toFixed(4))));
+  return <div className="v6-wheel" ref={ref}>{children}</div>;
+}
+
+/** The folded console: transport keys and the essentials on one line. */
+function Strip() {
+  const state = usePlayhead((p) => p.state);
+  const bpm = useApp((s) => s.settings.bpm);
+  const meterId = useApp((s) => s.settings.meterId);
+  const text = useCurrentChordText();
+  return (
+    <div className="v6-strip" data-testid="console-strip">
+      <HardwareKey label={state === 'playing' ? 'Pausa' : state === 'paused' ? 'Riprendi' : 'Avvia'} icon={state === 'playing' ? 'pause' : 'play'} lit={state === 'playing'} pressed={state === 'playing'} size="mini"
+        testId="play" hiddenText={state === 'playing' ? 'Pausa' : state === 'paused' ? 'Riprendi' : 'Avvia'} onClick={() => engine.toggle()} />
+      <HardwareKey label="Ferma" icon="stop" size="mini" disabled={state === 'stopped'} testId="stop" onClick={() => engine.stop()} />
+      <div className="v6-strip-lcd" role="status" aria-live="off">
+        <StateLed />
+        <span className="now-chord" data-none={text.none ? '1' : '0'} data-testid="current-chord">{text.current}</span>
+        <span data-testid="strip-tempo">{bpm} BPM · {meterId}</span>
+        <BeatLights />
+      </div>
+    </div>
+  );
+}
+
 function Lcd() {
   const settings = useApp((s) => s.settings);
   const lcdExpanded = useStudioUi((u) => u.lcdExpanded);
@@ -76,10 +146,10 @@ function Lcd() {
           </div>
           <span className="v57-lsub" data-testid="lcd-function">{model.numeral ? `${model.numeral} in ${model.tonic}` : text.none ? 'nessun accordo attivo' : 'fuori tonalità'}</span>
         </div>
-        <div className="v57-lz" aria-label="Tempo">
+        <TempoZone>
           <div className="v57-lval v57-lbpm"><BpmInput /><span className="v57-lmeter">{settings.meterId}</span></div>
           <div className="v57-lsub v57-lrow2"><span>{settings.meterId} · Swing {Math.round(settings.swing * 200)}%</span><BeatLights /></div>
-        </div>
+        </TempoZone>
       </div>
       {lcdExpanded ? (
         <div className="v57-lctx" role="status" aria-live="off" data-testid="lcd-context">
@@ -95,32 +165,48 @@ function Lcd() {
 
 export function Console() {
   const lcdExpanded = useStudioUi((u) => u.lcdExpanded);
+  const collapsed = useStudioUi((u) => u.consoleCollapsed);
+  const setCollapsed = useStudioUi((u) => u.setConsoleCollapsed);
   const swing = useApp((s) => s.settings.swing);
+  const master = useApp((s) => s.settings.volMaster);
   const update = useApp((s) => s.update);
   const tap = useTap();
   return (
-    <section className="v57-plate v57-deck" data-lcdx={lcdExpanded ? '1' : '0'} aria-label="Trasporto e display">
-      <Transport />
-      <div className="v57-plate v57-lcdframe">
-        <Lcd />
-        <div className="v57-lctl" role="group" aria-label="Tempo, metrica e click">
-          <div className="v57-lcr">
-            <HardwareKey label="Rallenta di 1 BPM" icon="minus" size="mini" onClick={() => engine.nudgeBpm(-1)} />
-            <HardwareKey label="Accelera di 1 BPM" icon="plus" size="mini" onClick={() => engine.nudgeBpm(1)} />
-            <HardwareKey label="Tap tempo" text="TAP" size="mini" onClick={tap} />
-          </div>
-          {lcdExpanded ? (
-            <div className="v57-lcr v57-lcr-sel">
-              <MeterSelect />
-              <ClickSelect />
+    <section className="v57-plate v57-deck" data-lcdx={lcdExpanded ? '1' : '0'} data-collapsed={collapsed ? '1' : '0'} aria-label="Trasporto e display" data-testid="console">
+      {collapsed ? <Strip /> : (
+        <>
+          <Transport />
+          <div className="v57-plate v57-lcdframe">
+            <Lcd />
+            <div className="v57-lctl" role="group" aria-label="Tempo, metrica e click">
+              <div className="v57-lcr">
+                <HardwareKey label="Rallenta di 1 BPM" icon="minus" size="mini" onClick={() => engine.nudgeBpm(-1)} />
+                <HardwareKey label="Accelera di 1 BPM" icon="plus" size="mini" onClick={() => engine.nudgeBpm(1)} />
+                <HardwareKey label="Tap tempo" text="TAP" size="mini" onClick={tap} />
+              </div>
+              {lcdExpanded ? (
+                <div className="v57-lcr v57-lcr-sel">
+                  <MeterSelect />
+                  <ClickSelect />
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
-        <div className="v57-lctl v57-lctl-knob">
-          <Knob label="Swing" value={swing} min={0} max={0.5} step={0.01} format={(v) => `${Math.round(v * 200)}%`} onChange={(v) => update({ swing: v })} testId="knob-swing" className="v57-knob" />
-          <AccentGrid />
-        </div>
-      </div>
+            <div className="v57-lctl v57-lctl-knob">
+              <WheelKnob step={0.01} value={swing} min={0} max={0.5} onChange={(v) => update({ swing: v })}>
+                <Knob label="Swing" value={swing} min={0} max={0.5} step={0.01} format={(v) => `${Math.round(v * 200)}%`} onChange={(v) => update({ swing: v })} testId="knob-swing" className="v57-knob" />
+              </WheelKnob>
+              <WheelKnob step={0.02} value={master} min={0} max={1} onChange={(v) => update({ volMaster: v })}>
+                <Knob label="Master" value={master} min={0} max={1} step={0.01} format={(v) => `${Math.round(v * 100)}%`} onChange={(v) => update({ volMaster: v })} testId="knob-master" className="v57-knob" />
+              </WheelKnob>
+              <AccentGrid />
+            </div>
+          </div>
+        </>
+      )}
+      <button type="button" className="v6-pulltab" aria-expanded={!collapsed} aria-label={collapsed ? 'Espandi la console' : 'Comprimi la console'} title={collapsed ? 'Espandi la console' : 'Comprimi la console'}
+        data-testid="console-toggle" onClick={() => setCollapsed(!collapsed)}>
+        <svg width="16" height="9" viewBox="0 0 16 9" aria-hidden="true"><path d={collapsed ? 'M2 2l6 5 6-5' : 'M2 7l6-5 6 5'} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
     </section>
   );
 }

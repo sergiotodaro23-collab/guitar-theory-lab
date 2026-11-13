@@ -1,4 +1,10 @@
 /**
+ * Studio V6 shell (D-43) over the V5.7 console (D-41): a global header
+ * across the window, then the rail, the work column and (from the next
+ * increment) the rig rack. In the work column: the transport console with
+ * its pull-tab, the neck, the divider, the notebook zone and the mixer
+ * handle; the mixer rises over the notebook only.
+ *
  * Studio (D-41): the V5.7 console. A physical rail, the hi-fi console with
  * its amber LCD, the production neck with a draggable divider, and a tabbed
  * notebook from whose bottom edge the devices rise. A presentation of the
@@ -10,14 +16,19 @@ import { Console } from './v57/Console';
 import { FretboardPanel } from './v57/FretboardPanel';
 import { DeviceBay, Notebook } from './v57/Notebook';
 import { Rail } from './v57/Rail';
+import { Header } from './v6/Header';
+import { MixerHandle } from './v6/MixerHandle';
 import { DEFAULT_SPLIT, FB_MIN, clampRatio, splitHeight } from './v57/layout';
 import { useStudioUi } from './v57/uiStore';
 import './v57/fonts.css';
 import './v57/v57.css';
 import './v57/devices.css';
+import './v6/v6.css';
 
 const SPLIT_PX = 14;
 const GAP = 6;
+/** Height of the mixer handle under the notebook zone. */
+const HANDLE_PX = 26;
 
 function useBox<T extends HTMLElement>(): [(el: T | null) => void, { w: number; h: number }] {
   const [el, setEl] = useState<T | null>(null);
@@ -39,11 +50,11 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
   const [legendHost, setLegendHost] = useState<HTMLElement | null>(null);
   const [dragging, setDragging] = useState(false);
   // Leaving Studio closes its panels and drawer, so coming back starts clean (no exit animation on mount).
-  useEffect(() => () => { useStudioUi.setState({ settingsOpen: false, vizOpen: false, device: null, launcher: null }); }, []);
+  useEffect(() => () => { useStudioUi.setState({ settingsOpen: false, vizOpen: false, metroOpen: false, device: null, launcher: null }); }, []);
   const drag = useRef<{ y: number; h: number } | null>(null);
 
   // Space under the console shared by the neck and the notebook.
-  const available = Math.max(0, work.h - deck.h - SPLIT_PX - GAP * 3);
+  const available = Math.max(0, work.h - deck.h - SPLIT_PX - HANDLE_PX - GAP * 4);
   const boardWidth = Math.max(0, work.w - 28 - 20);
   const fbh = work.h > 0 ? splitHeight(split, available, boardWidth) : 300;
   const max = work.h > 0 ? splitHeight(1, available, boardWidth) : 300;
@@ -72,7 +83,8 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
 
   return (
     <MixerShown.Provider value>
-      <div className="v57" data-testid="studio" data-drag={dragging ? '1' : '0'}>
+      <div className="v57 v6" data-testid="studio" data-drag={dragging ? '1' : '0'}>
+        <Header />
         <div className="v57-desk">
           <Rail studioAllowed={studioAllowed} />
           <div className="v57-work" ref={workRef}>
@@ -100,6 +112,7 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
               <Notebook onLegendHost={setLegendHost} />
               <DeviceBay />
             </div>
+            <MixerHandle />
           </div>
         </div>
       </div>

@@ -1,6 +1,8 @@
 /**
- * The physical navigation rail: the four laboratories, the four devices of
- * the drawer, settings and the collapse key, with the nameplate at the foot.
+ * The physical navigation rail (Studio V6): the four laboratories, the
+ * guitar and backing faders, settings and the collapse key, with the
+ * nameplate at the foot. The devices moved out: tuner, input and rig are in
+ * the global header, the mixer has its own handle under the notebook.
  */
 import { useEffect, useRef } from 'react';
 import type { AppMode } from '../../../app/settings';
@@ -8,17 +10,14 @@ import { useApp } from '../../../app/store';
 import { AppFooter } from '../../AppFooter';
 import { PresetsPanel } from '../../panels';
 import { AppearanceToggle, withModeLabels } from '../../Transport';
+import { RailFaders } from '../v6/RailFaders';
 import { useStudioUi, type DeviceId } from './uiStore';
 
-const ICON: Record<AppMode | DeviceId, string> = {
+const ICON: Record<AppMode, string> = {
   fretboard: 'M3 6h18M3 10h18M3 14h18M3 18h18M8 4v16M13 4v16M18 4v16',
   harmony: 'M9 18a2.5 2.5 0 1 1-5 0a2.5 2.5 0 0 1 5 0zM9 18V5l11-2v13M20 16a2.5 2.5 0 1 1-5 0a2.5 2.5 0 0 1 5 0z',
   arpeggio: 'M3 19l4-6 4 3 4-9 6 5M3 19h.01M7 13h.01M11 16h.01M15 7h.01M21 12h.01',
   jam: 'M4 12h2M8 7v10M12 4v16M16 8v8M20 11v2',
-  iface: 'M12 3v7M8.5 10h7v4.5a3.5 3.5 0 0 1-7 0zM12 18v3',
-  amp: 'M3 6h18v12H3zM3 9.5h18M7 14h.01M11 14h.01M15 14h.01M18.5 14h.01',
-  tuner: 'M9 3v8a3 3 0 0 0 6 0V3M12 14v7M8 21h8',
-  mixer: 'M6 3v18M12 3v18M18 3v18M4 15h4M10 8h4M16 12h4',
 };
 const GEAR = 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z';
 
@@ -94,17 +93,7 @@ export function Rail({ studioAllowed }: { readonly studioAllowed: boolean }) {
         ))}
       </ul>
       <div className="v57-hsep" role="presentation" />
-      <ul className="v57-rlist" aria-label="Dispositivi audio">
-        {DEVICES.map((dev) => (
-          <li key={dev.id}>
-            <button type="button" className="v57-rb" data-dev="1" data-on={ui.device === dev.id ? '1' : '0'} aria-label={dev.label} aria-pressed={ui.device === dev.id}
-              data-testid={`device-${dev.id}`}
-              onClick={(e) => (ui.device === dev.id ? ui.closeDevice() : ui.openDevice(dev.id, e.currentTarget))}>
-              <Icon d={ICON[dev.id]} /><span className="v57-rl">{dev.label}</span><span className="v57-tip" role="tooltip">{dev.label}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
+      <RailFaders />
       <div className="v57-rspacer" />
       <ul className="v57-rlist" aria-label="Impostazioni">
         <li>
