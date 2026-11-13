@@ -140,7 +140,8 @@ test('the controls drive the real audio chain on the listening branch', async ({
   // Pedals join the chain when switched on, in their place.
   const pedals = ['comp', 'fuzz', 'drive', 'eq', 'chorus', 'delay', 'reverb'];
   for (const id of pedals) await page.getByTestId(`pedal-${id}-switch`).click();
-  await expect.poll(async () => (await rigState(page))?.active).toEqual([...pedals, 'amp', 'cab']);
+  // `active` lists the stages in the order the signal meets them (pedal chain, D-49).
+  await expect.poll(async () => (await rigState(page))?.active).toEqual(['comp', 'fuzz', 'drive', 'amp', 'cab', 'eq', 'chorus', 'delay', 'reverb']);
   expect((await rigState(page))?.chain).toEqual(['comp', 'fuzz', 'drive', 'amp', 'cab', 'eq', 'chorus', 'delay', 'reverb']);
   for (const id of pedals) await page.getByTestId(`pedal-${id}-switch`).click();
   await expect.poll(async () => (await rigState(page))?.active).toEqual(['amp', 'cab']);
@@ -220,7 +221,7 @@ test('fuzz and EQ carry the signal; a sound preset sets the whole rig and moving
   await expect(page.getByTestId('pedal-eq-switch')).toHaveAttribute('aria-pressed', 'false');
   await expect.poll(async () => (await rigState(page))?.active).toEqual(['fuzz', 'amp', 'cab']);
   await preset.selectOption('ambient');
-  await expect.poll(async () => (await rigState(page))?.active).toEqual(['comp', 'chorus', 'delay', 'reverb', 'amp', 'cab']);
+  await expect.poll(async () => (await rigState(page))?.active).toEqual(['comp', 'amp', 'cab', 'chorus', 'delay', 'reverb']);
   await expect.poll(async () => (await rigState(page))?.cab).toBe('1x12');
   await expect(preset).toHaveValue('ambient');
   // One knob moved: it is no longer that preset. The choice survives a reload as settings, not as a name.
