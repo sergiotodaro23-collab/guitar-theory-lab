@@ -12,7 +12,7 @@ P1 (shell) conclusa con i lotti 1 e 2. Prossimo: lotto 3, taccuino V6.
 |---|---|---|---|---|
 | Mappa Graphify | `claude/hopeful-…` | #13 | unita | fatto |
 | 1 · Shell V6 | `claude/peaceful-galileo-9ukuvh` | #14 | unita (CI verde) | implementato |
-| 2 · Rack destro | `claude/peaceful-galileo-9ukuvh` | #15 | vedi PR | implementato; audio testato con segnale sintetico |
+| 2 · Rack destro | `claude/studio-v6-rack` | #15 | vedi PR | implementato; audio testato con segnale sintetico |
 | 3 · Taccuino V6 | — | — | — | mancante |
 | 4 · Mixer a fader lunghi | — | — | — | mancante |
 | 5 · Libreria preset | — | — | — | mancante |
@@ -68,7 +68,7 @@ Limiti dichiarati del lotto 2:
 |---|---|---|
 | Baseline su `c034a9c` | verde, 464 unit | 118 su 119: instabile `studio-v57-shell` «tuner and interface without input» (corsa tra il focus del cassetto e la pressione del tasto) |
 | Lotto 1 (PR #14) | verde, 465 unit | 128 su 128 in esecuzioni per file e ripetute; nella corsa completa un caso instabile di lettura dell'accordatore (`live-a2`, attesa sul segno invece che sul valore assoluto) corretto nel test |
-| Lotto 2 | verde, 467 unit | vedi PR #15 |
+| Lotto 2 | verde, 467 unit | 128 su 128 in locale; CI sulla PR #15 |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
