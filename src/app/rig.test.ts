@@ -84,9 +84,9 @@ describe('impulse responses', () => {
 });
 
 describe('fuzz and EQ (Studio V6)', () => {
-  it('the chain puts fuzz before the overdrive and the EQ after the cabinet', async () => {
-    const { RIG_CHAIN } = await import('./rig');
-    expect(RIG_CHAIN).toEqual(['comp', 'fuzz', 'drive', 'amp', 'cab', 'eq', 'chorus', 'delay', 'reverb']);
+  it('the factory chain puts fuzz before the overdrive and the EQ after the cabinet', async () => {
+    const { defaultChain, wiredOrder } = await import('./rig');
+    expect(wiredOrder(defaultChain())).toEqual(['comp', 'fuzz', 'drive', 'amp', 'cab', 'eq', 'chorus', 'delay', 'reverb']);
   });
   it('the fuzz clipper is bounded, monotonic, asymmetric, keeps zero at zero and squares the wave far harder than the soft clipper', async () => {
     const { FUZZ_FLOOR, fuzzCurve, fuzzDrive } = await import('./rig');
