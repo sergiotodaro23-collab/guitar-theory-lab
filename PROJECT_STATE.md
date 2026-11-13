@@ -37,7 +37,7 @@ Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e,
 ## Limiti noti
 
 - Aspetto **Studio** (console V5.7, predefinito su tablet e computer) e **Semplificata** (console, unica su smartphone verticale). Due layout sullo stesso stato, vedi D-16 e D-41. Render dei dispositivi in `GTL-V5.7-handoff/blender/` (scene e script); `tools/studio-assets/render.py` genera i pochi asset della base Studio rimasti (tasti, manopola, carta, telefono del tutor).
-- **Guitar Rig** (D-42): testata con DSP interno, Cabinet IR (sintetici o file dell'utente) e pedaliera Compressor, Overdrive, Chorus, Delay, Reverb, reali sul ramo d'ascolto della chitarra; un unico cassetto che copre la zona del taccuino. Il modello NAM non è ancora integrato (P4-01, `docs/NAM_FEASIBILITY.md`). Provato solo con un WAV come microfono.
+- **Guitar Rig** (D-42, nel rack destro della Studio V6 da D-44): testata con DSP interno, Cabinet IR (sintetici o file dell'utente) e pedaliera Compressor, Overdrive, Chorus, Delay, Reverb, reali sul ramo d'ascolto della chitarra. Il modello NAM non è ancora integrato (P4-01, `docs/NAM_FEASIBILITY.md`). Provato solo con un WAV come microfono.
 - Solo accordatura standard; nessuna vista per mancini.
 - Ingresso chitarra, ascolto, Live Monitor e accordatore: **testati con segnali sintetici** (WAV come microfono). La prova del proprietario con chitarra reale ha trovato tre problemi (layout, ascolto, accordi), corretti in D-22 ma **non ancora riverificati con l'hardware**. Diagnostica: `docs/AUDIO_DIAGNOSTICS.md`.
 - Layout desktop fisso (D-24) solo da 1200 × 720: sotto, la pagina scorre. A 1280 × 720 ai pannelli restano circa 150 px.
