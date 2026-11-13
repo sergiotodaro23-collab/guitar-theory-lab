@@ -9,8 +9,9 @@
  * model would replace that preamp (P4-01, docs/NAM_FEASIBILITY.md); nothing
  * here claims to be NAM.
  */
+import { PEDAL_IDS, defaultChain, wiredOrder, type ChainStage } from '../app/pedalChain';
 import {
-  CHORUS_BASE_DELAY, EQ_BANDS, PEDALS, RIG_CHAIN, ampDrive, ampOutGain, cabinetImpulse, chorusDepth, chorusRate, compMakeup, compThreshold, delayFeedback,
+  CHORUS_BASE_DELAY, EQ_BANDS, ampDrive, ampOutGain, cabinetImpulse, chorusDepth, chorusRate, compMakeup, compThreshold, delayFeedback,
   delayTime, eqDb, fuzzCurve, fuzzDrive, fuzzLevel, fuzzTone, mix01, odDrive, odLevel, odTone, presenceDb, reverbDecay, reverbImpulse, softClipCurve, toneDb, type PedalId, type RigSettings,
 } from '../app/rig';
 
@@ -46,7 +47,9 @@ export class GuitarRig {
   readonly input: GainNode;
   readonly output: GainNode;
   private readonly ctx: BaseAudioContext;
-  private readonly stages: Record<PedalId | 'amp' | 'cab', Stage>;
+  private readonly stages: Record<ChainStage, Stage>;
+  /** The stages in the order they are currently connected: what the graph really does. */
+  private order: readonly ChainStage[] = [];
   private readonly comp: DynamicsCompressorNode;
   private readonly compGain: GainNode;
   private readonly fuzz: WaveShaperNode;
@@ -84,15 +87,9 @@ export class GuitarRig {
     this.ctx = ctx;
     this.input = ctx.createGain();
     this.output = ctx.createGain();
-    const order = RIG_CHAIN;
-    this.stages = Object.fromEntries(order.map((id) => [id, stage(ctx)])) as Record<PedalId | 'amp' | 'cab', Stage>;
-    // Series wiring of the stages.
-    let previous: AudioNode = this.input;
-    for (const id of order) {
-      previous.connect(this.stages[id].input);
-      previous = this.stages[id].output;
-    }
-    previous.connect(this.output);
+    const ids: readonly ChainStage[] = [...PEDAL_IDS, 'amp', 'cab'];
+    this.stages = Object.fromEntries(ids.map((id) => [id, stage(ctx)])) as Record<ChainStage, Stage>;
+    this.wire(wiredOrder(defaultChain()));
 
     // Compressor.
     this.comp = ctx.createDynamicsCompressor();
@@ -167,6 +164,24 @@ export class GuitarRig {
     this.stages.reverb.input.connect(this.reverb).connect(this.stages.reverb.wet);
   }
 
+  /**
+   * Connects the chain in the given order: input, each stage in turn, output.
+   * Every outgoing link of the chain is removed first, so a new order never
+   * leaves a stale or doubled connection behind. A stage not in the order
+   * stays built but unconnected, and keeps its settings.
+   */
+  private wire(order: readonly ChainStage[]): void {
+    this.input.disconnect();
+    for (const id of Object.keys(this.stages) as ChainStage[]) this.stages[id].output.disconnect();
+    let previous: AudioNode = this.input;
+    for (const id of order) {
+      previous.connect(this.stages[id].input);
+      previous = this.stages[id].output;
+    }
+    previous.connect(this.output);
+    this.order = order;
+  }
+
   private set(param: AudioParam, value: number): void {
     param.setTargetAtTime(value, this.ctx.currentTime, GLIDE);
   }
@@ -187,6 +202,8 @@ export class GuitarRig {
 
   apply(r: RigSettings): void {
     this.settings = r;
+    const order = wiredOrder(r.chain);
+    if (order.join() !== this.order.join()) this.wire(order);
     const k = (id: PedalId, knob: string) => r.pedals[id].knobs[knob] ?? 50;
     // Inline pedals: wet only when on.
     this.set(this.comp.threshold, compThreshold(k('comp', 'sustain')));
@@ -247,13 +264,15 @@ export class GuitarRig {
       this.reverb.buffer = buffer;
     }
     for (const id of ['chorus', 'delay', 'reverb'] as const) this.route(id, 1, r.pedals[id].on ? mix01(k(id, 'mix')) : 0);
+    // A pedal out of the chain is not heard, whatever its switch says; its settings are kept.
+    for (const id of PEDAL_IDS) if (!order.includes(id)) this.route(id, 1, 0);
   }
 
   describe(): RigState {
     const r = this.settings;
     return {
-      chain: [...RIG_CHAIN],
-      active: [...PEDALS, 'amp', 'cab'].filter((id) => this.heard.has(id)),
+      chain: [...this.order],
+      active: this.order.filter((id) => this.heard.has(id)),
       ampHeard: this.heard.has('amp'),
       cab: r ? (r.cab.model === 'file' && !this.fileCab ? '4x12' : r.cab.model) : '',
       delaySeconds: this.echo.delayTime.value,

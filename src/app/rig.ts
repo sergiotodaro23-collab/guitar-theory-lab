@@ -7,12 +7,14 @@
  *   comp → fuzz → drive → amp (preamp + tone stack) → cabinet IR → eq → chorus → delay → reverb
  */
 
-export type PedalId = 'comp' | 'fuzz' | 'drive' | 'eq' | 'chorus' | 'delay' | 'reverb';
-export const PRE_PEDALS: readonly PedalId[] = ['comp', 'fuzz', 'drive'];
-export const POST_PEDALS: readonly PedalId[] = ['eq', 'chorus', 'delay', 'reverb'];
-/** The whole chain as wired, amp and cabinet between the two groups of pedals. */
-export const RIG_CHAIN: readonly (PedalId | 'amp' | 'cab')[] = [...PRE_PEDALS, 'amp', 'cab', ...POST_PEDALS];
-export const PEDALS: readonly PedalId[] = [...PRE_PEDALS, ...POST_PEDALS];
+import { DEFAULT_POST, DEFAULT_PRE, PEDAL_IDS, defaultChain, sanitizeChain, type PedalChain, type PedalId } from './pedalChain';
+
+export type { PedalChain, PedalId } from './pedalChain';
+export { defaultChain, wiredOrder, movePedal, addPedal, removePedal, availablePedals, inChain, isDefaultChain, sameChain, sanitizeChain } from './pedalChain';
+/** The factory zones, as the rack lists them: the default chain's pedals in each. */
+export const PRE_PEDALS: readonly PedalId[] = DEFAULT_PRE;
+export const POST_PEDALS: readonly PedalId[] = DEFAULT_POST;
+export const PEDALS: readonly PedalId[] = PEDAL_IDS;
 
 export type AmpKnob = 'gain' | 'bass' | 'mid' | 'treble' | 'presence' | 'out';
 export const AMP_KNOB_IDS: readonly AmpKnob[] = ['gain', 'bass', 'mid', 'treble', 'presence', 'out'];
@@ -47,6 +49,8 @@ export interface PedalState {
 }
 
 export interface RigSettings {
+  /** Order and membership of the pedals (pedalChain.ts). Parameters and on/off stay in `pedals` when a pedal leaves the chain. */
+  readonly chain: PedalChain;
   readonly amp: {
     readonly model: AmpModel;
     readonly power: boolean;
@@ -61,6 +65,7 @@ export interface RigSettings {
 const AMP_DEFAULTS: Record<AmpKnob, number> = { gain: 55, bass: 50, mid: 60, treble: 58, presence: 45, out: 62 };
 
 export const DEFAULT_RIG: RigSettings = {
+  chain: defaultChain(),
   amp: { model: 'internal', power: true, bypass: false, knobs: AMP_DEFAULTS },
   cab: { on: true, model: '4x12', fileName: '' },
   pedals: Object.fromEntries(PEDALS.map((id) => [id, { on: false, knobs: Object.fromEntries(PEDAL_SPECS[id].knobs.map(([k, , v]) => [k, v])) }])) as Record<PedalId, PedalState>,
@@ -78,6 +83,7 @@ export function sanitizeRig(raw: unknown): RigSettings {
   const cab = obj(r.cab);
   const pedals = obj(r.pedals);
   return {
+    chain: sanitizeChain(r.chain),
     amp: {
       model: 'internal',
       power: bool(amp.power, true),
@@ -270,6 +276,7 @@ function sound(id: string, name: string, amp: AmpKnobs, cab: '1x12' | '4x12', pe
   return {
     id, name,
     rig: {
+      chain: defaultChain(),
       amp: { model: 'internal', power: true, bypass: false, knobs: amp },
       cab: { on: true, model: cab, fileName: '' },
       pedals: Object.fromEntries(PEDALS.map((p) => [p, { on: p in pedals, knobs: { ...DEFAULT_RIG.pedals[p].knobs, ...pedals[p] } }])) as Record<PedalId, PedalState>,
