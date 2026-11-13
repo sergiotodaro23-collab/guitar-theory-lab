@@ -10,7 +10,9 @@ Nomenclatura P0–P5 invariata. **Ordine operativo** (direttiva del 7 novembre 2
 5. backing track reali (P3-09);
 6. ricerca NAM, IR, MIDI, polifonia (P4);
 7. design definitivo con Claude Design, accessibilità, ottimizzazione, rilascio.
-Le dipendenze tecniche restano vincolanti. Ogni incremento è una PR separata; il merge lo fa il proprietario.
+Le dipendenze tecniche restano vincolanti. Ogni incremento è una PR separata; dal 13 novembre 2026 l'agente può unire le proprie PR ordinarie con CI verde (D-43).
+
+**Studio V6** (D-43): lavoro in corso a lotti, registro in `docs/STUDIO_V6_PROGRESS.md`.
 
 Formato: **ID · Requisito** — stato · dipendenze · moduli. Strategia / test / accettazione.
 
