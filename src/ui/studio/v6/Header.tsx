@@ -1,6 +1,6 @@
 /**
  * Studio V6 global header: the brand strip across the whole window and the
- * keys of the global tools (tuner, metronome, guitar input, rig). It carries
+ * keys of the global tools (metronome, tuner, the rig rack). It carries
  * no transport: play, tempo and the LCD live in the console between the
  * sidebars.
  */
@@ -13,9 +13,8 @@ import { useStudioUi, type DeviceId } from '../v57/uiStore';
 
 const TOOLS: readonly { id: DeviceId; text: string; label: string; icon: string }[] = [
   { id: 'tuner', text: 'Accordatore', label: 'Accordatore cromatico', icon: 'M9 3v8a3 3 0 0 0 6 0V3M12 14v7M8 21h8' },
-  { id: 'iface', text: 'Ingresso', label: 'Ingresso chitarra', icon: 'M12 3v7M8.5 10h7v4.5a3.5 3.5 0 0 1-7 0zM12 18v3' },
-  { id: 'amp', text: 'Rig', label: 'Guitar Rig: amplificatore e pedaliera', icon: 'M3 6h18v12H3zM3 9.5h18M7 14h.01M11 14h.01M15 14h.01M18.5 14h.01' },
 ];
+const RIG_ICON = 'M3 6h18v12H3zM3 9.5h18M7 14h.01M11 14h.01M15 14h.01M18.5 14h.01';
 const METRO_ICON = 'M9 3h6l4 18H5zM12 17l4-10M7.5 13h9';
 
 function Glyph({ d }: { readonly d: string }) {
@@ -26,7 +25,11 @@ function Glyph({ d }: { readonly d: string }) {
   );
 }
 
-/** The metronome panel: the click's own channel, timbre, subdivision and meter. Same store as the mixer and the console. */
+/**
+ * The metronome panel: the click's own channel, timbre, meter and
+ * subdivision (the console shows them, this is where they are set). Same
+ * store as the mixer and the accent grid.
+ */
 function MetronomePanel() {
   const close = useStudioUi((u) => u.setMetroOpen);
   const s = useApp((state) => state.settings);
@@ -35,12 +38,17 @@ function MetronomePanel() {
   useEffect(() => {
     panel.current?.querySelector<HTMLElement>('button, select, input')?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(false); };
+    // Not modal: a press anywhere else closes the panel and still reaches what was pressed.
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!panel.current?.contains(target) && !target?.closest('[data-testid="metronome-toggle"]')) close(false);
+    };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onDown, true);
+    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('pointerdown', onDown, true); };
   }, [close]);
   return (
     <>
-      <button type="button" className="v57-scrim" aria-label="Chiudi metronomo" tabIndex={-1} onClick={() => close(false)} />
       <div className="v6-pop v6-metro" role="dialog" aria-label="Metronomo" ref={panel} data-testid="metronome-panel">
         <h4>Metronomo</h4>
         <div className="v6-metro-row">
@@ -56,22 +64,13 @@ function MetronomePanel() {
           <label className="v6-metro-field"><span>Timbro</span>
             <Select label="Timbro del metronomo" testId="metro-sound" value={s.clickSound} options={CLICK_SOUNDS} onChange={(clickSound) => update({ clickSound })} />
           </label>
-          <label className="v6-metro-field"><span>Metrica</span><span data-slot="meter"><MeterSelectPlain /></span></label>
+          <label className="v6-metro-field"><span>Metrica</span><MeterSelect /></label>
           <label className="v6-metro-field"><span>Suddivisione</span><ClickSelect /></label>
         </div>
-        <p>Il click segue l’unico orologio audio dell’app e parte con la riproduzione. Accenti personali: tasto «Accenti» nella console.</p>
+        <p>Il click segue l’unico orologio audio dell’app e parte con la riproduzione. La metrica nuova entra alla stanghetta successiva. Accenti personali: tasto «Accenti» nella console.</p>
       </div>
     </>
   );
-}
-
-/** The meter select without the console's test id, so the two never collide. */
-function MeterSelectPlain() {
-  const lcdExpanded = useStudioUi((u) => u.lcdExpanded);
-  const collapsed = useStudioUi((u) => u.consoleCollapsed);
-  const meterId = useApp((s) => s.settings.meterId);
-  // The console already shows the meter select when its display is extended.
-  return lcdExpanded && !collapsed ? <output className="v6-metro-read">{meterId} · dalla console</output> : <MeterSelect />;
 }
 
 export function Header() {
@@ -101,6 +100,10 @@ export function Header() {
             <Glyph d={tool.icon} /><span>{tool.text}</span>
           </button>
         ))}
+        <button type="button" className="v6-tool" data-on={ui.rack === 'hidden' ? '0' : '1'} aria-pressed={ui.rack !== 'hidden'} aria-label="Rack Audio e Rig" title={ui.rack === 'hidden' ? 'Mostra il rack Audio e Rig' : 'Nascondi il rack Audio e Rig'}
+          data-testid="rack-toggle" onClick={() => ui.setRack(ui.rack === 'hidden' ? 'expanded' : 'hidden')}>
+          <Glyph d={RIG_ICON} /><span>Rig</span>
+        </button>
         {ui.metroOpen ? <MetronomePanel /> : null}
       </div>
     </header>

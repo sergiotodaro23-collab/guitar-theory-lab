@@ -12,8 +12,8 @@ Regole: quelle di `CLAUDE.md` (motori puri, un solo clock, forme dal motore, mai
 
 | Lotto | Contenuto | Dipende da |
 |---|---|---|
-| 1 · Shell | Header globale; console con linguetta, striscia compatta, Master, rotella/trascinamento sul tempo; rail con fader chitarra e backing; maniglia del mixer; trim di gruppo del backing nel motore | — |
-| 2 · Rack destro | Colonna «Audio & Rig» espansa, compatta, nascosta; moduli Ingresso, Amplificatore, Cabinet IR, Pedaliera, Routing con i controlli reali di D-42; i cassetti di rig e ingresso vanno in pensione | 1 |
+| 1 · Shell (fatto, #14) | Header globale; console con linguetta, striscia compatta, Master, rotella/trascinamento sul tempo; rail con fader chitarra e backing; maniglia del mixer; trim di gruppo del backing nel motore | — |
+| 2 · Rack destro (fatto, #15) | Colonna «Audio & Rig» espansa, compatta, nascosta; moduli Ingresso, Amplificatore, Cabinet IR, Pedaliera, Routing con i controlli reali di D-42; i cassetti di rig e ingresso vanno in pensione | 1 |
 | 3 · Taccuino | Ordine delle schede V6 per laboratorio; schede condivise Tastiera secondaria, Legenda e visualizzazione (doppia pagina), Dettagli | 1 |
 | 4 · Mixer | Fader lunghi a tutta larghezza, misuratori per canale, Solo del backing | 1 |
 | 5 · Libreria preset | Finestra con ricerca e filtri (laboratorio, difficoltà, tonalità, tipo); salvataggio, modifica, cancellazione | 3 |

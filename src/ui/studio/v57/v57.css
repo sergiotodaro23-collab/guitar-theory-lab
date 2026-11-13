@@ -362,10 +362,6 @@ html .v57 .v57-labels .segment[aria-pressed='true'] { color: #2a2418; background
 .v57-dvx[data-c='2'] .v57-dv > .v57-dvnote { display: none; }
 
 /* ---------- Guitar Rig: pedalboard, pedals, cabinet unit ---------- */
-.v57-board-plate { position: absolute; border-radius: 6px; pointer-events: none;
-  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .03) 0 1px, rgba(0, 0, 0, 0) 1px 4px), linear-gradient(180deg, #2b2d31, #151619);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -2px 6px rgba(0, 0, 0, .6), 0 4px 10px rgba(0, 0, 0, .55); }
-.v57-board-lab { position: absolute; font: 600 10px/12px 'Barlow Condensed', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: rgba(232, 226, 208, .7); }
 .v57-pedal { position: absolute; border-radius: 9px; color: #f4efe2;
   background: linear-gradient(180deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 18%, rgba(0, 0, 0, 0) 80%, rgba(0, 0, 0, .3)), var(--paint);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 0 0 1px rgba(0, 0, 0, .7), 0 6px 10px rgba(0, 0, 0, .6); }
@@ -375,13 +371,4 @@ html .v57 .v57-labels .segment[aria-pressed='true'] { color: #2a2418; background
 .v57-pedal-led { position: absolute; right: 9px; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #5a1a12, #2a0a06); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .6); }
 .v57-pedal-led[data-on='1'] { background: radial-gradient(circle at 40% 35%, #ffe0d6, #ff3b2f 45%, #a3140c); box-shadow: 0 0 8px 2px rgba(255, 59, 47, .8); }
 .v57-pedal .v57-knob-body { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .55)); }
-.v57-cab { position: absolute; border-radius: 6px; color: #e8e2d0; background: linear-gradient(180deg, #3a2a1c, #20160e); box-shadow: inset 0 0 0 2px #120c07, inset 0 1px 0 rgba(255, 255, 255, .15), 0 6px 10px rgba(0, 0, 0, .6); }
-.v57-cab-title { position: absolute; left: 10px; top: 6px; font: 600 11px/14px 'Barlow Condensed', sans-serif; letter-spacing: .14em; text-transform: uppercase; }
-.v57-cab-grille { position: absolute; left: 12px; right: 12px; top: 26px; height: 92px; border-radius: 4px; background: repeating-linear-gradient(45deg, #2b2620 0 2px, #171310 2px 5px), #1a1511; box-shadow: inset 0 0 0 1px #000, inset 0 2px 6px rgba(0, 0, 0, .7); }
-.v57-cab-select { position: absolute; left: 10px; right: 10px; top: 126px; height: 26px; border: 0; border-radius: 3px; padding: 0 6px; background: #0c0d0f; color: #f2ead8; font: 600 12px/20px 'Barlow Condensed', sans-serif; box-shadow: 0 0 0 1px rgba(140, 147, 155, .42); }
-.v57-cab-switch { position: absolute; left: 10px; right: 10px; top: 160px; height: 30px; border: 1px solid #0b0c0e; border-radius: 5px; cursor: pointer; color: #f2ead8; font: 600 12px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; background: linear-gradient(180deg, #464a51, #2b2d31 52%, #1f2024); }
-.v57-cab-switch[aria-pressed='true'] { color: #2a1606; background: linear-gradient(180deg, #ffd27a, #e99a24); }
-.v57-cab-msg { position: absolute; left: 6px; right: 6px; bottom: -30px; font: 500 11px/13px 'Barlow', sans-serif; color: #ffb2a8; }
-.v57-cab-select:focus-visible, .v57-cab-switch:focus-visible, .v57-pedal-switch:focus-visible { outline: 2px solid #ffd23f; outline-offset: 2px; }
-.v57-rig-status .v57-linkbtn:disabled { opacity: .5; cursor: not-allowed; }
 .v57-pedal[data-ink='dark'] .v57-pedal-name, .v57-pedal[data-ink='dark'] .v57-pedal-klab { color: #1e1a12; text-shadow: 0 1px 0 rgba(255, 255, 255, .45); }

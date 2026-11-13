@@ -122,10 +122,11 @@ test('fret wires: 24 metal bars plus the nut, painted and visible on the wood, i
       expect(shape.fill).not.toBe('none');
     }
     // And they show: on the rendered pixels, the wire differs from the wood beside it.
-    const wire = wires.nth(9);
+    // A wire with no scale notes beside it (the default shape sits on frets 7–10): the sample must read wood, not a marker.
+    const wire = wires.nth(13);
     await wire.scrollIntoViewIfNeeded();
     const box = await wire.boundingBox();
-    if (!box) throw new Error('fret 10 not on screen');
+    if (!box) throw new Error('fret 14 not on screen');
     const shot = await page.screenshot({ clip: { x: box.x - 14, y: box.y + box.height * 0.3, width: 28, height: 4 } });
     const contrast = await page.evaluate(async (data) => {
       const img = new Image();

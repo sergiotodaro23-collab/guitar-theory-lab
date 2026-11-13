@@ -114,6 +114,24 @@ describe('UI preferences', () => {
     expect(p.viz.anim).toBe('glow');
     expect(p.viz.layerMarks).toBe('dots');
   });
+  it('the rig rack opens where it fits beside the work column, and the saved choice wins', () => {
+    expect(loadPrefs(memory(), 1440).rack).toBe('expanded');
+    expect(loadPrefs(memory(), 1024).rack).toBe('compact');
+    const store = memory();
+    savePref(store, 'rack', 'hidden');
+    savePref(store, 'rackFolded', ['cab', 'pedals']);
+    expect(loadPrefs(store, 1440).rack).toBe('hidden');
+    expect(loadPrefs(store, 1024).rackFolded).toEqual(['cab', 'pedals']);
+    // Unknown modes and modules are dropped, never trusted.
+    expect(loadPrefs(memory({ [STORAGE_KEYS.rack]: '"wide"', [STORAGE_KEYS.rackFolded]: '["amp","nope",3]' }), 1440)).toMatchObject({ rack: 'expanded', rackFolded: ['amp'] });
+    expect(loadPrefs(memory({ [STORAGE_KEYS.rackFolded]: '"amp"' })).rackFolded).toEqual([]);
+  });
+  it('the console starts unfolded and remembers being folded', () => {
+    const store = memory();
+    expect(loadPrefs(store).consoleCollapsed).toBe(false);
+    savePref(store, 'consoleCollapsed', true);
+    expect(loadPrefs(store).consoleCollapsed).toBe(true);
+  });
   it('a storage that throws never breaks the app', () => {
     const broken: KeyValueStore = { getItem: () => { throw new Error('denied'); }, setItem: () => { throw new Error('full'); } };
     expect(() => savePref(broken, 'railExpanded', true)).not.toThrow();

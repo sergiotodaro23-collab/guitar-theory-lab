@@ -7,7 +7,7 @@ Un criterio è soddisfatto solo con un test eseguito (unit o e2e) o con una veri
 - A1. L'header attraversa tutta la finestra e non contiene trasporto.
 - A2. La console sta tra le barre laterali, non sopra né sotto di esse.
 - A3. La console si comprime con la linguetta; compressa mostra stato, accordo, BPM e metrica, e Avvia/Ferma funzionano. Lo stato si conserva al ricaricamento.
-- A4. BPM: rotella, trascinamento verticale, tastiera e campo numerico, sempre dentro i limiti del motore. Swing e Master: manopole con tastiera, trascinamento e rotella.
+- A4. Metrica e suddivisione del click si impostano nel pannello Metronomo; la console le mostra. BPM: rotella, trascinamento verticale, tastiera e campo numerico, sempre dentro i limiti del motore. Swing e Master: manopole con tastiera, trascinamento e rotella.
 - A5. Aprire o chiudere un pannello (mixer, metronomo, rack) non sposta né ridimensiona la tastiera.
 - A6. Il layout non si muove quando l'ingresso audio parte o si ferma.
 

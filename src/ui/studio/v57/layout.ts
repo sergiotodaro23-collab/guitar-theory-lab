@@ -153,12 +153,23 @@ export interface UiPrefs {
   readonly lcdExpanded: boolean;
   /** Studio V6: the transport console folded into its one-line strip. */
   readonly consoleCollapsed: boolean;
+  /** Studio V6 rig rack on the right: full, a slim spine, or out of the way. */
+  readonly rack: RackMode;
+  /** Rack modules folded to their title bar. */
+  readonly rackFolded: readonly RackModuleId[];
   readonly viz: VizPrefs;
 }
 
+export type RackMode = 'expanded' | 'compact' | 'hidden';
+export const RACK_MODES: readonly RackMode[] = ['expanded', 'compact', 'hidden'];
+export type RackModuleId = 'input' | 'amp' | 'cab' | 'pedals' | 'routing';
+export const RACK_MODULES: readonly RackModuleId[] = ['input', 'amp', 'cab', 'pedals', 'routing'];
+/** Width the rack takes from the work column, in CSS px. */
+export const RACK_WIDTH: Readonly<Record<RackMode, number>> = { expanded: 336, compact: 46, hidden: 0 };
+
 /** Storage keys of the handoff (`STORAGE_KEYS`). Live monitor and tuner on/off are never stored; the rig lives in the session settings. */
 export const STORAGE_KEYS = {
-  split: 'gtl.v5.fbR', railExpanded: 'gtl.v5.railX', lcdExpanded: 'gtl.v5.lcdX', consoleCollapsed: 'gtl.v6.deckC', viz: 'gtl.v5.vz',
+  split: 'gtl.v5.fbR', railExpanded: 'gtl.v5.railX', lcdExpanded: 'gtl.v5.lcdX', consoleCollapsed: 'gtl.v6.deckC', rack: 'gtl.v6.rack', rackFolded: 'gtl.v6.rackF', viz: 'gtl.v5.vz',
 } as const;
 
 export interface KeyValueStore {
@@ -178,8 +189,18 @@ function read(store: KeyValueStore, key: string): unknown {
   }
 }
 
-/** Reads every preference, repairing anything missing or malformed with the defaults. */
-export function loadPrefs(store: KeyValueStore): UiPrefs {
+const foldedModules = (v: unknown): readonly RackModuleId[] =>
+  (Array.isArray(v) ? RACK_MODULES.filter((id) => v.includes(id)) : []);
+
+/** Below this window width the open rack would cover the work column: it starts as a spine until the user opens it. */
+export const RACK_OPEN_MIN_WIDTH = 1280;
+
+/**
+ * Reads every preference, repairing anything missing or malformed with the
+ * defaults. The rack's default depends on the window: open where it fits
+ * beside the work column, a spine where it would float over it.
+ */
+export function loadPrefs(store: KeyValueStore, viewportWidth = RACK_OPEN_MIN_WIDTH): UiPrefs {
   const viz = (read(store, STORAGE_KEYS.viz) ?? {}) as Record<string, unknown>;
   const split = read(store, STORAGE_KEYS.split);
   return {
@@ -187,6 +208,8 @@ export function loadPrefs(store: KeyValueStore): UiPrefs {
     railExpanded: bool(read(store, STORAGE_KEYS.railExpanded), false),
     lcdExpanded: bool(read(store, STORAGE_KEYS.lcdExpanded), true),
     consoleCollapsed: bool(read(store, STORAGE_KEYS.consoleCollapsed), false),
+    rack: oneOf(read(store, STORAGE_KEYS.rack), RACK_MODES, viewportWidth >= RACK_OPEN_MIN_WIDTH ? 'expanded' : 'compact'),
+    rackFolded: foldedModules(read(store, STORAGE_KEYS.rackFolded)),
     viz: {
       layerMarks: oneOf(viz.layerMarks, ['bars', 'dots'] as const, VIZ_DEFAULTS.layerMarks),
       anim: oneOf(viz.anim, ['pulse', 'glow', 'static'] as const, VIZ_DEFAULTS.anim),

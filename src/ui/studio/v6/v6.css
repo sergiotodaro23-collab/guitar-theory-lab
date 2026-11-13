@@ -38,7 +38,6 @@
 .v6-metro-field, .v6-metro-vol { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 110px; font: 600 11px/13px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); }
 .v6-metro .select { height: 30px; padding: 0 8px; border: 0; border-radius: 2px; background: #0c0d0f; color: var(--ink-primary); font: 600 13px/20px 'Barlow Condensed', sans-serif; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 0 0 1px rgba(140, 147, 155, .42); width: 100%; }
 .v6-metro-vol input { width: 100%; accent-color: var(--led-amber); }
-.v6-metro-read { display: flex; align-items: center; height: 30px; padding: 0 8px; border-radius: 2px; background: #120a04; color: var(--led-amber); font: 500 12px/1 'IBM Plex Mono', monospace; text-transform: none; letter-spacing: 0; }
 .v6-switch { display: inline-flex; align-items: center; gap: 9px; height: 30px; padding: 0 12px 0 6px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 15px; color: var(--ink-primary); background: #171411; font: 600 13px/1 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .v6-switch i { position: relative; width: 32px; height: 18px; border-radius: 9px; background: #4d463e; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .7); }
 .v6-switch i::after { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #d9d2c4; transition: left .12s; box-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
@@ -129,5 +128,127 @@
 /* Folded console: a plain brushed bar instead of the rendered plate (its corner screws do not fit 44 px). */
 .v57.v6 .v57-deck[data-collapsed='1'] { border: 1px solid #07080a; border-image: none; border-radius: 4px; padding: 5px 10px; background: linear-gradient(180deg, #3d4046, #25272b 55%, #1b1c1f); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 3px 6px rgba(0, 0, 0, .55); }
 
-/* The rig's status line carries the input and listening keys: never hidden, even in the shortest drawer. */
-.v57.v6 .v57-dvx[data-c='2'][data-device='amp'] .v57-dv > .v57-rig-status { display: block; }
+/* ---------- rig rack (right sidebar) ---------- */
+.v6-rack { flex: none; width: 336px; min-height: 0; display: flex; flex-direction: column; border-radius: 4px; color: var(--ink-primary); overflow: hidden;
+  background: linear-gradient(110deg, #1b1714, #2a211b); box-shadow: inset 0 0 0 1px #07080a, inset 0 0 0 2px rgba(190, 150, 100, .28), 0 4px 10px rgba(0, 0, 0, .6); }
+.v6-rack[data-mode='compact'] { width: 46px; align-items: center; gap: 6px; padding: 8px 0; }
+.v6-rack-title { flex: none; height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 8px; border-bottom: 2px solid #0b0c0e; box-shadow: 0 1px 0 rgba(255, 220, 170, .12);
+  background: linear-gradient(180deg, #3a2c22, #241b15); }
+.v6-rack-title h2 { flex: 1; margin: 0; font: 600 17px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #f1ca86; white-space: nowrap; }
+.v6-rack-key { flex: none; width: 26px; height: 24px; display: grid; place-items: center; padding: 0; cursor: pointer; color: var(--ink-primary); border: 1px solid #0b0c0e; border-radius: 4px;
+  background: linear-gradient(180deg, #4a4037, #2b2520 52%, #1c1815); box-shadow: inset 0 1px 0 rgba(255, 236, 200, .28); }
+.v6-rack-key:hover, .v6-spine:hover { filter: brightness(1.2); }
+.v6-rack-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: #6a5540 transparent; }
+.v6-spine { position: relative; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; cursor: pointer; color: var(--ink-primary); border: 1px solid #0b0c0e; border-radius: 5px;
+  background: linear-gradient(180deg, #3d4046, #25272b 55%, #1b1c1f); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18); }
+.v6-spine i { position: absolute; right: 3px; top: 3px; width: 6px; height: 6px; border-radius: 50%; background: #2c1a10; }
+.v6-spine[data-on='1'] i { background: var(--led-green); box-shadow: 0 0 5px var(--led-green); }
+
+/* a rack module: black rack ears, a title strip, the unit */
+.v6-mod { flex: none; border-radius: 5px; background: linear-gradient(180deg, #2f2823, #1a1613); box-shadow: 0 0 0 1px #07080a, inset 0 1px 0 rgba(255, 230, 190, .14), 0 2px 5px rgba(0, 0, 0, .5); }
+.v6-mod-head { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, #33291f, #261e17); }
+.v6-mod[data-folded='1'] .v6-mod-head { border-radius: 5px; }
+.v6-mod-head h3 { flex: 1; min-width: 0; margin: 0; font: 600 14px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v6-mod-led { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #2c1a10; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .7); }
+.v6-mod-led[data-on='1'] { background: var(--led-green); box-shadow: 0 0 5px var(--led-green); }
+.v6-mod-fold { flex: none; width: 24px; height: 22px; display: grid; place-items: center; padding: 0; border: 0; background: none; cursor: pointer; color: var(--ink-muted); border-radius: 3px; }
+.v6-mod-fold:hover { color: var(--led-amber); }
+.v6-mod-body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 8px; }
+.v6-toggle { flex: none; position: relative; width: 34px; height: 18px; padding: 0; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 10px; background: #4d463e; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .7); }
+.v6-toggle i { position: absolute; left: 2px; top: 1px; width: 14px; height: 14px; border-radius: 50%; background: #d9d2c4; transition: left .12s; box-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+.v6-toggle[aria-pressed='true'] { background: #dba64b; }
+.v6-toggle[aria-pressed='true'] i { left: 16px; background: #fff3d3; }
+.v6-toggle:disabled { opacity: .45; cursor: not-allowed; }
+.v6-minikey { flex: none; height: 22px; padding: 0 8px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 4px; color: var(--ink-primary); font: 600 11px/1 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase;
+  background: linear-gradient(180deg, #464a51, #2b2d31 52%, #1f2024); box-shadow: inset 0 1px 0 rgba(245, 247, 250, .25); }
+.v6-minikey:disabled { opacity: .45; cursor: default; }
+.v6-silk { font: 600 11px/14px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); }
+.v6-silk b { font: 500 11px/14px 'IBM Plex Mono', monospace; letter-spacing: 0; color: var(--led-amber); text-transform: none; }
+.v6-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 22px; }
+.v6-note { margin: 0; font: 400 11.5px/15px 'Barlow', sans-serif; color: var(--ink-muted); }
+.v6-alert { color: #ffb3a8; }
+.v6-lcdline { display: flex; flex-direction: column; gap: 1px; padding: 5px 8px; border-radius: 3px; background: radial-gradient(120% 150% at 28% 18%, #21140a 0%, #120a04 55%, #080502 100%); box-shadow: inset 0 2px 6px rgba(0, 0, 0, .85), 0 0 0 1px #050505;
+  color: var(--led-amber); font: 500 11px/14px 'IBM Plex Mono', ui-monospace, monospace; text-shadow: 0 0 5px rgba(255, 170, 50, .5); }
+.v6-lcdline b { font-weight: 600; font-size: 12px; }
+.v6-lcdline span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .85; }
+.v6-in-row { display: flex; align-items: center; gap: 12px; }
+.v6-knobcell { position: relative; flex: none; }
+.v6-in-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.v6-in-ch { display: flex; align-items: center; gap: 6px; }
+.v6-chip { width: 26px; height: 22px; padding: 0; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 4px; color: var(--ink-muted); background: #171411; font: 600 12px/1 'IBM Plex Mono', monospace; }
+.v6-chip[data-on='1'] { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); }
+.v6-chip[aria-checked='true'] { box-shadow: 0 0 0 1px #fff0bf; }
+.v6-meter { display: flex; gap: 2px; height: 10px; padding: 2px; border-radius: 2px; background: #080706; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .8); }
+.v6-meter i { flex: 1; border-radius: 1px; background: var(--led-green); opacity: .16; }
+.v6-meter i[data-zone='warm'] { background: var(--led-amber); }
+.v6-meter i[data-zone='hot'] { background: var(--led-red); }
+.v6-meter i[data-on='1'] { opacity: 1; }
+.v6-meter-out { flex: 1; max-width: 220px; }
+
+/* amplifier: tolex top with the script badge, gold faceplate, all six knobs inside the chassis */
+.v6-amp { align-self: center; border-radius: 7px; overflow: hidden; box-shadow: 0 0 0 1px #050505, 0 0 0 3px #8a6a3c, 0 0 0 4px #050505, 0 4px 8px rgba(0, 0, 0, .6); }
+.v6-amp-top { position: relative; height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px;
+  background: repeating-linear-gradient(35deg, #1d1d1d 0 2px, #272727 2px 3px, #141414 3px 5px); }
+.v6-amp-name { font: italic 600 22px/1 'Cormorant Garamond', Georgia, serif; color: #f0c67e; text-shadow: 0 2px 3px #000; white-space: nowrap; }
+.v6-amp-tape { padding: 2px 6px; font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #2a1a08; background: #e6d7a8; transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; }
+.v6-amp-panel { position: relative; height: 84px; background: linear-gradient(180deg, #e4c488, #cba15e 50%, #b88d4c); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .35), inset 0 -2px 3px rgba(0, 0, 0, .3); }
+.v6-amp-lab { position: absolute; top: 5px; transform: translateX(-50%); font: 600 9px/11px 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #26160c; white-space: nowrap; }
+.v6-amp-lamp { position: absolute; left: 6px; top: 68px; width: 8px; height: 8px; border-radius: 50%; background: #5a1a12; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .6); }
+.v6-amp-lamp[data-on='1'] { background: radial-gradient(circle at 40% 35%, #ffe0d6, #ff3b2f 45%, #a3140c); box-shadow: 0 0 8px 2px rgba(255, 59, 47, .8); }
+.v6-amp[data-on='0'] .v6-amp-panel { filter: saturate(.55) brightness(.8); }
+.v6-amp .v57-knob-body { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .5)); }
+
+/* cabinet */
+.v6-cab { display: flex; align-items: center; gap: 10px; }
+.v6-cab-grille { flex: none; width: 58px; height: 46px; border-radius: 4px; box-shadow: 0 0 0 1px #050505, 0 0 0 3px #3a2c22, inset 0 0 8px #000;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, .55) 0 34%, transparent 36%), repeating-linear-gradient(45deg, #5b5146 0 2px, #2c2620 2px 4px), #2c2620; }
+.v6-field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.v6-select { width: 100%; height: 28px; padding: 0 6px; border: 0; border-radius: 3px; background: #0c0d0f; color: var(--ink-primary); font: 600 13px/20px 'Barlow Condensed', sans-serif; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 0 0 1px rgba(140, 147, 155, .42); }
+
+/* pedalboard: the real pedals on a strip that scrolls sideways */
+.v6-board { overflow-x: auto; overflow-y: hidden; border-radius: 5px; padding: 6px 6px 2px; scrollbar-width: thin; scrollbar-color: #6a5540 transparent;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .03) 0 1px, rgba(0, 0, 0, 0) 1px 4px), linear-gradient(180deg, #2b2d31, #151619); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -2px 6px rgba(0, 0, 0, .6); }
+.v6-board-in { position: relative; zoom: .8; }
+.v6-board-lab { position: absolute; top: 0; font: 600 10px/12px 'Barlow Condensed', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: rgba(232, 226, 208, .7); }
+.v6-board-amp { position: absolute; top: 12px; display: grid; place-items: center; writing-mode: vertical-rl; border-radius: 4px; border: 1px dashed rgba(232, 226, 208, .35); color: rgba(232, 226, 208, .6); font: 600 10px/1 'Barlow Condensed', sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+
+/* routing */
+.v6-route { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.v6-route span { padding: 2px 6px; border-radius: 3px; background: #171411; box-shadow: 0 0 0 1px #6a5540; font: 600 10px/13px 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-primary); }
+.v6-route span[data-dim='1'] { color: var(--lcd-blue); }
+.v6-route i { width: 10px; height: 1px; background: #c3ad91; position: relative; }
+.v6-route i::after { content: ''; position: absolute; right: 0; top: -2px; border-left: 4px solid #c3ad91; border-top: 2.5px solid transparent; border-bottom: 2.5px solid transparent; }
+.v6-rack-foot { flex: none; padding: 7px 10px 8px; display: flex; flex-direction: column; gap: 4px; border-top: 2px solid #0b0c0e; background: #1c1713; box-shadow: inset 0 1px 0 rgba(255, 220, 170, .12); }
+
+/* The work column narrows when the rack is open: the console and the neck toolbar tighten with it. */
+.v57.v6 .v57-work { container: v6work / inline-size; }
+@container v6work (max-width: 1080px) {
+  .v57-tp { gap: 4px; }
+  .v57-lz { padding: 0 9px; }
+  .v57-lscale { font-size: 15px; line-height: 18px; }
+  .v57-lbig { font-size: 24px; }
+  html .v57 .v57-lctl-knob { gap: 6px; }
+  html html .v57 .v57-knob .knob-label { display: none; }
+  .v57-silk { display: none; }
+  .v57-lsel .select { max-width: 150px; }
+  .v57-lctx { gap: 2px 12px; }
+  html .v57 .v57-labels .segment { padding: 0 6px; font-size: 12px; }
+  /* The control strips stack, so the display keeps the width: − + over TAP, the two knobs over Accenti. */
+  .v57-lctl { padding: 0 2px 0 8px; }
+  .v57-lctl .v57-lcr { display: grid; grid-template-columns: auto auto; gap: 4px; }
+  .v57-lctl .v57-lcr > :last-child { grid-column: 1 / -1; }
+  .v57-lctl .v57-lcr > :last-child .v57-key { width: 100%; }
+  html .v57 .v57-lctl-knob { display: grid; grid-template-columns: auto auto; align-items: center; justify-items: center; gap: 3px 8px; }
+  html .v57 .v57-lctl-knob .accent-control { grid-column: 1 / -1; }
+  html .v57 .v57-lctl-knob .accent-toggle { height: 22px; padding: 0 8px; font-size: 11px; }
+  html .v57 .v57-knob .knob-dial { width: 32px; height: 32px; }
+}
+@container v6work (max-width: 900px) {
+  .v57-lmain { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); }
+  .v57-tsep { display: none; }
+}
+/* Narrow windows: the open rack floats over the work column instead of squeezing it. */
+@media (max-width: 1180px) {
+  .v57.v6 .v57-desk { position: relative; }
+  .v6-rack[data-mode='expanded'] { position: absolute; z-index: 35; right: 8px; top: 8px; bottom: 8px; box-shadow: inset 0 0 0 1px #07080a, inset 0 0 0 2px rgba(190, 150, 100, .28), -10px 0 26px rgba(0, 0, 0, .7); }
+}

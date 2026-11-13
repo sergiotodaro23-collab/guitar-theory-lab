@@ -21,3 +21,7 @@ Copiati da `GTL-V5.7-handoff/` (archivio originale, con scene Blender e script).
 | Barlow Condensed | 500, 600, 700 | SIL OFL 1.1, dal pacchetto `@fontsource/barlow-condensed` già in uso |
 
 I font mantengono la loro licenza originale; non sono rilicenziati sotto GPL.
+
+## Studio V6
+
+Dal lotto 2 della V6 (rack destro) i corpi renderizzati `amp-body@2x.webp` e `iface-body@2x.webp`, con interruttori a bilanciere e a levetta, non sono più importati: testata e scheda audio sono moduli del rack disegnati in CSS, con le manopole renderizzate `knob-gold` e `knob-alu`. I file restano nel repository con le loro scene Blender.

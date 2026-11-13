@@ -89,10 +89,10 @@ export function AccentGrid() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
-    // Working the transport (metre, click, play) keeps it open: the grid follows the metre live.
+    // Working the transport or the header's metronome (metre, click, play) keeps it open: the grid follows the metre live.
     const onDown = (e: PointerEvent) => {
       const target = e.target as Element | null;
-      if (box.current?.contains(target) || target?.closest('.cs-transport, .ws-transport, .v57-deck')) return;
+      if (box.current?.contains(target) || target?.closest('.cs-transport, .ws-transport, .v57-deck, .v6-head')) return;
       setOpen(false);
     };
     window.addEventListener('keydown', onKey);

@@ -9,7 +9,7 @@ import type { Settings } from '../../../app/settings';
 import { useApp, usePlayhead } from '../../../app/store';
 import { AccentGrid } from '../../AccentGrid';
 import { Knob } from '../../hardware';
-import { BeatLights, BpmInput, ClickSelect, MeterSelect, useCurrentChordText, useTap } from '../../Transport';
+import { BeatLights, BpmInput, useCurrentChordText, useTap } from '../../Transport';
 import { HardwareKey } from './HardwareKey';
 import { useNowNext } from './hooks';
 import { lcdModel } from './layout';
@@ -178,18 +178,12 @@ export function Console() {
           <Transport />
           <div className="v57-plate v57-lcdframe">
             <Lcd />
-            <div className="v57-lctl" role="group" aria-label="Tempo, metrica e click">
+            <div className="v57-lctl" role="group" aria-label="Tempo">
               <div className="v57-lcr">
                 <HardwareKey label="Rallenta di 1 BPM" icon="minus" size="mini" onClick={() => engine.nudgeBpm(-1)} />
                 <HardwareKey label="Accelera di 1 BPM" icon="plus" size="mini" onClick={() => engine.nudgeBpm(1)} />
                 <HardwareKey label="Tap tempo" text="TAP" size="mini" onClick={tap} />
               </div>
-              {lcdExpanded ? (
-                <div className="v57-lcr v57-lcr-sel">
-                  <MeterSelect />
-                  <ClickSelect />
-                </div>
-              ) : null}
             </div>
             <div className="v57-lctl v57-lctl-knob">
               <WheelKnob step={0.01} value={swing} min={0} max={0.5} onChange={(v) => update({ swing: v })}>

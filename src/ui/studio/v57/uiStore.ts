@@ -5,9 +5,10 @@
  */
 import { create } from 'zustand';
 import type { AppMode } from '../../../app/settings';
-import { loadPrefs, savePref, type KeyValueStore, type TabId, type UiPrefs, type VizPrefs } from './layout';
+import { loadPrefs, savePref, type KeyValueStore, type RackMode, type RackModuleId, type TabId, type UiPrefs, type VizPrefs } from './layout';
 
-export type DeviceId = 'mixer' | 'amp' | 'tuner' | 'iface';
+/** Drawer devices. Input and rig left the drawer for the rack (Studio V6). */
+export type DeviceId = 'mixer' | 'tuner';
 
 function storage(): KeyValueStore {
   try {
@@ -35,6 +36,8 @@ export interface StudioUi extends UiPrefs {
   readonly setLcd: (lcdExpanded: boolean) => void;
   readonly setConsoleCollapsed: (consoleCollapsed: boolean) => void;
   readonly setMetroOpen: (open: boolean) => void;
+  readonly setRack: (rack: RackMode) => void;
+  readonly toggleRackModule: (id: RackModuleId) => void;
   readonly setViz: (change: Partial<VizPrefs>) => void;
   readonly openDevice: (device: DeviceId, launcher: HTMLElement | null) => void;
   readonly closeDevice: () => void;
@@ -45,7 +48,7 @@ export interface StudioUi extends UiPrefs {
 }
 
 export const useStudioUi = create<StudioUi>((set, get) => ({
-  ...loadPrefs(storage()),
+  ...loadPrefs(storage(), typeof window === 'undefined' ? undefined : window.innerWidth),
   device: null,
   launcher: null,
   pickedTab: {},
@@ -58,6 +61,13 @@ export const useStudioUi = create<StudioUi>((set, get) => ({
   setRail: (railExpanded) => { set({ railExpanded }); savePref(storage(), 'railExpanded', railExpanded); },
   setLcd: (lcdExpanded) => { set({ lcdExpanded }); savePref(storage(), 'lcdExpanded', lcdExpanded); },
   setConsoleCollapsed: (consoleCollapsed) => { set({ consoleCollapsed }); savePref(storage(), 'consoleCollapsed', consoleCollapsed); },
+  setRack: (rack) => { set({ rack }); savePref(storage(), 'rack', rack); },
+  toggleRackModule: (id) => {
+    const folded = get().rackFolded;
+    const rackFolded = folded.includes(id) ? folded.filter((m) => m !== id) : [...folded, id];
+    set({ rackFolded });
+    savePref(storage(), 'rackFolded', rackFolded);
+  },
   setMetroOpen: (metroOpen) => set({ metroOpen, settingsOpen: false, vizOpen: false }),
   setViz: (change) => { const viz = { ...get().viz, ...change }; set({ viz }); savePref(storage(), 'viz', viz); },
   // A device replaces the open one at once (no exit animation), as in the handoff.
