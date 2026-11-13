@@ -43,7 +43,7 @@ test('the rack holds input, amp, cabinet, pedalboard and routing; it folds to a 
   const rack = page.getByTestId('rack');
   await expect(rack).toHaveAttribute('data-mode', 'expanded');
   for (const title of ['Scheda audio / Input', 'Amplificatore', 'Cabinet / IR', 'Pedaliera', 'Routing / Uscita']) await expect(rack.getByRole('region', { name: title })).toBeVisible();
-  for (const id of ['comp', 'drive', 'chorus', 'delay', 'reverb']) await expect(rack.getByTestId(`pedal-${id}`)).toBeAttached();
+  for (const id of ['comp', 'fuzz', 'drive', 'eq', 'chorus', 'delay', 'reverb']) await expect(rack.getByTestId(`pedal-${id}`)).toBeAttached();
   await expect(rack.getByTestId('rig-cab')).toBeVisible();
   // All six amp knobs sit inside the amp chassis.
   const chassis = await rack.locator('.v6-amp').boundingBox();
@@ -138,10 +138,11 @@ test('the controls drive the real audio chain on the listening branch', async ({
   expect(base).toBeGreaterThan(0.01);
 
   // Pedals join the chain when switched on, in their place.
-  for (const id of ['comp', 'drive', 'chorus', 'delay', 'reverb']) await page.getByTestId(`pedal-${id}-switch`).click();
-  await expect.poll(async () => (await rigState(page))?.active).toEqual(['comp', 'drive', 'chorus', 'delay', 'reverb', 'amp', 'cab']);
-  expect((await rigState(page))?.chain).toEqual(['comp', 'drive', 'amp', 'cab', 'chorus', 'delay', 'reverb']);
-  for (const id of ['comp', 'drive', 'chorus', 'delay', 'reverb']) await page.getByTestId(`pedal-${id}-switch`).click();
+  const pedals = ['comp', 'fuzz', 'drive', 'eq', 'chorus', 'delay', 'reverb'];
+  for (const id of pedals) await page.getByTestId(`pedal-${id}-switch`).click();
+  await expect.poll(async () => (await rigState(page))?.active).toEqual([...pedals, 'amp', 'cab']);
+  expect((await rigState(page))?.chain).toEqual(['comp', 'fuzz', 'drive', 'amp', 'cab', 'eq', 'chorus', 'delay', 'reverb']);
+  for (const id of pedals) await page.getByTestId(`pedal-${id}-switch`).click();
   await expect.poll(async () => (await rigState(page))?.active).toEqual(['amp', 'cab']);
 
   // Delay time and reverb decay reach the nodes.
@@ -183,4 +184,53 @@ test('the controls drive the real audio chain on the listening branch', async ({
   await page.keyboard.press('End');
   const loud = await out(page);
   expect(loud).toBeGreaterThan(quiet * 5);
+});
+
+test('fuzz and EQ carry the signal; a sound preset sets the whole rig and moving a knob leaves it', async ({ page }) => {
+  await open(page);
+  await listen(page);
+  // Fuzz alone, amp and cabinet bypassed: its Level knob spans 30 dB of real output.
+  await page.getByTestId('amp-bypass').click();
+  await page.getByTestId('pedal-fuzz-switch').click();
+  await expect.poll(async () => (await rigState(page))?.active).toEqual(['fuzz']);
+  await page.getByTestId('pedal-fuzz-level').focus();
+  await page.keyboard.press('Home');
+  const quiet = await out(page);
+  await page.keyboard.press('End');
+  const loud = await out(page);
+  expect(loud).toBeGreaterThan(quiet * 8);
+  await page.getByTestId('pedal-fuzz-switch').click();
+  // EQ alone on the dry guitar (an A2 with harmonics): cutting all three bands lowers the level, boosting raises it.
+  await page.getByTestId('pedal-eq-switch').click();
+  await expect.poll(async () => (await rigState(page))?.active).toEqual(['eq']);
+  const flat = await out(page);
+  for (const band of ['low', 'mid', 'high']) { await page.getByTestId(`pedal-eq-${band}`).focus(); await page.keyboard.press('Home'); }
+  const cut = await out(page);
+  for (const band of ['low', 'mid', 'high']) { await page.getByTestId(`pedal-eq-${band}`).focus(); await page.keyboard.press('End'); }
+  const boost = await out(page);
+  expect(cut).toBeLessThan(flat * 0.6);
+  expect(boost).toBeGreaterThan(flat * 1.5);
+
+  // A preset replaces amp, cabinet and pedals at once, and the graph follows.
+  const preset = page.getByTestId('rig-preset');
+  await expect(preset).toHaveValue('');
+  await preset.selectOption('fuzz');
+  await expect(page.getByTestId('amp-bypass')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByTestId('pedal-fuzz-switch')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('pedal-eq-switch')).toHaveAttribute('aria-pressed', 'false');
+  await expect.poll(async () => (await rigState(page))?.active).toEqual(['fuzz', 'amp', 'cab']);
+  await preset.selectOption('ambient');
+  await expect.poll(async () => (await rigState(page))?.active).toEqual(['comp', 'chorus', 'delay', 'reverb', 'amp', 'cab']);
+  await expect.poll(async () => (await rigState(page))?.cab).toBe('1x12');
+  await expect(preset).toHaveValue('ambient');
+  // One knob moved: it is no longer that preset. The choice survives a reload as settings, not as a name.
+  await page.getByTestId('amp-gain').focus();
+  await page.keyboard.press('ArrowUp');
+  await expect(preset).toHaveValue('');
+  await page.keyboard.press('ArrowDown');
+  await expect(preset).toHaveValue('ambient');
+  await page.waitForTimeout(400);
+  await page.reload();
+  await openRack(page);
+  await expect(page.getByTestId('rig-preset')).toHaveValue('ambient');
 });

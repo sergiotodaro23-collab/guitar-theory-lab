@@ -59,8 +59,11 @@ describe('custom pattern', () => {
 });
 
 describe('click timbres', () => {
-  it('four timbres; silent steps make no sound; accents are louder and higher than normal clicks', () => {
-    expect(CLICK_SOUNDS).toHaveLength(4);
+  it('five timbres; silent steps make no sound; accents are louder and higher than normal clicks', () => {
+    expect(CLICK_SOUNDS).toHaveLength(5);
+    expect(new Set(CLICK_SOUNDS.map((c) => c.value)).size).toBe(5);
+    // The soft tick is one pure sine: no bright partials.
+    expect(clickRecipe('soft', 2)?.oscillators).toEqual([{ type: 'sine', frequency: 620 }]);
     for (const { value } of CLICK_SOUNDS) {
       expect(clickRecipe(value, 0)).toBeNull();
       const accent = clickRecipe(value, 3);

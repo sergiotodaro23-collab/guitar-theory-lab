@@ -4,12 +4,14 @@
  * curves, synthesised impulse responses). No Web Audio and no DOM here.
  *
  * Chain on the guitar's listening branch:
- *   comp → drive → amp (preamp + tone stack) → cabinet IR → chorus → delay → reverb
+ *   comp → fuzz → drive → amp (preamp + tone stack) → cabinet IR → eq → chorus → delay → reverb
  */
 
-export type PedalId = 'comp' | 'drive' | 'chorus' | 'delay' | 'reverb';
-export const PRE_PEDALS: readonly PedalId[] = ['comp', 'drive'];
-export const POST_PEDALS: readonly PedalId[] = ['chorus', 'delay', 'reverb'];
+export type PedalId = 'comp' | 'fuzz' | 'drive' | 'eq' | 'chorus' | 'delay' | 'reverb';
+export const PRE_PEDALS: readonly PedalId[] = ['comp', 'fuzz', 'drive'];
+export const POST_PEDALS: readonly PedalId[] = ['eq', 'chorus', 'delay', 'reverb'];
+/** The whole chain as wired, amp and cabinet between the two groups of pedals. */
+export const RIG_CHAIN: readonly (PedalId | 'amp' | 'cab')[] = [...PRE_PEDALS, 'amp', 'cab', ...POST_PEDALS];
 export const PEDALS: readonly PedalId[] = [...PRE_PEDALS, ...POST_PEDALS];
 
 export type AmpKnob = 'gain' | 'bass' | 'mid' | 'treble' | 'presence' | 'out';
@@ -31,7 +33,9 @@ export interface PedalSpec {
 
 export const PEDAL_SPECS: Readonly<Record<PedalId, PedalSpec>> = {
   comp: { name: 'Compressor', color: '#2f6fb0', knobs: [['sustain', 'Sustain', 50], ['level', 'Level', 40]] },
+  fuzz: { name: 'Fuzz', color: '#b8452c', knobs: [['fuzz', 'Fuzz', 60], ['tone', 'Tone', 50], ['level', 'Level', 40]] },
   drive: { name: 'Overdrive', color: '#3f8f4a', knobs: [['drive', 'Drive', 45], ['tone', 'Tone', 55], ['level', 'Level', 50]] },
+  eq: { name: 'EQ', color: '#d9d2c4', darkInk: true, knobs: [['low', 'Low', 50], ['mid', 'Mid', 50], ['high', 'High', 50]] },
   chorus: { name: 'Chorus', color: '#5aa6c8', knobs: [['rate', 'Rate', 35], ['depth', 'Depth', 45], ['mix', 'Mix', 50]] },
   delay: { name: 'Delay', color: '#c9c3b2', darkInk: true, knobs: [['time', 'Time', 40], ['feedback', 'Feedback', 35], ['mix', 'Mix', 30]] },
   reverb: { name: 'Reverb', color: '#7a5aa8', knobs: [['decay', 'Decay', 40], ['mix', 'Mix', 30]] },
@@ -110,6 +114,15 @@ export const odDrive = (v: number): number => lin(v, 1, 60);
 export const odTone = (v: number): number => log(v, 800, 8000);
 export const odLevel = (v: number): number => dbToGain(lin(v, -20, 6));
 
+/** Fuzz: clipping factor 20–300 (close to a square wave at the top), tone low-pass 500 Hz–6 kHz (log), level −30…0 dB. */
+export const fuzzDrive = (v: number): number => lin(v, 20, 300);
+export const fuzzTone = (v: number): number => log(v, 500, 6000);
+export const fuzzLevel = (v: number): number => dbToGain(lin(v, -30, 0));
+
+/** EQ: three bands, ±12 dB around noon (low shelf 150 Hz, mid bell 800 Hz, high shelf 3.5 kHz). */
+export const eqDb = (v: number): number => lin(v, -12, 12);
+export const EQ_BANDS = { low: 150, mid: 800, high: 3500 } as const;
+
 /** Chorus: rate 0.1–5 Hz (log), depth 0–6 ms of modulation around a 12 ms delay, mix 0–1. */
 export const chorusRate = (v: number): number => log(v, 0.1, 5);
 export const chorusDepth = (v: number): number => lin(v, 0, 0.006);
@@ -137,6 +150,23 @@ export function softClipCurve(drive: number, points = 2048): Float32Array<ArrayB
   for (let i = 0; i < points; i += 1) {
     const x = (i / (points - 1)) * 2 - 1;
     curve[i] = Math.tanh(k * x) / norm;
+  }
+  return curve;
+}
+
+/**
+ * Fuzz clipper: a hard, asymmetric clip. The positive half saturates at +1,
+ * the negative half at −0.75, like a mis-biased transistor stage: the
+ * asymmetry adds even harmonics, the hard knee the buzz. Monotonic and
+ * bounded, and zero stays zero (no DC step when the pedal switches in).
+ */
+export const FUZZ_FLOOR = -0.75;
+export function fuzzCurve(drive: number, points = 2048): Float32Array<ArrayBuffer> {
+  const curve = new Float32Array(points);
+  const k = Math.max(1, drive);
+  for (let i = 0; i < points; i += 1) {
+    const x = (i / (points - 1)) * 2 - 1;
+    curve[i] = x >= 0 ? 1 - Math.exp(-k * x) : FUZZ_FLOOR * (1 - Math.exp(k * x));
   }
   return curve;
 }
@@ -225,4 +255,44 @@ export function highBandShare(data: Float32Array, sampleRate: number, cutoff: nu
     if ((k * sampleRate) / n >= cutoff) high += power;
   }
   return total > 0 ? high / total : 0;
+}
+
+/* ---------------- sound presets ---------------- */
+
+export interface RigPreset {
+  readonly id: string;
+  readonly name: string;
+  readonly rig: RigSettings;
+}
+
+type AmpKnobs = Readonly<Record<AmpKnob, number>>;
+function sound(id: string, name: string, amp: AmpKnobs, cab: '1x12' | '4x12', pedals: Partial<Record<PedalId, Readonly<Record<string, number>>>>): RigPreset {
+  return {
+    id, name,
+    rig: {
+      amp: { model: 'internal', power: true, bypass: false, knobs: amp },
+      cab: { on: true, model: cab, fileName: '' },
+      pedals: Object.fromEntries(PEDALS.map((p) => [p, { on: p in pedals, knobs: { ...DEFAULT_RIG.pedals[p].knobs, ...pedals[p] } }])) as Record<PedalId, PedalState>,
+    },
+  };
+}
+
+/**
+ * Starting sounds for the internal DSP rig, named for what they are for. They
+ * are settings of this rig, not models of any maker's amplifier.
+ */
+export const RIG_PRESETS: readonly RigPreset[] = [
+  sound('blues-clean', 'Pulito blues', { gain: 28, bass: 55, mid: 45, treble: 62, presence: 55, out: 68 }, '1x12', { comp: { sustain: 35, level: 30 }, reverb: { decay: 30, mix: 22 } }),
+  sound('jazz-clean', 'Pulito jazz con chorus leggero', { gain: 18, bass: 60, mid: 55, treble: 38, presence: 30, out: 70 }, '1x12', { chorus: { rate: 25, depth: 30, mix: 25 }, reverb: { decay: 25, mix: 15 } }),
+  sound('rock', 'Distorsione rock', { gain: 72, bass: 58, mid: 55, treble: 60, presence: 55, out: 58 }, '4x12', { drive: { drive: 40, tone: 55, level: 55 } }),
+  sound('fusion', 'Distorsione fusion', { gain: 62, bass: 48, mid: 70, treble: 52, presence: 45, out: 60 }, '4x12', { comp: { sustain: 55, level: 35 }, drive: { drive: 55, tone: 48, level: 52 }, delay: { time: 38, feedback: 25, mix: 18 }, reverb: { decay: 35, mix: 15 } }),
+  sound('punk', 'Distorsione punk', { gain: 85, bass: 50, mid: 40, treble: 70, presence: 68, out: 55 }, '4x12', {}),
+  sound('fuzz', 'Fuzz', { gain: 40, bass: 55, mid: 50, treble: 50, presence: 40, out: 58 }, '4x12', { fuzz: { fuzz: 75, tone: 45, level: 38 } }),
+  sound('ambient', 'Ambient con delay', { gain: 22, bass: 50, mid: 50, treble: 58, presence: 50, out: 66 }, '1x12', { comp: { sustain: 45, level: 30 }, chorus: { rate: 20, depth: 40, mix: 30 }, delay: { time: 55, feedback: 55, mix: 45 }, reverb: { decay: 75, mix: 45 } }),
+];
+
+/** The preset whose settings the rig has right now (a user file cabinet never matches), or null once anything was moved. */
+export function matchingRigPreset(rig: RigSettings): RigPreset | null {
+  const key = JSON.stringify(sanitizeRig(rig));
+  return RIG_PRESETS.find((p) => JSON.stringify(sanitizeRig(p.rig)) === key) ?? null;
 }

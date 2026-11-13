@@ -4,12 +4,13 @@
  */
 import type { AccentLevel } from '../timeline';
 
-export type ClickSound = 'beep' | 'wood' | 'stick' | 'bell';
+export type ClickSound = 'beep' | 'wood' | 'stick' | 'bell' | 'soft';
 export const CLICK_SOUNDS: readonly { readonly value: ClickSound; readonly label: string }[] = [
   { value: 'beep', label: 'Bip' },
   { value: 'wood', label: 'Legno' },
   { value: 'stick', label: 'Bacchetta' },
   { value: 'bell', label: 'Campanaccio' },
+  { value: 'soft', label: 'Morbido' },
 ];
 
 export interface ClickRecipe {
@@ -47,5 +48,8 @@ export function clickRecipe(sound: ClickSound, level: AccentLevel): ClickRecipe 
         duration: 0.2, level: gain * 0.55, attack: 0.001, decaying: true,
         oscillators: [{ type: 'square', frequency: 540 * pitch }, { type: 'square', frequency: 800 * pitch, mix: 0.9 }],
       };
+    case 'soft':
+      // A low, round tick for quiet practice: one sine with a slower attack and no bright partials.
+      return { duration: 0.06, level: gain * 0.9, attack: 0.004, decaying: true, oscillators: [{ type: 'sine', frequency: 620 * pitch }] };
   }
 }
