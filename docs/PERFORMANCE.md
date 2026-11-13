@@ -22,3 +22,7 @@ Misure leggere e riproducibili, senza servizi esterni: `npm run build && npm run
 | Schermo rispetto all'audio | mediana 8 ms, p95 18 ms |
 
 Non misurato qui: latenza audio reale d'ingresso e uscita (dipende da scheda e driver: vedi la calibrazione, D-31), consumo su portatili a batteria, Firefox e Safari. Il numero di nodi DOM è alto per via della tastiera SVG a 24 tasti con marker ed etichette: è il primo candidato se servisse alleggerire.
+
+## Motore NAM
+
+`npm run build && npm run perf:nam` (`tools/perf/nam.mjs`): costo per blocco, tempo di caricamento, latenza aggiunta, continuità dell'uscita e memoria con modelli sintetici. Tabella e lettura dei numeri in `docs/NAM_INTEGRATION.md`.

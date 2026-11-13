@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_RIG, PEDALS, ampOutGain, cabinetImpulse, chorusDepth, chorusRate, compThreshold, dbToGain, delayFeedback, delayTime,
-  highBandShare, odTone, reverbDecay, reverbImpulse, sanitizeRig, softClipCurve, toneDb,
+  highBandShare, odTone, reverbDecay, reverbImpulse, sanitizeRig, softClipCurve, toneDb, RIG_PRESETS, matchingRigPreset,
 } from './rig';
 
 describe('rig settings', () => {
@@ -159,5 +159,33 @@ describe('rig sound presets', () => {
     expect(gain('blues-clean')).toBeLessThan(40);
     expect(gain('fusion')).toBeLessThan(gain('rock'));
     expect(gain('rock')).toBeLessThan(gain('punk'));
+  });
+});
+
+describe('amp engine choice (NAM, D-51)', () => {
+  it('a session saved before NAM existed plays the internal DSP, with the cabinet in', () => {
+    const old = JSON.parse(JSON.stringify(DEFAULT_RIG)) as { amp: Record<string, unknown> };
+    delete old.amp.namCab;
+    old.amp.model = undefined;
+    const r = sanitizeRig(old);
+    expect(r.amp.model).toBe('internal');
+    expect(r.amp.namCab).toBe(false);
+  });
+
+  it('the choice of NAM and the cabinet switch are kept; anything else is the internal DSP', () => {
+    expect(sanitizeRig({ amp: { model: 'nam', namCab: true } }).amp).toMatchObject({ model: 'nam', namCab: true });
+    expect(sanitizeRig({ amp: { model: 'tube', namCab: 'yes' } }).amp).toMatchObject({ model: 'internal', namCab: false });
+  });
+
+  it('settings carry no model file: only the choice and one switch', () => {
+    const keys = Object.keys(sanitizeRig({ amp: { model: 'nam', namName: 'x.nam', namJson: '{}', token: 'secret' } }).amp).sort();
+    expect(keys).toEqual(['bypass', 'knobs', 'model', 'namCab', 'power']);
+  });
+
+  it('every starting sound is a setting of the internal DSP, and a rig on NAM is none of them', () => {
+    for (const preset of RIG_PRESETS) expect(preset.rig.amp.model, preset.id).toBe('internal');
+    const first = RIG_PRESETS[0];
+    if (!first) throw new Error('no presets');
+    expect(matchingRigPreset({ ...first.rig, amp: { ...first.rig.amp, model: 'nam' } })).toBeNull();
   });
 });

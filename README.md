@@ -34,3 +34,5 @@ Vedi `PROJECT_STATE.md`, `docs/ROADMAP.md`, `docs/MASTER_SPEC.md` e `docs/ARCHIT
 ## Licenza
 
 Copyright © 2026 Sergio Todaro. Guitar Theory Lab è software libero: puoi ridistribuirlo e modificarlo secondo i termini della GNU General Public License, versione 3 o (a tua scelta) successiva. È distribuito senza alcuna garanzia. Il testo completo è in `LICENSE`; per contribuire vedi `CONTRIBUTING.md`.
+
+Componenti di terzi: il motore dei modelli Neural Amp Modeler è [`neural-amp-modeler-wasm`](https://github.com/tone-3000/neural-amp-modeler-wasm) di TONE3000 (MIT), che contiene [NeuralAmpModelerCore](https://github.com/sdatkinson/NeuralAmpModelerCore) di Steven Atkinson (MIT). I modelli `.nam` li carica l'utente: l'app non ne distribuisce.

@@ -14,13 +14,15 @@
     "test:e2e": "playwright test",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
     "build:single": "npm run build && node scripts/build-single.mjs",
-    "perf": "node tools/perf/perf.mjs"
+    "perf": "node tools/perf/perf.mjs",
+    "perf:nam": "node tools/perf/nam.mjs"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.3.0",
     "@fontsource/barlow-condensed": "^5.3.0",
     "@fontsource/caveat": "^5.3.0",
     "@fontsource/chakra-petch": "^5.3.0",
+    "neural-amp-modeler-wasm": "3.0.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "^5.0.16"
