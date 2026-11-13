@@ -181,3 +181,56 @@ for (const [width, height] of [[1366, 768], [1280, 800], [1280, 720], [1024, 768
     expect(await page.getByTestId('notebook-page').evaluate((el) => el.clientHeight)).toBeGreaterThanOrEqual(120);
   });
 }
+
+const notebookTabs = (page: Page) => page.getByTestId('notebook').getByRole('tab');
+const railLab = (page: Page, name: string) => page.getByTestId('studio-rail').getByRole('button', { name, exact: true });
+
+test('notebook: V6 page order per lab, with the three shared pages everywhere', async ({ page }) => {
+  const errors = await open(page);
+  const shared = ['Tastiera secondaria', 'Legenda e visualizzazione', 'Dettagli', 'Ingresso'];
+  await expect(notebookTabs(page)).toHaveText(['Scala', 'Accordi', 'Esercizi', ...shared]);
+  await railLab(page, 'Arpeggios Lab').click();
+  await expect(notebookTabs(page)).toHaveText(['Arpeggi', 'Accordi', 'Esercizi', ...shared]);
+  // What is arpeggiated is on the first page, how it is played on the exercises page.
+  await expect(page.getByTestId('arp-symbol')).toBeVisible();
+  await expect(page.getByTestId('arp-start')).toHaveCount(0);
+  await notebookTabs(page).filter({ hasText: 'Esercizi' }).click();
+  await expect(page.getByTestId('arp-start')).toBeVisible();
+  await railLab(page, 'Harmony Lab').click();
+  await expect(notebookTabs(page)).toHaveText(['Progressione', 'Accordo', 'Voice leading', 'Analisi', 'Esercizi', ...shared]);
+  await railLab(page, 'Jam Studio').click();
+  await expect(notebookTabs(page).first()).toHaveText('Progressione');
+  await expect(page.getByTestId('builder')).toBeVisible();
+  await notebookTabs(page).filter({ hasText: 'Basso / Comping' }).click();
+  await expect(page.getByTestId('jam-genre')).toBeVisible();
+  await notebookTabs(page).filter({ hasText: 'Backing track' }).click();
+  await expect(page.getByRole('region', { name: 'Backing track' })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('Dettagli and Voice leading read the engine: ii–V–I in C', async ({ page }) => {
+  await open(page);
+  // Scale lab: the studied scale, its formula and notes.
+  await notebookTabs(page).filter({ hasText: 'Dettagli' }).click();
+  await expect(page.getByTestId('details-formula')).toHaveText('1 – 2 – 3 – 4 – 5 – 6 – 7');
+  await expect(page.getByTestId('details-notes')).toHaveText('C – D – E – F – G – A – B');
+  await expect(page.getByTestId('details-position')).toHaveText('CAGED E');
+  await page.getByTestId('notebook').getByRole('tab', { name: 'Scala', exact: true }).click();
+  await page.getByTestId('tonic').selectOption('D');
+  await page.getByTestId('scale').selectOption('dorian');
+  await notebookTabs(page).filter({ hasText: 'Dettagli' }).click();
+  await expect(page.getByTestId('details-formula')).toHaveText('1 – 2 – b3 – 4 – 5 – 6 – b7');
+  await expect(page.getByTestId('details-notes')).toHaveText('D – E – F – G – A – B – C');
+  // Harmony lab: Dm7 → G7, numeral and guide-tone motion from the harmony engine.
+  await railLab(page, 'Harmony Lab').click();
+  await page.getByTestId('template').selectOption('ii-v-i');
+  await notebookTabs(page).filter({ hasText: 'Dettagli' }).click();
+  await expect(page.getByTestId('details-chord-tones')).toHaveText('D (1) · F (b3) · A (5) · C (b7)');
+  await expect(page.getByTestId('details-numeral')).toHaveText('ii7 in C');
+  await notebookTabs(page).filter({ hasText: 'Voice leading' }).click();
+  await expect(page.getByTestId('voice-motion')).toContainText('C (b7) → B (3): scende di 1 semitono');
+  await expect(page.getByTestId('voice-common')).toHaveText('D: 1 → 5 · F: b3 → b7');
+  // The page follows the chord: on G7 the motion is towards Cmaj7.
+  await page.keyboard.press('n');
+  await expect(page.getByTestId('voice-motion')).toContainText('F (b7) → E (3): scende di 1 semitono');
+});

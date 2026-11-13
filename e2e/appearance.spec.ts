@@ -185,7 +185,7 @@ test('Studio controls are real inputs, reachable from the keyboard', async ({ pa
 test('the tutor phone: three real modes, words from the engine, folds away', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await open(page);
-  await openTab(page, 'Legenda');
+  await openTab(page, 'Legenda e visualizzazione', 'Legenda');
   const tutor = page.getByTestId('tutor');
   await expect(tutor.getByRole('img', { name: /pixel art/ })).toBeVisible();
   await reveal(page, page.getByTestId('tutor-line'));
@@ -195,7 +195,7 @@ test('the tutor phone: three real modes, words from the engine, folds away', asy
   await reveal(page, page.getByTestId('tutor-line'));
   await expect(page.getByTestId('tutor-line').locator('.ws-bubble-tip')).toBeVisible();
   await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
-  await openTab(page, 'Legenda');
+  await openTab(page, 'Legenda e visualizzazione', 'Legenda');
   await reveal(page, page.getByTestId('tutor-line'));
   await expect(page.getByTestId('tutor-line')).toContainText('Guide tones');
   await tutor.getByRole('button', { name: 'Silenzioso' }).click();
@@ -212,14 +212,14 @@ test('the tutor phone: three real modes, words from the engine, folds away', asy
 test('the legend lists only what the neck shows', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await open(page);
-  await openTab(page, 'Legenda');
+  await openTab(page, 'Legenda e visualizzazione', 'Legenda');
   const legend = page.getByTestId('notebook-legend').getByTestId('legend');
   // Tonic, scale, and the played-note entry that stays while the exercise is on.
   await expect(legend.locator('[data-kind]')).toHaveCount(3);
   await expect(legend.locator('[data-kind="root"]')).toBeVisible();
   await expect(legend.locator('[data-kind="played"]')).toBeVisible();
   await page.getByRole('button', { name: 'Harmony Lab', exact: true }).click();
-  await openTab(page, 'Legenda');
+  await openTab(page, 'Legenda e visualizzazione', 'Legenda');
   await expect(legend.locator('[data-kind="root"]')).toHaveCount(0);
   await expect(legend.locator('[data-kind="guide"]')).toBeVisible();
 });
@@ -278,7 +278,7 @@ test('Studio stays readable: WCAG contrast measured on the painted colours', asy
     tab: ['.v57-tab[aria-selected="false"]', null, 'rgb(102, 154, 104)'],
     chordToneLabel: ['.v57-board .role-chord-tone .marker-label', '.v57-board .role-chord-tone .shape', null],
   });
-  await openTab(page, 'Legenda');
+  await openTab(page, 'Legenda e visualizzazione', 'Legenda');
   const second = await measure({
     legend: ['.v57-legend .legend', null, paper],
     bubble: ['.ws-bubble', '.ws-bubble', null],
