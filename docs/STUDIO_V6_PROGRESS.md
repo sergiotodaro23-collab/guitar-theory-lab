@@ -14,7 +14,7 @@ P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lot
 | 1 · Shell V6 | `claude/peaceful-galileo-9ukuvh` | #14 | unita (CI verde) | implementato |
 | 2 · Rack destro | `claude/studio-v6-rack` | #15 | unita (CI verde) | implementato; audio testato con segnale sintetico |
 | 3 · Taccuino V6 | `claude/studio-v6-notebook` | #16 | unita (CI verde) | parziale: ordine, Dettagli, Voice leading; legenda a doppia pagina nel lotto 7 |
-| 4 · Mixer a fader lunghi | `claude/studio-v6-mixer` | #17 | vedi PR | implementato |
+| 4 · Mixer a fader lunghi | `claude/studio-v6-mixer` | #17 | unita (CI verde) | implementato |
 | 5 · Libreria preset | `claude/studio-v6-presets` | #18 | vedi PR | implementato |
 | 6 · Rig: fuzz, EQ, riordino, preset | — | — | — | mancante |
 | 7 · Legenda a simboli | — | — | — | mancante |
