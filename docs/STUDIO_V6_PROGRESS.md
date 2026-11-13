@@ -85,7 +85,7 @@ Limiti dichiarati del lotto 3:
 | Baseline su `c034a9c` | verde, 464 unit | 118 su 119: instabile `studio-v57-shell` «tuner and interface without input» (corsa tra il focus del cassetto e la pressione del tasto) |
 | Lotto 1 (PR #14) | verde, 465 unit | 128 su 128 in esecuzioni per file e ripetute; nella corsa completa un caso instabile di lettura dell'accordatore (`live-a2`, attesa sul segno invece che sul valore assoluto) corretto nel test |
 | Lotto 2 (PR #15) | verde, 467 unit | 128 su 128 in locale e in CI |
-| Lotto 3 | verde, 473 unit | 130 su 130 in locale dopo una correzione; CI sulla PR #16 |
+| Lotto 3 | verde, 473 unit | corsa completa locale 129 su 130 (un test degli arpeggi cercava la striscia degli accordi sulla scheda Esercizi: aggiunta lì); i file toccati rieseguiti verdi; corsa completa di riferimento in CI sulla PR #16 |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
