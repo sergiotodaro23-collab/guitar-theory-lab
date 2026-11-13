@@ -25,12 +25,16 @@ export interface StudioUi extends UiPrefs {
   readonly pickedTab: Partial<Record<AppMode, TabId>>;
   readonly settingsOpen: boolean;
   readonly vizOpen: boolean;
+  /** Studio V6: the metronome panel of the global header. */
+  readonly metroOpen: boolean;
   /** Tuner footswitch and the last reference tone pressed: never restored on reload. */
   readonly tunerOn: boolean;
   readonly referencePc: number | null;
   readonly setSplit: (split: number) => void;
   readonly setRail: (railExpanded: boolean) => void;
   readonly setLcd: (lcdExpanded: boolean) => void;
+  readonly setConsoleCollapsed: (consoleCollapsed: boolean) => void;
+  readonly setMetroOpen: (open: boolean) => void;
   readonly setViz: (change: Partial<VizPrefs>) => void;
   readonly openDevice: (device: DeviceId, launcher: HTMLElement | null) => void;
   readonly closeDevice: () => void;
@@ -47,17 +51,20 @@ export const useStudioUi = create<StudioUi>((set, get) => ({
   pickedTab: {},
   settingsOpen: false,
   vizOpen: false,
+  metroOpen: false,
   tunerOn: false,
   referencePc: null,
   setSplit: (split) => { set({ split }); savePref(storage(), 'split', split); },
   setRail: (railExpanded) => { set({ railExpanded }); savePref(storage(), 'railExpanded', railExpanded); },
   setLcd: (lcdExpanded) => { set({ lcdExpanded }); savePref(storage(), 'lcdExpanded', lcdExpanded); },
+  setConsoleCollapsed: (consoleCollapsed) => { set({ consoleCollapsed }); savePref(storage(), 'consoleCollapsed', consoleCollapsed); },
+  setMetroOpen: (metroOpen) => set({ metroOpen, settingsOpen: false, vizOpen: false }),
   setViz: (change) => { const viz = { ...get().viz, ...change }; set({ viz }); savePref(storage(), 'viz', viz); },
   // A device replaces the open one at once (no exit animation), as in the handoff.
-  openDevice: (device, launcher) => set({ device, launcher, settingsOpen: false, vizOpen: false }),
+  openDevice: (device, launcher) => set({ device, launcher, settingsOpen: false, vizOpen: false, metroOpen: false }),
   closeDevice: () => set({ device: null }),
   pickTab: (mode, tab) => set({ pickedTab: { ...get().pickedTab, [mode]: tab } }),
-  setSettingsOpen: (settingsOpen) => set({ settingsOpen, vizOpen: false }),
-  setVizOpen: (vizOpen) => set({ vizOpen, settingsOpen: false }),
+  setSettingsOpen: (settingsOpen) => set({ settingsOpen, vizOpen: false, metroOpen: false }),
+  setVizOpen: (vizOpen) => set({ vizOpen, settingsOpen: false, metroOpen: false }),
   setTuner: (change) => set(change),
 }));

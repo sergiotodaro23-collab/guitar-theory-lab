@@ -133,8 +133,10 @@ export function DeviceBay() {
   const canvas = device ? CANVAS[device] : CANVAS.mixer;
   const fit = (c: { w: number; h: number }) => fitScale(c.w, c.h, size.w - BAY_FRAME, size.h - BAY_FRAME, true);
   // The rig takes whichever arrangement shows its controls larger.
-  const rigLayout: RigLayout = fit(RIG_LAYOUTS.row) > fit(RIG_LAYOUTS.stack) ? 'row' : 'stack';
-  const scale = device === 'amp' ? fit(RIG_LAYOUTS[rigLayout]) : fit(canvas);
+  // The rig's status line holds the keys that start the input and the listening: it stays at every height, so its room is always reserved.
+  const fitRig = (c: { w: number; h: number }) => fitScale(c.w, c.h, size.w - BAY_FRAME, size.h - BAY_FRAME - 36, false);
+  const rigLayout: RigLayout = fitRig(RIG_LAYOUTS.row) > fitRig(RIG_LAYOUTS.stack) ? 'row' : 'stack';
+  const scale = device === 'amp' ? fitRig(RIG_LAYOUTS[rigLayout]) : fit(canvas);
   const label = DEVICES.find((d) => d.id === device)?.label ?? '';
   const openInputTab = () => { ui.pickTab(mode, 'input'); ui.closeDevice(); };
   return (

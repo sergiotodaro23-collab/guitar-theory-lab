@@ -129,6 +129,9 @@ export interface HarmonySettings {
   readonly liveProfileId: string;
   /** Master output level, after every channel including the guitar monitor. */
   readonly volMaster: number;
+  /** Backing group (Studio V6 rail): one trim and one mute over comping, bass and drums. The channel faders keep their place. */
+  readonly volBacking: number;
+  readonly muteBacking: boolean;
   /** Guitar Rig on the listening branch (D-42): pedals, amp head, cabinet. */
   readonly rig: RigSettings;
   /** Click accents, 16 steps from the downbeat; null follows the meter (D-18). */
@@ -258,6 +261,8 @@ export const DEFAULT_SETTINGS: Settings = {
   liveProfiles: [],
   liveProfileId: '',
   volMaster: 0.85,
+  volBacking: 1,
+  muteBacking: false,
   rig: DEFAULT_RIG,
   clickAccents: null,
   clickSound: 'beep',
@@ -377,6 +382,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     liveProfiles: sanitizeProfiles(r.liveProfiles),
     liveProfileId: typeof r.liveProfileId === 'string' && sanitizeProfiles(r.liveProfiles).some((p) => p.id === r.liveProfileId) ? r.liveProfileId : '',
     volMaster: number01(r.volMaster, d.volMaster),
+    volBacking: number01(r.volBacking, d.volBacking),
+    muteBacking: r.muteBacking === true,
     rig: sanitizeRig(r.rig),
     clickAccents: sanitizeAccents(r.clickAccents),
     clickSound: oneOf(r.clickSound, CLICK_SOUNDS.map((c) => c.value), d.clickSound),
@@ -486,17 +493,25 @@ export const meterOf = (s: Pick<StudySettings, 'meterId'>): Meter => METERS[s.me
 export type MixChannel = 'click' | 'notes' | 'comp' | 'bass' | 'drums';
 export const MIX_CHANNELS: readonly MixChannel[] = ['click', 'notes', 'comp', 'bass', 'drums'];
 
-/** The level a channel actually plays at: its fader, or silence while muted. */
+/** The accompaniment: the channels the backing trim and mute act on. Click and study notes are not part of it. */
+export const BACKING_CHANNELS: readonly MixChannel[] = ['comp', 'bass', 'drums'];
+
+/** The level a channel actually plays at: its fader, or silence while muted; the band also follows the backing trim. */
 export function channelVolume(s: Settings, channel: MixChannel): number {
   if (s.soloChannel && s.soloChannel !== channel) return 0;
+  const backing = s.muteBacking ? 0 : s.volBacking;
   switch (channel) {
     case 'click': return s.muteClick ? 0 : s.volClick;
     case 'notes': return s.muteNotes ? 0 : s.volNotes;
-    case 'comp': return s.muteComp ? 0 : s.volComp;
-    case 'drums': return s.muteDrums ? 0 : s.volDrums;
-    case 'bass': return s.muteBass ? 0 : s.volBass;
+    case 'comp': return s.muteComp ? 0 : s.volComp * backing;
+    case 'drums': return s.muteDrums ? 0 : s.volDrums * backing;
+    case 'bass': return s.muteBass ? 0 : s.volBass * backing;
   }
 }
+
+/** Level of the imported backing track: its own volume under the same backing trim and mute. */
+export const backingTrackVolume = (s: Pick<Settings, 'backing' | 'volBacking' | 'muteBacking'>): number =>
+  (s.muteBacking ? 0 : s.backing.volume * s.volBacking);
 
 /**
  * Choosing a genre sets up the band: drums (pattern A), bass line, comping

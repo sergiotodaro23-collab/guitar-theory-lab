@@ -49,4 +49,26 @@ describe('mixer mute', () => {
     expect(channelVolume(s, 'notes')).toBe(DEFAULT_SETTINGS.volNotes);
     expect(sanitizeSettings({ ...s, muteNotes: 'yes' }).muteNotes).toBe(false);
   });
+
+  it('the backing trim scales comping, bass and drums only, and its mute silences them without moving any fader', async () => {
+    const { channelVolume, backingTrackVolume } = await import('../app/settings');
+    const s = { ...DEFAULT_SETTINGS, volComp: 0.8, volBass: 0.6, volDrums: 0.5, volClick: 0.7, volNotes: 0.7, volBacking: 0.5 };
+    expect(channelVolume(s, 'comp')).toBeCloseTo(0.4);
+    expect(channelVolume(s, 'bass')).toBeCloseTo(0.3);
+    expect(channelVolume(s, 'drums')).toBeCloseTo(0.25);
+    expect(channelVolume(s, 'click')).toBe(0.7);
+    expect(channelVolume(s, 'notes')).toBe(0.7);
+    const muted = { ...s, muteBacking: true };
+    expect(['comp', 'bass', 'drums'].map((c) => channelVolume(muted, c as 'comp'))).toEqual([0, 0, 0]);
+    expect(channelVolume(muted, 'click')).toBe(0.7);
+    expect(muted.volComp).toBe(0.8);
+    expect(backingTrackVolume({ ...s, backing: { ...s.backing, volume: 0.8 } })).toBeCloseTo(0.4);
+    expect(backingTrackVolume(muted)).toBe(0);
+    // Sessions saved before V6 have no trim: full level, not muted.
+    const old = { ...DEFAULT_SETTINGS } as Record<string, unknown>;
+    delete old.volBacking;
+    delete old.muteBacking;
+    expect(sanitizeSettings(old).volBacking).toBe(1);
+    expect(sanitizeSettings(old).muteBacking).toBe(false);
+  });
 });

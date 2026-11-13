@@ -11,7 +11,8 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await openInput(page, look);
     await reveal(page, page.getByTestId('tuner-string'));
     await expect(page.getByTestId('tuner-string')).toHaveText('5ª corda · A2', { timeout: 5000 });
-    await expect.poll(() => centsShown(page)).toBeLessThanOrEqual(2);
+    // The reading settles from either side: wait on its distance from zero, not on its sign.
+    await expect.poll(async () => Math.abs(await centsShown(page))).toBeLessThanOrEqual(2);
     expect(Math.abs(await centsShown(page))).toBeLessThanOrEqual(2);
     await reveal(page, page.getByTestId('tuner-advice'));
     await expect(page.getByTestId('tuner-advice')).toHaveText('Intonata');

@@ -151,12 +151,14 @@ export interface UiPrefs {
   readonly split: number;
   readonly railExpanded: boolean;
   readonly lcdExpanded: boolean;
+  /** Studio V6: the transport console folded into its one-line strip. */
+  readonly consoleCollapsed: boolean;
   readonly viz: VizPrefs;
 }
 
 /** Storage keys of the handoff (`STORAGE_KEYS`). Live monitor and tuner on/off are never stored; the rig lives in the session settings. */
 export const STORAGE_KEYS = {
-  split: 'gtl.v5.fbR', railExpanded: 'gtl.v5.railX', lcdExpanded: 'gtl.v5.lcdX', viz: 'gtl.v5.vz',
+  split: 'gtl.v5.fbR', railExpanded: 'gtl.v5.railX', lcdExpanded: 'gtl.v5.lcdX', consoleCollapsed: 'gtl.v6.deckC', viz: 'gtl.v5.vz',
 } as const;
 
 export interface KeyValueStore {
@@ -184,6 +186,7 @@ export function loadPrefs(store: KeyValueStore): UiPrefs {
     split: clampRatio(typeof split === 'number' ? split : DEFAULT_SPLIT),
     railExpanded: bool(read(store, STORAGE_KEYS.railExpanded), false),
     lcdExpanded: bool(read(store, STORAGE_KEYS.lcdExpanded), true),
+    consoleCollapsed: bool(read(store, STORAGE_KEYS.consoleCollapsed), false),
     viz: {
       layerMarks: oneOf(viz.layerMarks, ['bars', 'dots'] as const, VIZ_DEFAULTS.layerMarks),
       anim: oneOf(viz.anim, ['pulse', 'glow', 'static'] as const, VIZ_DEFAULTS.anim),

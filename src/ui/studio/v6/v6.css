@@ -1,0 +1,133 @@
+/*
+ * Studio V6 shell (D-43): global header, rail faders, console pull-tab and
+ * strip, mixer handle. Built on the V5.7 tokens and rendered assets (D-40);
+ * scoped to .v57.v6, so Semplificata is untouched.
+ */
+.v57.v6 { display: flex; flex-direction: column; gap: 6px; }
+.v57.v6 > .v57-desk { flex: 1; min-height: 0; height: auto; }
+
+/* ---------- global header: a thin brand strip, no transport ---------- */
+.v6-head { position: relative; z-index: 40; flex: none; height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px 0 16px; border-radius: 3px;
+  color: #6f1f12;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, 0) 45%, rgba(60, 20, 8, .28)),
+    linear-gradient(100deg, #f1e2bd 0%, #e3cf9f 38%, #cfae7c 62%, #9a5236 100%);
+  box-shadow: inset 0 0 0 1px rgba(60, 24, 10, .55), inset 0 -3px 0 #8f2f1c, inset 0 -4px 0 rgba(255, 226, 180, .55), 0 3px 7px rgba(0, 0, 0, .6); }
+.v6-brand { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; min-width: 0; }
+.v6-brand strong { font: 600 25px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .09em; text-transform: uppercase; color: #8c2415; text-shadow: 0 1px 0 rgba(255, 246, 220, .75), 1px 2px 0 rgba(90, 30, 12, .28); }
+.v6-brand small { font: 600 12px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #3a2117; }
+/* Retro stripes after the name: decoration drawn in CSS, no artwork. */
+.v6-brand::after { content: ''; width: 150px; height: 14px; margin-left: 6px; align-self: center; opacity: .85; transform: skewX(-24deg);
+  background: linear-gradient(180deg, #8f2f1c 0 4px, transparent 4px 5px, #c9652c 5px 9px, transparent 9px 10px, #e2a44a 10px 14px);
+  -webkit-mask-image: linear-gradient(90deg, #000, transparent); mask-image: linear-gradient(90deg, #000, transparent); }
+.v6-tools { position: relative; display: flex; align-items: center; gap: 5px; flex: none; }
+.v6-tool { position: relative; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px 0 9px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 5px; color: var(--ink-primary);
+  font: 600 13px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .08em; text-transform: uppercase;
+  background: linear-gradient(180deg, #4a4037 0%, #2b2520 52%, #1c1815 100%); box-shadow: inset 0 1px 0 rgba(255, 236, 200, .3), inset 0 -2px 0 rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .5); }
+.v6-tool:hover { filter: brightness(1.15); }
+.v6-tool[data-on='1'] { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 0 9px rgba(255, 170, 60, .55); }
+.v6-tool-led { width: 7px; height: 7px; border-radius: 50%; background: #3a1512; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .6); }
+.v6-tool-led[data-on='1'] { background: var(--led-green); box-shadow: 0 0 5px var(--led-green); }
+
+/* popovers of the header */
+.v6-pop { position: absolute; z-index: 50; right: 0; top: calc(100% + 10px); width: 430px; max-width: calc(100vw - 30px); padding: 14px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px; color: var(--ink-primary);
+  background: linear-gradient(135deg, #3a332c, #221e1a); box-shadow: 0 0 0 1px #090a0b, inset 0 0 0 1px rgba(190, 150, 100, .4), 0 12px 26px rgba(0, 0, 0, .65); }
+.v6-pop h4 { margin: 0; font: 600 12px/14px 'Barlow Condensed', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--led-amber); }
+.v6-pop p { margin: 0; font: 400 12px/16px 'Barlow', sans-serif; color: var(--ink-muted); }
+.v6-metro-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.v6-metro-field, .v6-metro-vol { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 110px; font: 600 11px/13px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); }
+.v6-metro .select { height: 30px; padding: 0 8px; border: 0; border-radius: 2px; background: #0c0d0f; color: var(--ink-primary); font: 600 13px/20px 'Barlow Condensed', sans-serif; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 0 0 1px rgba(140, 147, 155, .42); width: 100%; }
+.v6-metro-vol input { width: 100%; accent-color: var(--led-amber); }
+.v6-metro-read { display: flex; align-items: center; height: 30px; padding: 0 8px; border-radius: 2px; background: #120a04; color: var(--led-amber); font: 500 12px/1 'IBM Plex Mono', monospace; text-transform: none; letter-spacing: 0; }
+.v6-switch { display: inline-flex; align-items: center; gap: 9px; height: 30px; padding: 0 12px 0 6px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 15px; color: var(--ink-primary); background: #171411; font: 600 13px/1 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.v6-switch i { position: relative; width: 32px; height: 18px; border-radius: 9px; background: #4d463e; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .7); }
+.v6-switch i::after { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #d9d2c4; transition: left .12s; box-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+.v6-switch[aria-checked='true'] i { background: #dba64b; }
+.v6-switch[aria-checked='true'] i::after { left: 16px; background: #fff3d3; }
+
+/* ---------- rail faders ---------- */
+.v6-faders { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; justify-content: center; gap: 6px; padding: 2px 6px 0; overflow: hidden; }
+.v6-fader { flex: 1; min-width: 0; max-width: 84px; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.v6-fader-cap { display: inline-flex; align-items: center; gap: 4px; font: 600 10px/12px 'Barlow Condensed', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--led-amber); white-space: nowrap; }
+.v6-fader-led { width: 6px; height: 6px; border-radius: 50%; background: #2c1a10; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .7); }
+.v6-fader-led[data-on='1'] { background: var(--led-green); box-shadow: 0 0 5px var(--led-green); }
+.v6-fader-body { flex: 1; min-height: 46px; max-height: 190px; display: flex; align-items: stretch; justify-content: center; gap: 5px; width: 100%; }
+/* The slot: a rendered cap over a real vertical range input (the input is the control). */
+.v6-fader-slot { position: relative; width: 30px; flex: none; border-radius: 3px;
+  background:
+    linear-gradient(90deg, transparent 0 13px, #050505 13px 17px, transparent 17px),
+    repeating-linear-gradient(180deg, rgba(236, 226, 200, .5) 0 1px, transparent 1px 12.5%);
+  background-size: 100% 100%, 8px 100%; background-repeat: no-repeat; background-position: 0 0, 0 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .5), inset 0 2px 5px rgba(0, 0, 0, .6); background-color: #1b1512; }
+.v6-fader-slot::after { content: ''; position: absolute; left: 3px; width: 24px; height: 14px; margin-top: -7px; top: calc(7px + (100% - 14px) * (1 - var(--v))); border-radius: 2px; pointer-events: none;
+  background: linear-gradient(180deg, #f5efe0 0 2px, #b9b3a6 2px 6px, #1a1a1a 6px 8px, #a59f92 8px 12px, #6d685f 12px); box-shadow: 0 2px 3px rgba(0, 0, 0, .8), 0 0 0 1px rgba(0, 0, 0, .7); }
+.v6-fader-slot input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ns-resize; writing-mode: vertical-lr; direction: rtl; touch-action: none; }
+.v6-fader-slot:has(input:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.v6-fader-keys { display: flex; flex-direction: column; justify-content: flex-end; gap: 3px; }
+.v6-ms { min-width: 26px; height: 20px; padding: 0 3px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 3px; color: var(--ink-primary); font: 600 10px/1 'Barlow Condensed', sans-serif; letter-spacing: .06em;
+  background: linear-gradient(180deg, #464a51, #2b2d31 52%, #1f2024); box-shadow: inset 0 1px 0 rgba(245, 247, 250, .25); }
+.v6-ms[aria-pressed='true'] { color: #2a1606; background: linear-gradient(180deg, #ffb46a, var(--accent-orange) 55%, #c94e12); box-shadow: 0 0 7px rgba(242, 107, 29, .6); }
+.v6-ms:disabled { opacity: .45; cursor: not-allowed; }
+.v6-fader-val { font: 500 10px/12px 'IBM Plex Mono', monospace; color: var(--ink-primary); }
+/* Compact rail: the guitar fader only, its key under the slot. */
+.v57-rail:not([data-x='1']) .v6-fader[data-strip='backing'] { display: none; }
+.v57-rail:not([data-x='1']) .v6-fader-body { flex-direction: column; align-items: center; gap: 4px; }
+.v57-rail:not([data-x='1']) .v6-fader-slot { flex: 1; min-height: 40px; }
+.v57-rail:not([data-x='1']) .v6-fader-cap { font-size: 9px; letter-spacing: .06em; }
+.v57-rail .v57-rspacer { flex: 0 0 6px; }
+@media (max-height: 660px) { .v6-faders { visibility: hidden; } }
+
+/* ---------- console: pull-tab, folded strip, wheel zones ---------- */
+.v57.v6 .v57-deck-box { position: relative; z-index: 6; }
+.v6-pulltab { position: absolute; left: 50%; bottom: -31px; z-index: 7; width: 64px; height: 13px; margin-left: -32px; padding: 0; display: grid; place-items: center; cursor: pointer; color: var(--led-amber);
+  border: 1px solid #07080a; border-top: 0; border-radius: 0 0 8px 8px; background: linear-gradient(180deg, #2c2e33, #1b1c1f); box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .14), 0 2px 3px rgba(0, 0, 0, .6); }
+.v6-pulltab:hover { filter: brightness(1.3); }
+.v57-deck[data-collapsed='1'] { display: block; }
+.v57-deck[data-collapsed='1'] .v6-pulltab { bottom: -14px; }
+.v6-strip { display: flex; align-items: center; gap: 6px; height: 30px; }
+.v6-strip-lcd { flex: 1; min-width: 0; height: 26px; display: flex; align-items: center; gap: 18px; padding: 0 12px; border-radius: 3px; overflow: hidden; white-space: nowrap; color: var(--led-amber); font: 500 13px/1 'IBM Plex Mono', ui-monospace, monospace;
+  background: radial-gradient(120% 150% at 28% 18%, #21140a 0%, #120a04 55%, #080502 100%); box-shadow: inset 0 2px 6px rgba(0, 0, 0, .85), 0 0 0 1px #050505; text-shadow: 0 0 6px rgba(255, 170, 50, .6); }
+.v6-strip-lcd .now-chord { font-weight: 600; font-size: 15px; color: var(--led-amber); }
+.v6-strip-lcd .now-chord[data-none='1'] { opacity: .5; }
+.v6-strip-lcd .beat-lights { display: flex; gap: 5px; margin-left: auto; }
+.v6-strip-lcd .beat-light { width: 7px; height: 7px; border-radius: 50%; border: 0; background: var(--led-green); opacity: .18; }
+.v6-strip-lcd .beat-light.is-first { background: var(--led-amber); }
+.v6-strip-lcd .beat-light.is-on { opacity: 1; box-shadow: 0 0 6px currentColor; }
+.v6-tempo { cursor: ns-resize; touch-action: none; }
+.v6-tempo .bpm-input { cursor: text; }
+.v6-wheel { display: contents; }
+
+/* ---------- mixer handle ---------- */
+.v6-mixhandle { flex: none; height: 26px; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0; cursor: pointer; color: #f1ca86; border: 1px solid #07080a; border-radius: 3px;
+  font: 600 14px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .1em; text-transform: uppercase;
+  background: linear-gradient(180deg, #4a3526 0%, #2a1d14 55%, #1a120d 100%); box-shadow: inset 0 1px 0 rgba(255, 220, 170, .28), inset 0 -2px 0 rgba(0, 0, 0, .45), 0 2px 5px rgba(0, 0, 0, .55); }
+.v6-mixhandle em { font-style: normal; opacity: .7; text-transform: none; letter-spacing: .04em; }
+.v6-mixhandle:hover { filter: brightness(1.15); }
+.v6-mixhandle[data-on='1'] { color: #ffe2a8; box-shadow: inset 0 1px 0 rgba(255, 220, 170, .28), 0 0 10px rgba(255, 170, 60, .35); }
+
+@media (max-height: 820px) {
+  .v57.v6 { gap: 5px; }
+  .v6-head { height: 32px; }
+  .v6-brand strong { font-size: 21px; }
+  .v6-tool { height: 25px; }
+  .v6-mixhandle { height: 22px; }
+}
+@media (max-width: 1100px) {
+  .v6-brand::after { display: none; }
+  .v6-tool { padding: 0 8px; }
+}
+@media (max-width: 860px) {
+  .v6-brand small { display: none; }
+  .v6-brand strong { font-size: 18px; letter-spacing: .05em; }
+  .v6-tool span { display: none; }
+}
+
+/* Expanded rail: the icon keeps its own column, so the lab name never runs under it. */
+.v57.v6 .v57-rail[data-x='1'] .v57-rb { gap: 0; padding: 0; }
+.v57.v6 .v57-rail[data-x='1'] .v57-rb > svg { margin: -13px 8px -13px -6px; }
+.v57.v6 .v57-rail[data-x='1'] .v57-rl { overflow: hidden; text-overflow: ellipsis; }
+/* Folded console: a plain brushed bar instead of the rendered plate (its corner screws do not fit 44 px). */
+.v57.v6 .v57-deck[data-collapsed='1'] { border: 1px solid #07080a; border-image: none; border-radius: 4px; padding: 5px 10px; background: linear-gradient(180deg, #3d4046, #25272b 55%, #1b1c1f); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 3px 6px rgba(0, 0, 0, .55); }
+
+/* The rig's status line carries the input and listening keys: never hidden, even in the shortest drawer. */
+.v57.v6 .v57-dvx[data-c='2'][data-device='amp'] .v57-dv > .v57-rig-status { display: block; }
