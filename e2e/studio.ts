@@ -8,7 +8,10 @@ import { expect, type Locator, type Page } from '@playwright/test';
 
 export type Look = 'Studio' | 'Semplificata';
 
-const inStudio = (page: Page) => page.getByTestId('studio').isVisible();
+/** Which shell is on screen, read after the frame that follows a resize or a look change has painted. */
+const inStudio = (page: Page) => page.evaluate(() => new Promise<boolean>((resolve) => {
+  requestAnimationFrame(() => requestAnimationFrame(() => resolve(document.querySelector('[data-testid="studio"]') !== null)));
+}));
 
 /** Switch look from either shell. */
 export async function chooseLook(page: Page, look: Look): Promise<void> {
@@ -36,8 +39,11 @@ export async function openTab(page: Page, studioLabel: string, simpleLabel = stu
 export async function openDevice(page: Page, device: 'mixer' | 'amp' | 'tuner' | 'iface'): Promise<void> {
   if (!(await inStudio(page))) return;
   const key = page.getByTestId(`device-${device}`);
-  if ((await key.getAttribute('aria-pressed')) !== 'true') await key.click();
+  const opening = (await key.getAttribute('aria-pressed')) !== 'true';
+  if (opening) await key.click();
   await expect(page.getByTestId('device-drawer')).toHaveAttribute('data-device', device);
+  // The drawer moves focus to its close key a moment after opening: wait for it, or the next key press lands there.
+  if (opening) await expect(page.getByTestId('device-close')).toBeFocused();
 }
 
 /** The mixer is always on screen in Semplificata; in Studio it is a drawer device. */

@@ -208,6 +208,8 @@ test('tuner and interface without input: honest states, opening never starts mon
   await expect(page.getByTestId('iface-lcd')).toContainText('Ingresso spento');
   await expect(page.getByTestId('iface-monitor')).toBeDisabled();
   await expect(page.getByTestId('iface-monitor')).toHaveAttribute('aria-pressed', 'false');
+  // The drawer moves focus to its close key a moment after opening: wait for it, or the key press below lands there.
+  await expect(page.getByTestId('device-close')).toBeFocused();
   await page.getByTestId('iface-gain').focus();
   await page.keyboard.press('End');
   await expect(page.getByTestId('iface-gain')).toHaveAttribute('aria-valuetext', '+12.0 dB');

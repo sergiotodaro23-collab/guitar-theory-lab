@@ -45,11 +45,12 @@ for (const look of ['Studio', 'Semplificata'] as const) {
 
 test('the guitar reaches the output only when listening is switched on, at the mixer level', async ({ page }) => {
   await openInput(page, 'Studio');
-  // Levels move with a 10–20 ms glide: settle first, then take the peak over about a second.
+  // Levels move with a 10–20 ms glide: settle first, then take the peak over one whole loop of the picking file
+  // (2.9 s of notes and silences), so the reading never depends on which note the window happens to catch.
   const out = () => page.evaluate(async () => {
     await new Promise((r) => setTimeout(r, 250));
     let peak = 0;
-    for (let i = 0; i < 30; i += 1) {
+    for (let i = 0; i < 100; i += 1) {
       peak = Math.max(peak, window.__gtl?.engine.outputLevel() ?? 0);
       await new Promise((r) => setTimeout(r, 30));
     }
