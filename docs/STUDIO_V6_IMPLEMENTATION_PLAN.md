@@ -16,7 +16,7 @@ Regole: quelle di `CLAUDE.md` (motori puri, un solo clock, forme dal motore, mai
 | 2 · Rack destro (fatto, #15) | Colonna «Audio & Rig» espansa, compatta, nascosta; moduli Ingresso, Amplificatore, Cabinet IR, Pedaliera, Routing con i controlli reali di D-42; i cassetti di rig e ingresso vanno in pensione | 1 |
 | 3 · Taccuino (fatto in parte, #16) | Ordine delle schede V6 per laboratorio; schede condivise Tastiera secondaria, Legenda e visualizzazione (doppia pagina), Dettagli | 1 |
 | 4 · Mixer (fatto, #17) | Fader lunghi a tutta larghezza, misuratori per canale, Solo del backing | 1 |
-| 5 · Libreria preset | Finestra con ricerca e filtri (laboratorio, difficoltà, tonalità, tipo); salvataggio, modifica, cancellazione | 3 |
+| 5 · Libreria preset (fatto, #18) | Finestra con ricerca e filtri (laboratorio, difficoltà, tonalità, tipo); salvataggio, modifica, cancellazione | 3 |
 | 6 · Rig | Fuzz ed EQ, riordino dei pedali, preset di suono, quinto timbro del metronomo | 2 |
 | 7 · Legenda | Simboli per ruolo (cerchio, quadrato, triangolo, rombo), 12 colori, note sovrapposte composte | 3 |
 | 8 · Esercizi | Motore condiviso tra i laboratori, valutazione con il tracking dove misurabile | 5 |

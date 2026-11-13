@@ -92,6 +92,19 @@ export class PresetRepository {
     return error ? { ok: false, error } : { ok: true, preset };
   }
 
+  /** Renames a preset; refused when empty or when another preset of the same kind already has that name. */
+  rename(id: string, name: string): SaveResult {
+    const trimmed = name.trim();
+    if (!trimmed) return { ok: false, error: 'Dai un nome al preset.' };
+    const existing = this.read();
+    const target = existing.find((p) => p.id === id);
+    if (!target) return { ok: false, error: 'Preset non trovato.' };
+    if (existing.some((p) => p.id !== id && p.kind === target.kind && p.name === trimmed)) return { ok: false, error: 'Esiste già un preset con questo nome.' };
+    const preset: Preset = { ...target, name: trimmed };
+    const error = this.write(existing.map((p) => (p.id === id ? preset : p)));
+    return error ? { ok: false, error } : { ok: true, preset };
+  }
+
   remove(id: string): void {
     this.write(this.read().filter((preset) => preset.id !== id));
   }

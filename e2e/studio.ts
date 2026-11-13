@@ -74,6 +74,12 @@ export async function reveal(page: Page, target: Locator): Promise<void> {
     await page.getByTestId('device-close').click();
     await expect(drawer).toHaveCount(0);
   }
+  // The preset library is a modal dialog: close it unless the target is in it.
+  const library = page.getByTestId('preset-library');
+  if (await library.isVisible() && !(await library.locator(target).first().isVisible().catch(() => false))) {
+    await page.getByTestId('preset-library-close').click();
+    await expect(library).toBeHidden();
+  }
   // The metronome panel floats over the console and the rack: close it unless the target is in it.
   const metronome = page.getByTestId('metronome-panel');
   if (await metronome.isVisible() && !(await metronome.locator(target).first().isVisible().catch(() => false))) {
@@ -127,9 +133,36 @@ export async function reveal(page: Page, target: Locator): Promise<void> {
       if (await shown()) return;
     }
     await closeDrawer();
-    // Presets, look and licence live in the settings panel of the rail.
+    // Look and licence live in the settings panel of the rail.
     await page.getByTestId('studio-settings-toggle').click();
     if (await shown()) return;
     await page.keyboard.press('Escape');
+    await expect(page.getByTestId('studio-settings')).toHaveCount(0);
+    // Study presets live in the library of the header.
+    await page.getByTestId('preset-library-open').click();
+    if (await shown()) return;
+    await page.getByTestId('preset-library-close').click();
   }
+}
+
+/**
+ * Load a study preset by its id (starter presets) or by its name (the user's
+ * own): from the library in Studio, from the presets select in Semplificata.
+ */
+export async function loadPreset(page: Page, preset: { readonly id: string } | { readonly name: string }): Promise<void> {
+  if (await inStudio(page)) {
+    const library = page.getByTestId('preset-library');
+    if (!(await library.isVisible())) {
+      await reveal(page, page.getByTestId('preset-library-open'));
+      await page.getByTestId('preset-library-open').click();
+    }
+    const card = 'id' in preset ? library.locator(`[data-preset-id="${preset.id}"]`) : library.getByTestId('preset-card').filter({ hasText: preset.name });
+    await card.getByRole('button', { name: /^Carica / }).click();
+    await expect(library).toBeHidden();
+    return;
+  }
+  const select = page.getByTestId('preset-load');
+  await reveal(page, select);
+  if ('id' in preset) await select.selectOption(preset.id);
+  else await select.selectOption(await select.locator('option', { hasText: `Tuo: ${preset.name}` }).getAttribute('value') as string);
 }

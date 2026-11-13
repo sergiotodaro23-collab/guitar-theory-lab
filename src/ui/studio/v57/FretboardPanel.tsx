@@ -1,13 +1,13 @@
 /**
- * The fretboard panel: its toolbar (visualisation, tuning, preset) and the
+ * The fretboard panel: its toolbar (visualisation, labels, tuning) and the
  * production neck — six strings, frets 0–24, markers from the engine. The
  * visualisation preferences only change how things are drawn.
  */
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { tuningOf } from '../../../app/settings';
-import { presetRepository, useApp } from '../../../app/store';
+import { useApp } from '../../../app/store';
 import { Board } from '../../Board';
-import { LabelModeSelector, loadStudyPreset, neckTuningChange, neckTuningOptions, presetLoadOptions } from '../../panels';
+import { LabelModeSelector, neckTuningChange, neckTuningOptions } from '../../panels';
 import { Select } from '../../controls';
 import { useStudioUi } from './uiStore';
 import type { VizPrefs } from './layout';
@@ -71,8 +71,6 @@ function Toolbar() {
   const update = useApp((state) => state.update);
   const vizOpen = useStudioUi((u) => u.vizOpen);
   const setVizOpen = useStudioUi((u) => u.setVizOpen);
-  const [saved] = useState(() => presetRepository.list('study'));
-  const [loaded, setLoaded] = useState('__');
   const vizKey = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
   useEffect(() => {
@@ -90,10 +88,6 @@ function Toolbar() {
       <span className="v57-silk" aria-hidden="true">Accordatura</span>
       <span className="v57-lsel">
         <Select<string> label="Accordatura del manico" value={s.neckTuning} options={neckTuningOptions} onChange={(neckTuning) => update(neckTuningChange(neckTuning, tuningOf(s)))} />
-      </span>
-      <span className="v57-silk" aria-hidden="true">Preset</span>
-      <span className="v57-lsel">
-        <Select<string> label="Preset rapido" value={loaded} options={presetLoadOptions(saved)} onChange={(id) => { if (loadStudyPreset(id, saved)) setLoaded(id); }} />
       </span>
       {vizOpen ? <VizPopover /> : null}
     </div>

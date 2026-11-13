@@ -4,7 +4,7 @@ Stati come in `CLAUDE.md`: implementato, testato con segnali sintetici, verifica
 
 ## Fase corrente
 
-P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lotto 4 (mixer) fatto. Prossimo: lotto 5, Preset Library.
+P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lotti 4 (mixer) e 5 (Preset Library) fatti. Prossimo: lotto 7, legenda e tastiera secondaria.
 
 ## Lotti
 
@@ -15,7 +15,7 @@ P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lot
 | 2 · Rack destro | `claude/studio-v6-rack` | #15 | unita (CI verde) | implementato; audio testato con segnale sintetico |
 | 3 · Taccuino V6 | `claude/studio-v6-notebook` | #16 | unita (CI verde) | parziale: ordine, Dettagli, Voice leading; legenda a doppia pagina nel lotto 7 |
 | 4 · Mixer a fader lunghi | `claude/studio-v6-mixer` | #17 | vedi PR | implementato |
-| 5 · Libreria preset | — | — | — | mancante |
+| 5 · Libreria preset | `claude/studio-v6-presets` | #18 | vedi PR | implementato |
 | 6 · Rig: fuzz, EQ, riordino, preset | — | — | — | mancante |
 | 7 · Legenda a simboli | — | — | — | mancante |
 | 8 · Motore esercizi condiviso | — | — | — | mancante |
@@ -37,7 +37,6 @@ P1 (shell) conclusa con i lotti 1 e 2; P2 avviata con il lotto 3 (taccuino); lot
 
 Limiti dichiarati del lotto 1 ancora aperti:
 
-- Nessun tasto «Preset Library» nell'header: arriva con il lotto 5. I preset restano nel pannello Impostazioni.
 - Il metronomo ha quattro timbri; il quinto è nel lotto 6.
 
 ## Lotto 2 — cosa c'è
@@ -89,6 +88,17 @@ Limiti dichiarati del lotto 3:
 
 Limiti dichiarati del lotto 4: nessun misuratore per il gruppo Backing né per la backing track importata; il Solo non include la backing track importata.
 
+## Lotto 5 — cosa c'è
+
+| Funzione | Stato | Prova |
+|---|---|---|
+| Finestra Preset Library dall'header: ricerca, filtri combinabili (laboratorio, tipo, tonalità, difficoltà, origine) | implementato | unit `presetLibrary.test.ts`, `e2e/studio-v6-shell.spec.ts` |
+| Carica (anche cambiando laboratorio), salva lo studio corrente, rinomina, elimina; persistenza al ricaricamento | implementato | e2e, `e2e/app.spec.ts` |
+| Descrizione dei preset letta dai dati | implementato | unit |
+| Preset su progressione con la tonalità dell'analisi | corretto | unit |
+
+Limiti dichiarati del lotto 5: nessun filtro per tecnica e stile (i preset non portano quei dati); la difficoltà esiste solo sui preset di partenza; la modifica di un preset è rinomina o sovrascrittura con lo stesso nome.
+
 ## Test
 
 | Momento | `npm run check` | `npm run test:e2e` |
@@ -97,7 +107,8 @@ Limiti dichiarati del lotto 4: nessun misuratore per il gruppo Backing né per l
 | Lotto 1 (PR #14) | verde, 465 unit | 128 su 128 in esecuzioni per file e ripetute; nella corsa completa un caso instabile di lettura dell'accordatore (`live-a2`, attesa sul segno invece che sul valore assoluto) corretto nel test |
 | Lotto 2 (PR #15) | verde, 467 unit | 128 su 128 in locale e in CI |
 | Lotto 3 | verde, 473 unit | corsa completa locale 129 su 130 (un test degli arpeggi cercava la striscia degli accordi sulla scheda Esercizi: aggiunta lì); i file toccati rieseguiti verdi; corsa completa verde in CI sulla PR #16 |
-| Lotto 4 | verde, 473 unit | 131 su 131 in locale; CI sulla PR #17 |
+| Lotto 4 (PR #17) | verde, 473 unit | 131 su 131 in locale |
+| Lotto 5 | verde, 478 unit | 132 su 132 in locale; CI sulla PR #18 |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
@@ -107,4 +118,4 @@ Nessuno.
 
 ## Prossimo lotto consigliato
 
-Lotto 5: Preset Library globale (finestra dall'header con ricerca e filtri per laboratorio, difficoltà, tonalità, tipo; salvataggio, modifica, cancellazione) sopra `presetRepository` e `STUDY_PRESETS`. Poi lotto 7 (legenda a doppia pagina, tastiera secondaria in palissandro) e lotto 6 (fuzz, EQ, riordino dei pedali, preset di suono, quinto timbro del metronomo).
+Lotto 7: legenda a doppia pagina (Scale a sinistra, Accordi a destra) con numero, simbolo per ruolo, nome, colore tra 12 e visibilità, sopra `scaleLayers` e `chordLayers`; note sovrapposte composte; tastiera secondaria in palissandro con overlay indipendente. Poi lotto 6 (fuzz, EQ, riordino dei pedali, preset di suono, quinto timbro del metronomo), lotto 8 (motore esercizi condiviso), lotto 9 (fattibilità NAM).
