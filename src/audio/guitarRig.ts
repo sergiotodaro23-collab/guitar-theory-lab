@@ -1,7 +1,7 @@
 /**
  * Guitar Rig audio graph (D-42), built from native Web Audio nodes on the
- * guitar's listening branch: comp → drive → amp → cabinet → chorus → delay →
- * reverb. Every stage has a dry and a wet path with smooth gain changes, so
+ * guitar's listening branch: comp → fuzz → drive → amp → cabinet → eq →
+ * chorus → delay → reverb. Every stage has a dry and a wet path with smooth gain changes, so
  * bypass and parameter moves never click. The analysis keeps the dry signal:
  * the rig sits after the input gain, before the monitor level.
  *
@@ -10,8 +10,8 @@
  * here claims to be NAM.
  */
 import {
-  CHORUS_BASE_DELAY, PEDALS, ampDrive, ampOutGain, cabinetImpulse, chorusDepth, chorusRate, compMakeup, compThreshold, delayFeedback,
-  delayTime, mix01, odDrive, odLevel, odTone, presenceDb, reverbDecay, reverbImpulse, softClipCurve, toneDb, type PedalId, type RigSettings,
+  CHORUS_BASE_DELAY, EQ_BANDS, PEDALS, RIG_CHAIN, ampDrive, ampOutGain, cabinetImpulse, chorusDepth, chorusRate, compMakeup, compThreshold, delayFeedback,
+  delayTime, eqDb, fuzzCurve, fuzzDrive, fuzzLevel, fuzzTone, mix01, odDrive, odLevel, odTone, presenceDb, reverbDecay, reverbImpulse, softClipCurve, toneDb, type PedalId, type RigSettings,
 } from '../app/rig';
 
 const GLIDE = 0.02;
@@ -49,6 +49,13 @@ export class GuitarRig {
   private readonly stages: Record<PedalId | 'amp' | 'cab', Stage>;
   private readonly comp: DynamicsCompressorNode;
   private readonly compGain: GainNode;
+  private readonly fuzz: WaveShaperNode;
+  private readonly fuzzTone: BiquadFilterNode;
+  private readonly fuzzLevel: GainNode;
+  private readonly eqLow: BiquadFilterNode;
+  private readonly eqMid: BiquadFilterNode;
+  private readonly eqHigh: BiquadFilterNode;
+  private fuzzKey = -1;
   private readonly drive: WaveShaperNode;
   private readonly driveTone: BiquadFilterNode;
   private readonly driveLevel: GainNode;
@@ -77,8 +84,8 @@ export class GuitarRig {
     this.ctx = ctx;
     this.input = ctx.createGain();
     this.output = ctx.createGain();
-    const order = ['comp', 'drive', 'amp', 'cab', 'chorus', 'delay', 'reverb'] as const;
-    this.stages = Object.fromEntries(order.map((id) => [id, stage(ctx)])) as Record<(typeof order)[number], Stage>;
+    const order = RIG_CHAIN;
+    this.stages = Object.fromEntries(order.map((id) => [id, stage(ctx)])) as Record<PedalId | 'amp' | 'cab', Stage>;
     // Series wiring of the stages.
     let previous: AudioNode = this.input;
     for (const id of order) {
@@ -95,6 +102,14 @@ export class GuitarRig {
     this.comp.release.value = 0.2;
     this.compGain = ctx.createGain();
     this.stages.comp.input.connect(this.comp).connect(this.compGain).connect(this.stages.comp.wet);
+
+    // Fuzz: hard asymmetric clipper, then its tone low-pass and level.
+    this.fuzz = ctx.createWaveShaper();
+    this.fuzz.oversample = '4x';
+    this.fuzzTone = ctx.createBiquadFilter();
+    this.fuzzTone.type = 'lowpass';
+    this.fuzzLevel = ctx.createGain();
+    this.stages.fuzz.input.connect(this.fuzz).connect(this.fuzzTone).connect(this.fuzzLevel).connect(this.stages.fuzz.wet);
 
     // Overdrive.
     this.drive = ctx.createWaveShaper();
@@ -124,6 +139,12 @@ export class GuitarRig {
     // Cabinet.
     this.cab = ctx.createConvolver();
     this.stages.cab.input.connect(this.cab).connect(this.stages.cab.wet);
+
+    // EQ after the cabinet: low shelf, mid bell, high shelf.
+    this.eqLow = filter('lowshelf', EQ_BANDS.low);
+    this.eqMid = filter('peaking', EQ_BANDS.mid, 0.9);
+    this.eqHigh = filter('highshelf', EQ_BANDS.high);
+    this.stages.eq.input.connect(this.eqLow).connect(this.eqMid).connect(this.eqHigh).connect(this.stages.eq.wet);
 
     // Chorus: a short delay swept by an LFO (an audio-rate oscillator, not a UI timer).
     this.chorusDelay = ctx.createDelay(0.05);
@@ -174,7 +195,14 @@ export class GuitarRig {
     if (driveAmount !== this.driveKey) { this.drive.curve = softClipCurve(driveAmount); this.driveKey = driveAmount; }
     this.set(this.driveTone.frequency, odTone(k('drive', 'tone')));
     this.set(this.driveLevel.gain, odLevel(k('drive', 'level')));
-    for (const id of ['comp', 'drive'] as const) this.route(id, r.pedals[id].on ? 0 : 1, r.pedals[id].on ? 1 : 0);
+    const fuzzAmount = fuzzDrive(k('fuzz', 'fuzz'));
+    if (fuzzAmount !== this.fuzzKey) { this.fuzz.curve = fuzzCurve(fuzzAmount); this.fuzzKey = fuzzAmount; }
+    this.set(this.fuzzTone.frequency, fuzzTone(k('fuzz', 'tone')));
+    this.set(this.fuzzLevel.gain, fuzzLevel(k('fuzz', 'level')));
+    this.set(this.eqLow.gain, eqDb(k('eq', 'low')));
+    this.set(this.eqMid.gain, eqDb(k('eq', 'mid')));
+    this.set(this.eqHigh.gain, eqDb(k('eq', 'high')));
+    for (const id of ['comp', 'fuzz', 'drive', 'eq'] as const) this.route(id, r.pedals[id].on ? 0 : 1, r.pedals[id].on ? 1 : 0);
 
     // Amp: bypass passes the signal straight through amp and cabinet; power off silences it.
     const a = r.amp.knobs;
@@ -224,7 +252,7 @@ export class GuitarRig {
   describe(): RigState {
     const r = this.settings;
     return {
-      chain: ['comp', 'drive', 'amp', 'cab', 'chorus', 'delay', 'reverb'],
+      chain: [...RIG_CHAIN],
       active: [...PEDALS, 'amp', 'cab'].filter((id) => this.heard.has(id)),
       ampHeard: this.heard.has('amp'),
       cab: r ? (r.cab.model === 'file' && !this.fileCab ? '4x12' : r.cab.model) : '',

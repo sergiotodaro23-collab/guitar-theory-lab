@@ -8,7 +8,7 @@
  */
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { engine } from '../../../app/engine';
-import { AMP_KNOB_IDS, PEDAL_SPECS, POST_PEDALS, PRE_PEDALS, type CabModel, type PedalId } from '../../../app/rig';
+import { AMP_KNOB_IDS, PEDAL_SPECS, POST_PEDALS, PRE_PEDALS, RIG_PRESETS, matchingRigPreset, type CabModel, type PedalId } from '../../../app/rig';
 import { useApp } from '../../../app/store';
 import { liveInput, useLive, type InputChannel } from '../../../audio/liveInput';
 import { useMidi } from '../../../audio/midi';
@@ -220,7 +220,7 @@ function PedalsModule() {
 
 /* ---------------- 5 · routing / output ---------------- */
 
-const STAGE: Record<string, string> = { comp: 'Compressor', drive: 'Overdrive', amp: 'Ampli', cab: 'Cabinet', chorus: 'Chorus', delay: 'Delay', reverb: 'Reverb' };
+const STAGE: Record<string, string> = { comp: 'Compressor', fuzz: 'Fuzz', drive: 'Overdrive', amp: 'Ampli', cab: 'Cabinet', eq: 'EQ', chorus: 'Chorus', delay: 'Delay', reverb: 'Reverb' };
 
 function OutMeter() {
   const [level, setLevel] = useState(0);
@@ -293,6 +293,24 @@ function Footer() {
   );
 }
 
+/* ---------------- sound presets ---------------- */
+
+/** Starting sounds of the rig: choosing one sets amp, cabinet and pedals; moving any control leaves it. */
+function SoundPreset() {
+  const [rig, setRig] = useRig();
+  const current = matchingRigPreset(rig);
+  return (
+    <label className="v6-sound">
+      <span className="v6-silk">Suono</span>
+      <select className="v6-select" aria-label="Suono del rig" data-testid="rig-preset" value={current?.id ?? ''}
+        onChange={(e) => { const preset = RIG_PRESETS.find((p) => p.id === e.target.value); if (preset) setRig(() => preset.rig); }}>
+        <option value="">{current ? 'Scegli…' : 'Personale'}</option>
+        {RIG_PRESETS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+      </select>
+    </label>
+  );
+}
+
 /* ---------------- the rack ---------------- */
 
 const SPINE: readonly { id: RackModuleId; glyph: string; label: string }[] = [
@@ -351,6 +369,7 @@ export function Rack() {
         </button>
       </div>
       <div className="v6-rack-body" data-testid="rig">
+        <SoundPreset />
         <InputModule />
         <AmpModule />
         <CabModule />

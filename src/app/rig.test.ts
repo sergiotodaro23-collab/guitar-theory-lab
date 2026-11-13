@@ -82,3 +82,82 @@ describe('impulse responses', () => {
     expect(left).not.toEqual(right);
   });
 });
+
+describe('fuzz and EQ (Studio V6)', () => {
+  it('the chain puts fuzz before the overdrive and the EQ after the cabinet', async () => {
+    const { RIG_CHAIN } = await import('./rig');
+    expect(RIG_CHAIN).toEqual(['comp', 'fuzz', 'drive', 'amp', 'cab', 'eq', 'chorus', 'delay', 'reverb']);
+  });
+  it('the fuzz clipper is bounded, monotonic, asymmetric, keeps zero at zero and squares the wave far harder than the soft clipper', async () => {
+    const { FUZZ_FLOOR, fuzzCurve, fuzzDrive } = await import('./rig');
+    const curve = fuzzCurve(fuzzDrive(60));
+    const at = (x: number) => curve[Math.round(((x + 1) / 2) * (curve.length - 1))] ?? 0;
+    for (let i = 1; i < curve.length; i += 1) expect(curve[i] ?? 0).toBeGreaterThanOrEqual(curve[i - 1] ?? 0);
+    expect(Math.max(...curve)).toBeLessThanOrEqual(1);
+    expect(Math.min(...curve)).toBeGreaterThanOrEqual(FUZZ_FLOOR);
+    // Odd-length-free check of the origin: the two samples around zero straddle it closely.
+    expect(Math.abs(at(0))).toBeLessThan(0.1);
+    // A quiet input is already almost fully clipped on both sides, at different heights.
+    expect(at(0.05)).toBeGreaterThan(0.99);
+    expect(at(-0.05)).toBeLessThan(FUZZ_FLOOR * 0.99);
+    expect(at(1)).toBeCloseTo(1, 3);
+    expect(at(-1)).toBeCloseTo(FUZZ_FLOOR, 3);
+    // The overdrive's soft clipper at its default leaves the same quiet input far from the rail.
+    const soft = softClipCurve(28);
+    expect(soft[Math.round(((0.05 + 1) / 2) * (soft.length - 1))] ?? 0).toBeLessThan(0.95);
+  });
+  it('fuzz and EQ knobs map to their ranges; the EQ is flat at noon', async () => {
+    const { eqDb, fuzzDrive, fuzzLevel, fuzzTone } = await import('./rig');
+    expect(eqDb(50)).toBe(0);
+    expect(eqDb(0)).toBe(-12);
+    expect(eqDb(100)).toBe(12);
+    expect(fuzzDrive(0)).toBe(20);
+    expect(fuzzDrive(100)).toBe(300);
+    expect(fuzzTone(0)).toBeCloseTo(500);
+    expect(fuzzTone(100)).toBeCloseTo(6000);
+    expect(fuzzLevel(100)).toBeCloseTo(1);
+    expect(fuzzLevel(0)).toBeCloseTo(dbToGain(-30));
+  });
+  it('a session saved before fuzz and EQ existed gains them switched off, with the other pedals untouched', () => {
+    const old = { ...DEFAULT_RIG, pedals: { delay: { on: true, knobs: { time: 70, feedback: 20, mix: 40 } } } };
+    const r = sanitizeRig(old);
+    expect(r.pedals.fuzz).toEqual({ on: false, knobs: { fuzz: 60, tone: 50, level: 40 } });
+    expect(r.pedals.eq).toEqual({ on: false, knobs: { low: 50, mid: 50, high: 50 } });
+    expect(r.pedals.delay).toEqual({ on: true, knobs: { time: 70, feedback: 20, mix: 40 } });
+  });
+});
+
+describe('rig sound presets', () => {
+  it('seven starting sounds, each valid as saved settings and recognised when loaded', async () => {
+    const { RIG_PRESETS, matchingRigPreset } = await import('./rig');
+    expect(RIG_PRESETS.map((p) => p.id)).toEqual(['blues-clean', 'jazz-clean', 'rock', 'fusion', 'punk', 'fuzz', 'ambient']);
+    expect(new Set(RIG_PRESETS.map((p) => p.name)).size).toBe(RIG_PRESETS.length);
+    for (const preset of RIG_PRESETS) {
+      expect(sanitizeRig(preset.rig), preset.id).toEqual(preset.rig);
+      expect(matchingRigPreset(preset.rig)?.id).toBe(preset.id);
+      expect(preset.rig.amp.power && !preset.rig.amp.bypass, preset.id).toBe(true);
+    }
+    // Moving any control leaves the preset; the default rig is none of them.
+    const rock = RIG_PRESETS.find((p) => p.id === 'rock');
+    if (!rock) throw new Error('no rock preset');
+    expect(matchingRigPreset({ ...rock.rig, amp: { ...rock.rig.amp, knobs: { ...rock.rig.amp.knobs, gain: 71 } } })).toBeNull();
+    expect(matchingRigPreset(DEFAULT_RIG)).toBeNull();
+  });
+  it('each sound is what its name says', async () => {
+    const { RIG_PRESETS } = await import('./rig');
+    const by = Object.fromEntries(RIG_PRESETS.map((p) => [p.id, p.rig]));
+    const on = (id: string) => PEDALS.filter((p) => by[id]?.pedals[p].on);
+    expect(on('fuzz')).toEqual(['fuzz']);
+    expect(on('punk')).toEqual([]);
+    expect(on('jazz-clean')).toEqual(['chorus', 'reverb']);
+    expect(by['jazz-clean']?.pedals.chorus.knobs.mix).toBeLessThanOrEqual(30);
+    expect(on('ambient')).toEqual(['comp', 'chorus', 'delay', 'reverb']);
+    expect(by.ambient?.pedals.delay.knobs.mix).toBeGreaterThanOrEqual(40);
+    // Clean sounds keep the preamp low, distorted ones push it, in the order blues < fusion < rock < punk.
+    const gain = (id: string) => by[id]?.amp.knobs.gain ?? 0;
+    expect(gain('jazz-clean')).toBeLessThan(gain('blues-clean'));
+    expect(gain('blues-clean')).toBeLessThan(40);
+    expect(gain('fusion')).toBeLessThan(gain('rock'));
+    expect(gain('rock')).toBeLessThan(gain('punk'));
+  });
+});

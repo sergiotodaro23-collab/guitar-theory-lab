@@ -336,3 +336,5 @@
 .v6-pl-msg { font: 500 12px/32px 'IBM Plex Mono', monospace; color: #ffb23f; }
 .v6-pl button:focus-visible, .v6-pl input:focus-visible, .v6-pl select:focus-visible { outline: 2px solid #ffd23f; outline-offset: 2px; }
 @media (max-width: 900px) { .v6-pl-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } .v6-pl-search { grid-column: 1 / -1; } }
+.v6-sound { flex: none; display: flex; align-items: center; gap: 8px; padding: 0 2px; }
+.v6-sound .v6-select { flex: 1; }
