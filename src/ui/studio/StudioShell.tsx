@@ -1,7 +1,6 @@
 /**
  * Studio V6 shell (D-43) over the V5.7 console (D-41): a global header
- * across the window, then the rail, the work column and (from the next
- * increment) the rig rack. In the work column: the transport console with
+ * across the window, then the rail, the work column and the rig rack. In the work column: the transport console with
  * its pull-tab, the neck, the divider, the notebook zone and the mixer
  * handle; the mixer rises over the notebook only.
  *
@@ -18,6 +17,7 @@ import { DeviceBay, Notebook } from './v57/Notebook';
 import { Rail } from './v57/Rail';
 import { Header } from './v6/Header';
 import { MixerHandle } from './v6/MixerHandle';
+import { Rack } from './v6/Rack';
 import { DEFAULT_SPLIT, FB_MIN, clampRatio, splitHeight } from './v57/layout';
 import { useStudioUi } from './v57/uiStore';
 import './v57/fonts.css';
@@ -114,6 +114,7 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
             </div>
             <MixerHandle />
           </div>
+          <Rack />
         </div>
       </div>
     </MixerShown.Provider>

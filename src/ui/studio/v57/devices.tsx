@@ -1,26 +1,22 @@
 /**
- * Tuner and audio interface on their rendered chassis (handoff geometry,
- * device CSS px), both on the real guitar input. The Guitar Rig is in rig.tsx.
+ * The tuner on its rendered chassis (handoff geometry, device CSS px), on
+ * the real guitar input. Input and Guitar Rig live in the Studio V6 rack.
  */
-import { Fragment, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { engine } from '../../../app/engine';
 import { useApp } from '../../../app/store';
-import { liveInput, useLive, type InputChannel } from '../../../audio/liveInput';
+import { useLive } from '../../../audio/liveInput';
 import { IN_TUNE_CENTS, TUNINGS, noteOf, tunerReading } from '../../../pitch';
 import { startInput } from '../../LivePanels';
-import { gainDb, gainToKnob, hzToKnob, knobToGain, knobToHz } from './layout';
+import { hzToKnob, knobToHz } from './layout';
 import { RotaryKnob } from './RotaryKnob';
 import { useStudioUi } from './uiStore';
 import tunerBody from './assets/tuner-body@2x.webp';
 import knobBlack from './assets/knob-black@2x.png';
 import footswitch from './assets/footswitch@2x.png';
-import ifaceBody from './assets/iface-body@2x.webp';
-import knobAlu from './assets/knob-alu@2x.png';
 
 /** Device canvases (CSS px at scale 1); the body renders are larger by the shadow margin. */
-export const AMP = { canvas: { w: 868, h: 344 }, render: { w: 930, h: 402 }, knobCx: [270, 350, 430, 510, 590, 670], knobCy: 268, labelY: 210 };
 export const TUNER = { canvas: { w: 428, h: 404 }, render: { w: 490, h: 462 }, display: { left: 56, top: 52 }, arc: { cx: 214, cy: 204, r: 118, cells: 21, stepDeg: 6 } };
-export const IFACE = { canvas: { w: 668, h: 254 }, render: { w: 730, h: 312 }, gain: { cx: 294, cy: 120 }, inputs: [94, 184] };
 
 const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -91,65 +87,6 @@ export function TunerDevice({ scale }: { readonly scale: number }) {
         <img src={footswitch} alt="" className="gtl-abs" style={{ left: 159, top: 245, width: 110, height: 110, transform: enabled ? 'scale(.985) translateY(1px)' : 'none' }} />
         <button type="button" className="gtl-hit" style={{ left: 184, top: 270, width: 60, height: 60, borderRadius: '50%' }} aria-pressed={enabled}
           aria-label="Interruttore a pedale: attiva o disattiva l’accordatore" data-testid="tuner-footswitch" onClick={toggle} />
-      </Canvas>
-    </>
-  );
-}
-
-/* ---------------- audio interface (real input) ---------------- */
-
-const CHANNEL_OF: Record<1 | 2, InputChannel> = { 1: 'left', 2: 'right' };
-
-export function InterfaceDevice({ scale, onOpenPanel }: { readonly scale: number; readonly onOpenPanel: () => void }) {
-  const live = useLive();
-  const s = useApp((state) => state.settings);
-  const update = useApp((state) => state.update);
-  const on = live.state === 'on';
-  const level = on ? Math.min(1, live.level / 0.5) : 0;
-  const halo = level <= 0 ? 0 : live.clipping || level > 0.82 ? 3 : 2;
-  const statusText = live.error ? 'Errore d’ingresso' : on ? 'Ingresso attivo' : live.state === 'starting' ? 'Apertura…' : 'Ingresso spento';
-  const d = live.diagnostics;
-  const pathText = on && d ? `${d.deviceLabel || 'dispositivo'} · ${d.sampleRate} Hz` : 'nessun dispositivo aperto';
-  const note = live.pitch ? noteOf(live.pitch.frequency, s.tunerA4) : null;
-  const pickChannel = (n: 1 | 2) => { const inputChannel = CHANNEL_OF[n]; update({ inputChannel }); liveInput.route(inputChannel); };
-  return (
-    <>
-      <p className="v57-dvnote">
-        Gain d’ingresso, ascolto e master restano separati. Aprire il pannello non attiva l’ascolto: usalo con le cuffie.{' '}
-        <button type="button" className="v57-linkbtn" onClick={onOpenPanel}>Dispositivo, MIDI e calibrazione nella scheda Ingresso</button>
-      </p>
-      <Canvas w={IFACE.canvas.w} h={IFACE.canvas.h} scale={scale} body={ifaceBody} render={IFACE.render}>
-        {!on ? <span className="gtl-tape" style={{ left: 190, top: 44 }}>{live.error ? 'Errore: vedi la scheda Ingresso' : 'Ingresso spento'}</span> : null}
-        <div role="radiogroup" aria-label="Canale di ingresso">
-          {([1, 2] as const).map((n, i) => (
-            <Fragment key={n}>
-              <span className="gtl-i-lab" style={{ left: IFACE.inputs[i], top: 150 }}>Input {n}</span>
-              <button type="button" role="radio" aria-checked={s.inputChannel === CHANNEL_OF[n]} className="gtl-i-ch" data-on={s.inputChannel === CHANNEL_OF[n] || s.inputChannel === 'mix' ? 1 : 0}
-                style={{ left: (IFACE.inputs[i] ?? 0) - 13, top: 176 }} aria-label={`Ingresso ${n}${s.inputChannel === 'mix' ? ' (ora: entrambi sommati)' : ''}`} onClick={() => pickChannel(n)}>{n}</button>
-            </Fragment>
-          ))}
-        </div>
-        <span className="gtl-i-halo" data-s={halo} />
-        <RotaryKnob value={gainToKnob(s.inputGain)} onChange={(v) => { const inputGain = knobToGain(v); update({ inputGain }); liveInput.setGain(inputGain); }}
-          label="Gain d’ingresso" valueText={gainDb(s.inputGain)} bodySrc={knobAlu} bodySize={84} hitSize={60} pointer={{ length: 12, offset: 5, color: '#f1f1f1' }}
-          cx={IFACE.gain.cx} cy={IFACE.gain.cy} defaultValue={25} testId="iface-gain" />
-        <span className="gtl-i-lab" style={{ left: IFACE.gain.cx, top: 172 }}>Gain {gainDb(s.inputGain)}</span>
-        <div className="gtl-i-mon">
-          <button type="button" aria-pressed={on} aria-label={on ? 'Ferma l’ingresso' : 'Avvia l’ingresso'} disabled={live.state === 'starting'} data-testid="iface-power" onClick={() => (on ? liveInput.stop() : startInput())}>
-            <i data-lit={on ? 1 : 0} />Ingresso
-          </button>
-          <button type="button" aria-pressed={live.monitorOn} aria-label="Ascolto della chitarra (usa le cuffie)" disabled={!on} data-testid="iface-monitor" onClick={() => liveInput.setMonitor(!live.monitorOn, s.monitorVol)}>
-            <i data-lit={live.monitorOn ? 1 : 0} />Ascolto
-          </button>
-        </div>
-        <div className="gtl-i-met" role="meter" aria-label="Livello d’ingresso" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)}>
-          {Array.from({ length: 14 }, (_, i) => {
-            const lit = i < Math.round(level * 14);
-            const c = i >= 12 ? '#ff3b2f' : i >= 9 ? '#ffb23f' : '#7dff6a';
-            return <i key={i} style={{ background: c, opacity: lit ? 1 : 0.16 }} />;
-          })}
-        </div>
-        <div className="gtl-i-lcd" data-testid="iface-lcd"><b>{statusText}</b><span>{pathText} · Rilevato: {note ? `${note.name}${note.octave}` : '—'}</span></div>
       </Canvas>
     </>
   );
