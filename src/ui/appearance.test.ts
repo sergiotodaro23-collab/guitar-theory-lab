@@ -64,6 +64,15 @@ describe('mixer mute', () => {
     expect(muted.volComp).toBe(0.8);
     expect(backingTrackVolume({ ...s, backing: { ...s.backing, volume: 0.8 } })).toBeCloseTo(0.4);
     expect(backingTrackVolume(muted)).toBe(0);
+    // Solo on the backing group keeps the band and silences click and study notes; the trim still applies.
+    const solo = { ...s, soloChannel: 'backing' as const };
+    expect(channelVolume(solo, 'click')).toBe(0);
+    expect(channelVolume(solo, 'notes')).toBe(0);
+    expect(channelVolume(solo, 'comp')).toBeCloseTo(0.4);
+    expect(channelVolume(solo, 'drums')).toBeCloseTo(0.25);
+    expect(channelVolume({ ...s, soloChannel: 'bass' as const }, 'comp')).toBe(0);
+    expect(sanitizeSettings({ ...s, soloChannel: 'backing' }).soloChannel).toBe('backing');
+    expect(sanitizeSettings({ ...s, soloChannel: 'guitar' }).soloChannel).toBe('');
     // Sessions saved before V6 have no trim: full level, not muted.
     const old = { ...DEFAULT_SETTINGS } as Record<string, unknown>;
     delete old.volBacking;

@@ -8,13 +8,13 @@ import {
   ARRANGEMENT_PRESETS, DYNAMICS, MAX_REPEATS, MAX_SECTIONS, PATTERN_NAMES, SECTION_NAMES, section, sectionAtBar, sectionSpans, sectionSymbols,
   type Dynamics, type Section, type SectionKind,
 } from '../jam';
-import { meterOf, type MixChannel } from '../app/settings';
+import { meterOf, type SoloTarget } from '../app/settings';
 import { Field, Panel, Segmented, Select, Toggle } from './controls';
 
 const KIND_OPTIONS = (Object.keys(SECTION_NAMES) as SectionKind[]).map((k) => ({ value: k, label: SECTION_NAMES[k] }));
 const DYN_OPTIONS = (Object.keys(DYNAMICS) as Dynamics[]).map((d) => ({ value: d, label: DYNAMICS[d].label }));
-const SOLO_OPTIONS: readonly { value: MixChannel | ''; label: string }[] = [
-  { value: '', label: 'Nessuno' }, { value: 'drums', label: 'Batteria' }, { value: 'bass', label: 'Basso' }, { value: 'comp', label: 'Accordi' },
+const SOLO_OPTIONS: readonly { value: SoloTarget; label: string }[] = [
+  { value: '', label: 'Nessuno' }, { value: 'backing', label: 'Backing (accordi, basso, batteria)' }, { value: 'drums', label: 'Batteria' }, { value: 'bass', label: 'Basso' }, { value: 'comp', label: 'Accordi' },
   { value: 'notes', label: 'Note' }, { value: 'click', label: 'Click' },
 ];
 
@@ -50,7 +50,7 @@ export function ArrangementPanel() {
           />
         </Field>
         <Field label="Solo">
-          <Select<MixChannel | ''> label="Canale in solo" testId="solo-channel" value={s.soloChannel} options={SOLO_OPTIONS} onChange={(soloChannel) => update({ soloChannel })} />
+          <Select<SoloTarget> label="Canale in solo" testId="solo-channel" value={s.soloChannel} options={SOLO_OPTIONS} onChange={(soloChannel) => update({ soloChannel })} />
         </Field>
       </div>
       <p className="field-hint" data-testid="arrangement-now" role="status">

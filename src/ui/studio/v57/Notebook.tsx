@@ -14,7 +14,7 @@ import { ArpeggioPanel, ChordsPanel, ExercisePanel, HarmonyPanel, JamPanels, Sca
 import { TutorPhone } from '../TutorPhone';
 import { DeviceDrawer } from './DeviceDrawer';
 import { TUNER, TunerDevice } from './devices';
-import { MIXER_CANVAS, MixerDevice } from './MixerDevice';
+import { Mixer } from '../v6/Mixer';
 import { NextFretboard } from './NextFretboard';
 import { DetailsPage, VoiceLeadingPage } from '../v6/DetailsPage';
 import { DEVICES } from './Rail';
@@ -22,7 +22,7 @@ import { activeTab, compactLevel, fitScale, tabKeyTarget, tabsFor, type TabId } 
 import { useStudioUi, type DeviceId } from './uiStore';
 
 const CANVAS: Record<DeviceId, { w: number; h: number }> = {
-  mixer: MIXER_CANVAS,
+  mixer: { w: 0, h: 0 },
   tuner: TUNER.canvas,
 };
 
@@ -145,7 +145,7 @@ export function DeviceBay() {
   return (
     <div ref={box} className="v57-bay">
       <DeviceDrawer device={device} label={label} onClose={ui.closeDevice} returnFocusTo={ui.launcher} compactLevel={compactLevel(size.h)}>
-        {device === 'mixer' ? <MixerDevice scale={scale} /> : null}
+        {device === 'mixer' ? <Mixer /> : null}
         {device === 'tuner' ? <TunerDevice scale={scale} /> : null}
       </DeviceDrawer>
     </div>

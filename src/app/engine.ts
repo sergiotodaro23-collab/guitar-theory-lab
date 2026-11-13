@@ -11,7 +11,7 @@ import {
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
 import { fileOffsetAt, loopRegion, progressionLength, sectionSpans, stepAt } from '../jam';
 import { backingTrack } from '../audio/backingTrack';
-import { BPM_MAX, BPM_MIN, MIX_CHANNELS, backingTrackVolume, channelVolume, meterOf, type Settings } from './settings';
+import { BPM_MAX, BPM_MIN, MIX_CHANNELS, backingTrackVolume, channelVolume, meterOf, type MixChannel, type Settings } from './settings';
 import { useApp, usePlayhead, type Playhead } from './store';
 
 export interface DebugLog {
@@ -383,6 +383,11 @@ class Engine {
     const data = new Float32Array(analyser.fftSize);
     analyser.getFloatTimeDomainData(data);
     return Math.sqrt(data.reduce((sum, v) => sum + v * v, 0) / data.length);
+  }
+
+  /** Level of one mixer channel after its fader (0 before the audio starts). */
+  channelLevel(channel: MixChannel): number {
+    return this.audio?.busLevel(channel) ?? 0;
   }
 
   /** The last samples sent to the output, with the audio time of the buffer's end. */

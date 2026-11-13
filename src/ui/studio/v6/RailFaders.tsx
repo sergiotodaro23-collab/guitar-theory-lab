@@ -23,6 +23,7 @@ interface StripProps {
   readonly keyTitle: string;
   readonly keyTestId: string;
   readonly onKey: () => void;
+  readonly solo?: { readonly on: boolean; readonly onClick: () => void };
 }
 
 function Strip(p: StripProps) {
@@ -36,6 +37,7 @@ function Strip(p: StripProps) {
         </span>
         <span className="v6-fader-keys">
           <button type="button" className="v6-ms" aria-pressed={p.keyOn} aria-label={p.keyLabel} title={p.keyTitle} disabled={p.keyDisabled} data-testid={p.keyTestId} onClick={p.onKey}>{p.keyText}</button>
+          {p.solo ? <button type="button" className="v6-ms" data-tone="solo" aria-pressed={p.solo.on} aria-label="Solo backing" title="Solo di accordi, basso e batteria: click e note tacciono" data-testid="rail-solo-backing" onClick={p.solo.onClick}>S</button> : null}
         </span>
       </div>
       <span className="v6-fader-val">{pct(p.value)}</span>
@@ -47,6 +49,7 @@ export function RailFaders() {
   const monitorVol = useApp((s) => s.settings.monitorVol);
   const volBacking = useApp((s) => s.settings.volBacking);
   const muteBacking = useApp((s) => s.settings.muteBacking);
+  const soloBacking = useApp((s) => s.settings.soloChannel === 'backing');
   const update = useApp((s) => s.update);
   const inputOn = useLive((l) => l.state === 'on');
   const monitorOn = useLive((l) => l.monitorOn);
@@ -60,7 +63,8 @@ export function RailFaders() {
       <Strip id="backing" caption="Backing" label="Backing (accordi, basso, batteria, traccia)" value={volBacking} lit={!muteBacking && volBacking > 0}
         onChange={(v) => update({ volBacking: v })}
         keyLabel="Muto backing" keyText="M" keyOn={muteBacking} keyTestId="rail-mute-backing" keyTitle="Muto di accordi, basso, batteria e backing track"
-        onKey={() => update({ muteBacking: !muteBacking })} />
+        onKey={() => update({ muteBacking: !muteBacking })}
+        solo={{ on: soloBacking, onClick: () => update({ soloChannel: soloBacking ? '' : 'backing' }) }} />
     </div>
   );
 }
