@@ -1,0 +1,80 @@
+{
+  "component": "amp-head",
+  "spec": "tools/blender/specs/amp.json",
+  "blender": "5.3.0",
+  "engine": "CYCLES",
+  "samples": 128,
+  "scale": 2,
+  "assets": {
+    "body": {
+      "file": "amp-body@2x.webp",
+      "px": [
+        648,
+        400
+      ],
+      "css": [
+        324,
+        200
+      ],
+      "scale": 2,
+      "bytes": 50890,
+      "sha256": "14f960cea4007c0c",
+      "use": "Amplifier head: cabinet, grille, badge, control plate",
+      "offset": [
+        -10,
+        -6
+      ]
+    },
+    "knob": {
+      "file": "amp-knob-strip@2x.webp",
+      "px": [
+        3100,
+        100
+      ],
+      "css": [
+        1550,
+        50
+      ],
+      "scale": 2,
+      "bytes": 66768,
+      "sha256": "a5203d8fd7302ba8",
+      "use": "Amplifier knob at every position of its travel (sprite strip)",
+      "frames": 31,
+      "frame": [
+        50,
+        50
+      ]
+    },
+    "lampOff": {
+      "file": "amp-lamp-off@2x.webp",
+      "px": [
+        48,
+        48
+      ],
+      "css": [
+        24,
+        24
+      ],
+      "scale": 2,
+      "bytes": 980,
+      "sha256": "5493bd512d98424b",
+      "use": "Pilot lamp, off"
+    },
+    "lampOn": {
+      "file": "amp-lamp-on@2x.webp",
+      "px": [
+        48,
+        48
+      ],
+      "css": [
+        24,
+        24
+      ],
+      "scale": 2,
+      "bytes": 1062,
+      "sha256": "0b4c43f5fbd60c93",
+      "use": "Pilot lamp, lit"
+    }
+  },
+  "renderSeconds": 47.5
+}

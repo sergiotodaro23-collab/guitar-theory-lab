@@ -25,3 +25,5 @@ I font mantengono la loro licenza originale; non sono rilicenziati sotto GPL.
 ## Studio V6
 
 Dal lotto 2 della V6 (rack destro) i corpi renderizzati `amp-body@2x.webp` e `iface-body@2x.webp`, con interruttori a bilanciere e a levetta, non sono più importati: testata e scheda audio sono moduli del rack disegnati in CSS, con le manopole renderizzate `knob-gold` e `knob-alu`. I file restano nel repository con le loro scene Blender.
+
+Dal 15 novembre 2026 (D-53) la testata dell'amplificatore è di nuovo renderizzata, con la pipeline in `tools/blender/` e gli asset in `src/ui/studio/v6/hardware/assets/`. `knob-gold` resta nel repository ma la testata non lo usa più. Sistema e piano: `docs/STUDIO_V6_HARDWARE_PIPELINE.md`.

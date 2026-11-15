@@ -134,6 +134,7 @@ Limiti dichiarati del lotto 6:
 | Lotto 6 | verde, 502 unit | 140 su 140 in locale (incluse le 7 prove della pedaliera) |
 | Consolidamento (D-50) | verde, 502 unit | rig e pedaliera 12 su 12 in locale (nuova prova: cambio di catena nel silenzio); corsa completa verde in CI sulla PR #21 |
 | Lotto 9, parte NAM (D-51) | verde, 516 unit | 148 su 148 in locale (7 prove nuove in `e2e/nam.spec.ts`) |
+| Sistema grafico, testata (D-53) | verde, 523 unit | 155 su 155 in locale (7 prove nuove in `e2e/hardware-amp.spec.ts`) |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
@@ -159,6 +160,14 @@ PR #20 (pedaliera configurabile) unita in `main` come `8768765` dopo verifica lo
 | Misure: caricamento, costo per blocco, latenza, continuità, memoria | misurate su questa macchina | `npm run perf:nam`, `docs/NAM_INTEGRATION.md` |
 
 Limiti dichiarati: nessuna prova con chitarra, scheda audio e capture reali; nessun ricampionamento; lo scambio di modello interrompe l'audio per decine di millisecondi; il modello non viene conservato tra le visite; catalogo TONE3000 nella PR successiva.
+
+## Sistema grafico (D-53) — cosa c'è
+
+| Funzione | Stato | Prova |
+|---|---|---|
+| Pipeline Blender → asset → React (`tools/blender/`), geometria da una sola spec | implementata | `hardware.test.ts`, rendering reali con Blender 5.3.0 |
+| Testata dell'amplificatore renderizzata: corpo, manopole a 31 fotogrammi, spia | implementata, verificata a tre risoluzioni in Chromium headless | `e2e/hardware-amp.spec.ts`, confronti in `docs/hardware/` |
+| Altri componenti (cabinet, pedali, scheda audio, mixer, console, telaio, fondo della tastiera) | mancanti: piano in `docs/STUDIO_V6_HARDWARE_PIPELINE.md` | — |
 
 ## Baseline
 

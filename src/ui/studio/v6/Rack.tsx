@@ -21,7 +21,11 @@ import { RotaryKnob } from '../v57/RotaryKnob';
 import { gainDb, gainToKnob, knobToGain, type RackModuleId } from '../v57/layout';
 import { AMP_LABELS, PEDAL_SIZE, Pedal, useRig } from '../v57/rig';
 import { useStudioUi } from '../v57/uiStore';
-import knobGold from '../v57/assets/knob-gold@2x.png';
+import { AMP_HEAD } from './hardware/amp.generated';
+import ampBody from './hardware/assets/amp-body@2x.webp';
+import ampKnobStrip from './hardware/assets/amp-knob-strip@2x.webp';
+import ampLampOff from './hardware/assets/amp-lamp-off@2x.webp';
+import ampLampOn from './hardware/assets/amp-lamp-on@2x.webp';
 import knobAlu from '../v57/assets/knob-alu@2x.png';
 
 const CHEVRON_UP = 'M2 7l6-5 6 5';
@@ -113,8 +117,9 @@ function InputModule() {
 
 /* ---------------- 2 · amplifier ---------------- */
 
-const AMP_W = 300;
-const KNOB_PITCH = AMP_W / AMP_KNOB_IDS.length;
+/** Geometry of the rendered amplifier head: the same numbers Blender built the pictures from (tools/blender/specs/amp.json). */
+const AMP = AMP_HEAD.spec;
+const AMP_BODY = AMP_HEAD.assets.body;
 
 /** True when the settings ask for the model, the engine holds one, and it includes its cabinet: the rig's cabinet is skipped. */
 const namSkipsCab = (rig: { readonly amp: { readonly model: string; readonly namCab: boolean } }, nam: NamStatus): boolean => rig.amp.model === 'nam' && rig.amp.namCab && nam.phase === 'ready';
@@ -196,22 +201,26 @@ function AmpModule() {
   return (
     <Module id="amp" title="Amplificatore" lit={heard}
       power={<Switch on={amp.power} label="Accensione dell’amplificatore" testId="amp-power" onClick={() => setRig((r) => ({ ...r, amp: { ...r.amp, power: !r.amp.power } }))} />}>
-      <div className="v6-amp" data-on={amp.power ? '1' : '0'}>
-        <div className="v6-amp-top">
+      <div className="v6-amp" data-on={amp.power ? '1' : '0'} data-testid="amp-head" style={{ width: AMP.size.w, height: AMP.size.h }}>
+        <img className="v6-amp-body" src={ampBody} alt="" draggable={false} data-testid="amp-body" style={{ left: AMP_BODY.offset[0], top: AMP_BODY.offset[1], width: AMP_BODY.css[0], height: AMP_BODY.css[1] }} />
+        <div className="v6-amp-top" style={{ left: AMP.badge.x, top: AMP.badge.y, width: AMP.badge.w, height: AMP.badge.h }}>
           <span className="v6-amp-name">{namReady ? 'GTL NAM' : 'GTL Clean'}</span>
+        </div>
+        <div className="v6-amp-tapebox" style={{ right: AMP.tape.right, top: AMP.tape.y }}>
           <span className="v6-amp-tape" data-testid="amp-tape">{namReady ? `NAM · ${nam.summary?.name ?? ''}` : amp.model === 'nam' ? 'DSP interno · NAM senza modello' : 'DSP interno'}</span>
         </div>
-        <div className="v6-amp-panel" style={{ width: AMP_W }}>
-          <span className="v6-amp-lamp" data-on={amp.power ? 1 : 0} data-testid="amp-lamp" role="img" aria-label={amp.power ? 'Amplificatore acceso' : 'Amplificatore spento'} />
+        <div className="v6-amp-panel">
+          <span className="v6-amp-lamp" data-on={amp.power ? 1 : 0} data-testid="amp-lamp" role="img" aria-label={amp.power ? 'Amplificatore acceso' : 'Amplificatore spento'}
+            style={{ left: AMP.lamp.x, top: AMP.lamp.y, width: AMP.lamp.frame, height: AMP.lamp.frame, backgroundImage: `url(${amp.power ? ampLampOn : ampLampOff})` }} />
           {AMP_KNOB_IDS.map((id, i) => {
-            const cx = KNOB_PITCH * (i + 0.5);
+            const cx = AMP.knobs.first + AMP.knobs.pitch * i;
             const label = namReady && id === 'gain' ? 'Input' : AMP_LABELS[id];
             return (
               <Fragment key={id}>
-                <span className="v6-amp-lab" style={{ left: cx }}>{label}</span>
+                <span className="v6-amp-lab" style={{ left: cx, top: AMP.labelY }}>{label}</span>
                 <RotaryKnob value={amp.knobs[id]} label={`Amplificatore ${label}`} valueText={`${Math.round(amp.knobs[id] / 10)} su 10`}
                   onChange={(v) => setRig((r) => ({ ...r, amp: { ...r.amp, knobs: { ...r.amp.knobs, [id]: v } } }))}
-                  bodySrc={knobGold} bodySize={50} hitSize={38} pointer={{ length: 7, offset: 3, color: '#efe3bd', width: 2.5 }} cx={cx} cy={44} defaultValue={50} testId={`amp-${id}`} />
+                  sprite={{ src: ampKnobStrip, frames: AMP.knobs.frames }} bodySize={AMP.knobs.frame} hitSize={AMP.knobs.hit} cx={cx} cy={AMP.knobs.y} defaultValue={50} testId={`amp-${id}`} />
               </Fragment>
             );
           })}
