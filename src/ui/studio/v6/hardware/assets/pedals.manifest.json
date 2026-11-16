@@ -1,0 +1,224 @@
+{
+  "component": "pedals",
+  "spec": "tools/blender/specs/pedals.json",
+  "blender": "5.3.0",
+  "engine": "CYCLES",
+  "samples": 128,
+  "scale": 2,
+  "assets": {
+    "body-comp": {
+      "file": "pedal-comp@2x.webp",
+      "px": [
+        288,
+        452
+      ],
+      "css": [
+        144,
+        226
+      ],
+      "scale": 2,
+      "bytes": 11662,
+      "sha256": "eebaad85db4a4bbf",
+      "use": "Pedal body: comp",
+      "offset": [
+        -8,
+        -5
+      ]
+    },
+    "body-fuzz": {
+      "file": "pedal-fuzz@2x.webp",
+      "px": [
+        288,
+        452
+      ],
+      "css": [
+        144,
+        226
+      ],
+      "scale": 2,
+      "bytes": 16468,
+      "sha256": "bb469497a611da1c",
+      "use": "Pedal body: fuzz",
+      "offset": [
+        -8,
+        -5
+      ]
+    },
+    "body-drive": {
+      "file": "pedal-drive@2x.webp",
+      "px": [
+        288,
+        452
+      ],
+      "css": [
+        144,
+        226
+      ],
+      "scale": 2,
+      "bytes": 11058,
+      "sha256": "61cf4f7b92e76f54",
+      "use": "Pedal body: drive",
+      "offset": [
+        -8,
+        -5
+      ]
+    },
+    "body-eq": {
+      "file": "pedal-eq@2x.webp",
+      "px": [
+        288,
+        452
+      ],
+      "css": [
+        144,
+        226
+      ],
+      "scale": 2,
+      "bytes": 8416,
+      "sha256": "b922eefa6019c337",
+      "use": "Pedal body: eq",
+      "offset": [
+        -8,
+        -5
+      ]
+    },
+    "body-chorus": {
+      "file": "pedal-chorus@2x.webp",
+      "px": [
+        288,
+        452
+      ],
+      "css": [
+        144,
+        226
+      ],
+      "scale": 2,
+      "bytes": 10818,
+      "sha256": "c7d948e37bce6c95",
+      "use": "Pedal body: chorus",
+      "offset": [
+        -8,
+        -5
+      ]
+    },
+    "body-delay": {
+      "file": "pedal-delay@2x.webp",
+      "px": [
+        288,
+        452
+      ],
+      "css": [
+        144,
+        226
+      ],
+      "scale": 2,
+      "bytes": 7442,
+      "sha256": "88a3ba33edfb7e55",
+      "use": "Pedal body: delay",
+      "offset": [
+        -8,
+        -5
+      ]
+    },
+    "body-reverb": {
+      "file": "pedal-reverb@2x.webp",
+      "px": [
+        288,
+        452
+      ],
+      "css": [
+        144,
+        226
+      ],
+      "scale": 2,
+      "bytes": 13668,
+      "sha256": "85437e139da9a90d",
+      "use": "Pedal body: reverb",
+      "offset": [
+        -8,
+        -5
+      ]
+    },
+    "knob": {
+      "file": "pedal-knob-strip@2x.webp",
+      "px": [
+        2604,
+        84
+      ],
+      "css": [
+        1302,
+        42
+      ],
+      "scale": 2,
+      "bytes": 41918,
+      "sha256": "ba8927ed66b0f76a",
+      "use": "Pedal knob at every position of its travel (sprite strip)",
+      "frames": 31,
+      "frame": [
+        42,
+        42
+      ]
+    },
+    "ledOff": {
+      "file": "pedal-led-off@2x.webp",
+      "px": [
+        40,
+        40
+      ],
+      "css": [
+        20,
+        20
+      ],
+      "scale": 2,
+      "bytes": 626,
+      "sha256": "e8cc658387f17900",
+      "use": "Pedal LED, off"
+    },
+    "ledOn": {
+      "file": "pedal-led-on@2x.webp",
+      "px": [
+        40,
+        40
+      ],
+      "css": [
+        20,
+        20
+      ],
+      "scale": 2,
+      "bytes": 626,
+      "sha256": "c9fd4a9295269b07",
+      "use": "Pedal LED, lit"
+    },
+    "switchUp": {
+      "file": "pedal-switch-up@2x.webp",
+      "px": [
+        104,
+        104
+      ],
+      "css": [
+        52,
+        52
+      ],
+      "scale": 2,
+      "bytes": 2078,
+      "sha256": "9d235ec46090ad9a",
+      "use": "Footswitch, released"
+    },
+    "switchDown": {
+      "file": "pedal-switch-down@2x.webp",
+      "px": [
+        104,
+        104
+      ],
+      "css": [
+        52,
+        52
+      ],
+      "scale": 2,
+      "bytes": 1878,
+      "sha256": "7504dadec1d1105c",
+      "use": "Footswitch, pressed"
+    }
+  },
+  "renderSeconds": 189.0
+}

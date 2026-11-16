@@ -1,0 +1,24 @@
+{
+  "id": "pedals",
+  "about": "The seven pedals of the Studio V6 pedalboard. All numbers are CSS pixels. One body picture per pedal; knob, LED and footswitch are shared pictures. Paint is the colour the interface already uses for the pedal.",
+  "size": { "w": 124, "h": 206 },
+  "margin": { "left": 8, "top": 5, "right": 12, "bottom": 15 },
+  "corner": 10,
+  "height": 30,
+  "screwInset": 9,
+  "knobs": { "y": 38, "pitch": 38, "diameter": 26, "frame": 42, "hit": 30, "frames": 31, "sweep": 270 },
+  "labelY": 58,
+  "name": { "y": 74, "h": 20 },
+  "led": { "x": 62, "y": 109, "r": 3.8, "frame": 20 },
+  "switch": { "x": 62, "y": 156, "r": 15, "frame": 52, "hit": 46 },
+  "jackY": 46,
+  "pedals": {
+    "comp": { "paint": "#2f6fb0", "finish": "metallic", "art": "pinstripes", "artColor": "#e9e2cc", "knobs": 2 },
+    "fuzz": { "paint": "#b8452c", "finish": "hammered", "art": "panel", "artColor": "#141312", "knobs": 3 },
+    "drive": { "paint": "#3f8f4a", "finish": "gloss", "art": "frame", "artColor": "#efe6c4", "knobs": 3 },
+    "eq": { "paint": "#d9d2c4", "finish": "gloss", "art": "rules", "artColor": "#23201b", "knobs": 3 },
+    "chorus": { "paint": "#5aa6c8", "finish": "metallic", "art": "band", "artColor": "#143a56", "knobs": 3 },
+    "delay": { "paint": "#c9c3b2", "finish": "brushed", "art": "footplate", "artColor": "#1a1917", "knobs": 3 },
+    "reverb": { "paint": "#7a5aa8", "finish": "metallic", "art": "arches", "artColor": "#e6dcf2", "knobs": 2 }
+  }
+}

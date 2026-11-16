@@ -67,6 +67,22 @@ Tutti i controlli sono rimasti: sei manopole (tastiera, trascinamento, doppio cl
 
 Confronto prima e dopo, tre stati per risoluzione: `docs/hardware/amp-before-after-1440x900.webp`, `…-1280x720.webp`, `…-1024x768.webp`.
 
+## 3b · Pedaliera (16 novembre 2026)
+
+Stato: **implementata**; resa con Blender 5.3.0, verificata in Chromium headless a 1440 × 900, 1366 × 768, 1280 × 720 e 1024 × 768. Non verificata su schermi reali né su altri browser.
+
+| | |
+|---|---|
+| Spec | `tools/blender/specs/pedals.json`: una geometria per tutti; per pedale vernice (il colore di `PEDAL_SPECS`), finitura e grafica |
+| Corpi | 7 immagini 144 × 226 px CSS: scatola pressofusa, viti, prese jack ai lati, rondelle dei potenziometri |
+| Identità | Compressor blu metallizzato con filetti; Fuzz arancio martellato con pannello nero; Overdrive verde lucido con doppia cornice; EQ crema con scale graduate; Chorus azzurro metallizzato con fascia blu; Delay alluminio spazzolato con pedana in gomma; Reverb viola metallizzato con anelli |
+| Parti condivise | manopola a barilotto (31 fotogrammi), LED spento e acceso, interruttore a pedale su e giù |
+| HTML sopra | nome, etichette, manopole (`RotaryKnob`), LED (`role="img"`), interruttore (`aria-pressed`), tasti di ordine e rimozione |
+| Peso | corpi 80 kB, manopola 42 kB, LED e interruttore 5 kB: **127 kB** |
+| Nel kit | materiali `painted` (lucido, metallizzato, martellato, opaco), `anodized`, `rubber`, `led_lens`, `srgb`, `deepen`; parti `enclosure`, `barrel_knob`, `footswitch`, `led`, `side_jack`, `decal`, `outline` |
+
+DSP, ordine, aggiunta e rimozione non sono cambiati: `guitar-rig.spec.ts` e `pedal-chain.spec.ts` passano senza modifiche. Tolti da `src/ui/studio/v57/assets/` tredici file che nessun modulo importava più (354 kB): la cartella passa a 199 kB.
+
 ## 4 · Verifica
 
 | Verifica | Eseguita | Esito |
