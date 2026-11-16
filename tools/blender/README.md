@@ -9,7 +9,7 @@ gtlkit/scene.py              unità, camera ortografica, luce standard, renderin
 gtlkit/materials.py          materiali procedurali (nessuna texture)
 gtlkit/parts.py              geometrie riutilizzabili (scatole, viti, manopole, spie, angolari)
 gtlkit/export.py             sfumatura dei bordi, strisce di fotogrammi, WebP, manifest, TypeScript
-build.py                     comando unico
+build.py                     comando unico; ogni componente dichiara le sue immagini in `pictures()`
 blend/                       scene salvate (una per immagine)
 ```
 

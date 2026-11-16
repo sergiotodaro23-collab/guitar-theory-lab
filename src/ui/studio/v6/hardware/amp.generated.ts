@@ -5,7 +5,7 @@ export const AMP_HEAD = {
     "about": "Amplifier head of the Studio V6 rack. All numbers are CSS pixels. Blender builds the picture from this file and React places the live controls from it.",
     "size": {
       "w": 300,
-      "h": 176
+      "h": 124
     },
     "margin": {
       "left": 10,
@@ -14,34 +14,34 @@ export const AMP_HEAD = {
       "bottom": 18
     },
     "cabinet": {
-      "corner": 9,
-      "cornerCap": 20
+      "corner": 8,
+      "cornerCap": 17
     },
     "grille": {
-      "x": 14,
-      "y": 13,
-      "w": 272,
-      "h": 58,
-      "corner": 4
+      "x": 12,
+      "y": 10,
+      "w": 276,
+      "h": 30,
+      "corner": 3
     },
     "badge": {
-      "x": 24,
-      "y": 26,
-      "w": 126,
-      "h": 32
+      "x": 20,
+      "y": 14,
+      "w": 112,
+      "h": 22
     },
     "tape": {
-      "right": 26,
-      "y": 31
+      "right": 22,
+      "y": 18
     },
     "plate": {
       "x": 8,
-      "y": 84,
+      "y": 46,
       "w": 284,
-      "h": 84,
+      "h": 72,
       "corner": 3
     },
-    "labelY": 90,
+    "labelY": 50,
     "knobs": {
       "ids": [
         "gain",
@@ -51,19 +51,19 @@ export const AMP_HEAD = {
         "presence",
         "out"
       ],
-      "first": 32.5,
-      "pitch": 47,
-      "y": 131,
+      "first": 52,
+      "pitch": 43,
+      "y": 90,
       "diameter": 34,
       "frame": 50,
       "hit": 38,
       "frames": 31,
       "sweep": 270,
-      "tickRadius": 21
+      "tickRadius": 20
     },
     "lamp": {
-      "x": 27,
-      "y": 157,
+      "x": 21,
+      "y": 90,
       "r": 5.5,
       "frame": 24
     }
@@ -73,11 +73,11 @@ export const AMP_HEAD = {
       "file": "amp-body@2x.webp",
       "px": [
         648,
-        400
+        296
       ],
       "css": [
         324,
-        200
+        148
       ],
       "offset": [
         -10,

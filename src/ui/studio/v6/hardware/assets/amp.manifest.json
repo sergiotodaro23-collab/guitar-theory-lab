@@ -10,15 +10,15 @@
       "file": "amp-body@2x.webp",
       "px": [
         648,
-        400
+        296
       ],
       "css": [
         324,
-        200
+        148
       ],
       "scale": 2,
-      "bytes": 50890,
-      "sha256": "14f960cea4007c0c",
+      "bytes": 33406,
+      "sha256": "aa8b2dba671f8cad",
       "use": "Amplifier head: cabinet, grille, badge, control plate",
       "offset": [
         -10,
@@ -36,8 +36,8 @@
         50
       ],
       "scale": 2,
-      "bytes": 66768,
-      "sha256": "a5203d8fd7302ba8",
+      "bytes": 64178,
+      "sha256": "eb27fc6cab10d756",
       "use": "Amplifier knob at every position of its travel (sprite strip)",
       "frames": 31,
       "frame": [
@@ -56,8 +56,8 @@
         24
       ],
       "scale": 2,
-      "bytes": 980,
-      "sha256": "5493bd512d98424b",
+      "bytes": 990,
+      "sha256": "dbd94d3d0d80f33c",
       "use": "Pilot lamp, off"
     },
     "lampOn": {
@@ -71,10 +71,10 @@
         24
       ],
       "scale": 2,
-      "bytes": 1062,
-      "sha256": "0b4c43f5fbd60c93",
+      "bytes": 1000,
+      "sha256": "0f564488141a625f",
       "use": "Pilot lamp, lit"
     }
   },
-  "renderSeconds": 47.5
+  "renderSeconds": 77.0
 }
