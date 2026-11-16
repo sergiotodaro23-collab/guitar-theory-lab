@@ -48,12 +48,12 @@ def body(spec, samples):
     for sx in (b['x'] + 6, b['x'] + b['w'] - 6):
         P.screw(sx, b['y'] + b['h'] / 2, 1.7, Z - 4.2, nickel, slot, turn=sx * 7)
 
-    # Control plate: brushed gold, three screws, a mark ring for every knob, a well for the lamp.
+    # Control plate: brushed gold, four screws, a mark ring for every knob, a well for the lamp.
     p = spec['plate']
-    gold = M.brushed('plate-gold', (0.82, 0.53, 0.18), rough=0.36, streak=0.45)
-    plate = P.rbox('plate', p['x'], p['y'], p['w'], p['h'], Z, Z + P.Z_PLATE, gold, corner=p['corner'], edge=0.8, segments=3)
+    gold = M.brushed('plate-gold', (0.84, 0.5, 0.14), rough=0.38, streak=0.45)
+    P.rbox('plate', p['x'], p['y'], p['w'], p['h'], Z, Z + P.Z_PLATE, gold, corner=p['corner'], edge=0.8, segments=3)
     top = Z + P.Z_PLATE
-    for (sx, sy) in ((p['x'] + 7, p['y'] + 7), (p['x'] + p['w'] - 7, p['y'] + 7), (p['x'] + p['w'] - 7, p['y'] + p['h'] - 7)):
+    for (sx, sy) in ((p['x'] + 7, p['y'] + 7), (p['x'] + p['w'] - 7, p['y'] + 7), (p['x'] + p['w'] - 7, p['y'] + p['h'] - 7), (p['x'] + 7, p['y'] + p['h'] - 7)):
         P.screw(sx, sy, 2.3, top, nickel, slot, turn=(sx + sy) * 3)
     k = spec['knobs']
     ink = M.ink()
@@ -63,8 +63,9 @@ def body(spec, samples):
         # The shaft hole under the knob: seen only at the rim, it grounds the knob on the plate.
         P.cyl('shaft-hole', cx, k['y'], k['diameter'] * 0.3, top - 1.5, top + 0.05, slot, verts=32)
     lamp = spec['lamp']
-    P.cut(plate, P.cyl('lamp-well', lamp['x'], lamp['y'], lamp['r'] + 0.6, Z - 2, top + 4, verts=40))
-    P.cyl('lamp-well-floor', lamp['x'], lamp['y'], lamp['r'] + 0.6, Z - 0.5, Z + 0.4, slot, verts=40)
+    # The lamp's well is a dark disc on the plate, not a boolean hole: cutting the plate turned its flat top into an
+    # n-gon whose hardened normals shaded as a diagonal band across the whole plate.
+    P.cyl('lamp-well', lamp['x'], lamp['y'], lamp['r'] + 0.6, top - 1.5, top + 0.05, slot, verts=40)
 
     # Corner protectors.
     black = M.plain('corner-black', (0.012, 0.012, 0.012), rough=0.4, coat=0.3)
@@ -105,3 +106,26 @@ def lamp(spec, samples, lit):
     camera(0, 0, l['frame'], l['frame'])
     if lit:
         bpy.context.scene.view_settings.look = 'AgX - Medium High Contrast'
+
+
+NAME = 'amp'
+EXPORT = 'AMP_HEAD'
+
+
+def pictures(spec, samples):
+    """What the build renders: see build.py for the fields."""
+    from gtlkit import export
+    k, f = spec['knobs'], spec['lamp']['frame']
+    fx, fy, fw, fh = frame(spec)
+    angles = knob_angles(spec)
+    return [
+        dict(key='body', file='amp-body@2x.webp', css=(fw, fh), quality=90, use='Amplifier head: cabinet, grille, badge, control plate',
+             scenes=[('amp-body', lambda: body(spec, samples))], post=lambda im: export.feather(im, 8), extra={'offset': [fx, fy]}),
+        dict(key='knob', file='amp-knob-strip@2x.webp', css=(k['frame'] * k['frames'], k['frame']), quality=88, use='Amplifier knob at every position of its travel (sprite strip)',
+             scenes=[('amp-knob' if i == len(angles) // 2 else f'amp-knob-{i:02d}', lambda a=a: knob(spec, max(24, samples // 2), a)) for i, a in enumerate(angles)],
+             post=lambda im: export.vignette(im, 0.8, 0.98), extra={'frames': k['frames'], 'frame': [k['frame'], k['frame']]}),
+        dict(key='lampOff', file='amp-lamp-off@2x.webp', css=(f, f), quality=92, use='Pilot lamp, off',
+             scenes=[('amp-lamp-off', lambda: lamp(spec, samples, False))], post=lambda im: export.vignette(im, 0.72, 0.98)),
+        dict(key='lampOn', file='amp-lamp-on@2x.webp', css=(f, f), quality=92, use='Pilot lamp, lit',
+             scenes=[('amp-lamp-on', lambda: lamp(spec, samples, True))], post=lambda im: export.vignette(im, 0.72, 0.98)),
+    ]

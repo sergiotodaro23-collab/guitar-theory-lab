@@ -190,13 +190,13 @@
 /* Rendered body (tools/blender): larger than the device by its shadow margin, placed by the generated offset. */
 .v6-amp-body { position: absolute; max-width: none; pointer-events: none; user-select: none; }
 .v6-amp-top { position: absolute; display: grid; place-items: center; }
-.v6-amp-name { font: italic 600 21px/1 'Cormorant Garamond', Georgia, serif; color: #2b1907; text-shadow: 0 1px 0 rgba(255, 226, 160, .55); white-space: nowrap; }
+.v6-amp-name { font: italic 600 17px/1 'Cormorant Garamond', Georgia, serif; color: #2b1907; text-shadow: 0 1px 0 rgba(255, 226, 160, .55); white-space: nowrap; }
 .v6-amp-tapebox { position: absolute; }
 .v6-amp-tape { display: block; padding: 2px 6px; font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #2a1a08; background: #e6d7a8; transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; }
 .v6-amp-panel { position: absolute; inset: 0; }
 .v6-amp-lab { position: absolute; transform: translateX(-50%); font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #2a1806; text-shadow: 0 1px 0 rgba(255, 226, 160, .4); white-space: nowrap; }
 .v6-amp-lamp { position: absolute; transform: translate(-50%, -50%); background-size: 100% 100%; }
-.v6-amp-lamp[data-on='1']::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 70, 40, .5), rgba(255, 60, 30, 0) 68%); pointer-events: none; }
+.v6-amp-lamp[data-on='1']::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 120, 80, .5) 0, rgba(255, 60, 30, .6) 24%, rgba(255, 50, 25, .28) 44%, rgba(255, 50, 25, 0) 70%); mix-blend-mode: plus-lighter; pointer-events: none; }
 .v6-amp[data-on='0'] .v6-amp-body, .v6-amp[data-on='0'] .v57-knob-sprite { filter: brightness(.86) saturate(.85); }
 .v57-knob-sprite { background-repeat: no-repeat; }
 

@@ -205,14 +205,14 @@ def enamel(name, color, rough=0.3):
     return plain(name, color, rough, coat=0.4)
 
 
-def jewel(name, color, lit=False, strength=0.45):
-    """Faceted glass of a pilot lamp. Lit: the glass itself emits its colour."""
+def jewel(name, color, lit=False, strength=1.7, glow=(1.0, 0.035, 0.012)):
+    """Faceted glass of a pilot lamp. Lit: the glass emits `glow`, strong enough to burn towards white at its centre as a real lamp does."""
     m, nt, b = _new(name)
     _set(b, color, 0.06, spec=0.8, coat=1.0)
     b.inputs['Transmission Weight'].default_value = 0.55
     b.inputs['IOR'].default_value = 1.5
     if lit:
-        b.inputs['Emission Color'].default_value = (*color, 1)
+        b.inputs['Emission Color'].default_value = (*glow, 1)
         b.inputs['Emission Strength'].default_value = strength
     return m
 

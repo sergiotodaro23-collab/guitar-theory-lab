@@ -29,10 +29,10 @@ test('the rendered pictures load and the head keeps its size', async ({ page }) 
   await expect(head).toBeVisible();
   const body = page.getByTestId('amp-body');
   await expect.poll(() => body.evaluate((i) => (i as HTMLImageElement).naturalWidth)).toBe(648);
-  expect(await body.evaluate((i) => (i as HTMLImageElement).naturalHeight)).toBe(400);
+  expect(await body.evaluate((i) => (i as HTMLImageElement).naturalHeight)).toBe(296);
   const box = await head.boundingBox();
   expect(box?.width).toBe(300);
-  expect(box?.height).toBe(176);
+  expect(box?.height).toBe(124);
   // The knob strip and the lamp are real pictures too.
   const pictures = await page.evaluate(async () => {
     const urls = [...document.querySelectorAll<HTMLElement>('.v57-knob-sprite, .v6-amp-lamp')].map((e) => /url\("?([^")]+)/.exec(getComputedStyle(e).backgroundImage)?.[1] ?? '');
@@ -53,8 +53,8 @@ for (const [width, height] of [[1440, 900], [1280, 720], [1024, 768]] as const) 
       // On the control plate: the lower half of the head.
       expect(knob.x, id).toBeGreaterThanOrEqual(head.x + 8);
       expect(knob.x + knob.width, id).toBeLessThanOrEqual(head.x + head.width - 8);
-      expect(knob.y, id).toBeGreaterThanOrEqual(head.y + 84);
-      expect(knob.y + knob.height, id).toBeLessThanOrEqual(head.y + 168);
+      expect(knob.y, id).toBeGreaterThanOrEqual(head.y + 46);
+      expect(knob.y + knob.height, id).toBeLessThanOrEqual(head.y + 118);
     }
     // Knobs do not cover each other: a pointer always lands on the knob under it.
     const boxes = await Promise.all(KNOBS.map((id) => page.getByTestId(`amp-${id}`).boundingBox()));

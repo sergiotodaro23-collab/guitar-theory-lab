@@ -55,12 +55,12 @@ Dove potrebbe servire davvero: una vista prospettica della chitarra o del manico
 
 | | |
 |---|---|
-| Dimensioni | 300 × 176 px CSS (prima 300 × 124); immagine del corpo 324 × 200 con il margine d'ombra |
-| Corpo | cabinet in tolex con angolari, tela con bordino, targhetta in ottone, piastra dorata spazzolata con tre viti e le tacche di ogni manopola |
+| Dimensioni | 300 × 124 px CSS, come la testata CSS di prima (la prima versione resa era 300 × 176); immagine del corpo 324 × 148 con il margine d'ombra |
+| Corpo | cabinet in tolex con angolari, tela con bordino, targhetta in ottone, piastra dorata spazzolata con quattro viti, spia a sinistra delle manopole e le tacche di ogni manopola |
 | Manopola | gonna zigrinata, calotta dorata, linea smaltata in rilievo; 31 fotogrammi |
 | Spia | ghiera cromata e vetro sfaccettato, spenta e accesa |
 | HTML sopra l'immagine | nome del modello sulla targhetta, etichetta su nastro, sei etichette, sei manopole, spia |
-| Peso | corpo 51 kB, striscia 67 kB, spie 2 kB: **120 kB** in tutto. Bundle JS +4 kB |
+| Peso | corpo 33 kB, striscia 64 kB, spie 2 kB: **100 kB** in tutto |
 | Tempo di rendering | circa 55 s per tutto, 128 campioni, 4 core, CPU |
 
 Tutti i controlli sono rimasti: sei manopole (tastiera, trascinamento, doppio clic, valori salvati), accensione, spia, bypass, nome e nastro del motore NAM. Nessuna modifica a DSP, teoria o tracking.
@@ -85,7 +85,14 @@ Confronto prima e dopo, tre stati per risoluzione: `docs/hardware/amp-before-aft
 | Lettori di schermo | **no** (ruoli e nomi invariati, non provati) | — |
 | Contrasto delle etichette sulla piastra misurato | **no** | — |
 
-Difetti noti: la spia accesa è poco luminosa rispetto a una spia vera (l'alone è CSS); sulla piastra c'è una fascia di riflesso scura a metà altezza; a 1× l'immagine viene ridotta dal browser, senza un file dedicato.
+Corretti il 16 novembre 2026 (rendering e screenshot rifatti, e2e verde):
+
+- **Fascia scura sulla piastra**: non era un riflesso. Il foro booleano della spia trasformava la faccia piana in un poligono unico, e le normali indurite dello smusso lo ombreggiavano lungo una diagonale. La spia ora ha un disco scuro appoggiato, senza taglio. Regola del kit: niente booleane su facce metalliche piane in vista.
+- **Stanza per i riflessi**: il mondo ha due livelli, uno scuro che illumina e uno chiaro visto solo dai raggi speculari (`ROOM_LEVEL`), così i metalli non riflettono il nero.
+- **Spia**: vetro con emissione più forte e alone CSS additivo (`plus-lighter`).
+- **Altezza**: tornata a 124 px (tela 30 px, piastra 72 px).
+
+Difetto noto: a 1× l'immagine viene ridotta dal browser, senza un file dedicato.
 
 ## 5 · Piano di estensione
 

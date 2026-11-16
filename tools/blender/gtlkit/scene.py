@@ -6,6 +6,7 @@ import bpy
 from mathutils import Vector
 
 U = 0.01  # 1 CSS px in Blender units
+ROOM_LEVEL = 0.22  # brightness of the room that metals reflect, straight ahead
 
 
 def px(v: float) -> float:
@@ -35,9 +36,41 @@ def reset(samples: int = 96, seed: int = 7):
         world.use_nodes = True
     except Exception:
         pass
-    bg = world.node_tree.nodes['Background']
+    # Two worlds in one: a dim one that lights the scene, and a soft bright
+    # "room" that only glossy rays see. A flat metal plate seen straight on
+    # reflects whatever is behind the camera: with a black room it showed dark
+    # bands between the reflections of the two lamps.
+    nt = world.node_tree
+    bg = nt.nodes['Background']
     bg.inputs[0].default_value = (0.05, 0.05, 0.055, 1)
     bg.inputs[1].default_value = 1.0
+    room = nt.nodes.new('ShaderNodeBackground')
+    room.inputs[1].default_value = 1.0
+    tc = nt.nodes.new('ShaderNodeTexCoord')
+    sep = nt.nodes.new('ShaderNodeSeparateXYZ')
+    nt.links.new(tc.outputs['Generated'], sep.inputs[0])
+    # Brighter towards the viewer and upwards (a ceiling), darker below and behind.
+    up = nt.nodes.new('ShaderNodeMath')
+    up.operation = 'MULTIPLY_ADD'
+    up.inputs[1].default_value = 0.10
+    up.inputs[2].default_value = ROOM_LEVEL
+    nt.links.new(sep.outputs['Y'], up.inputs[0])
+    front = nt.nodes.new('ShaderNodeMath')
+    front.operation = 'MULTIPLY_ADD'
+    front.inputs[1].default_value = 0.16
+    nt.links.new(sep.outputs['Z'], front.inputs[0])
+    nt.links.new(up.outputs[0], front.inputs[2])
+    floor = nt.nodes.new('ShaderNodeMath')
+    floor.operation = 'MAXIMUM'
+    floor.inputs[1].default_value = 0.02
+    nt.links.new(front.outputs[0], floor.inputs[0])
+    nt.links.new(floor.outputs[0], room.inputs[0])
+    lp = nt.nodes.new('ShaderNodeLightPath')
+    mix = nt.nodes.new('ShaderNodeMixShader')
+    nt.links.new(lp.outputs['Is Glossy Ray'], mix.inputs[0])
+    nt.links.new(bg.outputs[0], mix.inputs[1])
+    nt.links.new(room.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], nt.nodes['World Output'].inputs['Surface'])
     return s
 
 
