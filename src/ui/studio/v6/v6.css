@@ -216,7 +216,8 @@
 .v6-amp-top { position: absolute; display: grid; place-items: center; }
 .v6-amp-name { font: italic 600 17px/1 'Cormorant Garamond', Georgia, serif; color: #2b1907; text-shadow: 0 1px 0 rgba(255, 226, 160, .55); white-space: nowrap; }
 .v6-amp-tapebox { position: absolute; }
-.v6-amp-tape { display: block; padding: 2px 6px; font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #2a1a08; background: #e6d7a8; transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; }
+/* One fixed size for every word it can carry (DSP interno, NAM, TONE3000): the head never changes with the model's name. */
+.v6-amp-tape { display: block; box-sizing: border-box; width: 64px; text-align: center; overflow: hidden; padding: 2px 0; font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #2a1a08; background: #e6d7a8; transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; }
 .v6-amp-panel { position: absolute; inset: 0; }
 .v6-amp-lab { position: absolute; transform: translateX(-50%); font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #2a1806; text-shadow: 0 1px 0 rgba(255, 226, 160, .4); white-space: nowrap; }
 .v6-amp-lamp { position: absolute; transform: translate(-50%, -50%); background-size: 100% 100%; }
@@ -471,3 +472,7 @@
 .v6-nam-origin { display: flex; align-items: center; gap: 8px; }
 .v6-nam-origin img { width: 34px; height: 34px; border-radius: 4px; object-fit: cover; }
 @media (max-width: 560px) { .v6-t3k-tone { grid-template-columns: 1fr; } }
+
+/* model facts: long titles and file names wrap inside the panel, they never widen it */
+.v6-nam-facts dd { min-width: 0; overflow-wrap: anywhere; }
+.v6-nam-origin span { min-width: 0; overflow-wrap: anywhere; }

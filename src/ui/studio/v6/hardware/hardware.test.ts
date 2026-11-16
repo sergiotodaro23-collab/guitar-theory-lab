@@ -235,3 +235,15 @@ describe('header nameplate', () => {
     expect(reference).toContain('STUDIO · VER. 6.0');
   });
 });
+
+describe('amplifier sticker', () => {
+  it('names the engine only: three fixed words, whatever the model is called', async () => {
+    const { AMP_STICKER, ampSourceOf } = await import('../Rack');
+    expect(AMP_STICKER).toEqual({ internal: 'DSP interno', nam: 'NAM', tone3000: 'TONE3000' });
+    expect(ampSourceOf(false, null)).toBe('internal');
+    expect(ampSourceOf(false, { kind: 'tone3000' })).toBe('internal');
+    expect(ampSourceOf(true, { kind: 'file' })).toBe('nam');
+    expect(ampSourceOf(true, null)).toBe('nam');
+    expect(ampSourceOf(true, { kind: 'tone3000' })).toBe('tone3000');
+  });
+});

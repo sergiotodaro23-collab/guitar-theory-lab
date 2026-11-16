@@ -135,6 +135,11 @@ function InputModule() {
 const AMP = AMP_HEAD.spec;
 const AMP_BODY = AMP_HEAD.assets.body;
 
+/** What plays in the amp stage, for the sticker on the head: the built-in preamp, a local .nam file, or a model chosen on TONE3000. */
+export type AmpSource = 'internal' | 'nam' | 'tone3000';
+export const AMP_STICKER: Readonly<Record<AmpSource, string>> = { internal: 'DSP interno', nam: 'NAM', tone3000: 'TONE3000' };
+export const ampSourceOf = (namPlays: boolean, origin: { readonly kind: string } | null): AmpSource => (!namPlays ? 'internal' : origin?.kind === 'tone3000' ? 'tone3000' : 'nam');
+
 /** True when the settings ask for the model, the engine holds one, and it includes its cabinet: the rig's cabinet is skipped. */
 const namSkipsCab = (rig: { readonly amp: { readonly model: string; readonly namCab: boolean } }, nam: NamStatus): boolean => rig.amp.model === 'nam' && rig.amp.namCab && nam.phase === 'ready';
 
@@ -201,7 +206,7 @@ function NamPanel() {
               {origin.imageUrl ? <img src={origin.imageUrl} alt="" referrerPolicy="no-referrer" /> : null}
               <span><T3kMark /> {origin.title} · {gearLabel(origin.gear)} · {formatLabel('nam')} · @{origin.author || 'sconosciuto'} · <a href={origin.toneUrl} target="_blank" rel="noreferrer noopener">pagina del tone</a></span>
             </dd></div>
-          ) : null}
+          ) : <div><dt>Origine</dt><dd data-testid="nam-origin">file locale</dd></div>}
           <div><dt>Modello</dt><dd>{describeNamModel(s)}</dd></div>
           <div><dt>File</dt><dd>{s.fileName} · {(s.sizeBytes / 1024).toFixed(0)} kB · formato {s.version}</dd></div>
           {m ? <div><dt>Misurato qui</dt><dd data-testid="nam-measure">caricato in {Math.round(m.loadMs)} ms · costo stimato {percent(m.realtimeFactor)} del tempo audio ({Math.round(m.microsPerBlock)} µs per blocco su {Math.round(m.budgetMicros)}) · latenza aggiunta 0 campioni</dd></div> : null}
@@ -225,6 +230,7 @@ function AmpModule() {
   const amp = rig.amp;
   const heard = amp.power && !amp.bypass;
   const namReady = amp.model === 'nam' && nam.phase === 'ready' && nam.summary !== null;
+  const ampSource = ampSourceOf(namReady, nam.origin);
   return (
     <Module id="amp" title="Amplificatore" lit={heard}
       power={<Switch on={amp.power} label="Accensione dell’amplificatore" testId="amp-power" onClick={() => setRig((r) => ({ ...r, amp: { ...r.amp, power: !r.amp.power } }))} />}>
@@ -234,7 +240,8 @@ function AmpModule() {
           <span className="v6-amp-name">{namReady ? 'GTL NAM' : 'GTL Clean'}</span>
         </div>
         <div className="v6-amp-tapebox" style={{ right: AMP.tape.right, top: AMP.tape.y }}>
-          <span className="v6-amp-tape" data-testid="amp-tape">{namReady ? `NAM · ${nam.summary?.name ?? ''}` : amp.model === 'nam' ? 'DSP interno · NAM senza modello' : 'DSP interno'}</span>
+          {/* The sticker names the engine that plays, nothing else: a fixed word on a fixed tape. Titles, files and authors are in the facts under the head. */}
+          <span className="v6-amp-tape" data-testid="amp-tape" data-source={ampSource}>{AMP_STICKER[ampSource]}</span>
         </div>
         <div className="v6-amp-panel">
           <span className="v6-amp-lamp" data-on={amp.power ? 1 : 0} data-testid="amp-lamp" role="img" aria-label={amp.power ? 'Amplificatore acceso' : 'Amplificatore spento'}
