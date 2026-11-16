@@ -1,6 +1,36 @@
 {
   "id": "mixer",
   "about": "Moving parts of the Studio V6 mixer. All numbers are CSS pixels. Fader caps slide over the CSS slot; keys are nine-slice pictures so one render serves keys of any width.",
-  "cap": { "w": 28, "h": 18, "frame": { "w": 40, "h": 32 }, "shadowDrop": 2 },
-  "key": { "w": 44, "h": 22, "slice": 8 }
+  "cap": {
+    "w": 28,
+    "h": 18,
+    "frame": {
+      "w": 40,
+      "h": 32
+    },
+    "shadowDrop": 2
+  },
+  "key": {
+    "w": 44,
+    "h": 22,
+    "slice": 8
+  },
+  "strip": {
+    "w": 80,
+    "h": 120,
+    "slice": 12,
+    "corner": 4
+  },
+  "slot": {
+    "w": 34,
+    "h": 64,
+    "slice": 14,
+    "groove": 4
+  },
+  "bank": {
+    "w": 96,
+    "h": 96,
+    "slice": 14,
+    "corner": 5
+  }
 }

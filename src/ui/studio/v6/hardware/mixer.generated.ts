@@ -16,6 +16,24 @@ export const MIXER_HW = {
       "w": 44,
       "h": 22,
       "slice": 8
+    },
+    "strip": {
+      "w": 80,
+      "h": 120,
+      "slice": 12,
+      "corner": 4
+    },
+    "slot": {
+      "w": 34,
+      "h": 64,
+      "slice": 14,
+      "groove": 4
+    },
+    "bank": {
+      "w": 96,
+      "h": 96,
+      "slice": 14,
+      "corner": 5
     }
   },
   "assets": {
@@ -76,6 +94,66 @@ export const MIXER_HW = {
         22
       ],
       "slice": 8
+    },
+    "strip": {
+      "file": "mixer-strip@2x.webp",
+      "px": [
+        160,
+        240
+      ],
+      "css": [
+        80,
+        120
+      ],
+      "slice": 12
+    },
+    "stripGroup": {
+      "file": "mixer-strip-group@2x.webp",
+      "px": [
+        160,
+        240
+      ],
+      "css": [
+        80,
+        120
+      ],
+      "slice": 12
+    },
+    "stripMaster": {
+      "file": "mixer-strip-master@2x.webp",
+      "px": [
+        160,
+        240
+      ],
+      "css": [
+        80,
+        120
+      ],
+      "slice": 12
+    },
+    "slot": {
+      "file": "mixer-slot@2x.webp",
+      "px": [
+        68,
+        128
+      ],
+      "css": [
+        34,
+        64
+      ],
+      "slice": 14
+    },
+    "bank": {
+      "file": "mixer-bank@2x.webp",
+      "px": [
+        192,
+        192
+      ],
+      "css": [
+        96,
+        96
+      ],
+      "slice": 14
     }
   }
 } as const;

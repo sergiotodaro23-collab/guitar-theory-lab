@@ -278,22 +278,27 @@
 .v57-dv:has(.v6-mx) { justify-content: stretch; align-items: stretch; }
 .v6-mx { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; gap: 4px; padding: 2px 34px 0 2px; }
 .v6-mx-banks { flex: 1; min-height: 0; display: flex; gap: 10px; }
-.v6-mx-bank { display: flex; gap: 6px; min-width: 0; min-height: 0; padding: 6px; border-radius: 5px;
-  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 1px, rgba(0, 0, 0, 0) 1px 4px), linear-gradient(180deg, #2f3136, #1a1b1e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 0 0 1px #07080a; }
+.v6-mx-bank { display: flex; gap: 6px; min-width: 0; min-height: 0; padding: 6px; }
 .v6-mx-bank:first-child { flex: 5; }
 .v6-mx-bank:nth-child(2) { flex: 3; }
-.v6-mx-strip { flex: 1; min-width: 58px; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px 4px 4px; border-radius: 4px; background: linear-gradient(180deg, #25262a, #17181b); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .07); }
-.v6-mx-strip[data-kind='group'] { background: linear-gradient(180deg, #33291f, #1e1711); }
-.v6-mx-strip[data-kind='master'] { background: linear-gradient(180deg, #3a2320, #1f1412); }
+/* Rendered faceplates (tools/blender, mixer.json) as nine-slice pictures on a layer behind the content: the layout is the same as with the CSS backgrounds. */
+.v6-mx-bank, .v6-mx-strip, .v6-mx-slot { position: relative; isolation: isolate; }
+.v6-mx-bank::before, .v6-mx-strip::before, .v6-mx-slot::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-style: solid; border-color: transparent; }
+.v6-mx-bank::before { border-width: var(--bank-slice); border-image: var(--bank) var(--bank-slice-px) fill / var(--bank-slice) stretch; }
+.v6-mx-strip { flex: 1; min-width: 58px; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px 4px 4px; }
+.v6-mx-strip::before { border-width: var(--strip-slice); border-image: var(--strip) var(--strip-slice-px) fill / var(--strip-slice) stretch; }
+.v6-mx-strip[data-kind='group']::before { border-image-source: var(--strip-group); }
+.v6-mx-strip[data-kind='master']::before { border-image-source: var(--strip-master); }
 .v6-mx-name { display: inline-flex; align-items: center; gap: 5px; font: 600 13px/15px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #ece4cf; white-space: nowrap; }
 .v6-mx-led { width: 7px; height: 7px; border-radius: 50%; background: #1a1d1a; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .7); }
 .v6-mx-led[data-on='1'] { background: var(--led-green); box-shadow: 0 0 5px var(--led-green); }
 .v6-mx-run { flex: 1; min-height: 60px; display: flex; align-items: stretch; justify-content: center; gap: 5px; }
 .v6-mx-scale { position: relative; width: 20px; flex: none; }
 .v6-mx-scale b { position: absolute; right: 0; top: calc(var(--cap-h) / 2 + (100% - var(--cap-h)) * (1 - var(--g))); transform: translateY(-50%); font: 500 9px/1 'IBM Plex Mono', monospace; color: rgba(232, 226, 208, .7); }
-.v6-mx-slot { position: relative; width: 34px; flex: none; border-radius: 3px; background-color: #0e0d0c;
-  background-image: linear-gradient(90deg, transparent 0 15px, #000 15px 19px, transparent 19px), repeating-linear-gradient(180deg, rgba(236, 226, 200, .45) 0 1px, transparent 1px 10%);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .6), inset 0 2px 5px rgba(0, 0, 0, .7); }
+.v6-mx-slot { width: var(--slot-w); flex: none; }
+.v6-mx-slot::before { border-width: var(--slot-slice) 0; border-image: var(--slot) var(--slot-slice-px) 0 fill / var(--slot-slice) 0 stretch; }
+/* a tick beside every dB mark, on the strip's paint */
+.v6-mx-scale b::after { content: ''; position: absolute; left: calc(100% + 2px); top: 50%; width: 4px; height: 1px; background: rgba(232, 226, 208, .55); }
 /* rendered fader cap (tools/blender, mixer.json): the picture carries its shadow, so it is larger than the cap and dropped by the spec's shadowDrop */
 .v6-mx-slot::after { content: ''; position: absolute; left: 50%; width: var(--cap-fw); height: var(--cap-fh); margin: calc(var(--cap-fh) / -2 + var(--cap-drop)) 0 0 calc(var(--cap-fw) / -2);
   top: calc(var(--cap-h) / 2 + (100% - var(--cap-h)) * (1 - var(--v))); pointer-events: none; background: var(--cap) center / 100% 100% no-repeat; }
