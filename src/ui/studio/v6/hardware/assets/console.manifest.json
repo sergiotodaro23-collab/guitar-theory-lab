@@ -1,0 +1,91 @@
+{
+  "component": "console",
+  "spec": "tools/blender/specs/console.json",
+  "blender": "5.3.0",
+  "engine": "CYCLES",
+  "samples": 128,
+  "scale": 2,
+  "assets": {
+    "plate": {
+      "file": "console-plate9@2x.webp",
+      "px": [
+        800,
+        320
+      ],
+      "css": [
+        400,
+        160
+      ],
+      "scale": 2,
+      "bytes": 2868,
+      "sha256": "9c40a7690b7e362b",
+      "use": "Deck plate, nine-slice",
+      "slice": 22
+    },
+    "lcd": {
+      "file": "console-lcd9@2x.webp",
+      "px": [
+        600,
+        200
+      ],
+      "css": [
+        300,
+        100
+      ],
+      "scale": 2,
+      "bytes": 1372,
+      "sha256": "d56e29e66f23297f",
+      "use": "LCD bezel and glass, nine-slice",
+      "slice": 13
+    },
+    "keyUp": {
+      "file": "console-key-up@2x.webp",
+      "px": [
+        120,
+        104
+      ],
+      "css": [
+        60,
+        52
+      ],
+      "scale": 2,
+      "bytes": 816,
+      "sha256": "f2433aa3a17b8347",
+      "use": "Hardware key (keyUp), nine-slice",
+      "slice": 13
+    },
+    "keyDown": {
+      "file": "console-key-down@2x.webp",
+      "px": [
+        120,
+        104
+      ],
+      "css": [
+        60,
+        52
+      ],
+      "scale": 2,
+      "bytes": 748,
+      "sha256": "2105a08a32ed626e",
+      "use": "Hardware key (keyDown), nine-slice",
+      "slice": 13
+    },
+    "keyLit": {
+      "file": "console-key-lit@2x.webp",
+      "px": [
+        120,
+        104
+      ],
+      "css": [
+        60,
+        52
+      ],
+      "scale": 2,
+      "bytes": 1118,
+      "sha256": "d3d17465021f8338",
+      "use": "Hardware key (keyLit), nine-slice",
+      "slice": 13
+    }
+  },
+  "renderSeconds": 27.5
+}
