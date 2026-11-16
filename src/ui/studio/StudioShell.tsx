@@ -20,7 +20,7 @@ import { Header } from './v6/Header';
 import { MixerCompact } from './v6/MixerCompact';
 import { MixerHandle } from './v6/MixerHandle';
 import { Rack } from './v6/Rack';
-import { DEFAULT_SPLIT, FB_MIN, clampRatio, splitHeight } from './v57/layout';
+import { DEFAULT_SPLIT, FB_MIN, NB_MIN, clampRatio, splitHeight } from './v57/layout';
 import { useStudioUi } from './v57/uiStore';
 import './v57/fonts.css';
 import './v57/v57.css';
@@ -45,12 +45,13 @@ function useBox<T extends HTMLElement>(): [(el: T | null) => void, { w: number; 
 export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean }) {
   const split = useStudioUi((u) => u.split);
   const setSplit = useStudioUi((u) => u.setSplit);
+  // Compact mixer: its own row between the notebook and the foot of the case. The notebook stays mounted, with its tab and scroll.
+  const compactMixer = useStudioUi((u) => u.device === 'mixer' && u.mixerMode === 'compact');
   const [workRef, work] = useBox<HTMLDivElement>();
   const [deckRef, deck] = useBox<HTMLDivElement>();
+  const [mixRef, mix] = useBox<HTMLDivElement>();
   const [legendHost, setLegendHost] = useState<HTMLElement | null>(null);
   const [dragging, setDragging] = useState(false);
-  // Compact mixer: its own row between the notebook and the handle. The notebook only gets shorter: it stays mounted, with its tab and scroll.
-  const compactMixer = useStudioUi((u) => u.device === 'mixer' && u.mixerMode === 'compact');
   // Leaving Studio closes its panels and drawer, so coming back starts clean (no exit animation on mount).
   useEffect(() => () => { useStudioUi.setState({ settingsOpen: false, vizOpen: false, metroOpen: false, device: null, launcher: null }); }, []);
   const drag = useRef<{ y: number; h: number } | null>(null);
@@ -58,7 +59,10 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
   // Space under the console shared by the neck and the notebook.
   const available = Math.max(0, work.h - deck.h - SPLIT_PX - GAP * 3);
   const boardWidth = Math.max(0, work.w - 28 - 20);
-  const fbh = work.h > 0 ? splitHeight(split, available, boardWidth) : 300;
+  const wanted = work.h > 0 ? splitHeight(split, available, boardWidth) : 300;
+  // The compact mixer takes its row from the notebook. The notebook keeps the same minimum the divider already guarantees it:
+  // only if the row would push it under that minimum does the neck give back the difference, and never below its own minimum.
+  const fbh = compactMixer && mix.h > 0 ? Math.max(FB_MIN, Math.min(wanted, available - (mix.h + GAP) - NB_MIN)) : wanted;
   const max = work.h > 0 ? splitHeight(1, available, boardWidth) : 300;
   const setHeight = useCallback((h: number) => {
     if (available <= 0) return;
@@ -114,7 +118,7 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
               <Notebook onLegendHost={setLegendHost} />
               <DeviceBay />
             </div>
-            {compactMixer ? <MixerCompact /> : null}
+            {compactMixer ? <div ref={mixRef} className="v6-mc-box"><MixerCompact /></div> : null}
           </div>
           <Rack />
         </div>

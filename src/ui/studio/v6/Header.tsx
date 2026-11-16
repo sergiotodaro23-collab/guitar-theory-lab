@@ -32,15 +32,16 @@ function Glyph({ d }: { readonly d: string }) {
  * subdivision (the console shows them, this is where they are set). Same
  * store as the mixer and the accent grid.
  */
-/** The one control of a sidebar's width: a window with its left or right pane marked, filled when the pane is open. */
+/**
+ * The one control of a sidebar's width. The glyph is the owner's reference: a rounded frame with a short bar standing inside it,
+ * near the side the key belongs to. Nothing is filled; the open state is the key's colour.
+ */
 function SideToggle({ side, open, label, testId, onClick }: { readonly side: 'left' | 'right'; readonly open: boolean; readonly label: string; readonly testId: string; readonly onClick: () => void }) {
-  const x = side === 'left' ? 4.5 : 14.5;
   return (
     <button type="button" className="v6-side" data-side={side} aria-expanded={open} aria-label={open ? `Comprimi ${label}` : `Espandi ${label}`} title={open ? `Comprimi ${label}` : `Espandi ${label}`} data-testid={testId} onClick={onClick}>
-      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="3" y="4.5" width="18" height="15" rx="2.6" fill="none" stroke="currentColor" strokeWidth="1.9" />
-        <rect x={x} y="6" width="5" height="12" rx="1.2" fill="currentColor" opacity={open ? 1 : 0.28} />
-        <path d={side === 'left' ? 'M9.5 5v14' : 'M14.5 5v14'} stroke="currentColor" strokeWidth="1.9" />
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <rect x="3.5" y="5" width="17" height="14" rx="3.6" data-part="frame" />
+        <path d={side === 'left' ? 'M8.1 9v6' : 'M15.9 9v6'} data-part="bar" />
       </svg>
     </button>
   );

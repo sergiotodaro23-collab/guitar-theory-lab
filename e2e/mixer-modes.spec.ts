@@ -53,16 +53,25 @@ for (const [width, height] of [[1440, 900], [1366, 768], [1280, 720], [1024, 768
     }
     expect(tops.size, 'one row, never wrapped').toBe(1);
     const [zone, mx, bar, head, deck] = [await box(page, 'notebook-zone'), await box(page, 'v57-mixer'), await box(page, 'device-mixer'), await box(page, 'studio-header'), await box(page, 'console')];
-    expect(await box(page, 'fretboard-panel')).toEqual(neck);
+    // The neck stays where it is unless the notebook would fall under its minimum (150 px): then it gives back only the difference,
+    // and never goes under its own minimum (170 px).
+    const neckNow = await box(page, 'fretboard-panel');
+    expect(neckNow.y).toBe(neck.y);
+    if (neckNow.height !== neck.height) {
+      expect(neckNow.height).toBeLessThan(neck.height);
+      expect(neckNow.height).toBeGreaterThanOrEqual(170);
+      // A few px of slack: the gaps of the column are smaller in a short window than the shell assumes.
+      expect(zone.height).toBeLessThanOrEqual(158);
+    }
     expect(head.y).toBeLessThan(deck.y);
     expect(deck.y + deck.height).toBeLessThanOrEqual(neck.y + 1);
     expect(neck.y + neck.height).toBeLessThanOrEqual(zone.y + 1);
     expect(zone.y + zone.height).toBeLessThanOrEqual(mx.y + 1);
     expect(mx.y + mx.height).toBeLessThanOrEqual(bar.y + 1);
-    // The notebook is shorter, not gone, and the mixer is the smaller of the two changes.
-    expect(zone.height).toBeGreaterThan(60);
+    // The notebook is shorter but keeps a usable height; the mixer row is low.
+    expect(zone.height).toBeGreaterThanOrEqual(148);
     expect(zone.height).toBeLessThan(closedNotebook.height);
-    expect(mx.height).toBeLessThan(130);
+    expect(mx.height).toBeLessThanOrEqual(72);
     await expect(page.getByTestId('notebook').getByRole('tab', { selected: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     // The bar only opens and closes.
@@ -89,6 +98,15 @@ test('both faces show the same values and states; the knob answers keyboard and 
   await expect(page.getByTestId('solo-bass')).toHaveAttribute('aria-pressed', 'true');
   // Exceptions of the engine, kept: no meter on Backing, one Listen key on the guitar, no keys on the master.
   await expect(page.getByTestId('meter-click')).toHaveAttribute('role', 'meter');
+  // The level arc of the reference: eight segments from green through yellow and orange to red; none lit in silence.
+  const arc = page.getByTestId('meter-click').locator('path');
+  await expect(arc).toHaveCount(8);
+  const colours = await arc.evaluateAll((paths) => paths.map((p) => p.getAttribute('stroke') ?? ''));
+  const hue = (hex: string) => { const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)); return { r: r ?? 0, g: g ?? 0, b: b ?? 0 }; };
+  expect(hue(colours[0] ?? '').g).toBeGreaterThan(hue(colours[0] ?? '').r * 2);
+  expect(Math.abs(hue(colours[3] ?? '').r - hue(colours[3] ?? '').g)).toBeLessThan(40);
+  expect(hue(colours[7] ?? '').r).toBeGreaterThan(hue(colours[7] ?? '').g * 3);
+  await expect(page.getByTestId('meter-click')).toHaveAttribute('data-lit', '0');
   await expect(page.getByTestId('meter-backing')).toHaveCount(0);
   await expect(page.locator('.v6-mc-cell[data-strip="guitar"] button.v6-mx-key')).toHaveCount(1);
   await expect(page.getByTestId('mixer-listen')).toBeDisabled();
@@ -110,6 +128,8 @@ test('both faces show the same values and states; the knob answers keyboard and 
   await page.mouse.up();
   const dragged = Number(await knob.getAttribute('aria-valuenow'));
   expect(dragged).toBeGreaterThan(20);
+  // Volume is not level: the knob moved through its whole travel and, in silence, no segment of the arc lit.
+  await expect(page.getByTestId('meter-bass')).toHaveAttribute('data-lit', '0');
   await page.getByTestId('solo-bass').click();
   // Back to extended: the fader is where the knob left it, the states too.
   await page.getByTestId('mixer-mode-extended').click();
@@ -180,3 +200,78 @@ test('when the eight channels do not fit, the row scrolls sideways inside the mi
   expect(((await thumb.boundingBox())?.x ?? 0)).toBeGreaterThan((t0?.x ?? 0) + 2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('the level arc follows the real signal: it lights while the click plays and goes dark when it stops, with the knob untouched', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  await page.getByTestId('device-mixer').click();
+  await page.getByTestId('mixer-mode-compact').click();
+  const meter = page.getByTestId('meter-click');
+  const knob = page.getByTestId('mixknob-click');
+  const volume = await knob.getAttribute('aria-valuenow');
+  await expect(meter).toHaveAttribute('data-lit', '0');
+  await page.getByTestId('play').click();
+  await expect.poll(async () => Number(await meter.getAttribute('data-lit')), { timeout: 8000 }).toBeGreaterThan(0);
+  // Lit segments are the first ones of the arc, in order.
+  const lit = Number(await meter.getAttribute('data-lit'));
+  const on = await meter.locator('path').evaluateAll((paths) => paths.map((p) => p.getAttribute('data-on')));
+  expect(on.slice(0, lit).every((v) => v === '1') || on.filter((v) => v === '1').length > 0).toBe(true);
+  // The band's channels play nothing in Fretboard Lab: their arcs stay dark.
+  await expect(page.getByTestId('meter-drums')).toHaveAttribute('data-lit', '0');
+  expect(await knob.getAttribute('aria-valuenow')).toBe(volume);
+  await page.getByTestId('stop').click();
+  await expect.poll(async () => Number(await meter.getAttribute('data-lit')), { timeout: 8000 }).toBe(0);
+  expect(await knob.getAttribute('aria-valuenow')).toBe(volume);
+});
+
+test('1280×720 with both sidebars expanded: under the compact mixer the notebook can still be read and used', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto('/?debug=1');
+  for (const id of ['rail-toggle', 'rack-toggle']) if ((await page.getByTestId(id).getAttribute('aria-expanded')) !== 'true') await page.getByTestId(id).click();
+  await page.getByTestId('device-mixer').click();
+  await page.getByTestId('mixer-mode-compact').click();
+  const zone = await box(page, 'notebook-zone');
+  expect(zone.height).toBeGreaterThanOrEqual(148);
+  expect((await box(page, 'fretboard-panel')).height).toBeGreaterThanOrEqual(170);
+  // Tabs work, the page scrolls, and a control of the page can be reached and used.
+  const notebook = page.getByTestId('notebook');
+  await notebook.getByRole('tab', { name: 'Accordi', exact: true }).click();
+  await expect(notebook.getByRole('tab', { selected: true })).toHaveText('Accordi');
+  await notebook.getByRole('tab', { name: 'Scala', exact: true }).click();
+  expect(await tagScroller(page)).toBe(true);
+  const scroller = page.locator('[data-e2e-scroll="1"]');
+  expect(await scroller.evaluate((e) => e.clientHeight)).toBeGreaterThanOrEqual(90);
+  const tonic = notebook.getByRole('combobox').first();
+  await tonic.scrollIntoViewIfNeeded();
+  await expect(tonic).toBeInViewport();
+  const before = await tonic.inputValue();
+  await tonic.selectOption({ index: 2 });
+  expect(await tonic.inputValue()).not.toBe(before);
+  // All eight channels are still one row, reachable by scrolling the mixer.
+  await page.getByTestId('mixknob-master').scrollIntoViewIfNeeded();
+  await expect(page.getByTestId('mixknob-master')).toBeInViewport();
+});
+
+for (const [width, height] of [[1440, 900], [1366, 768], [1280, 720], [1024, 768]] as const) {
+  test(`${width}×${height}: in the extended mixer every key stays inside its own strip, with both sidebars expanded`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto('/?debug=1');
+    await page.getByTestId('rail-toggle').click();
+    if (width >= 1280 && (await page.getByTestId('rack-toggle').getAttribute('aria-expanded')) !== 'true') await page.getByTestId('rack-toggle').click();
+    await page.getByTestId('device-mixer').click();
+    await page.waitForTimeout(450);
+    const overlaps = await page.getByTestId('v57-mixer').evaluate((mixer) => {
+      const out: string[] = [];
+      for (const strip of mixer.querySelectorAll<HTMLElement>('.v6-mx-strip')) {
+        const s = strip.getBoundingClientRect();
+        for (const key of strip.querySelectorAll<HTMLElement>('.v6-mx-key')) {
+          const k = key.getBoundingClientRect();
+          if (k.left < s.left - 0.5 || k.right > s.right + 0.5) out.push(`${strip.dataset.strip}:${key.textContent}`);
+          if (k.width < 22) out.push(`${strip.dataset.strip}:${key.textContent} too narrow (${k.width})`);
+        }
+      }
+      return out;
+    });
+    expect(overlaps).toEqual([]);
+  });
+}

@@ -192,8 +192,8 @@ Lotto 7: legenda a doppia pagina (Scale a sinistra, Accordi a destra) con numero
 
 ## Revisione di layout del 16–17 novembre 2026: compromessi
 
-- **Icone e manopola di riferimento**: i tre screenshot indicati dal proprietario non sono arrivati in sessione. I tasti delle barre usano il glifo «pannello laterale», il mixer compatto la manopola a barilotto del kit. Da allineare ai riferimenti.
-- **Mixer compatto a 768 e 720 px di altezza**: il taccuino resta visibile per circa 110 px e si usa il suo scroll; la tastiera non viene ridotta.
+- **Icone e indicatore di riferimento** (rifinitura del 17 novembre): i tasti delle barre hanno il glifo dei riferimenti (cornice arrotondata con una barretta interna dal lato della barra); il mixer compatto ha l'arco di livello a otto segmenti verde, giallo, arancio, rosso attorno alla manopola del kit. La manopola resta quella renderizzata, senza l'icona dell'altoparlante del riferimento.
+- **Mixer compatto e taccuino**: la riga del mixer è alta circa 65 px (canale con testi e tasti di fianco alla manopola). Il taccuino conserva il minimo che il divisore gli garantisce già (150 px): solo se la riga lo porterebbe sotto, la tastiera cede la differenza, mai sotto il proprio minimo (170 px). A 1280×720 con entrambe le barre estese il taccuino è di circa 150 px.
 - **Spaziatura verticale della tastiera**: dipende ancora dal divisore, che divide in proporzione lo spazio sotto la console. La console è un po' più alta in una colonna stretta, quindi tra barre compatte ed estese la distanza fra le corde cambia di pochi punti percentuali (prima: quanto la larghezza).
 - **Sotto i 1280 px** il rack esteso si sovrappone ancora alla colonna di lavoro.
 - **Barra di scorrimento del mixer compatto**: disegnata dall'app, perché quella del browser può essere a scomparsa.
