@@ -7,6 +7,7 @@ import { AMP_HEAD } from './amp.generated';
 import { PEDALS_HW } from './pedals.generated';
 import { CAB_HW } from './cab.generated';
 import { IFACE_HW } from './iface.generated';
+import { MIXER_HW } from './mixer.generated';
 import { PEDAL_SPECS } from '../../../../app/rig';
 
 /**
@@ -98,6 +99,7 @@ const COMPONENTS = [
   { name: 'pedals', generated: PEDALS_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 160 },
   { name: 'cab', generated: CAB_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 60 },
   { name: 'iface', generated: IFACE_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 80 },
+  { name: 'mixer', generated: MIXER_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 20 },
 ];
 
 describe.each(COMPONENTS)('rendered component $name', ({ name, generated, budget }) => {
@@ -168,5 +170,16 @@ describe('audio interface and cabinet: live controls have their place on the pic
       expect(s.y - s.r).toBeGreaterThanOrEqual(grille.y);
       expect(s.y + s.r).toBeLessThanOrEqual(grille.y + grille.h);
     }
+  });
+});
+
+describe('mixer parts', () => {
+  it('the cap picture holds the cap and its shadow; a key can be sliced into nine', () => {
+    const { cap, key } = MIXER_HW.spec;
+    expect(cap.frame.w).toBeGreaterThan(cap.w);
+    expect(cap.frame.h).toBeGreaterThanOrEqual(cap.h + 2 * cap.shadowDrop);
+    expect(key.slice * 2).toBeLessThan(key.h);
+    expect(MIXER_HW.assets.keyOff.px).toEqual([key.w * 2, key.h * 2]);
+    expect(MIXER_HW.assets.keyMute.slice).toBe(key.slice);
   });
 });

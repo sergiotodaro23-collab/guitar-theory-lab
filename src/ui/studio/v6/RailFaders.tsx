@@ -4,6 +4,7 @@
  * as the mixer: the guitar fader is the mixer's guitar channel; the backing
  * fader trims comping, bass, drums and the imported track together.
  */
+import { MIXER_VARS } from './hardware/mixerVars';
 import { useApp } from '../../../app/store';
 import { liveInput, useLive } from '../../../audio/liveInput';
 
@@ -54,7 +55,7 @@ export function RailFaders() {
   const inputOn = useLive((l) => l.state === 'on');
   const monitorOn = useLive((l) => l.monitorOn);
   return (
-    <div className="v6-faders" data-testid="rail-faders">
+    <div className="v6-faders" data-testid="rail-faders" style={MIXER_VARS}>
       <Strip id="guitar" caption="Guitar" label="Chitarra (ascolto)" value={monitorVol} lit={monitorOn && monitorVol > 0}
         onChange={(v) => { update({ monitorVol: v }); if (monitorOn) liveInput.setMonitor(true, v); }}
         keyLabel="Ascolta la chitarra" keyText="ASC" keyOn={monitorOn} keyDisabled={!inputOn} keyTestId="rail-listen"

@@ -315,3 +315,22 @@ def led_lens(name, color, lit=False, strength=1.1):
     else:
         _set(b, tuple(c * 0.16 for c in color), 0.22, spec=0.6, coat=0.8)
     return m
+
+
+def key_cap(name, color, lit=False, strength=0.3):
+    """Translucent moulded key of a console. Off: the dark tinted plastic. Lit: the lamp under it glows through, brighter at the centre."""
+    m, nt, b = _new(name)
+    if not lit:
+        _set(b, color, 0.38, spec=0.5, coat=0.35)
+        return m
+    _set(b, color, 0.34, spec=0.5, coat=0.35)
+    tc = nt.nodes.new('ShaderNodeTexCoord')
+    grad = nt.nodes.new('ShaderNodeTexGradient')
+    grad.gradient_type = 'SPHERICAL'
+    mp = nt.nodes.new('ShaderNodeMapping')
+    mp.inputs['Scale'].default_value = (2.2, 4.0, 1.0)
+    nt.links.new(tc.outputs['Object'], mp.inputs['Vector'])
+    nt.links.new(mp.outputs['Vector'], grad.inputs['Vector'])
+    nt.links.new(_range(nt, grad.outputs['Fac'], strength * 0.45, strength), b.inputs['Emission Strength'])
+    b.inputs['Emission Color'].default_value = (*color, 1)
+    return m

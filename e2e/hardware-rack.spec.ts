@@ -67,3 +67,40 @@ test('the cabinet picture dims when the cabinet is switched off', async ({ page 
   await page.getByTestId('rig-cab-switch').click();
   expect(await filter()).not.toBe('none');
 });
+
+test('mixer: rendered caps follow the faders and rendered keys show mute and solo', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  await page.getByTestId('device-mixer').click();
+  const mixer = page.getByTestId('v57-mixer');
+  await expect(mixer).toBeVisible();
+  const fader = page.getByTestId('fader-bass');
+  const cap = () => fader.evaluate((input) => {
+    const style = getComputedStyle(input.parentElement as HTMLElement, '::after');
+    return { top: parseFloat(style.top), picture: style.backgroundImage, width: parseFloat(style.width) };
+  });
+  await fader.fill('1');
+  const high = await cap();
+  await fader.fill('0');
+  const low = await cap();
+  // Small pictures are inlined by the build: a WebP either way.
+  expect(high.picture).toContain('webp');
+  expect(high.width).toBe(40);
+  // Up is louder: the cap at full volume is nearer the top of the slot.
+  expect(high.top).toBeLessThan(low.top - 40);
+  const mute = page.getByTestId('mute-bass');
+  const picture = (key: typeof mute) => key.evaluate((e) => getComputedStyle(e).borderImageSource);
+  const off = await picture(mute);
+  expect(off).toContain('webp');
+  await mute.click();
+  const muted = await picture(mute);
+  expect(muted).not.toBe(off);
+  await mute.click();
+  const solo = page.getByTestId('solo-bass');
+  await solo.click();
+  const soloed = await picture(solo);
+  expect(soloed).not.toBe(off);
+  expect(soloed).not.toBe(muted);
+  await solo.click();
+  expect(await picture(solo)).toBe(off);
+});

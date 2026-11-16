@@ -1,6 +1,6 @@
 # Studio V6 — Registro di avanzamento
 
-Stati come in `CLAUDE.md`: implementato, testato con segnali sintetici, verificato con hardware reale, parziale, mancante. Aggiornato: 13 novembre 2026.
+Stati come in `CLAUDE.md`: implementato, testato con segnali sintetici, verificato con hardware reale, parziale, mancante. Aggiornato: 16 novembre 2026.
 
 ## Fase corrente
 
@@ -166,7 +166,11 @@ Limiti dichiarati: nessuna prova con chitarra, scheda audio e capture reali; nes
 | Funzione | Stato | Prova |
 |---|---|---|
 | Pipeline Blender → asset → React (`tools/blender/`), geometria da una sola spec | implementata | `hardware.test.ts`, rendering reali con Blender 5.3.0 |
-| Testata dell'amplificatore renderizzata: corpo, manopole a 31 fotogrammi, spia | implementata, verificata a tre risoluzioni in Chromium headless | `e2e/hardware-amp.spec.ts`, confronti in `docs/hardware/` |
+| Testata dell'amplificatore renderizzata: corpo, manopole a 31 fotogrammi, spia; 124 px di altezza | implementata, verificata in Chromium headless | `e2e/hardware-amp.spec.ts` |
+| Pedaliera renderizzata: sette corpi, manopola, LED e interruttore condivisi | implementata, verificata in Chromium headless | `e2e/hardware-pedals.spec.ts`, `guitar-rig.spec.ts`, `pedal-chain.spec.ts` |
+| Cabinet e scheda audio renderizzati | implementati, verificati in Chromium headless | `e2e/hardware-rack.spec.ts` |
+| Mixer: cappucci dei fader e tasti Mute/Solo renderizzati | parziale: fondo e guide ancora CSS | `e2e/hardware-rack.spec.ts` |
+| Console, telaio, fondo della tastiera renderizzati | mancanti | piano in `STUDIO_V6_HARDWARE_PIPELINE.md` §5 |
 | Altri componenti (cabinet, pedali, scheda audio, mixer, console, telaio, fondo della tastiera) | mancanti: piano in `docs/STUDIO_V6_HARDWARE_PIPELINE.md` | — |
 
 ## Baseline

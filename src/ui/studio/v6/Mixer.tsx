@@ -10,6 +10,7 @@ import { engine } from '../../../app/engine';
 import { MIX_CHANNELS, channelVolume, type MixChannel, type SoloTarget } from '../../../app/settings';
 import { useApp } from '../../../app/store';
 import { liveInput, useLive } from '../../../audio/liveInput';
+import { MIXER_VARS } from './hardware/mixerVars';
 
 const CHANNELS = [
   { id: 'click', label: 'Click', vol: 'volClick', mute: 'muteClick' },
@@ -109,7 +110,7 @@ export function Mixer() {
   const levels = useLevels();
   const solo = (target: SoloTarget) => update({ soloChannel: s.soloChannel === target ? '' : target });
   return (
-    <section className="v6-mx" aria-label="Mixer" data-testid="v57-mixer">
+    <section className="v6-mx" aria-label="Mixer" data-testid="v57-mixer" style={MIXER_VARS}>
       <div className="v6-mx-banks">
       <div className="v6-mx-bank" role="group" aria-label="Canali">
         {CHANNELS.map(({ id, label, vol, mute }) => (
