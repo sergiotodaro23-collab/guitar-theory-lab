@@ -373,3 +373,7 @@ html .v57 .v57-labels .segment[aria-pressed='true'] { color: #2a2418; background
 
 /* rosewood board (preview of the next chord): pale inlays, as mother-of-pearl on a dark board */
 .v57 [data-board='rosewood'] .inlay { fill: #e8dfca; filter: drop-shadow(0 .6px 0 rgba(0, 0, 0, .5)); }
+
+/* transport glyphs in the colours of the approved V6.7 console: green to go, amber to hold */
+.v57-tp .v57-key[data-testid='play']:not([data-on='1']) svg { color: #5fd46e; }
+.v57-tp .v57-key[data-testid='pause']:not([data-on='1']):not(:disabled) svg, .v57-tp .v57-key[data-testid='stop']:not(:disabled) svg { color: #f2bb4b; }
