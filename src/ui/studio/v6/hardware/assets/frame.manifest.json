@@ -1,0 +1,57 @@
+{
+  "component": "frame",
+  "spec": "tools/blender/specs/frame.json",
+  "blender": "5.3.0",
+  "engine": "CYCLES",
+  "samples": 128,
+  "scale": 2,
+  "assets": {
+    "boardMaple": {
+      "file": "board-maple@2x.webp",
+      "px": [
+        2344,
+        424
+      ],
+      "css": [
+        1172,
+        212
+      ],
+      "scale": 2,
+      "bytes": 12138,
+      "sha256": "6afa12cec73382b1",
+      "use": "Fretboard face (boardMaple), stretched under the SVG fretboard"
+    },
+    "boardRosewood": {
+      "file": "board-rosewood@2x.webp",
+      "px": [
+        2344,
+        424
+      ],
+      "css": [
+        1172,
+        212
+      ],
+      "scale": 2,
+      "bytes": 16468,
+      "sha256": "7e645506ed5ed340",
+      "use": "Fretboard face (boardRosewood), stretched under the SVG fretboard"
+    },
+    "rail": {
+      "file": "frame-rail9@2x.webp",
+      "px": [
+        240,
+        1200
+      ],
+      "css": [
+        120,
+        600
+      ],
+      "scale": 2,
+      "bytes": 6098,
+      "sha256": "452a7b23c40ea689",
+      "use": "Walnut rail, nine-slice",
+      "slice": 20
+    }
+  },
+  "renderSeconds": 135.2
+}

@@ -37,8 +37,8 @@
 
 /* ---------- rail ---------- */
 .v57-rail { flex: none; width: 60px; z-index: 30; padding: 8px 0; display: flex; flex-direction: column; align-items: center; transition: width .18s;
-  border-width: 20px; border-image: url('./assets/rail-wood9@2x.webp') 40 fill / 20px stretch; box-shadow: 0 4px 10px rgba(0, 0, 0, .6), 0 1px 2px rgba(0, 0, 0, .7); }
-.v57-rail { border: 0; border-image: url('./assets/rail-wood9@2x.webp') 40 fill / 20px stretch; box-shadow: 0 4px 10px rgba(0, 0, 0, .6), 0 1px 2px rgba(0, 0, 0, .7); }
+  border-width: 20px; border-image: url('../v6/hardware/assets/frame-rail9@2x.webp') 40 fill / 20px stretch; box-shadow: 0 4px 10px rgba(0, 0, 0, .6), 0 1px 2px rgba(0, 0, 0, .7); }
+.v57-rail { border: 0; border-image: url('../v6/hardware/assets/frame-rail9@2x.webp') 40 fill / 20px stretch; box-shadow: 0 4px 10px rgba(0, 0, 0, .6), 0 1px 2px rgba(0, 0, 0, .7); }
 .v57-rail[data-x='1'] { width: 196px; align-items: stretch; }
 .v57-rlist { list-style: none; margin: 0; padding: 0 7px; display: flex; flex-direction: column; gap: 4px; width: 100%; }
 .v57-hsep { height: 2px; margin: 6px 8px; align-self: stretch; background: linear-gradient(180deg, rgba(0, 0, 0, .6) 0 1px, rgba(255, 220, 180, .1) 1px 2px); }
@@ -370,3 +370,6 @@ html .v57 .v57-labels .segment[aria-pressed='true'] { color: #2a2418; background
 .v57-pedal-led { position: absolute; transform: translate(-50%, -50%); background-size: 100% 100%; }
 .v57-pedal-led[data-on='1']::after { content: ''; position: absolute; inset: -7px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 130, 90, .55) 0, rgba(255, 50, 25, .6) 22%, rgba(255, 45, 20, .25) 45%, rgba(255, 45, 20, 0) 70%); mix-blend-mode: plus-lighter; pointer-events: none; }
 .v57-pedal[data-ink='dark'] .v57-pedal-name, .v57-pedal[data-ink='dark'] .v57-pedal-klab { color: #1e1a12; text-shadow: 0 1px 0 rgba(255, 255, 255, .45); }
+
+/* rosewood board (preview of the next chord): pale inlays, as mother-of-pearl on a dark board */
+.v57 [data-board='rosewood'] .inlay { fill: #e8dfca; filter: drop-shadow(0 .6px 0 rgba(0, 0, 0, .5)); }

@@ -9,6 +9,7 @@ import { viewForChord, viewNotes, viewScale } from '../../../app/chordViews';
 import { arpeggioPlanOf, boardContext, tuningOf } from '../../../app/settings';
 import { useApp } from '../../../app/store';
 import { Fretboard } from '../../../viz/Fretboard';
+import boardRosewood from '../v6/hardware/assets/board-rosewood@2x.webp';
 import { buildMarkerLayer } from '../../../viz/markers';
 import { useNowNext } from './hooks';
 import { useStudioUi } from './uiStore';
@@ -47,7 +48,7 @@ export function NextFretboard() {
     : !next ? (source === 'chords' ? 'Aggiungi un secondo accordo nella scheda Accordi per vedere il successivo.' : 'La progressione ha un accordo solo.') : null;
 
   return (
-    <section className="v57-sc v57-sc-full" aria-label="Next Fretboard" data-testid="next-fretboard">
+    <section className="v57-sc v57-sc-full" aria-label="Next Fretboard" data-testid="next-fretboard" data-board="rosewood">
       <h4 className="v57-sh">Next Fretboard · {label} · anteprima</h4>
       <div className="v57-nxctx">
         <div className="v57-nxc"><small>Ora</small><b data-testid="next-now">{now?.symbol ?? '—'}</b></div>
@@ -60,7 +61,7 @@ export function NextFretboard() {
       </div>
       <div className="v57-nxb" ref={holder}>
         {message ? <p className="v57-nxmsg">{message}</p> : null}
-        {layer ? <Fretboard markers={layer.markers} arrows={[]} active={null} trail={[]} layerMarks={layerMarks} onPick={NOOP} /> : null}
+        {layer ? <Fretboard markers={layer.markers} arrows={[]} active={null} trail={[]} layerMarks={layerMarks} boardImage={boardRosewood} onPick={NOOP} /> : null}
       </div>
     </section>
   );

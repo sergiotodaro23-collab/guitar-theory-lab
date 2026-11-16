@@ -25,7 +25,7 @@ sys.path.insert(0, HERE)
 import bpy  # noqa: E402
 from PIL import Image  # noqa: E402
 
-from components import amp, cab, console, iface, mixer, pedals  # noqa: E402
+from components import amp, cab, console, frame, iface, mixer, pedals  # noqa: E402
 from gtlkit import export  # noqa: E402
 from gtlkit.scene import render, save_blend  # noqa: E402
 
@@ -82,7 +82,7 @@ def build(component, args):
     export.write_ts(os.path.join(GENERATED, f'{name}.generated.ts'), component.EXPORT, {'spec': spec, 'assets': {k: {x: v[x] for x in v if x in keep} for k, v in made.items()}}, header)
 
 
-COMPONENTS = {c.NAME: c for c in (amp, cab, console, iface, mixer, pedals)}
+COMPONENTS = {c.NAME: c for c in (amp, cab, console, frame, iface, mixer, pedals)}
 
 
 def main():
