@@ -208,3 +208,9 @@ test('the choice of NAM is saved, the model is not: after a reload the DSP plays
   const saved = await page.evaluate(() => Object.entries(localStorage).map(([k, v]) => `${k}=${v}`).join('\n'));
   expect(saved).not.toContain('receptive_field');
 });
+
+test('the engine adds no latency: an impulse through a one-tap model comes out at the same sample', async ({ page }) => {
+  await open(page);
+  const delay = await page.evaluate(() => window.__gtl?.namTools?.latency(48000) ?? Number.NaN);
+  expect(delay).toBe(0);
+});

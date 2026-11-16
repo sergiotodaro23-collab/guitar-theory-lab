@@ -135,6 +135,7 @@ Limiti dichiarati del lotto 6:
 | Consolidamento (D-50) | verde, 502 unit | rig e pedaliera 12 su 12 in locale (nuova prova: cambio di catena nel silenzio); corsa completa verde in CI sulla PR #21 |
 | Lotto 9, parte NAM (D-51) | verde, 516 unit | 148 su 148 in locale (7 prove nuove in `e2e/nam.spec.ts`) |
 | Sistema grafico, testata (D-53) | verde, 523 unit | 155 su 155 in locale (7 prove nuove in `e2e/hardware-amp.spec.ts`) |
+| TONE3000 (D-52) | verde, 537 unit | 153 su 153 in locale (4 prove nuove in `e2e/tone3000.spec.ts` contro un servizio simulato, 1 nuova sulla latenza del motore) |
 
 Test resi deterministici nel lotto 1, senza cambiare ciò che verificano: l'helper `openDevice` aspetta il focus del cassetto; `chooseLook` legge la shell dopo il frame successivo a un ridimensionamento; `live-stability` misura il picco su un loop intero del file di prova (prima dipendeva da quale nota cadeva nella finestra).
 
@@ -177,6 +178,14 @@ Limiti dichiarati: nessuna prova con chitarra, scheda audio e capture reali; nes
 | Header alto 48 px (38 sotto gli 820 px), strumenti sotto le strisce | implementato | `e2e/studio-logo.spec.ts` |
 | Tastiera adattata in altezza: corde, marker ed etichette costanti; i tasti si avvicinano fino a un minimo, poi scorrimento orizzontale | implementata | `e2e/fretboard-fit.spec.ts`, `layout.test.ts` |
 | Altri componenti (cabinet, pedali, scheda audio, mixer, console, telaio, fondo della tastiera) | mancanti: piano in `docs/STUDIO_V6_HARDWARE_PIPELINE.md` | — |
+## TONE3000 (D-52) — cosa c'è
+
+| Funzione | Stato | Prova |
+|---|---|---|
+| «Sfoglia TONE3000» nella testata: flusso Select in una finestra, OAuth 2.0 con PKCE e `state` | implementato, **testato contro un servizio simulato** | unit `tone3000.test.ts`, `e2e/tone3000.spec.ts` |
+| Dettagli del tone, selettore dei modelli, caricamento nel motore NAM, attribuzione sulla testata | implementato, testato contro un servizio simulato | e2e |
+| Niente token, codici, indirizzi di download o modelli in memoria permanente | implementato | e2e (contenuto di `localStorage` e `sessionStorage`) |
+| Flusso con il servizio TONE3000 reale | **non eseguito**: manca la chiave pubblicabile | — |
 
 ## Baseline
 

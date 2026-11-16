@@ -14,6 +14,8 @@ import { useApp } from '../../../app/store';
 import { liveInput, useLive, type InputChannel } from '../../../audio/liveInput';
 import { namHost, useNam, type NamStatus } from '../../../audio/namHost';
 import { describeNamModel } from '../../../app/namModel';
+import { formatLabel, gearLabel } from '../../../app/tone3000';
+import { T3kMark, Tone3000Dialog, Tone3000Wordmark } from './Tone3000';
 import { useMidi } from '../../../audio/midi';
 import { noteOf } from '../../../pitch';
 import { startInput } from '../../LivePanels';
@@ -145,6 +147,8 @@ function NamPanel() {
   const live = useLive();
   const file = useRef<HTMLInputElement>(null);
   const [engineNow, setEngineNow] = useState<'internal' | 'nam' | null>(null);
+  const [browsing, setBrowsing] = useState(false);
+  const origin = nam.phase === 'ready' && nam.origin?.kind === 'tone3000' ? nam.origin : null;
   useEffect(() => { setEngineNow(liveInput.rigState()?.ampEngine ?? null); }, [rig, live.state, live.rigRevision, nam.phase]);
   const wanted = rig.amp.model === 'nam';
   const pick = (model: 'internal' | 'nam') => setRig((r) => ({ ...r, amp: { ...r.amp, model } }));
@@ -183,10 +187,21 @@ function NamPanel() {
         <button type="button" className="v6-minikey" data-testid="nam-load" disabled={busy} onClick={() => file.current?.click()}>Carica file .nam</button>
         <button type="button" className="v6-minikey" data-testid="nam-unload" disabled={busy || nam.phase !== 'ready'} onClick={() => namHost.unload()}>Rimuovi modello</button>
       </div>
+      <div className="v6-line">
+        <button type="button" className="v6-minikey" data-testid="nam-browse-t3k" aria-label="Sfoglia TONE3000" onClick={() => setBrowsing(true)}>Sfoglia <Tone3000Wordmark /></button>
+        <span className="v6-note">facoltativo</span>
+      </div>
+      <Tone3000Dialog open={browsing} onClose={() => setBrowsing(false)} />
       <input ref={file} type="file" accept=".nam,application/json" hidden data-testid="nam-file" onChange={(e) => void onFile(e.target.files?.[0])} />
       {nam.error ? <p className="v6-note v6-alert" role="alert" data-testid="nam-error">{nam.error}</p> : null}
       {nam.phase === 'ready' && s ? (
         <dl className="v6-nam-facts" data-testid="nam-facts">
+          {origin ? (
+            <div><dt>Origine</dt><dd className="v6-nam-origin" data-testid="nam-origin">
+              {origin.imageUrl ? <img src={origin.imageUrl} alt="" referrerPolicy="no-referrer" /> : null}
+              <span><T3kMark /> {origin.title} · {gearLabel(origin.gear)} · {formatLabel('nam')} · @{origin.author || 'sconosciuto'} · <a href={origin.toneUrl} target="_blank" rel="noreferrer noopener">pagina del tone</a></span>
+            </dd></div>
+          ) : null}
           <div><dt>Modello</dt><dd>{describeNamModel(s)}</dd></div>
           <div><dt>File</dt><dd>{s.fileName} · {(s.sizeBytes / 1024).toFixed(0)} kB · formato {s.version}</dd></div>
           {m ? <div><dt>Misurato qui</dt><dd data-testid="nam-measure">caricato in {Math.round(m.loadMs)} ms · costo stimato {percent(m.realtimeFactor)} del tempo audio ({Math.round(m.microsPerBlock)} µs per blocco su {Math.round(m.budgetMicros)}) · latenza aggiunta 0 campioni</dd></div> : null}
