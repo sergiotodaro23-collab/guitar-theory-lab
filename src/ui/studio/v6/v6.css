@@ -336,7 +336,9 @@
 .v6-mx-meter i[data-zone='warm'] { background: var(--led-amber); }
 .v6-mx-meter i[data-zone='hot'] { background: var(--led-red); }
 .v6-mx-meter i[data-on='1'] { opacity: 1; }
-.v6-mx-keys { display: flex; gap: 3px; min-height: 22px; }
+/* Keys share the width of their own strip: in a narrow strip they get narrower, they never reach into the next one. */
+.v6-mx-keys { display: flex; gap: 3px; min-height: 22px; align-self: stretch; justify-content: center; min-width: 0; }
+.v6-mx-keys .v6-mx-key { flex: 0 1 44px; min-width: 0; letter-spacing: .05em; }
 .v6-mx-key { box-sizing: border-box; height: var(--key-h); min-width: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink-primary); font: 600 10.5px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
   background: none; border: var(--key-slice) solid transparent; border-image: var(--key-off) var(--key-slice-px) fill / var(--key-slice) stretch; border-radius: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
 .v6-mx-key:active { transform: translateY(1px); }
@@ -409,33 +411,35 @@
 .v6-mx > .v6-mxmode { position: absolute; right: 5px; top: 44px; flex-direction: column; }
 .v6-mx > .v6-mxmode button { writing-mode: vertical-rl; width: 20px; height: auto; padding: 8px 0; }
 /* Compact: one row, never wrapped; it scrolls sideways when the eight channels do not fit, with a bar that is always there. */
-.v6-mc { position: relative; flex: none; display: flex; align-items: stretch; gap: 8px; min-width: 0; padding: 6px 8px 4px; border-radius: 4px; isolation: isolate; }
+.v6-mc-box { flex: none; min-width: 0; }
+.v6-mc { position: relative; flex: none; display: flex; align-items: stretch; gap: 6px; min-width: 0; padding: 4px 6px 3px; border-radius: 4px; isolation: isolate; }
 .v6-mc::before { content: ''; position: absolute; inset: 0; z-index: -1; border: var(--bank-slice) solid transparent; border-image: var(--bank) var(--bank-slice-px) fill / var(--bank-slice) stretch; }
 .v6-mc > .v6-mxmode { flex-direction: column; align-self: center; }
-.v6-mc > .v6-mxmode button { height: 22px; }
+.v6-mc > .v6-mxmode button { height: 20px; }
 .v6-mc-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.v6-mc-row { min-width: 0; display: flex; flex-wrap: nowrap; gap: 5px; overflow-x: scroll; overflow-y: hidden; scrollbar-width: none; }
+.v6-mc-row { min-width: 0; display: flex; flex-wrap: nowrap; gap: 4px; overflow-x: scroll; overflow-y: hidden; scrollbar-width: none; }
 .v6-mc-row::-webkit-scrollbar { display: none; }
 /* The bar that says the row goes on: always drawn when the channels do not fit (the browser's own may hide). */
-.v6-mc-bar { position: relative; flex: none; height: 5px; border-radius: 3px; }
+.v6-mc-bar { position: relative; flex: none; height: 4px; border-radius: 3px; }
+.v6-mc-bar[data-on='0'] { display: none; }
 .v6-mc-bar[data-on='1'] { background: #0c0907; box-shadow: inset 0 1px 1px rgba(0, 0, 0, .8); }
 .v6-mc-bar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: linear-gradient(180deg, #c9a06a, #8a6f52); }
 .v6-mc-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
-.v6-mc-cell { position: relative; isolation: isolate; flex: 1 0 96px; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 4px 3px; }
+/* A cell is a dial with its texts and keys beside it: low, so the notebook above keeps its room. */
+.v6-mc-cell { position: relative; isolation: isolate; flex: 1 0 100px; display: flex; align-items: center; gap: 4px; padding: 3px 5px 3px 4px; }
 .v6-mc-cell::before { content: ''; position: absolute; inset: 0; z-index: -1; border: var(--strip-slice) solid transparent; border-image: var(--strip) var(--strip-slice-px) fill / var(--strip-slice) stretch; }
 .v6-mc-cell[data-kind='group']::before { border-image-source: var(--strip-group); }
 .v6-mc-cell[data-kind='master']::before { border-image-source: var(--strip-master); }
-.v6-mc-cell .v6-mx-name { font-size: 11.5px; line-height: 13px; }
-.v6-mc-mid { display: flex; align-items: center; gap: 4px; }
 .v6-mc-dial { position: relative; flex: none; }
+.v6-mc-side { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.v6-mc-side .v6-mx-name { font-size: 11px; line-height: 12px; letter-spacing: .06em; gap: 4px; }
+.v6-mc-side .v6-mx-read { font-size: 10px; line-height: 11px; }
+/* Level arc: every segment has its own colour; unlit it is a dark trace of it, lit it glows. */
 .v6-mc-ring { position: absolute; inset: 0; pointer-events: none; }
-.v6-mc-ring circle { fill: var(--led-green); opacity: .16; }
-.v6-mc-ring circle[data-zone='warm'] { fill: var(--led-amber); }
-.v6-mc-ring circle[data-zone='hot'] { fill: var(--led-red); }
-.v6-mc-ring circle[data-on='1'] { opacity: 1; filter: drop-shadow(0 0 1.5px currentColor); }
-.v6-mc-keys { display: flex; flex-direction: column; gap: 3px; }
-.v6-mc-keys .v6-mx-key { min-width: 24px; width: 24px; height: 20px; font-size: 11px; letter-spacing: 0; border-width: 6px; border-image-width: 6px; }
-.v6-mc-cell .v6-mx-read { font-size: 10px; line-height: 11px; }
+.v6-mc-ring path { opacity: .2; stroke-linecap: butt; }
+.v6-mc-ring path[data-on='1'] { opacity: 1; filter: drop-shadow(0 0 1.6px currentColor); }
+.v6-mc-keys { display: flex; gap: 3px; height: 16px; }
+.v6-mc-keys .v6-mx-key { min-width: 22px; width: 22px; height: 16px; font-size: 10.5px; letter-spacing: 0; border-width: 5px; border-image-width: 5px; }
 /* settings: a row of choices */
 .v57-setrow { display: flex; gap: 6px; }
 .v57-setrow .v57-textbtn[data-on='1'] { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); }

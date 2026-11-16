@@ -53,3 +53,24 @@ test('the choices are saved; a rack saved as hidden by an older version comes ba
   // No other control resizes a sidebar.
   await expect(page.getByRole('button', { name: /Comprimi barra|Espandi barra|Nascondi il rack|Compatta il rack/ })).toHaveCount(0);
 });
+
+test('the keys carry the reference glyph: a rounded frame with a short bar inside, near the side of their sidebar', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  for (const [id, side] of [['rail-toggle', 'left'], ['rack-toggle', 'right']] as const) {
+    const key = page.getByTestId(id);
+    const [frame, bar] = [await key.locator('[data-part="frame"]').boundingBox(), await key.locator('[data-part="bar"]').boundingBox()];
+    if (!frame || !bar) throw new Error(id);
+    // Outline only, rounded; the bar is inside the frame, shorter than it, off the centre towards its side.
+    expect(await key.locator('svg').getAttribute('fill')).toBe('none');
+    expect(Number(await key.locator('[data-part="frame"]').getAttribute('rx'))).toBeGreaterThan(2);
+    expect(bar.height).toBeLessThan(frame.height * 0.7);
+    expect(bar.y).toBeGreaterThan(frame.y);
+    const [centre, middle] = [bar.x + bar.width / 2, frame.x + frame.width / 2];
+    if (side === 'left') { expect(centre).toBeLessThan(middle - 2); expect(bar.x).toBeGreaterThan(frame.x); } else { expect(centre).toBeGreaterThan(middle + 2); expect(bar.x + bar.width).toBeLessThan(frame.x + frame.width); }
+    // Same key as before: size and place.
+    const box = await key.boundingBox();
+    expect(box?.width).toBe(30);
+    expect(box?.height).toBe(26);
+  }
+});
