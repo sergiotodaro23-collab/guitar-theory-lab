@@ -1,0 +1,50 @@
+{
+  "component": "iface",
+  "spec": "tools/blender/specs/iface.json",
+  "blender": "5.3.0",
+  "engine": "CYCLES",
+  "samples": 128,
+  "scale": 2,
+  "assets": {
+    "body": {
+      "file": "iface-body@2x.webp",
+      "px": [
+        640,
+        196
+      ],
+      "css": [
+        320,
+        98
+      ],
+      "scale": 2,
+      "bytes": 8816,
+      "sha256": "02d67b540444a514",
+      "use": "Audio interface: chassis, panel, input socket, meter window",
+      "offset": [
+        -8,
+        -5
+      ]
+    },
+    "knob": {
+      "file": "iface-knob-strip@2x.webp",
+      "px": [
+        3100,
+        100
+      ],
+      "css": [
+        1550,
+        50
+      ],
+      "scale": 2,
+      "bytes": 45928,
+      "sha256": "967be185ccfca590",
+      "use": "Aluminium gain knob at every position of its travel (sprite strip)",
+      "frames": 31,
+      "frame": [
+        50,
+        50
+      ]
+    }
+  },
+  "renderSeconds": 62.9
+}

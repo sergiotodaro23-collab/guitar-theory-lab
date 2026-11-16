@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { knobFrame } from '../../v57/RotaryKnob';
 import { AMP_HEAD } from './amp.generated';
 import { PEDALS_HW } from './pedals.generated';
+import { CAB_HW } from './cab.generated';
+import { IFACE_HW } from './iface.generated';
 import { PEDAL_SPECS } from '../../../../app/rig';
 
 /**
@@ -94,6 +96,8 @@ describe('amplifier head: spec, pictures and generated geometry agree', () => {
 const COMPONENTS = [
   { name: 'amp', generated: AMP_HEAD as { spec: unknown; assets: Record<string, { file: string }> }, budget: 160 },
   { name: 'pedals', generated: PEDALS_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 160 },
+  { name: 'cab', generated: CAB_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 60 },
+  { name: 'iface', generated: IFACE_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 80 },
 ];
 
 describe.each(COMPONENTS)('rendered component $name', ({ name, generated, budget }) => {
@@ -138,5 +142,31 @@ describe('pedals: the rendered bodies match the pedals of the rig', () => {
     expect(led.y + led.r).toBeLessThan(sw.y - sw.hit / 2);
     expect(sw.y + sw.hit / 2).toBeLessThanOrEqual(size.h - 8);
     expect(k.frames % 2).toBe(1);
+  });
+});
+
+describe('audio interface and cabinet: live controls have their place on the pictures', () => {
+  it('interface: socket, knob with its marks, meter window and control strip lie on the panel without overlapping', () => {
+    const { size, cheek, jack, knob: k, meter, controls } = IFACE_HW.spec;
+    expect(size.w).toBeLessThanOrEqual(300);
+    expect(jack.x - jack.r).toBeGreaterThanOrEqual(cheek);
+    expect(jack.x + jack.r).toBeLessThanOrEqual(k.x - k.tickRadius);
+    expect(k.x + k.tickRadius).toBeLessThanOrEqual(meter.x);
+    expect(k.y + k.tickRadius).toBeLessThanOrEqual(size.h);
+    expect(meter.x + meter.w).toBeLessThanOrEqual(size.w - cheek);
+    expect(meter.y + meter.h).toBeLessThanOrEqual(controls.y);
+    expect(controls.y + controls.h).toBeLessThanOrEqual(size.h);
+    expect(k.hit).toBeGreaterThanOrEqual(k.diameter);
+    expect(IFACE_HW.assets.knob.frames).toBe(k.frames);
+  });
+  it('cabinet: as wide as the amplifier head above it, speakers inside the grille', () => {
+    const { size, grille, speakers } = CAB_HW.spec;
+    expect(size.w).toBe(AMP_HEAD.spec.size.w);
+    for (const s of speakers) {
+      expect(s.x - s.r).toBeGreaterThanOrEqual(grille.x);
+      expect(s.x + s.r).toBeLessThanOrEqual(grille.x + grille.w);
+      expect(s.y - s.r).toBeGreaterThanOrEqual(grille.y);
+      expect(s.y + s.r).toBeLessThanOrEqual(grille.y + grille.h);
+    }
   });
 });

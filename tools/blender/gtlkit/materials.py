@@ -99,8 +99,8 @@ def tolex(name='tolex', color=(0.022, 0.021, 0.02), grain=1.6):
     return m
 
 
-def grille_cloth(name='cloth', color=(0.26, 0.2, 0.12), dark=(0.04, 0.03, 0.02), thread=2.2):
-    """Woven grille cloth: two sets of threads crossing, with a little irregularity."""
+def grille_cloth(name='cloth', color=(0.26, 0.2, 0.12), dark=(0.04, 0.03, 0.02), thread=2.2, open_weave=0.0):
+    """Woven grille cloth: two sets of threads crossing, with a little irregularity. `open_weave` > 0 leaves the gaps between threads see-through, so what is behind the cloth shows faintly."""
     m, nt, b = _new(name)
     _set(b, color, 0.9, spec=0.2)
     v = _coords(nt)
@@ -128,6 +128,12 @@ def grille_cloth(name='cloth', color=(0.26, 0.2, 0.12), dark=(0.04, 0.03, 0.02),
     nt.links.new(mx.outputs[0], fac.inputs[0])
     nt.links.new(_range(nt, tint, 0.75, 1.15), fac.inputs[1])
     nt.links.new(_mix_color(nt, fac.outputs[0], dark, color), b.inputs['Base Color'])
+    if open_weave > 0:
+        gap = nt.nodes.new('ShaderNodeMath')
+        gap.operation = 'GREATER_THAN'
+        gap.inputs[1].default_value = open_weave
+        nt.links.new(mx.outputs[0], gap.inputs[0])
+        nt.links.new(gap.outputs[0], b.inputs['Alpha'])
     return m
 
 

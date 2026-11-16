@@ -1,0 +1,30 @@
+{
+  "component": "cab",
+  "spec": "tools/blender/specs/cab.json",
+  "blender": "5.3.0",
+  "engine": "CYCLES",
+  "samples": 128,
+  "scale": 2,
+  "assets": {
+    "body": {
+      "file": "cab-body@2x.webp",
+      "px": [
+        648,
+        232
+      ],
+      "css": [
+        324,
+        116
+      ],
+      "scale": 2,
+      "bytes": 45606,
+      "sha256": "ab4f02e4f44ee0bc",
+      "use": "Loudspeaker cabinet: tolex, grille cloth, two speakers behind it",
+      "offset": [
+        -10,
+        -6
+      ]
+    }
+  },
+  "renderSeconds": 29.6
+}

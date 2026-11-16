@@ -26,7 +26,17 @@ import ampBody from './hardware/assets/amp-body@2x.webp';
 import ampKnobStrip from './hardware/assets/amp-knob-strip@2x.webp';
 import ampLampOff from './hardware/assets/amp-lamp-off@2x.webp';
 import ampLampOn from './hardware/assets/amp-lamp-on@2x.webp';
-import knobAlu from '../v57/assets/knob-alu@2x.png';
+import { CAB_HW } from './hardware/cab.generated';
+import cabBody from './hardware/assets/cab-body@2x.webp';
+import { IFACE_HW } from './hardware/iface.generated';
+import ifaceBody from './hardware/assets/iface-body@2x.webp';
+import ifaceKnobStrip from './hardware/assets/iface-knob-strip@2x.webp';
+
+/** Geometry of the rendered audio interface and cabinet (tools/blender/specs/iface.json, cab.json). */
+const IFACE = IFACE_HW.spec;
+const CAB = CAB_HW.spec;
+/** A rendered body: the picture is larger than the device by its shadow margin. */
+const bodyBox = (a: { readonly offset: readonly [number, number]; readonly css: readonly [number, number] }) => ({ left: a.offset[0], top: a.offset[1], width: a.css[0], height: a.css[1] });
 
 const CHEVRON_UP = 'M2 7l6-5 6 5';
 const CHEVRON_DOWN = 'M2 2l6 5 6-5';
@@ -84,24 +94,26 @@ function InputModule() {
     <Module id="input" title="Scheda audio / Input" lit={on}
       power={<Switch on={on} label={on ? 'Ferma l’ingresso' : 'Avvia l’ingresso'} disabled={live.state === 'starting'} testId="iface-power" onClick={() => (on ? liveInput.stop() : startInput())} />}>
       <div className="v6-lcdline" data-testid="iface-lcd" role="status"><b>{statusText}</b><span>{pathText} · Rilevato: {note ? `${note.name}${note.octave}` : '—'}</span></div>
-      <div className="v6-in-row">
-        <div className="v6-knobcell" style={{ width: 62, height: 62 }}>
-          <RotaryKnob value={gainToKnob(s.inputGain)} onChange={(v) => { const inputGain = knobToGain(v); update({ inputGain }); liveInput.setGain(inputGain); }}
-            label="Gain d’ingresso" valueText={gainDb(s.inputGain)} bodySrc={knobAlu} bodySize={58} hitSize={46} pointer={{ length: 9, offset: 4, color: '#f1f1f1' }}
-            cx={31} cy={31} defaultValue={25} testId="iface-gain" />
+      <div className="v6-iface" data-on={on ? '1' : '0'} data-testid="iface-panel" style={{ width: IFACE.size.w, height: IFACE.size.h }}>
+        <img className="v6-hw-body" src={ifaceBody} alt="" draggable={false} data-testid="iface-body" style={bodyBox(IFACE_HW.assets.body)} />
+        <span className="v6-iface-lab" style={{ left: IFACE.jack.x, top: IFACE.labelY }}>Input</span>
+        <span className="v6-iface-lab" style={{ left: IFACE.knob.x, top: IFACE.labelY }}>Gain</span>
+        <RotaryKnob value={gainToKnob(s.inputGain)} onChange={(v) => { const inputGain = knobToGain(v); update({ inputGain }); liveInput.setGain(inputGain); }}
+          label="Gain d’ingresso" valueText={gainDb(s.inputGain)} sprite={{ src: ifaceKnobStrip, frames: IFACE.knob.frames }} bodySize={IFACE.knob.frame} hitSize={IFACE.knob.hit}
+          cx={IFACE.knob.x} cy={IFACE.knob.y} defaultValue={25} testId="iface-gain" />
+        <div className="v6-meter v6-iface-meter" role="meter" aria-label="Livello d’ingresso" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)} data-clip={live.clipping ? '1' : '0'}
+          style={{ left: IFACE.meter.x, top: IFACE.meter.y, width: IFACE.meter.w, height: IFACE.meter.h }}>
+          {Array.from({ length: 14 }, (_, i) => <i key={i} data-zone={i >= 12 ? 'hot' : i >= 9 ? 'warm' : 'ok'} data-on={i < Math.round(level * 14) ? '1' : '0'} />)}
         </div>
-        <div className="v6-in-side">
-          <span className="v6-silk">Gain <b>{gainDb(s.inputGain)}</b></span>
-          <div className="v6-meter" role="meter" aria-label="Livello d’ingresso" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)} data-clip={live.clipping ? '1' : '0'}>
-            {Array.from({ length: 14 }, (_, i) => <i key={i} data-zone={i >= 12 ? 'hot' : i >= 9 ? 'warm' : 'ok'} data-on={i < Math.round(level * 14) ? '1' : '0'} />)}
-          </div>
+        <div className="v6-iface-strip" style={{ left: IFACE.controls.x, top: IFACE.controls.y, width: IFACE.controls.w, height: IFACE.controls.h }}>
           <div className="v6-in-ch" role="radiogroup" aria-label="Canale di ingresso">
-            <span className="v6-silk">Ingresso</span>
+            <span className="v6-silk">In</span>
             {([1, 2] as const).map((n) => (
               <button key={n} type="button" role="radio" className="v6-chip" aria-checked={s.inputChannel === CHANNEL_OF[n]} data-on={s.inputChannel === CHANNEL_OF[n] || s.inputChannel === 'mix' ? '1' : '0'}
                 aria-label={`Ingresso ${n}${s.inputChannel === 'mix' ? ' (ora: entrambi sommati)' : ''}`} onClick={() => pickChannel(n)}>{n}</button>
             ))}
           </div>
+          <span className="v6-silk">Gain <b>{gainDb(s.inputGain)}</b></span>
         </div>
       </div>
       <div className="v6-line">
@@ -261,8 +273,10 @@ function CabModule() {
     <Module id="cab" title="Cabinet / IR" lit={rig.cab.on && !rig.amp.bypass && !skipped} testId="rig-cab"
       power={<button type="button" className="v6-toggle" aria-pressed={rig.cab.on} aria-label="Cabinet" title={rig.cab.on ? 'Cabinet attivo' : 'Cabinet escluso'} data-testid="rig-cab-switch"
         onClick={() => setRig((r) => ({ ...r, cab: { ...r.cab, on: !r.cab.on } }))}><i aria-hidden="true" /></button>}>
-      <div className="v6-cab">
-        <div className="v6-cab-grille" aria-hidden="true" />
+      <div className="v6-cab" data-on={rig.cab.on && !rig.amp.bypass && !skipped ? '1' : '0'}>
+        <div className="v6-cab-unit" style={{ width: CAB.size.w, height: CAB.size.h }}>
+          <img className="v6-hw-body" src={cabBody} alt="" draggable={false} data-testid="cab-body" style={bodyBox(CAB_HW.assets.body)} />
+        </div>
         <label className="v6-field"><span className="v6-silk">Risposta all’impulso</span>
           <select className="v6-select" aria-label="Risposta all’impulso del cabinet" data-testid="rig-cab-model" value={rig.cab.model} onChange={(e) => choose(e.target.value as CabModel)}>
             <option value="4x12">4x12 (sintetico)</option>

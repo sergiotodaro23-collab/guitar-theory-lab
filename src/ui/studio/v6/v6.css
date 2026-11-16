@@ -171,9 +171,6 @@
   color: var(--led-amber); font: 500 11px/14px 'IBM Plex Mono', ui-monospace, monospace; text-shadow: 0 0 5px rgba(255, 170, 50, .5); }
 .v6-lcdline b { font-weight: 600; font-size: 12px; }
 .v6-lcdline span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .85; }
-.v6-in-row { display: flex; align-items: center; gap: 12px; }
-.v6-knobcell { position: relative; flex: none; }
-.v6-in-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .v6-in-ch { display: flex; align-items: center; gap: 6px; }
 .v6-chip { width: 26px; height: 22px; padding: 0; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 4px; color: var(--ink-muted); background: #171411; font: 600 12px/1 'IBM Plex Mono', monospace; }
 .v6-chip[data-on='1'] { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); }
@@ -201,9 +198,19 @@
 .v57-knob-sprite { background-repeat: no-repeat; }
 
 /* cabinet */
-.v6-cab { display: flex; align-items: center; gap: 10px; }
-.v6-cab-grille { flex: none; width: 58px; height: 46px; border-radius: 4px; box-shadow: 0 0 0 1px #050505, 0 0 0 3px #3a2c22, inset 0 0 8px #000;
-  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, .55) 0 34%, transparent 36%), repeating-linear-gradient(45deg, #5b5146 0 2px, #2c2620 2px 4px), #2c2620; }
+.v6-cab { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+.v6-cab-unit { position: relative; align-self: center; flex: none; margin-top: 2px; }
+.v6-cab[data-on='0'] .v6-hw-body { filter: brightness(.78) saturate(.8); }
+/* rendered hardware bodies (tools/blender): larger than the device by the shadow margin, placed by the generated offset */
+.v6-hw-body { position: absolute; max-width: none; pointer-events: none; user-select: none; }
+/* audio interface: live controls on the rendered panel */
+.v6-iface { position: relative; align-self: center; flex: none; margin: 2px 0 10px; }
+.v6-iface[data-on='0'] .v6-iface-meter { opacity: .75; }
+.v6-iface-lab { position: absolute; transform: translateX(-50%); font: 600 8px/10px 'Barlow Condensed', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: rgba(214, 214, 210, .82); white-space: nowrap; }
+.v6-iface-meter { position: absolute; box-sizing: border-box; height: auto; padding: 4px 5px; gap: 2px; background: none; box-shadow: none; }
+.v6-iface-strip { position: absolute; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.v6-iface-strip .v6-silk { font-size: 10px; white-space: nowrap; }
+.v6-iface-strip .v6-chip { width: 24px; height: 20px; }
 .v6-field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .v6-select { width: 100%; height: 28px; padding: 0 6px; border: 0; border-radius: 3px; background: #0c0d0f; color: var(--ink-primary); font: 600 13px/20px 'Barlow Condensed', sans-serif; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 0 0 1px rgba(140, 147, 155, .42); }
 
