@@ -142,6 +142,9 @@ export function DeviceBay() {
   // The rig takes whichever arrangement shows its controls larger.
   const scale = fit(canvas);
   const label = DEVICES.find((d) => d.id === device)?.label ?? '';
+  // In its compact mode the mixer is not in this drawer: it has its own row under the notebook (StudioShell). The drawer is
+  // dropped at once, without its closing animation, so the two faces of the mixer are never on the page together.
+  if (device === 'mixer' && ui.mixerMode === 'compact') return <div ref={box} className="v57-bay" />;
   return (
     <div ref={box} className="v57-bay">
       <DeviceDrawer device={device} label={label} onClose={ui.closeDevice} returnFocusTo={ui.launcher} compactLevel={compactLevel(size.h)}>

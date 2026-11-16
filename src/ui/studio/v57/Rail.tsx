@@ -42,6 +42,8 @@ function Icon({ d, width = 1.8 }: { readonly d: string; readonly width?: number 
 
 function SettingsPanel({ studioAllowed }: { readonly studioAllowed: boolean }) {
   const close = useStudioUi((u) => u.setSettingsOpen);
+  const mixerMode = useStudioUi((u) => u.mixerMode);
+  const setMixerMode = useStudioUi((u) => u.setMixerMode);
   const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
     panel.current?.querySelector<HTMLElement>('button, select, input')?.focus({ preventScroll: true });
@@ -57,6 +59,13 @@ function SettingsPanel({ studioAllowed }: { readonly studioAllowed: boolean }) {
         <AppearanceToggle studioAllowed={studioAllowed} current="studio" />
         <p>Semplificata è l’altra interfaccia dell’app: stessi laboratori, stesso stato e stessa riproduzione.</p>
         <p>I preset di studio sono nella Preset Library, dal tasto «Preset» in alto.</p>
+        <h4>Mixer</h4>
+        <div className="v57-setrow" role="radiogroup" aria-label="Modalità del mixer all’apertura">
+          {([['extended', 'Esteso'], ['compact', 'Compatto']] as const).map(([id, text]) => (
+            <button key={id} type="button" role="radio" className="v57-textbtn" aria-checked={mixerMode === id} data-on={mixerMode === id ? '1' : '0'} data-testid={`pref-mixer-${id}`} onClick={() => setMixerMode(id)}>{text}</button>
+          ))}
+        </div>
+        <p>Come si apre il mixer: con i fader lunghi sopra il taccuino, oppure in una riga di manopole sotto il taccuino. La scelta resta salvata.</p>
         <AppFooter />
         <div><button type="button" className="v57-textbtn" onClick={() => close(false)}>Chiudi</button></div>
       </div>

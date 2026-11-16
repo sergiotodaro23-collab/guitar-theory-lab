@@ -141,6 +141,11 @@ describe('UI preferences', () => {
     // Unknown modes and modules are dropped, never trusted.
     expect(loadPrefs(memory({ [STORAGE_KEYS.rack]: '"wide"', [STORAGE_KEYS.rackFolded]: '["amp","nope",3]' }), 1440)).toMatchObject({ rack: 'expanded', rackFolded: ['amp'] });
     expect(loadPrefs(memory({ [STORAGE_KEYS.rackFolded]: '"amp"' })).rackFolded).toEqual([]);
+    // The mixer opens extended unless compact was saved; anything else falls back.
+    expect(loadPrefs(memory()).mixerMode).toBe('extended');
+    expect(loadPrefs(memory({ [STORAGE_KEYS.mixerMode]: '"compact"' })).mixerMode).toBe('compact');
+    expect(loadPrefs(memory({ [STORAGE_KEYS.mixerMode]: '"tiny"' })).mixerMode).toBe('extended');
+    expect(loadPrefs(memory({ [STORAGE_KEYS.mixerMode]: '{broken' })).mixerMode).toBe('extended');
   });
   it('the console starts unfolded and remembers being folded', () => {
     const store = memory();
