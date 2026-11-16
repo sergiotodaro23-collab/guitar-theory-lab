@@ -11,6 +11,7 @@ import { Select } from '../../controls';
 import { ClickSelect, MeterSelect } from '../../Transport';
 import { useStudioUi, type DeviceId } from '../v57/uiStore';
 import { PresetLibrary } from './PresetLibrary';
+import { StudioLogo } from './StudioLogo';
 
 const TOOLS: readonly { id: DeviceId; text: string; label: string; icon: string }[] = [
   { id: 'tuner', text: 'Accordatore', label: 'Accordatore cromatico', icon: 'M9 3v8a3 3 0 0 0 6 0V3M12 14v7M8 21h8' },
@@ -88,8 +89,8 @@ export function Header() {
   return (
     <header className="v6-head" data-testid="studio-header">
       <div className="v6-brand" data-testid="brand">
-        <strong>Guitar Theory Lab</strong>
-        <small>Studio V6</small>
+        <StudioLogo />
+        <span className="v57-sr">Guitar Theory Lab · Studio · Ver. 6.0</span>
       </div>
       <div className="v6-tools" role="toolbar" aria-label="Strumenti globali">
         <button type="button" className="v6-tool" aria-haspopup="dialog" aria-label="Preset Library" data-testid="preset-library-open" onClick={() => setLibraryOpen(true)}>

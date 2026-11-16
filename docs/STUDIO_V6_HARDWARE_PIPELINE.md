@@ -121,6 +121,21 @@ Finiture dal riferimento approvato V6.7 (sezioni `transport` e `toolbar` di `Gui
 
 Stato: **implementato**. `specs/frame.json`: faccia della tastiera in acero laccato (tastiera principale) e in palissandro (anteprima del prossimo accordo), barra laterale in noce a nove fette con viti d'ottone. Le tastiere restano SVG: l'immagine è solo il legno sotto tasti, capotasto, segnatasti, corde e note, attraverso il gancio `boardImage` che `Fretboard` aveva già. Sul palissandro i segnatasti sono chiari. Materiale nuovo `wood` (venatura, deriva di tono, fiammatura, pori) con `maple`, `rosewood`, `walnut`. Peso 35 kB. Non resi: lo sfondo in legno della pagina (quasi tutto coperto dai pannelli, resta a gradienti CSS) e la fascia dell'intestazione, che aspetta il logo.
 
+## 3g · Logo e intestazione (17 novembre 2026)
+
+Stato: **implementato**. Riferimento approvato: lo SVG `#vectorHeader` di `Guitar_Theory_Lab_Studio_V6_7_Editable_Header.html`, conservato senza la sua bitmap in `docs/hardware/v6_7-vector-header.svg`. `StudioLogo.tsx` ne riusa senza modifiche la sagoma della targa, le due strisce (quattro tratti: bordo crema e colore), il tracciato del lettering «GUITAR THEORY LAB», la scritta «STUDIO · VER. 6.0» e i colori; `hardware.test.ts` confronta i due file.
+
+Adattamenti, tutti dichiarati:
+
+| Riferimento | Studio V6 | Perché |
+|---|---|---|
+| fondo della targa da bitmap (smalto consumato, vite fotografica) | gradiente `enamel` dello stesso SVG e una vite vettoriale | il logo resta tutto vettoriale e pesa 5 kB nel bundle, zero immagini |
+| intestazione alta 85 px su 928 | barra alta 38 px (32 sotto gli 820 px di altezza); la targa è alta 52 px e usa il margine superiore della pagina e lo spazio sotto la barra | tastiera e taccuino non perdono un pixel |
+| le strisce finiscono a 635 unità e nel bozzetto piegano in basso prima dei tasti della finestra | proseguono diritte fino al bordo destro, sopra gli strumenti | restano continue a ogni larghezza; non ci sono tasti della finestra |
+| fondo scuro in tolex da bitmap | fondo scuro a CSS | nessuna immagine in più |
+
+Non ripresi dal bozzetto: il bordo rosso attorno a tutta l'applicazione, i tasti a schermo intero, impostazioni e aiuto nell'intestazione (le funzioni esistono altrove), l'ombra sotto le lettere (non è nello SVG).
+
 ## 4 · Verifica
 
 | Verifica | Eseguita | Esito |
