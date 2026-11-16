@@ -178,3 +178,86 @@ def pilot_lamp(x, y, r, z, lit, color=(0.7, 0.012, 0.008)):
         glow.data.energy = 0.006 * r * r
         glow.data.shadow_soft_size = px(r * 0.5)
     return dome
+
+
+def decal(name, x, y, w, h, z, mat, corner=0.0):
+    """Paint on a surface at height z: a band, a stripe, a panel. Thin enough to cast no shadow."""
+    return rbox(name, x, y, w, h, z - 0.2, z + 0.12, mat, corner=corner)
+
+
+def outline(name, x, y, w, h, z, mat, line=1.2):
+    """A painted rectangular frame, `line` px thick."""
+    return [decal(name, x, y, w, line, z, mat), decal(name, x, y + h - line, w, line, z, mat),
+            decal(name, x, y, line, h, z, mat), decal(name, x + w - line, y, line, h, z, mat)]
+
+
+def enclosure(x, y, w, h, z, mat, corner=9.0, edge=4.5):
+    """A die-cast pedal enclosure seen from above: soft vertical corners, rounded top rim."""
+    return rbox('enclosure', x, y, w, h, 0, z, mat, corner=corner, edge=edge, segments=6)
+
+
+def barrel_knob(x, y, diameter, angle=0.0, z=0.0, body_mat=None, line_mat=None, height=11.0):
+    """
+    A small pedal knob: straight knurled barrel, slightly domed smooth top, a
+    painted line from near the centre to the rim and down the side. `angle`
+    in degrees clockwise from straight up.
+    """
+    r = diameter / 2
+    body_mat = body_mat or M.knurled('barrel-side', (0.016, 0.016, 0.017), ridges=36, rough=0.38)
+    top_mat = M.bakelite('barrel-top', (0.02, 0.02, 0.021), rough=0.3)
+    line_mat = line_mat or M.enamel('barrel-line', (0.92, 0.9, 0.84))
+    bpy.ops.object.empty_add(location=(px(x), -px(y), px(z)))
+    axis = bpy.context.object
+    axis.name = 'knob-axis'
+    side = cone('knob-side', x, y, r, r * 0.93, z, z + height - 1.4, body_mat, edge=0.5)
+    top = cone('knob-top', x, y, r * 0.93, r * 0.8, z + height - 1.4, z + height, top_mat, edge=0.6)
+    line = rbox('knob-line', x - 0.85, y - r * 0.9, 1.7, r * 0.72, z + height - 0.6, z + height + 0.3, line_mat, edge=0.15, segments=2)
+    drop = rbox('knob-line-side', x - 0.85, y - r * 1.0, 1.7, r * 0.14, z + 2, z + height - 0.5, line_mat, edge=0.15, segments=2)
+    parent([side, top, line, drop], axis)
+    axis.rotation_euler = (0, 0, -rad(angle))
+    return axis
+
+
+def footswitch(x, y, r, z, pressed=False):
+    """A stomp switch: washer, hexagonal nut, chrome plunger with a domed top. `r` is the washer's radius."""
+    chrome = M.plain('switch-chrome', (0.6, 0.6, 0.62), 0.12, metal=1.0)
+    nickel = M.nickel('switch-nickel', 0.28)
+    cyl('switch-washer', x, y, r, z, z + 0.8, nickel, edge=0.3, verts=64)
+    nut = cyl('switch-nut', x, y, r * 0.82, z + 0.8, z + 3.6, nickel, edge=0.5, verts=6)
+    nut.rotation_euler = (0, 0, rad(15))
+    cyl('switch-collar', x, y, r * 0.6, z + 3.6, z + 5.2, chrome, edge=0.4, verts=48)
+    top = z + (6.2 if pressed else 9.5)
+    cyl('switch-plunger', x, y, r * 0.5, z + 3.6, top, chrome, edge=1.6, verts=64)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=16, radius=px(r * 0.44), location=(px(x), -px(y), px(top - 0.3)))
+    dome = bpy.context.object
+    dome.name = 'switch-dome'
+    dome.scale.z = 0.3
+    dome.data.materials.append(chrome)
+    _smooth(80)
+    return dome
+
+
+def led(x, y, r, z, lit, color=(1.0, 0.02, 0.008)):
+    """A panel LED: chrome bezel, domed diffused lens."""
+    cyl('led-bezel', x, y, r, z, z + 1.6, M.chrome('led-chrome', 0.2), edge=0.6, verts=40)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=12, radius=px(r * 0.66), location=(px(x), -px(y), px(z + 1.5)))
+    lens = bpy.context.object
+    lens.name = 'led-lens'
+    lens.scale.z = 0.8
+    lens.data.materials.append(M.led_lens('led-lit' if lit else 'led-off', color, lit))
+    _smooth(80)
+    return lens
+
+
+def side_jack(x, y, side, z, r=6.5, out=5.0):
+    """A jack socket on the left (side=-1) or right (+1) wall of an enclosure whose wall is at x: nut and barrel seen from above."""
+    nickel = M.nickel('jack-nickel', 0.26)
+    for i, (length, radius, verts) in enumerate(((out * 0.45, r, 6), (out, r * 0.7, 32))):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=verts, radius=px(radius), depth=px(length), location=(px(x + side * length / 2), -px(y), px(z)))
+        o = bpy.context.object
+        o.name = 'jack-nut' if i == 0 else 'jack-barrel'
+        o.rotation_euler = (0, rad(90), 0)
+        o.data.materials.append(nickel)
+        bevel(o, 0.4, 2)
+        _smooth()
+    return o

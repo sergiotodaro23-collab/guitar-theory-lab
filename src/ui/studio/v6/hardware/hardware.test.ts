@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { knobFrame } from '../../v57/RotaryKnob';
 import { AMP_HEAD } from './amp.generated';
+import { PEDALS_HW } from './pedals.generated';
+import { PEDAL_SPECS } from '../../../../app/rig';
 
 /**
  * The rendered hardware and the code that places controls on it must agree.
@@ -85,5 +87,56 @@ describe('amplifier head: spec, pictures and generated geometry agree', () => {
     expect(total).toBeLessThan(160 * 1024);
     expect(manifest.engine).toBe('CYCLES');
     expect(manifest.samples).toBeGreaterThanOrEqual(96);
+  });
+});
+
+/** Every rendered component: its manifest must describe the committed files, and its generated module the spec. */
+const COMPONENTS = [
+  { name: 'amp', generated: AMP_HEAD as { spec: unknown; assets: Record<string, { file: string }> }, budget: 160 },
+  { name: 'pedals', generated: PEDALS_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 160 },
+];
+
+describe.each(COMPONENTS)('rendered component $name', ({ name, generated, budget }) => {
+  const componentSpec = JSON.parse(readFileSync(resolve(`tools/blender/specs/${name}.json`), 'utf8')) as unknown;
+  const componentManifest = JSON.parse(readFileSync(resolve(here, `assets/${name}.manifest.json`), 'utf8')) as { samples: number; assets: Record<string, Asset> };
+
+  it('generated module = spec; manifest = committed files; within its weight budget', () => {
+    expect(generated.spec).toEqual(componentSpec);
+    expect(Object.keys(generated.assets).sort()).toEqual(Object.keys(componentManifest.assets).sort());
+    let total = 0;
+    for (const asset of Object.values(componentManifest.assets)) {
+      const data = readFileSync(resolve(here, 'assets', asset.file));
+      expect(webpSize(data), asset.file).toEqual(asset.px);
+      expect(data.length, asset.file).toBe(asset.bytes);
+      expect(createHash('sha256').update(data).digest('hex').slice(0, 16), asset.file).toBe(asset.sha256);
+      expect(asset.px, asset.file).toEqual([asset.css[0] * asset.scale, asset.css[1] * asset.scale]);
+      total += asset.bytes;
+    }
+    expect(total).toBeLessThan(budget * 1024);
+    expect(componentManifest.samples).toBeGreaterThanOrEqual(96);
+  });
+});
+
+describe('pedals: the rendered bodies match the pedals of the rig', () => {
+  const hw = PEDALS_HW.spec;
+  it('one body per pedal of the rig, with a hole for every knob it has', () => {
+    expect(Object.keys(hw.pedals).sort()).toEqual(Object.keys(PEDAL_SPECS).sort());
+    for (const [id, pedal] of Object.entries(hw.pedals)) {
+      expect(pedal.knobs, id).toBe(PEDAL_SPECS[id as keyof typeof PEDAL_SPECS].knobs.length);
+      expect(pedal.paint.toLowerCase(), id).toBe(PEDAL_SPECS[id as keyof typeof PEDAL_SPECS].color.toLowerCase());
+      expect(PEDALS_HW.assets[`body-${id}` as keyof typeof PEDALS_HW.assets].file, id).toBe(`pedal-${id}@2x.webp`);
+    }
+  });
+  it('knobs, LED and switch lie on the enclosure and clear of each other', () => {
+    const { size, knobs: k, led, switch: sw, name, labelY } = hw;
+    const spread = k.pitch * 2 + k.diameter;
+    expect(spread).toBeLessThanOrEqual(size.w - 8);
+    expect(k.pitch).toBeGreaterThanOrEqual(k.hit);
+    expect(k.y + k.diameter / 2).toBeLessThanOrEqual(labelY);
+    expect(labelY + 10).toBeLessThanOrEqual(name.y);
+    expect(name.y + name.h).toBeLessThanOrEqual(led.y - led.r);
+    expect(led.y + led.r).toBeLessThan(sw.y - sw.hit / 2);
+    expect(sw.y + sw.hit / 2).toBeLessThanOrEqual(size.h - 8);
+    expect(k.frames % 2).toBe(1);
   });
 });

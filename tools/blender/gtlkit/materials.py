@@ -220,3 +220,92 @@ def jewel(name, color, lit=False, strength=1.7, glow=(1.0, 0.035, 0.012)):
 def void(name='void'):
     """The inside of a hole."""
     return plain(name, (0.003, 0.003, 0.003), 0.95, spec=0.0)
+
+
+def srgb(hex_color):
+    """'#2f6fb0' as the linear RGB Blender wants: a spec can carry the colours the interface uses."""
+    h = hex_color.lstrip('#')
+    def lin(c):
+        c = int(c, 16) / 255.0
+        return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    return (lin(h[0:2]), lin(h[2:4]), lin(h[4:6]))
+
+
+def deepen(color, saturation=1.35, value=0.8):
+    """A paint colour for rendering: the view transform and the clear coat wash colours out, so the pigment goes in richer than the swatch."""
+    import colorsys
+    h, sat, v = colorsys.rgb_to_hsv(*color)
+    return colorsys.hsv_to_rgb(h, min(1.0, sat * saturation), v * value)
+
+
+def painted(name, color, finish='gloss'):
+    """
+    Paint on a die-cast enclosure, under a clear coat.
+      gloss     solid colour with a faint orange peel
+      metallic  fine metal flakes under the coat
+      hammered  the dimpled finish of hammer-tone paint
+      matte     no coat: wrinkle-free powder paint
+    """
+    m, nt, b = _new(name)
+    v = _coords(nt)
+    if finish == 'metallic':
+        _set(b, color, 0.42, metal=0.55, coat=1.0)
+        flakes = nt.nodes.new('ShaderNodeTexVoronoi')
+        flakes.inputs['Scale'].default_value = 1.0 / (0.45 * U)
+        nt.links.new(v, flakes.inputs['Vector'])
+        sep = nt.nodes.new('ShaderNodeSeparateColor')
+        nt.links.new(flakes.outputs['Color'], sep.inputs[0])
+        _bump(nt, b, sep.outputs[0], 0.2, 0.12)
+        nt.links.new(_range(nt, sep.outputs[1], 0.3, 0.55), b.inputs['Roughness'])
+    elif finish == 'hammered':
+        _set(b, color, 0.4, metal=0.45, coat=0.7)
+        dimples = nt.nodes.new('ShaderNodeTexVoronoi')
+        dimples.feature = 'SMOOTH_F1'
+        dimples.inputs['Scale'].default_value = 1.0 / (4.5 * U)
+        dimples.inputs['Smoothness'].default_value = 0.6
+        nt.links.new(v, dimples.inputs['Vector'])
+        _bump(nt, b, dimples.outputs['Distance'], 0.5, 1.2)
+    elif finish == 'matte':
+        _set(b, color, 0.62, spec=0.35)
+        _bump(nt, b, _noise(nt, v, 0.7, detail=3), 0.12, 0.15)
+    else:
+        _set(b, color, 0.32, coat=1.0)
+        _bump(nt, b, _noise(nt, v, 3.0, detail=2), 0.035, 0.3)
+    return m
+
+
+def anodized(name, color=(0.045, 0.047, 0.052), rough=0.42):
+    """Anodised aluminium: a metal with a satin, very finely brushed dyed surface."""
+    m, nt, b = _new(name)
+    _set(b, color, rough, metal=0.85)
+    n = _noise(nt, _coords(nt, (0.02, 1, 1)), 0.4, detail=3)
+    _bump(nt, b, n, 0.08, 0.15)
+    nt.links.new(_range(nt, n, rough * 0.85, rough * 1.2), b.inputs['Roughness'])
+    return m
+
+
+def rubber(name='rubber', color=(0.012, 0.012, 0.012)):
+    m, nt, b = _new(name)
+    _set(b, color, 0.72, spec=0.3)
+    _bump(nt, b, _noise(nt, _coords(nt), 0.6, detail=3), 0.15, 0.15)
+    return m
+
+
+def cone_paper(name='cone-paper', color=(0.03, 0.028, 0.026)):
+    """Pressed paper of a loudspeaker cone: matte, fibrous."""
+    m, nt, b = _new(name)
+    _set(b, color, 0.85, spec=0.25)
+    _bump(nt, b, _noise(nt, _coords(nt), 1.2, detail=5), 0.3, 0.3)
+    return m
+
+
+def led_lens(name, color, lit=False, strength=1.1):
+    """Diffused plastic lens of an LED. Lit: it emits; off: the dark tinted plastic."""
+    m, nt, b = _new(name)
+    if lit:
+        _set(b, color, 0.25, spec=0.5, coat=0.6)
+        b.inputs['Emission Color'].default_value = (*color, 1)
+        b.inputs['Emission Strength'].default_value = strength
+    else:
+        _set(b, tuple(c * 0.16 for c in color), 0.22, spec=0.6, coat=0.8)
+    return m

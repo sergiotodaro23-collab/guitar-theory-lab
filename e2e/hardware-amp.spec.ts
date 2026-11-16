@@ -35,7 +35,7 @@ test('the rendered pictures load and the head keeps its size', async ({ page }) 
   expect(box?.height).toBe(124);
   // The knob strip and the lamp are real pictures too.
   const pictures = await page.evaluate(async () => {
-    const urls = [...document.querySelectorAll<HTMLElement>('.v57-knob-sprite, .v6-amp-lamp')].map((e) => /url\("?([^")]+)/.exec(getComputedStyle(e).backgroundImage)?.[1] ?? '');
+    const urls = [...document.querySelectorAll<HTMLElement>('.v6-amp .v57-knob-sprite, .v6-amp-lamp')].map((e) => /url\("?([^")]+)/.exec(getComputedStyle(e).backgroundImage)?.[1] ?? '');
     return Promise.all([...new Set(urls)].map((u) => new Promise<number>((done) => { const i = new Image(); i.onload = () => done(i.naturalWidth); i.onerror = () => done(0); i.src = u; })));
   });
   expect(pictures.sort((a, b) => a - b)).toEqual([48, 3100]);
