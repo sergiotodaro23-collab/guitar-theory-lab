@@ -98,6 +98,19 @@ Stato: **implementati**; resi con Blender 5.3.0, verificati in Chromium headless
 
 Tolto `knob-alu` dalla cartella V5.7 (non più importato). Asset resi in tutto: 166 kB V5.7 + 327 kB pipeline = **493 kB** su un tetto di 700.
 
+## 3d · Mixer: parti mobili (16 novembre 2026)
+
+Stato: **parziale**. Resi i cappucci dei fader (canale e master) e il tasto di console nei tre stati (spento, Mute rosso, Solo ambra); guide, scale, fondo delle strisce e misuratori restano CSS. Verificato in Chromium headless alle quattro risoluzioni.
+
+| | |
+|---|---|
+| Spec | `specs/mixer.json` → `mixer.generated.ts` → variabili CSS (`hardware/mixerVars.ts`): il foglio di stile non contiene misure copiate a mano |
+| Cappuccio | un'immagine con la sua ombra che scorre sulla guida; la stessa, ridotta, nei fader della barra laterale |
+| Tasti | resi a filo e usati come bordo a nove fette: un rendering serve tasti di qualsiasi larghezza; il testo resta HTML |
+| Logica | invariata: stessi `input type="range"`, stessi `aria-pressed`, stessi livelli reali |
+| Peso | 5 kB |
+| Nel kit | `fader_cap`, `console_key`, materiale `key_cap` |
+
 ## 4 · Verifica
 
 | Verifica | Eseguita | Esito |
@@ -131,14 +144,29 @@ Un componente per PR, nello stesso ordine in cui si vedono nel rack e poi verso 
 
 | # | Componente | Cosa si rende | Parti e materiali nuovi nel kit | Controlli HTML che restano | Peso atteso |
 |---|---|---|---|---|---|
-| 1 | **Cabinet / IR** | frontale 300 × ~150: tolex, tela, cono dietro la tela | `speaker_cone`; riusa tolex, tela, bordino, angolari | selettore IR, interruttore, file | ~45 kB |
-| 2 | **Pedali** (7) | un corpo per pedale 2×; manopola piccola a fotogrammi condivisa; interruttore a pedale su e giù; LED spento e acceso | `enclosure` pressofuso, materiale `painted` con colore dalla spec, `footswitch`, `led` | manopole, interruttore, tasti di ordine | ~12 kB a pedale + 40 kB condivisi |
-| 3 | **Scheda audio / Input** | pannello 300 × ~110 in alluminio, presa jack, ghiera del gain | `jack`, `anodized`; manopola in alluminio a fotogrammi | gain, canali, ascolto, misuratore (resta CSS: cambia a ogni frame) | ~60 kB |
-| 4 | **Manopole e fader comuni** | sostituire `knob-gold`, `knob-alu`, `knob-black` e i cappucci dei fader con strisce o stati dal kit | `fader_cap`, `slot` | tutti | ~70 kB per manopola |
-| 5 | **Mixer** | fondo a tutta larghezza come nove fette (bordi resi, centro ripetuto), guide dei fader, tasti Mute e Solo nei tre stati | `nine_slice` nell'export, `key` | fader, mute, solo, misuratori | ~80 kB |
-| 6 | **Console** | LCD e cornice come nove fette, tasti di trasporto nei tre stati | `lcd_glass` | tutto il trasporto | ~60 kB |
+| 1 | **Cabinet / IR** | fatto (3c) | | | 46 kB |
+| 2 | **Pedali** (7) | fatto (3b) | | | 127 kB |
+| 3 | **Scheda audio / Input** | fatto (3c) | | | 55 kB |
+| 4 | **Manopole e fader comuni** | fatto per il rack e per i cappucci (3d); resta `knob-black` dell'accordatore | | accordatore | — |
+| 5 | **Mixer** | cappucci e tasti fatti (3d); mancano il fondo a nove fette e le guide dei fader | `nine_slice` nell'export | fader, mute, solo, misuratori | ~60 kB |
+| 6 | **Console** | LCD e cornice come nove fette, tasti di trasporto nei tre stati (riusare `console_key`) | `lcd_glass` | tutto il trasporto | ~60 kB |
 | 7 | **Telaio** | legni e piastre come nove fette dalla stessa luce; geometria e zone invariate | `wood` procedurale (da `wood.py`) | — | ~90 kB |
 | 8 | **Tastiera** | solo materiali di fondo (palissandro, acero, tasti, capotasto) come strisce ripetibili; marker, note e corde restano SVG | `rosewood`, `maple`, `fret_wire` | tutta la tastiera SVG | ~50 kB |
+
+Bilancio al 16 novembre 2026: 166 kB V5.7 + 331 kB pipeline = **497 kB** su 700. Restano circa 200 kB per i passi 5–8, stimati 260 kB: al passo 6 i tasti V5.7 (`key-*`, 42 kB) e `footswitch` (43 kB, usato solo dall'accordatore) si sostituiscono con parti del kit e il conto rientra.
+
+### Rifiniture delegabili a un modello più economico
+
+Lavori meccanici, senza scelte di progetto. Ognuno: modificare la spec o il CSS indicato, `build.py <componente>`, `npm run check`, la spec e2e del componente, screenshot con `tools/hardware/shots.mjs`.
+
+1. File a 1× con `srcset` per i corpi (`export.py`: ridurre a metà con Lanczos e scrivere `…@1x.webp`).
+2. Accordatore: sostituire `knob-black` e `footswitch` V5.7 con `barrel_knob` e `footswitch` del kit, poi togliere i due file.
+3. Tasti della barra laterale (`.v6-ms`): stessi tasti a nove fette del mixer.
+4. Foglio di contatto di tutti i materiali (`build.py materials --preview`), per controllare a colpo d'occhio una modifica della luce.
+5. Contrasto misurato delle etichette su piastra dorata, pannello anodizzato e pedali chiari (EQ, Delay).
+6. Tacche graduate rese attorno alle manopole dei pedali (`tick_ring` con `dot=0.6`).
+7. LED di colore diverso per pedale: parametro `color` di `parts.led` dalla spec.
+8. Rifare i tre confronti in `docs/hardware/` con la testata a 124 px.
 
 Regole per l'estensione:
 

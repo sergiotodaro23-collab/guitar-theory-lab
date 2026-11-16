@@ -1,0 +1,89 @@
+{
+  "component": "mixer",
+  "spec": "tools/blender/specs/mixer.json",
+  "blender": "5.3.0",
+  "engine": "CYCLES",
+  "samples": 128,
+  "scale": 2,
+  "assets": {
+    "cap": {
+      "file": "mixer-cap@2x.webp",
+      "px": [
+        80,
+        64
+      ],
+      "css": [
+        40,
+        32
+      ],
+      "scale": 2,
+      "bytes": 1368,
+      "sha256": "120050f05ee83828",
+      "use": "Fader cap (cap)"
+    },
+    "capMaster": {
+      "file": "mixer-cap-master@2x.webp",
+      "px": [
+        80,
+        64
+      ],
+      "css": [
+        40,
+        32
+      ],
+      "scale": 2,
+      "bytes": 1684,
+      "sha256": "f00e179f63d06766",
+      "use": "Fader cap (capMaster)"
+    },
+    "keyOff": {
+      "file": "mixer-key-off@2x.webp",
+      "px": [
+        88,
+        44
+      ],
+      "css": [
+        44,
+        22
+      ],
+      "scale": 2,
+      "bytes": 512,
+      "sha256": "cb663318964032e9",
+      "use": "Console key (keyOff), nine-slice",
+      "slice": 8
+    },
+    "keyMute": {
+      "file": "mixer-key-mute@2x.webp",
+      "px": [
+        88,
+        44
+      ],
+      "css": [
+        44,
+        22
+      ],
+      "scale": 2,
+      "bytes": 692,
+      "sha256": "e4986e3a7dae0052",
+      "use": "Console key (keyMute), nine-slice",
+      "slice": 8
+    },
+    "keySolo": {
+      "file": "mixer-key-solo@2x.webp",
+      "px": [
+        88,
+        44
+      ],
+      "css": [
+        44,
+        22
+      ],
+      "scale": 2,
+      "bytes": 666,
+      "sha256": "edf62486aa0bf0f0",
+      "use": "Console key (keySolo), nine-slice",
+      "slice": 8
+    }
+  },
+  "renderSeconds": 5.7
+}

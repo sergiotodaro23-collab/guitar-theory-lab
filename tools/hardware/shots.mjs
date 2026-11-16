@@ -4,7 +4,7 @@
  *   node tools/hardware/shots.mjs <outDir> [label]
  * For every viewport writes <label>-<module>-<viewport>.png for each rack
  * module (device pixel ratio 2, states switched on so lamps and LEDs show),
- * <label>-rack-… and <label>-page-… (the whole Studio, ratio 1). Headless
+ * <label>-rack-…, <label>-mixer-… and <label>-page-… (the whole Studio, ratio 1). Headless
  * Chromium on the built app.
  */
 import { spawn } from 'node:child_process';
@@ -49,6 +49,13 @@ try {
     await page.waitForTimeout(200);
     await page.locator('.v6-board').screenshot({ path: join(out, `${label}-pedals-end-${size}.png`) });
     await page.getByTestId('rack').screenshot({ path: join(out, `${label}-rack-${size}.png`) });
+    // The mixer, opened from its handle, with one mute and one solo lit.
+    await page.getByTestId('device-mixer').click({ timeout: 1500 }).catch(() => {});
+    await page.getByTestId('mute-click').click({ timeout: 1500 }).catch(() => {});
+    await page.getByTestId('solo-bass').click({ timeout: 1500 }).catch(() => {});
+    await page.waitForTimeout(300);
+    await page.getByTestId('v57-mixer').screenshot({ path: join(out, `${label}-mixer-${size}.png`) }).catch(() => {});
+    await page.screenshot({ path: join(out, `${label}-page-mixer-${size}.png`) });
     await page.close();
   }
   await browser.close();

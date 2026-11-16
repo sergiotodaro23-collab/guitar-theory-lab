@@ -295,3 +295,22 @@ def combo_jack(x, y, r, z):
     rbox('socket-tab', x - r * 0.22, y - r * 1.02, r * 0.44, r * 0.3, z + 1.2, z + 2.6, M.nickel('socket-tab'), corner=1, edge=0.3, segments=2)
     for sx in (-1, 1):
         screw(x + sx * r * 0.86, y + sx * r * 0.86, r * 0.1, z + 1.2, M.nickel('socket-screw'), void, turn=40 * sx)
+
+
+def fader_cap(x, y, w, h, z, body_mat, line_mat, height=9.0):
+    """A mixer fader cap centred at (x, y), `w` wide and `h` along its travel: two ribbed slopes falling to a painted centre line."""
+    half = h / 2
+    for i, sy in enumerate((-1, 1)):
+        slope = rbox('cap-slope', x - w / 2, y - half if sy < 0 else y + 0.7, w, half - 0.7, z, z + height, body_mat, corner=1.6, edge=1.1, segments=4)
+        # Tilt each half towards the centre line: the finger rests in the valley.
+        slope.rotation_euler = (rad(11 * sy), 0, 0)
+    for k in range(-2, 3):
+        if k == 0:
+            continue
+        rbox('cap-rib', x - w / 2 + 1.5, y + k * (h / 6.2) - 0.45, w - 3, 0.9, z + height - 1.2, z + height + 0.5 - abs(k) * 0.1, body_mat, edge=0.3, segments=2)
+    return rbox('cap-line', x - w / 2 + 0.8, y - 0.7, w - 1.6, 1.4, z + 1, z + height - 1.6, line_mat, edge=0.2, segments=2)
+
+
+def console_key(x, y, w, h, z, mat, height=4.0):
+    """A soft-edged console key on the CSS rectangle (x, y, w, h): its face is where live text goes."""
+    return rbox('key', x, y, w, h, z, z + height, mat, corner=3.0, edge=1.6, segments=5)
