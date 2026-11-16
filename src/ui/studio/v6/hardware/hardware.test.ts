@@ -181,5 +181,9 @@ describe('mixer parts', () => {
     expect(key.slice * 2).toBeLessThan(key.h);
     expect(MIXER_HW.assets.keyOff.px).toEqual([key.w * 2, key.h * 2]);
     expect(MIXER_HW.assets.keyMute.slice).toBe(key.slice);
+    const { strip, slot, bank } = MIXER_HW.spec;
+    // Nine-slice sources: the borders, with their screws, never meet in the middle.
+    for (const part of [strip, slot, bank]) expect(part.slice * 2).toBeLessThan(Math.min(part.w, part.h));
+    expect(slot.w).toBeGreaterThan(cap.w);
   });
 });

@@ -100,7 +100,7 @@ Tolto `knob-alu` dalla cartella V5.7 (non più importato). Asset resi in tutto: 
 
 ## 3d · Mixer: parti mobili (16 novembre 2026)
 
-Stato: **parziale**. Resi i cappucci dei fader (canale e master) e il tasto di console nei tre stati (spento, Mute rosso, Solo ambra); guide, scale, fondo delle strisce e misuratori restano CSS. Verificato in Chromium headless alle quattro risoluzioni.
+Stato: **implementato**. Resi i cappucci dei fader (canale e master), il tasto di console nei tre stati, il frontale delle strisce (canale, gruppo, master), la guida dei fader e il vassoio dei banchi, questi ultimi come nove fette su un livello dietro il contenuto: il layout non cambia. Le sigle in dB e i misuratori restano HTML e CSS (i misuratori cambiano a ogni frame). Verificato in Chromium headless alle quattro risoluzioni.
 
 | | |
 |---|---|
@@ -108,8 +108,8 @@ Stato: **parziale**. Resi i cappucci dei fader (canale e master) e il tasto di c
 | Cappuccio | un'immagine con la sua ombra che scorre sulla guida; la stessa, ridotta, nei fader della barra laterale |
 | Tasti | resi a filo e usati come bordo a nove fette: un rendering serve tasti di qualsiasi larghezza; il testo resta HTML |
 | Logica | invariata: stessi `input type="range"`, stessi `aria-pressed`, stessi livelli reali |
-| Peso | 5 kB |
-| Nel kit | `fader_cap`, `console_key`, materiale `key_cap` |
+| Peso | 12 kB |
+| Nel kit | `fader_cap`, `console_key`, materiale `key_cap`; regola: le parti a nove fette si rendono a filo, senza piano d'ombra, con viti e angoli dentro la fetta |
 
 ## 4 · Verifica
 
@@ -148,7 +148,7 @@ Un componente per PR, nello stesso ordine in cui si vedono nel rack e poi verso 
 | 2 | **Pedali** (7) | fatto (3b) | | | 127 kB |
 | 3 | **Scheda audio / Input** | fatto (3c) | | | 55 kB |
 | 4 | **Manopole e fader comuni** | fatto per il rack e per i cappucci (3d); resta `knob-black` dell'accordatore | | accordatore | — |
-| 5 | **Mixer** | cappucci e tasti fatti (3d); mancano il fondo a nove fette e le guide dei fader | `nine_slice` nell'export | fader, mute, solo, misuratori | ~60 kB |
+| 5 | **Mixer** | fatto (3d) | | | 12 kB |
 | 6 | **Console** | LCD e cornice come nove fette, tasti di trasporto nei tre stati (riusare `console_key`) | `lcd_glass` | tutto il trasporto | ~60 kB |
 | 7 | **Telaio** | legni e piastre come nove fette dalla stessa luce; geometria e zone invariate | `wood` procedurale (da `wood.py`) | — | ~90 kB |
 | 8 | **Tastiera** | solo materiali di fondo (palissandro, acero, tasti, capotasto) come strisce ripetibili; marker, note e corde restano SVG | `rosewood`, `maple`, `fret_wire` | tutta la tastiera SVG | ~50 kB |

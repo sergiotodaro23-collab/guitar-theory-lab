@@ -10,8 +10,13 @@ import capMaster from './assets/mixer-cap-master@2x.webp';
 import keyOff from './assets/mixer-key-off@2x.webp';
 import keyMute from './assets/mixer-key-mute@2x.webp';
 import keySolo from './assets/mixer-key-solo@2x.webp';
+import strip from './assets/mixer-strip@2x.webp';
+import stripGroup from './assets/mixer-strip-group@2x.webp';
+import stripMaster from './assets/mixer-strip-master@2x.webp';
+import slot from './assets/mixer-slot@2x.webp';
+import bank from './assets/mixer-bank@2x.webp';
 
-const { cap: c, key: k } = MIXER_HW.spec;
+const { cap: c, key: k, strip: st, slot: sl, bank: bk } = MIXER_HW.spec;
 
 export const MIXER_VARS = {
   '--cap': `url(${cap})`,
@@ -27,4 +32,16 @@ export const MIXER_VARS = {
   '--key-h': `${k.h}px`,
   '--key-slice': `${k.slice}px`,
   '--key-slice-px': `${k.slice * 2}`,
+  '--strip': `url(${strip})`,
+  '--strip-group': `url(${stripGroup})`,
+  '--strip-master': `url(${stripMaster})`,
+  '--strip-slice': `${st.slice}px`,
+  '--strip-slice-px': `${st.slice * 2}`,
+  '--slot': `url(${slot})`,
+  '--slot-w': `${sl.w}px`,
+  '--slot-slice': `${sl.slice}px`,
+  '--slot-slice-px': `${sl.slice * 2}`,
+  '--bank': `url(${bank})`,
+  '--bank-slice': `${bk.slice}px`,
+  '--bank-slice-px': `${bk.slice * 2}`,
 } as CSSProperties;
