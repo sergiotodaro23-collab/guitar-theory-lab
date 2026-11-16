@@ -109,7 +109,7 @@ test('the rendered pointer really points where the value says: left at minimum, 
   await open(page);
   // Centre of the pixels of the painted pointer line of three frames of the strip, relative to the frame's centre.
   const pointer = await page.evaluate(async () => {
-    const url = /url\("?([^")]+)/.exec(getComputedStyle(document.querySelector('.v57-knob-sprite') as HTMLElement).backgroundImage)?.[1] ?? '';
+    const url = /url\("?([^")]+)/.exec(getComputedStyle(document.querySelector('.v6-amp .v57-knob-sprite') as HTMLElement).backgroundImage)?.[1] ?? '';
     const image = new Image();
     await new Promise((done) => { image.onload = done; image.src = url; });
     const size = image.naturalHeight;

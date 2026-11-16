@@ -1,0 +1,10 @@
+{
+  "id": "cab",
+  "about": "Loudspeaker cabinet of the Studio V6 rack. All numbers are CSS pixels. The picture is the same for every impulse response: the choice is the live control under it.",
+  "size": { "w": 300, "h": 92 },
+  "margin": { "left": 10, "top": 6, "right": 14, "bottom": 18 },
+  "cabinet": { "corner": 8, "cornerCap": 17 },
+  "grille": { "x": 12, "y": 10, "w": 276, "h": 72, "corner": 4 },
+  "speakers": [{ "x": 84, "y": 46, "r": 31 }, { "x": 216, "y": 46, "r": 31 }],
+  "badge": { "x": 127, "y": 66, "w": 46, "h": 11 }
+}

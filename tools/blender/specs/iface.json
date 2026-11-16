@@ -1,0 +1,14 @@
+{
+  "id": "iface",
+  "about": "Audio interface of the Studio V6 rack. All numbers are CSS pixels. The meter window and the control strip are places for live HTML: the meter changes every frame.",
+  "size": { "w": 300, "h": 78 },
+  "margin": { "left": 8, "top": 5, "right": 12, "bottom": 15 },
+  "corner": 5,
+  "height": 26,
+  "cheek": 9,
+  "jack": { "x": 37, "y": 39, "r": 17 },
+  "knob": { "x": 96, "y": 43, "diameter": 34, "frame": 50, "hit": 40, "frames": 31, "sweep": 270, "tickRadius": 21 },
+  "labelY": 8,
+  "meter": { "x": 130, "y": 12, "w": 154, "h": 18 },
+  "controls": { "x": 130, "y": 38, "w": 154, "h": 30 }
+}

@@ -261,3 +261,37 @@ def side_jack(x, y, side, z, r=6.5, out=5.0):
         bevel(o, 0.4, 2)
         _smooth()
     return o
+
+
+def speaker(x, y, r, z, depth=14.0):
+    """A loudspeaker seen from the front, its rim at height z: steel basket rim, rubber surround, paper cone, dust cap."""
+    steel = M.plain('speaker-steel', (0.1, 0.1, 0.11), 0.45, metal=1.0)
+    paper = M.cone_paper(color=(0.16, 0.15, 0.14))
+    cyl('speaker-rim', x, y, r, z - 2, z, steel, edge=0.6, verts=96)
+    cone('speaker-surround', x, y, r * 0.8, r * 0.92, z - 3, z + 0.6, M.rubber('speaker-surround'), verts=96)
+    cone('speaker-cone', x, y, r * 0.3, r * 0.82, z - depth, z - 1, paper, verts=96)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=16, radius=px(r * 0.32), location=(px(x), -px(y), px(z - depth)))
+    cap = bpy.context.object
+    cap.name = 'speaker-cap'
+    cap.scale.z = 0.5
+    cap.data.materials.append(M.cone_paper('speaker-cap', (0.3, 0.29, 0.27)))
+    _smooth(80)
+    return cap
+
+
+def combo_jack(x, y, r, z):
+    """A combined XLR and jack input socket: black moulded body, chrome ring, three pin holes around the jack hole, release tab."""
+    black = M.bakelite('socket-black', (0.014, 0.014, 0.015), 0.4)
+    void = M.void('socket-void')
+    cyl('socket-flange', x, y, r, z, z + 1.2, black, edge=0.5, verts=64)
+    cyl('socket-ring', x, y, r * 0.8, z + 1.2, z + 2.2, M.chrome('socket-chrome', 0.2), edge=0.4, verts=64)
+    cyl('socket-well', x, y, r * 0.7, z + 1.2, z + 2.3, black, verts=64)
+    cyl('socket-hole', x, y, r * 0.3, z + 2.3, z + 2.4, void, verts=40)
+    cyl('socket-sleeve', x, y, r * 0.38, z + 2.2, z + 2.9, M.nickel('socket-nickel'), edge=0.3, verts=40)
+    cyl('socket-hole-top', x, y, r * 0.26, z + 2.9, z + 2.96, void, verts=40)
+    for k in range(3):
+        a = rad(90 + 120 * k)
+        cyl('socket-pin', x + r * 0.52 * math.cos(a), y + r * 0.52 * math.sin(a), r * 0.09, z + 2.3, z + 2.4, void, verts=20)
+    rbox('socket-tab', x - r * 0.22, y - r * 1.02, r * 0.44, r * 0.3, z + 1.2, z + 2.6, M.nickel('socket-tab'), corner=1, edge=0.3, segments=2)
+    for sx in (-1, 1):
+        screw(x + sx * r * 0.86, y + sx * r * 0.86, r * 0.1, z + 1.2, M.nickel('socket-screw'), void, turn=40 * sx)
