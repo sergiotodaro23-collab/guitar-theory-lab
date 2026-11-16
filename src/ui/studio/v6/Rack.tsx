@@ -491,14 +491,10 @@ export function Rack() {
   const folded = useStudioUi((u) => u.rackFolded);
   const toggleModule = useStudioUi((u) => u.toggleRackModule);
   const lit = useModuleLit();
-  if (mode === 'hidden') return null;
   if (mode === 'compact') {
     const open = (id: RackModuleId) => { if (folded.includes(id)) toggleModule(id); setRack('expanded'); };
     return (
       <aside className="v6-rack" data-mode="compact" aria-label="Audio e Rig" data-testid="rack">
-        <button type="button" className="v6-rack-key" aria-label="Espandi il rack" title="Espandi il rack" data-testid="rack-expand" onClick={() => setRack('expanded')}>
-          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </button>
         {SPINE.map((m) => (
           <button key={m.id} type="button" className="v6-spine" aria-label={m.label} title={m.label} data-on={lit[m.id] ? '1' : '0'} onClick={() => open(m.id)}>
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d={m.glyph} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -511,13 +507,7 @@ export function Rack() {
   return (
     <aside className="v6-rack" data-mode="expanded" aria-label="Audio e Rig" data-testid="rack">
       <div className="v6-rack-title">
-        <button type="button" className="v6-rack-key" aria-label="Compatta il rack" title="Compatta il rack" data-testid="rack-compact" onClick={() => setRack('compact')}>
-          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6M19 5v14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </button>
         <h2>Audio &amp; Rig</h2>
-        <button type="button" className="v6-rack-key" aria-label="Nascondi il rack" title="Nascondi il rack" data-testid="rack-hide" onClick={() => setRack('hidden')}>
-          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
-        </button>
       </div>
       <div className="v6-rack-body" data-testid="rig">
         <SoundPreset />

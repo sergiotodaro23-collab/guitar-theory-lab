@@ -170,7 +170,8 @@ Limiti dichiarati: nessuna prova con chitarra, scheda audio e capture reali; nes
 | Pedaliera renderizzata: sette corpi, manopola, LED e interruttore condivisi | implementata, verificata in Chromium headless | `e2e/hardware-pedals.spec.ts`, `guitar-rig.spec.ts`, `pedal-chain.spec.ts` |
 | Cabinet e scheda audio renderizzati | implementati, verificati in Chromium headless | `e2e/hardware-rack.spec.ts` |
 | Mixer: cappucci dei fader e tasti Mute/Solo renderizzati | parziale: fondo e guide ancora CSS | `e2e/hardware-rack.spec.ts` |
-| Console, telaio, fondo della tastiera renderizzati | mancanti | piano in `STUDIO_V6_HARDWARE_PIPELINE.md` §5 |
+| Console, legni delle tastiere e della barra, logo vettoriale V6.7 | implementati | `hardware.test.ts`, `e2e/hardware-rack.spec.ts`, `e2e/studio-logo.spec.ts` |
+| Due barre laterali permanenti e simmetriche (navigazione, Audio & Rig), compatte o estese dai due tasti alle estremità dell'intestazione; `rack: hidden` migra a compatta | implementate | `layout.test.ts`, `e2e/sidebars.spec.ts` |
 | Altri componenti (cabinet, pedali, scheda audio, mixer, console, telaio, fondo della tastiera) | mancanti: piano in `docs/STUDIO_V6_HARDWARE_PIPELINE.md` | — |
 
 ## Baseline

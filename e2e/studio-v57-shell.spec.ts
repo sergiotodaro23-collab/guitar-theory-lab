@@ -242,11 +242,11 @@ test('visualisation: labels, overlay marks and display filters, saved', async ({
 
 test('rail: collapse, tooltips on focus, settings with look and licence', async ({ page }) => {
   await open(page);
-  await page.getByTestId('studio-rail').getByRole('button', { name: 'Espandi barra' }).click();
+  await page.getByTestId('rail-toggle').click();
   await expect(page.getByTestId('studio-rail')).toHaveAttribute('data-x', '1');
   await page.reload();
   await expect(page.getByTestId('studio-rail')).toHaveAttribute('data-x', '1');
-  await page.getByTestId('studio-rail').getByRole('button', { name: 'Comprimi barra' }).click();
+  await page.getByTestId('rail-toggle').click();
   await lab(page, 'Jam Studio').focus();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Shift+Tab');

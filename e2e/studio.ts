@@ -35,12 +35,11 @@ export async function openTab(page: Page, studioLabel: string, simpleLabel = stu
   await page.getByRole('tab', { name: simpleLabel, exact: true }).click();
 }
 
-/** Show the rig rack in full (Studio V6): it may be hidden or folded to its spine. */
+/** Show the rig rack in full (Studio V6): it may be folded to its compact bar. */
 export async function openRack(page: Page): Promise<void> {
   if (!(await inStudio(page))) return;
   const rack = page.getByTestId('rack');
-  if (!(await rack.isVisible())) await page.getByTestId('rack-toggle').click();
-  if ((await rack.getAttribute('data-mode')) === 'compact') await page.getByTestId('rack-expand').click();
+  if ((await rack.getAttribute('data-mode')) === 'compact') await page.getByTestId('rack-toggle').click();
   await expect(rack).toHaveAttribute('data-mode', 'expanded');
 }
 
