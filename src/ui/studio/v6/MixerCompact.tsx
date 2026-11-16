@@ -7,6 +7,7 @@
  * the keys the channel has. The row never wraps: when it does not fit, it
  * scrolls sideways inside the mixer.
  */
+import { useEffect, useRef, useState } from 'react';
 import { RotaryKnob } from '../v57/RotaryKnob';
 import { PEDALS_HW } from './hardware/pedals.generated';
 import knobStrip from './hardware/assets/pedal-knob-strip@2x.webp';
@@ -61,13 +62,37 @@ function Cell({ strip }: { readonly strip: StripModel }) {
   );
 }
 
+/** Where the row is scrolled to, as fractions of its content: the thumb of the bar under it. Null when everything fits. */
+function useScrollThumb() {
+  const row = useRef<HTMLDivElement>(null);
+  const [thumb, setThumb] = useState<{ left: number; width: number } | null>(null);
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    const read = () => setThumb(el.scrollWidth > el.clientWidth + 1 ? { left: el.scrollLeft / el.scrollWidth, width: el.clientWidth / el.scrollWidth } : null);
+    read();
+    el.addEventListener('scroll', read, { passive: true });
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(read);
+    observer?.observe(el);
+    return () => { el.removeEventListener('scroll', read); observer?.disconnect(); };
+  }, []);
+  return [row, thumb] as const;
+}
+
 export function MixerCompact() {
   const strips = useMixerStrips();
+  const [row, thumb] = useScrollThumb();
   return (
     <section className="v6-mc" aria-label="Mixer" data-testid="v57-mixer" data-mode="compact" style={MIXER_VARS}>
       <MixerModeSwitch />
-      <div className="v6-mc-row" data-testid="mixer-compact-row" tabIndex={0} role="group" aria-label="Canali del mixer">
-        {strips.map((strip) => <Cell key={strip.id} strip={strip} />)}
+      <div className="v6-mc-main">
+        <div className="v6-mc-row" ref={row} data-testid="mixer-compact-row" tabIndex={0} role="group" aria-label="Canali del mixer">
+          {strips.map((strip) => <Cell key={strip.id} strip={strip} />)}
+        </div>
+        {/* Our own bar: the browser's may be an overlay that hides. Drawn only when the channels do not fit; the row itself scrolls (wheel, drag, keys). */}
+        <div className="v6-mc-bar" aria-hidden="true" data-testid="mixer-compact-bar" data-on={thumb ? '1' : '0'}>
+          {thumb ? <i style={{ left: `${thumb.left * 100}%`, width: `${thumb.width * 100}%` }} /> : null}
+        </div>
       </div>
     </section>
   );

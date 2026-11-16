@@ -169,8 +169,14 @@ test('when the eight channels do not fit, the row scrolls sideways inside the mi
   expect(m.wrap).toBe('nowrap');
   const tops = await page.locator('.v6-mc-cell').evaluateAll((cells) => [...new Set(cells.map((c) => Math.round(c.getBoundingClientRect().top)))]);
   expect(tops).toHaveLength(1);
+  // The bar under the row is drawn, with a thumb shorter than the track; it follows the scroll.
+  const thumb = page.getByTestId('mixer-compact-bar').locator('i');
+  await expect(page.getByTestId('mixer-compact-bar')).toHaveAttribute('data-on', '1');
+  const [track, t0] = [await page.getByTestId('mixer-compact-bar').boundingBox(), await thumb.boundingBox()];
+  expect(t0 && track && t0.width < track.width - 4 && t0.width > 20).toBe(true);
   // The last channel is reachable by scrolling the row, not the page.
   await page.getByTestId('mixknob-master').scrollIntoViewIfNeeded();
   await expect(page.getByTestId('mixknob-master')).toBeInViewport();
+  expect(((await thumb.boundingBox())?.x ?? 0)).toBeGreaterThan((t0?.x ?? 0) + 2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

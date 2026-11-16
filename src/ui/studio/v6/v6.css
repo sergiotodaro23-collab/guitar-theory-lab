@@ -395,10 +395,13 @@
 .v6-mc::before { content: ''; position: absolute; inset: 0; z-index: -1; border: var(--bank-slice) solid transparent; border-image: var(--bank) var(--bank-slice-px) fill / var(--bank-slice) stretch; }
 .v6-mc > .v6-mxmode { flex-direction: column; align-self: center; }
 .v6-mc > .v6-mxmode button { height: 22px; }
-.v6-mc-row { flex: 1; min-width: 0; display: flex; flex-wrap: nowrap; gap: 5px; overflow-x: scroll; overflow-y: hidden; padding-bottom: 3px; scrollbar-width: thin; scrollbar-color: #8a6f52 #17120e; }
-.v6-mc-row::-webkit-scrollbar { height: 7px; }
-.v6-mc-row::-webkit-scrollbar-track { background: #17120e; border-radius: 4px; }
-.v6-mc-row::-webkit-scrollbar-thumb { background: #8a6f52; border-radius: 4px; }
+.v6-mc-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.v6-mc-row { min-width: 0; display: flex; flex-wrap: nowrap; gap: 5px; overflow-x: scroll; overflow-y: hidden; scrollbar-width: none; }
+.v6-mc-row::-webkit-scrollbar { display: none; }
+/* The bar that says the row goes on: always drawn when the channels do not fit (the browser's own may hide). */
+.v6-mc-bar { position: relative; flex: none; height: 5px; border-radius: 3px; }
+.v6-mc-bar[data-on='1'] { background: #0c0907; box-shadow: inset 0 1px 1px rgba(0, 0, 0, .8); }
+.v6-mc-bar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: linear-gradient(180deg, #c9a06a, #8a6f52); }
 .v6-mc-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 .v6-mc-cell { position: relative; isolation: isolate; flex: 1 0 96px; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 4px 3px; }
 .v6-mc-cell::before { content: ''; position: absolute; inset: 0; z-index: -1; border: var(--strip-slice) solid transparent; border-image: var(--strip) var(--strip-slice-px) fill / var(--strip-slice) stretch; }
