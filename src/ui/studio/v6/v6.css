@@ -7,7 +7,7 @@
 .v57.v6 > .v57-desk { flex: 1; min-height: 0; height: auto; }
 
 /* ---------- global header: a thin brand strip, no transport ---------- */
-.v6-head { position: relative; z-index: 40; flex: none; height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 0; border-radius: 3px;
+.v6-head { position: relative; z-index: 40; flex: none; height: 48px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 0; border-radius: 3px;
   color: #6f1f12; --logo-over: 6px;
   /* dark tolex behind the nameplate, as in the approved V6.7 header */
   background:
@@ -21,16 +21,19 @@
 .v6-head .v6-tools { position: relative; margin-left: auto; }
 .v6-logo { position: absolute; left: -8px; top: -8px; height: calc(100% + 8px + var(--logo-over)); width: auto; overflow: visible; display: block; }
 .v6-logo text { user-select: none; }
-.v6-tools { position: relative; display: flex; align-items: center; gap: 5px; flex: none; }
+/* The tools sit low in the bar, clear of the two stripes that run along its top. */
+.v6-tools { position: relative; display: flex; align-items: center; gap: 8px; flex: none; align-self: flex-end; margin-bottom: 5px; }
 /* The two sidebar keys: one at each end of the header, apart from the tools. */
 .v6-side { position: relative; z-index: 1; flex: none; width: 30px; height: 26px; display: grid; place-items: center; padding: 0; cursor: pointer; color: #f1e3c4; border: 1px solid #0b0c0e; border-radius: 5px;
   background: linear-gradient(180deg, #4a4037 0%, #2b2520 52%, #1c1815 100%); box-shadow: inset 0 1px 0 rgba(255, 236, 200, .3), inset 0 -2px 0 rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .5); }
 .v6-side:hover { filter: brightness(1.18); }
 .v6-side[aria-expanded='true'] { color: #ffd08a; }
 .v6-side:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.v6-side[data-side='left'] { margin-left: 5px; }
+.v6-side[data-side='left'] { margin-left: 6px; }
+.v6-side[data-side='right'], .v6-head-sep { align-self: flex-end; margin-bottom: 7px; }
+.v6-head-sep { margin-bottom: 10px; }
 .v6-head-sep { flex: none; width: 1px; height: 20px; margin: 0 3px 0 1px; background: linear-gradient(180deg, transparent, rgba(241, 202, 134, .5), transparent); }
-.v6-tool { position: relative; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px 0 9px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 5px; color: var(--ink-primary);
+.v6-tool { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 14px 0 12px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 5px; color: var(--ink-primary);
   font: 600 13px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .08em; text-transform: uppercase;
   background: linear-gradient(180deg, #4a4037 0%, #2b2520 52%, #1c1815 100%); box-shadow: inset 0 1px 0 rgba(255, 236, 200, .3), inset 0 -2px 0 rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .5); }
 .v6-tool:hover { filter: brightness(1.15); }
@@ -128,8 +131,11 @@
 
 @media (max-height: 820px) {
   .v57.v6 { gap: 5px; }
-  .v6-head { height: 32px; --logo-over: 5px; }
-  .v6-tool { height: 25px; }
+  .v6-head { height: 38px; --logo-over: 5px; }
+  .v6-tool { height: 26px; }
+  .v6-tools { margin-bottom: 3px; gap: 6px; }
+  .v6-side[data-side='right'] { margin-bottom: 3px; }
+  .v6-head-sep { margin-bottom: 6px; }
   .v6-casefoot { height: 32px; }
   .v6-mixhandle { height: 20px; }
 }

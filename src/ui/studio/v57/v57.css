@@ -176,6 +176,11 @@ html .v57 .v57-lctl-knob .accent-toggle[aria-expanded='true'] { color: #2a1606; 
 .v57-board .board-section { width: 100%; height: 100%; margin: 0; }
 .v57-board .fretboard-wrap { width: 100%; height: 100%; display: flex; flex-direction: column; }
 .v57-board .fretboard-scroll { flex: 1; min-height: 0; overflow: hidden; background: none; padding: 0; box-shadow: none; }
+/* Fitted by height (Fretboard `fit`): the SVG has its own size in px; when the frets reach their minimum distance the neck scrolls sideways. */
+.v57-board .fretboard-wrap[data-fit='height'] .fretboard-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: #6a5540 transparent; }
+/* The range bar has a fixed room (NAV_ROOM in Fretboard.tsx: 30 + 4), so the neck's height can be worked out before it is drawn. */
+.v57-board .fretboard-wrap[data-fit='height'] .fret-nav { flex: none; height: 30px; margin: 0 0 4px; }
+.v57-board .fretboard-wrap[data-fit='height'] .fret-nav-btn { height: 30px; }
 .v57 .v57-board .fretboard { min-width: 0; width: 100%; height: 100%; }
 .v57-board .fret-number { fill: #efe3bd; }
 /* V5.7 marker colours; labels dark for contrast on the lighter beads */

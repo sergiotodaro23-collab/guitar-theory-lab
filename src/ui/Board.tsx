@@ -101,6 +101,8 @@ export interface BoardProps {
   readonly foot?: 'inline' | 'external';
   readonly inspectorHost?: HTMLElement | null;
   readonly boardImage?: string | null;
+  /** How the neck fills its box (see Fretboard): the Studio fits it by height. */
+  readonly fit?: 'scale' | 'height';
   readonly layerMarks?: LayerMarks;
 }
 
@@ -108,7 +110,7 @@ export interface BoardProps {
  * The neck with its legend and note inspector. A layout that keeps the legend
  * elsewhere passes the element to render it into.
  */
-export function Board({ legendHost = null, foot = 'inline', inspectorHost = null, boardImage = null, layerMarks = 'dots' }: BoardProps = {}) {
+export function Board({ legendHost = null, foot = 'inline', inspectorHost = null, boardImage = null, layerMarks = 'dots', fit = 'scale' }: BoardProps = {}) {
   const settings = useApp((s) => s.settings);
   const pinnedPc = useApp((s) => s.pinnedPc);
   const setPinned = useApp((s) => s.setPinned);
@@ -246,6 +248,7 @@ export function Board({ legendHost = null, foot = 'inline', inspectorHost = null
         trail={showAids ? trail : []}
         layerStyles={layerStyles}
         boardImage={boardImage}
+        fit={fit}
         layerMarks={layerMarks}
         live={live}
         onPick={onPick}

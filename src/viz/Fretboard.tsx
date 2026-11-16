@@ -1,25 +1,46 @@
-import { memo, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { memo, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { DEFAULT_FRETS, type FretPosition } from '../fretboard';
 import type { FretArrow, Marker } from './markers';
 
 const WIDTH = 1240;
 const HEIGHT = 252;
 const NUT_X = 54;
-const RIGHT = WIDTH - 14;
+const RIGHT_MARGIN = 14;
 const TOP = 26;
 const BOTTOM = HEIGHT - 38;
 const STRING_GAP = (BOTTOM - TOP) / 5;
 const RADIUS = 13;
 
 /**
+ * Where things are along the neck, for a drawing `width` units wide. The
+ * vertical layout (strings, marker size, the room for fret numbers) never
+ * depends on it: a narrower neck only brings the frets closer together.
  * Uniform cells, not the real scale length: this is a study instrument, so
  * fret 24 must be as readable and clickable as fret 1.
  */
-export function fretX(fret: number): number {
-  return NUT_X + ((RIGHT - NUT_X) * fret) / DEFAULT_FRETS;
+export interface NeckGeometry {
+  readonly width: number;
+  readonly right: number;
+  readonly fretX: (fret: number) => number;
+  readonly noteX: (fret: number) => number;
 }
 
-const noteX = (fret: number): number => (fret === 0 ? NUT_X - 26 : (fretX(fret - 1) + fretX(fret)) / 2);
+export function neckGeometry(width: number): NeckGeometry {
+  const right = width - RIGHT_MARGIN;
+  const fretX = (fret: number): number => NUT_X + ((right - NUT_X) * fret) / DEFAULT_FRETS;
+  return { width, right, fretX, noteX: (fret) => (fret === 0 ? NUT_X - 26 : (fretX(fret - 1) + fretX(fret)) / 2) };
+}
+
+const BASE = neckGeometry(WIDTH);
+/** The narrowest neck that stays readable: a fret cell a little wider than a marker with its overlay bars. Below it the neck scrolls. */
+export const MIN_NECK_WIDTH = NUT_X + RIGHT_MARGIN + DEFAULT_FRETS * (RADIUS * 2 + 7);
+export const NECK_HEIGHT = HEIGHT;
+
+/** Fret positions of the default drawing (1240 units wide). */
+export function fretX(fret: number): number {
+  return BASE.fretX(fret);
+}
+
 /** High E on top, as in tablature. */
 const stringY = (string: number): number => BOTTOM - string * STRING_GAP;
 
@@ -33,7 +54,9 @@ const DOUBLE_INLAYS = [12, 24];
 const FRET_WIRE = 4;
 const NUT_WIDTH = 7;
 
-const FretGrid = memo(function FretGrid({ boardImage }: { readonly boardImage: string | null }) {
+const FretGrid = memo(function FretGrid({ boardImage, geo }: { readonly boardImage: string | null; readonly geo: NeckGeometry }) {
+  const { fretX, noteX } = geo;
+  const RIGHT = geo.right;
   return (
     <g>
       <rect className="board" x={NUT_X} y={TOP - 12} width={RIGHT - NUT_X} height={BOTTOM - TOP + 24} />
@@ -101,6 +124,7 @@ export type LayerMarks = 'dots' | 'bars';
 
 interface MarkerProps {
   readonly marker: Marker;
+  readonly geo: NeckGeometry;
   readonly layerStyles: readonly LayerStyle[];
   readonly layerMarks: LayerMarks;
   readonly onPick: (marker: Marker) => void;
@@ -109,8 +133,8 @@ interface MarkerProps {
 const BAR_WIDTH = 7;
 const BAR_GAP = 2;
 
-const MarkerGlyph = memo(function MarkerGlyph({ marker, layerStyles, layerMarks, onPick }: MarkerProps) {
-  const x = noteX(marker.fret);
+const MarkerGlyph = memo(function MarkerGlyph({ marker, geo, layerStyles, layerMarks, onPick }: MarkerProps) {
+  const x = geo.noteX(marker.fret);
   const y = stringY(marker.string);
   const classes = ['marker', `role-${marker.role}`];
   if (marker.dim) classes.push('is-dim');
@@ -164,7 +188,8 @@ const MarkerGlyph = memo(function MarkerGlyph({ marker, layerStyles, layerMarks,
   );
 });
 
-function ArrowLine({ arrow }: { readonly arrow: FretArrow }) {
+function ArrowLine({ arrow, geo }: { readonly arrow: FretArrow; readonly geo: NeckGeometry }) {
+  const { noteX } = geo;
   const x1 = noteX(arrow.from.fret);
   const y1 = stringY(arrow.from.string);
   const x2 = noteX(arrow.to.fret);
@@ -202,53 +227,89 @@ export interface FretboardProps {
   readonly boardImage?: string | null;
   /** Overlay marks: corner dots (default) or bars under the note. */
   readonly layerMarks?: LayerMarks;
+  /**
+   * How the neck fills its box. 'scale' (default): the whole drawing is scaled to the box's width. 'height': the drawing is as tall
+   * as the box, so strings, markers and labels keep their size, and only the distance between frets follows the width, down to a
+   * readable minimum; narrower than that, the neck scrolls sideways.
+   */
+  readonly fit?: 'scale' | 'height';
   readonly onPick: (marker: Marker) => void;
 }
 
+/** Height of the bar with the fret range and the two arrows, shown when the neck scrolls (CSS px, with its gap). */
+const NAV_ROOM = 34;
+
 const NO_LAYERS: readonly LayerStyle[] = [];
 
-export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAYERS, boardImage = null, layerMarks = 'dots', live = null, onPick }: FretboardProps) {
+export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAYERS, boardImage = null, layerMarks = 'dots', live = null, fit = 'scale', onPick }: FretboardProps) {
   const scroller = useRef<HTMLDivElement>(null);
+  const wrap = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ w: number; h: number } | null>(null);
+  useEffect(() => {
+    const element = wrap.current;
+    if (fit !== 'height' || !element || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(([entry]) => { if (entry) setBox({ w: Math.floor(entry.contentRect.width), h: Math.floor(entry.contentRect.height) }); });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [fit]);
+  // Fit by height: the box's height sets the scale; the width only sets how far apart the frets are.
+  const fitted = useMemo(() => {
+    if (fit !== 'height' || !box || box.w <= 0 || box.h <= 0) return null;
+    // Decided from the outer box, not from what is rendered, so showing the range bar cannot flip the decision back.
+    const scrolls = MIN_NECK_WIDTH * (box.h / HEIGHT) > box.w + 0.5;
+    const height = scrolls ? Math.max(60, box.h - NAV_ROOM) : box.h;
+    const scale = height / HEIGHT;
+    const units = Math.max(MIN_NECK_WIDTH, box.w / scale);
+    return { scrolls, height, widthPx: Math.round(units * scale), units };
+  }, [fit, box]);
+  const geo = useMemo(() => (fitted ? neckGeometry(fitted.units) : BASE), [fitted]);
+  const { noteX, fretX: geoFretX } = geo;
   const lowestFret = markers.length > 0 ? Math.min(...markers.map((m) => m.fret)) : 0;
-  const [view, setView] = useState<{ low: number; high: number; scrolls: boolean }>({ low: 0, high: DEFAULT_FRETS, scrolls: false });
+  const [view, setView] = useState<VisibleFrets>({ low: 0, high: DEFAULT_FRETS, scrolls: false, atStart: true, atEnd: true });
 
   // Whether the neck overflows depends on the box width, which changes on resize and rotation.
   useEffect(() => {
     const element = scroller.current;
     if (!element || typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(() => setView(visibleFrets(element)));
+    const observer = new ResizeObserver(() => setView(visibleFrets(element, geo)));
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [geo]);
+
+  // The fitted neck changes size without its box changing: read the visible range again.
+  useEffect(() => {
+    if (scroller.current) setView(visibleFrets(scroller.current, geo));
+  }, [fitted, geo]);
 
   // On a narrow screen, keep the position in view rather than the empty low frets.
   useEffect(() => {
     const element = scroller.current;
     if (!element || element.scrollWidth <= element.clientWidth) return;
-    const ratio = noteX(Math.max(0, lowestFret - 1)) / WIDTH;
+    const ratio = noteX(Math.max(0, lowestFret - 1)) / geo.width;
     element.scrollLeft = Math.max(0, ratio * element.scrollWidth - 12);
-    setView(visibleFrets(element));
-  }, [lowestFret]);
+    setView(visibleFrets(element, geo));
+  }, [lowestFret, geo, noteX]);
 
   const step = (direction: number) => {
     const element = scroller.current;
     if (!element) return;
     // Four frets at a time: one hand position.
-    const fretWidth = (element.scrollWidth * (fretX(1) - fretX(0))) / WIDTH;
+    const fretWidth = (element.scrollWidth * (geoFretX(1) - geoFretX(0))) / geo.width;
     element.scrollBy({ left: direction * fretWidth * 4, behavior: 'smooth' });
   };
 
   return (
-    <div className="fretboard-wrap">
-      {view.scrolls ? (
+    <div className="fretboard-wrap" ref={wrap} data-fit={fit}>
+      {(fitted ? fitted.scrolls : view.scrolls) ? (
         <div className="fret-nav" data-testid="fret-nav">
-          <button type="button" className="fret-nav-btn" aria-label="Mostra i tasti più bassi" disabled={view.low <= 0} onClick={() => step(-1)}>‹</button>
+          <button type="button" className="fret-nav-btn" aria-label="Mostra i tasti più bassi" disabled={view.atStart} onClick={() => step(-1)}>‹</button>
           <span className="fret-nav-range" aria-live="polite">Tasti {view.low}–{view.high}</span>
-          <button type="button" className="fret-nav-btn" aria-label="Mostra i tasti più alti" disabled={view.high >= DEFAULT_FRETS} onClick={() => step(1)}>›</button>
+          <button type="button" className="fret-nav-btn" aria-label="Mostra i tasti più alti" disabled={view.atEnd} onClick={() => step(1)}>›</button>
         </div>
       ) : null}
-    <div className="fretboard-scroll" ref={scroller} onScroll={(e) => setView(visibleFrets(e.currentTarget))}>
-      <svg className="fretboard" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="group" aria-label="Tastiera della chitarra">
+    <div className="fretboard-scroll" ref={scroller} onScroll={(e) => setView(visibleFrets(e.currentTarget, geo))}>
+      <svg className="fretboard" viewBox={`0 0 ${geo.width} ${HEIGHT}`} role="group" aria-label="Tastiera della chitarra" data-neck-width={Math.round(geo.width)}
+        style={fitted ? { width: fitted.widthPx, height: fitted.height, minWidth: 0, flex: 'none' } : undefined}>
         <defs>
           {/* Materials for the Studio look; the Simple look ignores them. */}
           <linearGradient id="gtl-maple" x1="0" y1="0" x2="0" y2="1">
@@ -292,10 +353,10 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
             <path d="M0 0 L8 4 L0 8 z" className="arrowhead-tension" />
           </marker>
         </defs>
-        <FretGrid boardImage={boardImage} />
-        {arrows.map((arrow, i) => <ArrowLine key={i} arrow={arrow} />)}
+        <FretGrid boardImage={boardImage} geo={geo} />
+        {arrows.map((arrow, i) => <ArrowLine key={i} arrow={arrow} geo={geo} />)}
         {markers.map((marker) => (
-          <MarkerGlyph key={`${marker.string}-${marker.fret}`} marker={marker} layerStyles={layerStyles} layerMarks={layerMarks} onPick={onPick} />
+          <MarkerGlyph key={`${marker.string}-${marker.fret}`} marker={marker} geo={geo} layerStyles={layerStyles} layerMarks={layerMarks} onPick={onPick} />
         ))}
         {trail.map((note, i) => (
           <circle key={i} className="trail" style={{ opacity: 0.55 - i * 0.16 }} cx={noteX(note.fret)} cy={stringY(note.string)} r={RADIUS + 3} />
@@ -331,11 +392,15 @@ export function Fretboard({ markers, arrows, active, trail, layerStyles = NO_LAY
 }
 
 /** Frets fully or mostly in view, and whether the neck is wider than its box. */
-function visibleFrets(element: HTMLElement): { low: number; high: number; scrolls: boolean } {
+interface VisibleFrets { readonly low: number; readonly high: number; readonly scrolls: boolean; readonly atStart: boolean; readonly atEnd: boolean }
+
+function visibleFrets(element: HTMLElement, geo: NeckGeometry): VisibleFrets {
+  const RIGHT = geo.right;
   const scrolls = element.scrollWidth > element.clientWidth + 1;
-  const scale = WIDTH / element.scrollWidth;
+  const scale = geo.width / element.scrollWidth;
   const left = element.scrollLeft * scale;
   const right = (element.scrollLeft + element.clientWidth) * scale;
   const fretAt = (x: number) => Math.min(DEFAULT_FRETS, Math.max(0, Math.round(((x - NUT_X) / (RIGHT - NUT_X)) * DEFAULT_FRETS)));
-  return { low: fretAt(left), high: fretAt(right), scrolls };
+  // The arrows go by the scroll itself, not by the rounded frets: a neck that overflows by less than a fret can still be moved.
+  return { low: fretAt(left), high: fretAt(right), scrolls, atStart: element.scrollLeft <= 1, atEnd: element.scrollLeft + element.clientWidth >= element.scrollWidth - 1 };
 }
