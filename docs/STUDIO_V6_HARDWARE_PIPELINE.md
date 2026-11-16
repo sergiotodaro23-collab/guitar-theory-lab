@@ -115,6 +115,10 @@ Stato: **implementato**. Resi i cappucci dei fader (canale e master), il tasto d
 
 Stato: **implementata**. `specs/console.json`: piastra dei deck, cornice e vetro dell'LCD, tasto hardware rilasciato, premuto e acceso, resi a filo come nove fette con le stesse misure e le stesse fette delle immagini V5.7 che sostituiscono: il CSS cambia solo i file, layout e interazioni sono identici. Il testo dell'LCD e tutti i tasti restano HTML. Peso 7 kB (le cinque immagini V5.7 rimosse pesavano 47 kB). Le parti piatte e grandi si illuminano a potenza ridotta (`key`, `fill` di `studio_rig`): a piena potenza risultano slavate accanto ai dispositivi. Le manopole Swing e Master sono ancora quelle a CSS della base (`ui/hardware`).
 
+## 3f · Legni: tastiere e barra laterale (17 novembre 2026)
+
+Stato: **implementato**. `specs/frame.json`: faccia della tastiera in acero laccato (tastiera principale) e in palissandro (anteprima del prossimo accordo), barra laterale in noce a nove fette con viti d'ottone. Le tastiere restano SVG: l'immagine è solo il legno sotto tasti, capotasto, segnatasti, corde e note, attraverso il gancio `boardImage` che `Fretboard` aveva già. Sul palissandro i segnatasti sono chiari. Materiale nuovo `wood` (venatura, deriva di tono, fiammatura, pori) con `maple`, `rosewood`, `walnut`. Peso 35 kB. Non resi: lo sfondo in legno della pagina (quasi tutto coperto dai pannelli, resta a gradienti CSS) e la fascia dell'intestazione, che aspetta il logo.
+
 ## 4 · Verifica
 
 | Verifica | Eseguita | Esito |
@@ -154,10 +158,10 @@ Un componente per PR, nello stesso ordine in cui si vedono nel rack e poi verso 
 | 4 | **Manopole e fader comuni** | fatto per il rack e per i cappucci (3d); resta `knob-black` dell'accordatore | | accordatore | — |
 | 5 | **Mixer** | fatto (3d) | | | 12 kB |
 | 6 | **Console** | fatto (3e); restano le manopole Swing e Master | | | 7 kB |
-| 7 | **Telaio** | legni e piastre come nove fette dalla stessa luce; geometria e zone invariate | `wood` procedurale (da `wood.py`) | — | ~90 kB |
-| 8 | **Tastiera** | solo materiali di fondo (palissandro, acero, tasti, capotasto) come strisce ripetibili; marker, note e corde restano SVG | `rosewood`, `maple`, `fret_wire` | tutta la tastiera SVG | ~50 kB |
+| 7 | **Telaio** | barra laterale fatta (3f); restano intestazione (bloccata dal logo) e sfondo della pagina | | — | — |
+| 8 | **Tastiera** | legni fatti (3f); tasti e capotasto restano SVG | | tutta la tastiera SVG | 29 kB |
 
-Bilancio al 16 novembre 2026: 166 kB V5.7 + 331 kB pipeline = **497 kB** su 700. Restano circa 200 kB per i passi 5–8, stimati 260 kB: al passo 6 i tasti V5.7 (`key-*`, 42 kB) e `footswitch` (43 kB, usato solo dall'accordatore) si sostituiscono con parti del kit e il conto rientra.
+Bilancio al 17 novembre 2026: 104 kB V5.7 (accordatore, spirale del taccuino) + 380 kB pipeline = **484 kB** su 700.
 
 ### Rifiniture delegabili a un modello più economico
 

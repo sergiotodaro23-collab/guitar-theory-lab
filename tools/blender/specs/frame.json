@@ -1,0 +1,6 @@
+{
+  "id": "frame",
+  "about": "Wood of the Studio V6: the fretboards' faces (stretched under the SVG fretboard, which stays live) and the walnut rail as a nine-slice source. All numbers are CSS pixels; the board has the size of the board rectangle in the fretboard's viewBox.",
+  "board": { "w": 1172, "h": 212 },
+  "rail": { "w": 120, "h": 600, "slice": 20, "corner": 6, "screwInset": 11 }
+}

@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { tuningOf } from '../../../app/settings';
 import { useApp } from '../../../app/store';
 import { Board } from '../../Board';
+import boardMaple from '../v6/hardware/assets/board-maple@2x.webp';
 import { LabelModeSelector, neckTuningChange, neckTuningOptions } from '../../panels';
 import { Select } from '../../controls';
 import { useStudioUi } from './uiStore';
@@ -112,7 +113,7 @@ export function FretboardPanel({ height, legendHost }: { readonly height: number
     >
       <Toolbar />
       <div className="v57-board">
-        <Board foot="external" legendHost={legendHost} inspectorHost={inspectorHost} layerMarks={viz.layerMarks} />
+        <Board foot="external" legendHost={legendHost} inspectorHost={inspectorHost} layerMarks={viz.layerMarks} boardImage={boardMaple} />
         <div className="v57-inspector" ref={setInspectorHost} />
       </div>
     </section>

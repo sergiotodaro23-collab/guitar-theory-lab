@@ -9,6 +9,7 @@ import { CAB_HW } from './cab.generated';
 import { IFACE_HW } from './iface.generated';
 import { MIXER_HW } from './mixer.generated';
 import { CONSOLE_HW } from './console.generated';
+import { FRAME_HW } from './frame.generated';
 import { PEDAL_SPECS } from '../../../../app/rig';
 
 /**
@@ -101,6 +102,7 @@ const COMPONENTS = [
   { name: 'cab', generated: CAB_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 60 },
   { name: 'iface', generated: IFACE_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 80 },
   { name: 'console', generated: CONSOLE_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 20 },
+  { name: 'frame', generated: FRAME_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 60 },
   { name: 'mixer', generated: MIXER_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 20 },
 ];
 
@@ -200,5 +202,19 @@ describe('console parts', () => {
     expect(css).toMatch(new RegExp(`console-key-up@2x\\.webp'\\) \\d+ fill / ${key.slice}px`));
     for (const state of ['up', 'down', 'lit']) expect(css).toContain(`console-key-${state}@2x.webp`);
     for (const part of [plate, lcd, key]) expect(part.slice * 2).toBeLessThan(Math.min(part.w, part.h));
+  });
+});
+
+describe('wood', () => {
+  it('the board pictures have the proportions of the board in the SVG fretboard, and the rail keeps the V5.7 slice', () => {
+    const { board, rail } = FRAME_HW.spec;
+    const source = readFileSync(resolve('src/viz/Fretboard.tsx'), 'utf8');
+    const constant = (name: string) => Number(new RegExp(`const ${name} = (\\d+)`).exec(source)?.[1]);
+    const [width, height, nut, top] = [constant('WIDTH'), constant('HEIGHT'), constant('NUT_X'), constant('TOP')];
+    // RIGHT = WIDTH - 14, BOTTOM = HEIGHT - 38; the board rectangle is 12 taller than the strings at each side.
+    expect(board.w).toBe(width - 14 - nut);
+    expect(board.h).toBe(height - 38 - top + 24);
+    const css = readFileSync(resolve('src/ui/studio/v57/v57.css'), 'utf8');
+    expect(css).toContain(`frame-rail9@2x.webp') ${rail.slice * 2} fill / ${rail.slice}px`);
   });
 });

@@ -334,3 +334,74 @@ def key_cap(name, color, lit=False, strength=0.3):
     nt.links.new(_range(nt, grad.outputs['Fac'], strength * 0.45, strength), b.inputs['Emission Strength'])
     b.inputs['Emission Color'].default_value = (*color, 1)
     return m
+
+
+def wood(name, light, dark, grain=1.4, along='X', figure=0.0, pores=0.0, rough=0.4, coat=0.0, contrast=1.0):
+    """
+    Wood seen on its face, grain running along `along`. Three layers, all
+    procedural: long streaks of early and late wood, a slow drift of tone
+    across the board, and optionally `figure` (the cross-grain shimmer of
+    flamed maple) and `pores` (the short dark dashes of open-pored woods such
+    as rosewood and walnut). `grain` is the streak width in CSS px.
+    """
+    m, nt, b = _new(name)
+    _set(b, light, rough, spec=0.4, coat=coat)
+    long_axis = (0.035, 1, 1) if along == 'X' else (1, 0.035, 1)
+    v = _coords(nt, long_axis)
+    streaks = _noise(nt, v, grain, detail=6, rough=0.62)
+    drift = _noise(nt, _coords(nt, (0.2, 1, 1) if along == 'X' else (1, 0.2, 1)), 38, detail=2)
+    mix = nt.nodes.new('ShaderNodeMath')
+    mix.operation = 'MULTIPLY_ADD'
+    mix.inputs[1].default_value = 0.72
+    nt.links.new(streaks, mix.inputs[0])
+    nt.links.new(_range(nt, drift, -0.1, 0.38), mix.inputs[2])
+    tone = mix.outputs[0]
+    if figure > 0:
+        wave = nt.nodes.new('ShaderNodeTexWave')
+        wave.wave_type = 'BANDS'
+        wave.bands_direction = along
+        wave.inputs['Scale'].default_value = 6.2831853 / (20.0 * 26 * U)
+        wave.inputs['Distortion'].default_value = 7.0
+        wave.inputs['Detail'].default_value = 2.0
+        wave.inputs['Detail Scale'].default_value = 0.6
+        nt.links.new(_coords(nt), wave.inputs['Vector'])
+        add = nt.nodes.new('ShaderNodeMath')
+        add.operation = 'MULTIPLY_ADD'
+        add.inputs[1].default_value = figure
+        nt.links.new(wave.outputs['Fac'], add.inputs[0])
+        nt.links.new(tone, add.inputs[2])
+        tone = add.outputs[0]
+    if pores > 0:
+        dash = _noise(nt, _coords(nt, (0.12, 1, 1) if along == 'X' else (1, 0.12, 1)), 0.55, detail=2, rough=0.5)
+        cut = nt.nodes.new('ShaderNodeMath')
+        cut.operation = 'GREATER_THAN'
+        cut.inputs[1].default_value = 0.66
+        nt.links.new(dash, cut.inputs[0])
+        sub = nt.nodes.new('ShaderNodeMath')
+        sub.operation = 'MULTIPLY_ADD'
+        sub.inputs[1].default_value = -pores
+        nt.links.new(cut.outputs[0], sub.inputs[0])
+        nt.links.new(tone, sub.inputs[2])
+        tone = sub.outputs[0]
+    ramp = nt.nodes.new('ShaderNodeMapRange')
+    ramp.inputs['From Min'].default_value = 0.5 - 0.3 / contrast
+    ramp.inputs['From Max'].default_value = 0.5 + 0.3 / contrast
+    nt.links.new(tone, ramp.inputs['Value'])
+    nt.links.new(_mix_color(nt, ramp.outputs['Result'], dark, light), b.inputs['Base Color'])
+    _bump(nt, b, streaks, 0.06 if coat else 0.18, 0.2)
+    return m
+
+
+def maple(name='maple'):
+    """Lacquered hard maple of a fretboard: pale gold, faint flame."""
+    return wood(name, (0.93, 0.6, 0.24), (0.62, 0.33, 0.09), grain=1.3, figure=0.07, rough=0.32, coat=0.3, contrast=1.5)
+
+
+def rosewood(name='rosewood'):
+    """Oiled rosewood of a fretboard: dark chocolate with near-black streaks and open pores."""
+    return wood(name, (0.13, 0.062, 0.035), (0.03, 0.014, 0.01), grain=1.6, pores=0.25, rough=0.5, contrast=1.3)
+
+
+def walnut(name='walnut', along='Y'):
+    """Satin walnut of the studio's furniture."""
+    return wood(name, (0.105, 0.05, 0.026), (0.028, 0.013, 0.008), grain=2.0, along=along, pores=0.12, rough=0.45, coat=0.15, contrast=1.2)

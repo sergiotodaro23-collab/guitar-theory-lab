@@ -104,3 +104,23 @@ test('mixer: rendered caps follow the faders and rendered keys show mute and sol
   await solo.click();
   expect(await picture(solo)).toBe(off);
 });
+
+test('the main fretboard lies on the rendered maple, the preview of the next chord on rosewood; the SVG board keeps its place', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  const main = page.getByTestId('fretboard-panel');
+  const wood = main.locator('.board-image');
+  await expect(wood).toHaveCount(1);
+  const maple = await wood.getAttribute('href');
+  expect(maple).toContain('webp');
+  const [image, board] = [await wood.boundingBox(), await main.locator('rect.board').boundingBox()];
+  expect(image).toEqual(board);
+  // Notes are still SVG marks over the wood.
+  expect(await main.locator('svg.fretboard circle, svg.fretboard text').count()).toBeGreaterThan(10);
+  await page.getByTestId('studio-rail').getByRole('button', { name: 'Harmony Lab', exact: true }).click();
+  await page.getByTestId('template').selectOption('ii-v-i');
+  await page.getByTestId('notebook').getByRole('tab', { name: 'Tastiera secondaria', exact: true }).click();
+  const rosewood = await page.getByTestId('next-fretboard').locator('.board-image').getAttribute('href');
+  expect(rosewood).toContain('webp');
+  expect(rosewood).not.toBe(maple);
+});
