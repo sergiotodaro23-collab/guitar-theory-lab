@@ -8,6 +8,7 @@ import { PEDALS_HW } from './pedals.generated';
 import { CAB_HW } from './cab.generated';
 import { IFACE_HW } from './iface.generated';
 import { MIXER_HW } from './mixer.generated';
+import { CONSOLE_HW } from './console.generated';
 import { PEDAL_SPECS } from '../../../../app/rig';
 
 /**
@@ -99,6 +100,7 @@ const COMPONENTS = [
   { name: 'pedals', generated: PEDALS_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 160 },
   { name: 'cab', generated: CAB_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 60 },
   { name: 'iface', generated: IFACE_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 80 },
+  { name: 'console', generated: CONSOLE_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 20 },
   { name: 'mixer', generated: MIXER_HW as { spec: unknown; assets: Record<string, { file: string }> }, budget: 20 },
 ];
 
@@ -185,5 +187,18 @@ describe('mixer parts', () => {
     // Nine-slice sources: the borders, with their screws, never meet in the middle.
     for (const part of [strip, slot, bank]) expect(part.slice * 2).toBeLessThan(Math.min(part.w, part.h));
     expect(slot.w).toBeGreaterThan(cap.w);
+  });
+});
+
+describe('console parts', () => {
+  it('the stylesheet slices each picture where the spec says, and uses the rendered files', () => {
+    const css = readFileSync(resolve('src/ui/studio/v57/v57.css'), 'utf8');
+    const { plate, lcd, key } = CONSOLE_HW.spec;
+    // border-image: <file> <slice in image px> fill / <slice in CSS px>
+    expect(css).toContain(`console-plate9@2x.webp') ${plate.slice * 2} fill / ${plate.slice}px`);
+    expect(css).toContain(`console-lcd9@2x.webp') ${lcd.slice * 2} fill / ${lcd.slice}px`);
+    expect(css).toMatch(new RegExp(`console-key-up@2x\\.webp'\\) \\d+ fill / ${key.slice}px`));
+    for (const state of ['up', 'down', 'lit']) expect(css).toContain(`console-key-${state}@2x.webp`);
+    for (const part of [plate, lcd, key]) expect(part.slice * 2).toBeLessThan(Math.min(part.w, part.h));
   });
 });

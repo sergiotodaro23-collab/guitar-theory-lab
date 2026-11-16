@@ -1,5 +1,5 @@
 /**
- * The rendered hardware key (key-up / key-down / key-lit, nine-slice). A real
+ * The rendered hardware key (console-key-up, -down, -lit from tools/blender, nine-slice). A real
  * button: the image is only its border. Icons are drawn as SVG strokes.
  */
 import type { ReactNode } from 'react';

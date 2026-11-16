@@ -111,6 +111,10 @@ Stato: **implementato**. Resi i cappucci dei fader (canale e master), il tasto d
 | Peso | 12 kB |
 | Nel kit | `fader_cap`, `console_key`, materiale `key_cap`; regola: le parti a nove fette si rendono a filo, senza piano d'ombra, con viti e angoli dentro la fetta |
 
+## 3e · Console (17 novembre 2026)
+
+Stato: **implementata**. `specs/console.json`: piastra dei deck, cornice e vetro dell'LCD, tasto hardware rilasciato, premuto e acceso, resi a filo come nove fette con le stesse misure e le stesse fette delle immagini V5.7 che sostituiscono: il CSS cambia solo i file, layout e interazioni sono identici. Il testo dell'LCD e tutti i tasti restano HTML. Peso 7 kB (le cinque immagini V5.7 rimosse pesavano 47 kB). Le parti piatte e grandi si illuminano a potenza ridotta (`key`, `fill` di `studio_rig`): a piena potenza risultano slavate accanto ai dispositivi. Le manopole Swing e Master sono ancora quelle a CSS della base (`ui/hardware`).
+
 ## 4 · Verifica
 
 | Verifica | Eseguita | Esito |
@@ -149,7 +153,7 @@ Un componente per PR, nello stesso ordine in cui si vedono nel rack e poi verso 
 | 3 | **Scheda audio / Input** | fatto (3c) | | | 55 kB |
 | 4 | **Manopole e fader comuni** | fatto per il rack e per i cappucci (3d); resta `knob-black` dell'accordatore | | accordatore | — |
 | 5 | **Mixer** | fatto (3d) | | | 12 kB |
-| 6 | **Console** | LCD e cornice come nove fette, tasti di trasporto nei tre stati (riusare `console_key`) | `lcd_glass` | tutto il trasporto | ~60 kB |
+| 6 | **Console** | fatto (3e); restano le manopole Swing e Master | | | 7 kB |
 | 7 | **Telaio** | legni e piastre come nove fette dalla stessa luce; geometria e zone invariate | `wood` procedurale (da `wood.py`) | — | ~90 kB |
 | 8 | **Tastiera** | solo materiali di fondo (palissandro, acero, tasti, capotasto) come strisce ripetibili; marker, note e corde restano SVG | `rosewood`, `maple`, `fret_wire` | tutta la tastiera SVG | ~50 kB |
 

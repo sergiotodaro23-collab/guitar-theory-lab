@@ -1,0 +1,7 @@
+{
+  "id": "console",
+  "about": "Nine-slice sources of the Studio V6 console: the metal plate of every deck, the LCD frame with its glass, the hardware key in three states. All numbers are CSS pixels. Sizes and slices match the V5.7 pictures they replace, so the layout does not move.",
+  "plate": { "w": 400, "h": 160, "slice": 22, "corner": 6, "screwInset": 12 },
+  "lcd": { "w": 300, "h": 100, "slice": 13, "corner": 5, "bezel": 6 },
+  "key": { "w": 60, "h": 52, "slice": 13, "corner": 5 }
+}
