@@ -1,8 +1,9 @@
 /**
  * Studio V6 shell (D-43) over the V5.7 console (D-41): a global header
  * across the window, then the rail, the work column and the rig rack. In the work column: the transport console with
- * its pull-tab, the neck, the divider, the notebook zone and the mixer
- * handle; the mixer rises over the notebook only.
+ * its pull-tab, the neck, the divider and the notebook zone; the mixer rises
+ * over the notebook only, or sits under it in its compact face. Under the
+ * three columns, the foot of the case carries the bar that opens the mixer.
  *
  * Studio (D-41): the V5.7 console. A physical rail, the hi-fi console with
  * its amber LCD, the production neck with a draggable divider, and a tabbed
@@ -28,8 +29,6 @@ import './v6/v6.css';
 
 const SPLIT_PX = 14;
 const GAP = 6;
-/** Height of the mixer handle under the notebook zone. */
-const HANDLE_PX = 26;
 
 function useBox<T extends HTMLElement>(): [(el: T | null) => void, { w: number; h: number }] {
   const [el, setEl] = useState<T | null>(null);
@@ -57,7 +56,7 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
   const drag = useRef<{ y: number; h: number } | null>(null);
 
   // Space under the console shared by the neck and the notebook.
-  const available = Math.max(0, work.h - deck.h - SPLIT_PX - HANDLE_PX - GAP * 4);
+  const available = Math.max(0, work.h - deck.h - SPLIT_PX - GAP * 3);
   const boardWidth = Math.max(0, work.w - 28 - 20);
   const fbh = work.h > 0 ? splitHeight(split, available, boardWidth) : 300;
   const max = work.h > 0 ? splitHeight(1, available, boardWidth) : 300;
@@ -116,10 +115,11 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
               <DeviceBay />
             </div>
             {compactMixer ? <MixerCompact /> : null}
-            <MixerHandle />
           </div>
           <Rack />
         </div>
+        {/* The foot of the case: one bar under the three columns, never covered by a sidebar. It opens and closes the mixer drawer. */}
+        <footer className="v6-casefoot" data-testid="case-foot"><MixerHandle /></footer>
       </div>
     </MixerShown.Provider>
   );
