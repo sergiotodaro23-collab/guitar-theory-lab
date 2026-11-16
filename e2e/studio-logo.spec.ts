@@ -59,3 +59,25 @@ test('the stripes run on, unbroken, to the right edge above the toolbar, and the
   await page.getByTestId('preset-library-open').click();
   await expect(page.getByRole('dialog', { name: /Preset/ })).toBeVisible();
 });
+
+for (const [width, height, bar] of [[1440, 900, 48], [1366, 768, 38], [1280, 720, 38], [1024, 768, 38]] as const) {
+  test(`${width}×${height}: the header is ${bar} px tall and its tools sit clear of the stripes`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto('/?debug=1');
+    const head = await page.getByTestId('studio-header').boundingBox();
+    const logo = await page.getByTestId('studio-logo').boundingBox();
+    if (!head || !logo) throw new Error('missing box');
+    expect(head.height).toBe(bar);
+    // Lower edge of the lower stripe where it runs along the top: 15 + 13 / 2 of the mark's 85 units.
+    const stripes = logo.y + (logo.height * 21.5) / 85;
+    for (const id of ['preset-library-open', 'metronome-toggle', 'device-tuner', 'rack-toggle']) {
+      const tool = await page.getByTestId(id).boundingBox();
+      if (!tool) throw new Error(id);
+      expect(tool.y, id).toBeGreaterThanOrEqual(stripes + 2);
+      expect(tool.y + tool.height, id).toBeLessThanOrEqual(head.y + head.height);
+    }
+    // Room between the tools.
+    const [a, b] = [await page.getByTestId('preset-library-open').boundingBox(), await page.getByTestId('metronome-toggle').boundingBox()];
+    expect((b?.x ?? 0) - ((a?.x ?? 0) + (a?.width ?? 0))).toBeGreaterThanOrEqual(6);
+  });
+}

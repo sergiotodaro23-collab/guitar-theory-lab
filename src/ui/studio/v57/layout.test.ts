@@ -31,9 +31,10 @@ describe('device fit (handoff fitS rule)', () => {
 });
 
 describe('fretboard / notebook divider', () => {
-  it('never lets the board grow past its natural height for the width', () => {
-    const natural = FB_CHROME + 1200 / BOARD_ASPECT;
-    expect(splitHeight(0.85, 1000, 1200)).toBe(Math.round(natural));
+  it('never lets the board grow past the height of its reference drawing, whatever the width of the column', () => {
+    // The neck is fitted by height (Fretboard fit): width changes the distance between frets, never the height.
+    const reference = Math.round(FB_CHROME + 1240 / BOARD_ASPECT);
+    for (const width of [700, 1200, 1600, 2400]) expect(splitHeight(0.85, 1000, width)).toBe(reference);
   });
   it('keeps the notebook its minimum and the board its minimum', () => {
     expect(splitHeight(0.85, 400, 2000)).toBe(400 - NB_MIN);

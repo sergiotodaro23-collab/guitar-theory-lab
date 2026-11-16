@@ -172,6 +172,10 @@ Limiti dichiarati: nessuna prova con chitarra, scheda audio e capture reali; nes
 | Mixer: cappucci dei fader e tasti Mute/Solo renderizzati | parziale: fondo e guide ancora CSS | `e2e/hardware-rack.spec.ts` |
 | Console, legni delle tastiere e della barra, logo vettoriale V6.7 | implementati | `hardware.test.ts`, `e2e/hardware-rack.spec.ts`, `e2e/studio-logo.spec.ts` |
 | Due barre laterali permanenti e simmetriche (navigazione, Audio & Rig), compatte o estese dai due tasti alle estremità dell'intestazione; `rack: hidden` migra a compatta | implementate | `layout.test.ts`, `e2e/sidebars.spec.ts` |
+| Mixer a cassetto con due viste, Esteso e Compatto (una riga di manopole sotto il taccuino), dalle stesse otto strisce; preferenza `gtl.v6.mixM` | implementato | `e2e/mixer-modes.spec.ts`, `layout.test.ts` |
+| Piede del case: barra del mixer continua sotto le tre colonne, angoli arrotondati | implementato | `e2e/case-foot.spec.ts` |
+| Header alto 48 px (38 sotto gli 820 px), strumenti sotto le strisce | implementato | `e2e/studio-logo.spec.ts` |
+| Tastiera adattata in altezza: corde, marker ed etichette costanti; i tasti si avvicinano fino a un minimo, poi scorrimento orizzontale | implementata | `e2e/fretboard-fit.spec.ts`, `layout.test.ts` |
 | Altri componenti (cabinet, pedali, scheda audio, mixer, console, telaio, fondo della tastiera) | mancanti: piano in `docs/STUDIO_V6_HARDWARE_PIPELINE.md` | — |
 
 ## Baseline
@@ -185,3 +189,12 @@ Nessuno.
 ## Prossimo lotto consigliato
 
 Lotto 7: legenda a doppia pagina (Scale a sinistra, Accordi a destra) con numero, simbolo per ruolo, nome, colore tra 12 e visibilità, sopra `scaleLayers` e `chordLayers`; note sovrapposte composte; tastiera secondaria in palissandro con overlay indipendente. Poi lotto 8 (motore esercizi condiviso), lotto 9 (fattibilità NAM).
+
+## Revisione di layout del 16–17 novembre 2026: compromessi
+
+- **Icone e manopola di riferimento**: i tre screenshot indicati dal proprietario non sono arrivati in sessione. I tasti delle barre usano il glifo «pannello laterale», il mixer compatto la manopola a barilotto del kit. Da allineare ai riferimenti.
+- **Mixer compatto a 768 e 720 px di altezza**: il taccuino resta visibile per circa 110 px e si usa il suo scroll; la tastiera non viene ridotta.
+- **Spaziatura verticale della tastiera**: dipende ancora dal divisore, che divide in proporzione lo spazio sotto la console. La console è un po' più alta in una colonna stretta, quindi tra barre compatte ed estese la distanza fra le corde cambia di pochi punti percentuali (prima: quanto la larghezza).
+- **Sotto i 1280 px** il rack esteso si sovrappone ancora alla colonna di lavoro.
+- **Barra di scorrimento del mixer compatto**: disegnata dall'app, perché quella del browser può essere a scomparsa.
+- **Verifica**: Chromium headless alle quattro risoluzioni. Non verificati schermi reali, Firefox, Safari, lettori di schermo.

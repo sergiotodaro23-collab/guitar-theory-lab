@@ -21,6 +21,8 @@ export const compactLevel = (notebookH: number): 0 | 1 | 2 => (notebookH < 350 ?
 
 /** Viewbox of the production fretboard (src/viz/Fretboard.tsx): the panel never stretches it. */
 export const BOARD_ASPECT = 1240 / 252;
+/** Width of the neck's reference drawing, in its own units (viz/Fretboard). */
+export const BOARD_REF_WIDTH = 1240;
 /** Toolbar, padding and borders of the fretboard panel around the board itself. */
 export const FB_CHROME = 58;
 export const FB_MIN = 170;
@@ -29,10 +31,13 @@ export const NB_MIN = 150;
 /**
  * Height of the fretboard panel. The ratio is the share of the space under
  * the console; it is clamped so the notebook keeps room for its tabs and a
- * page, and the board never grows taller than its width allows.
+ * page, and the board never grows taller than its reference drawing.
  */
 export function splitHeight(ratio: number, available: number, boardWidth: number): number {
-  const natural = FB_CHROME + boardWidth / BOARD_ASPECT;
+  // The neck is fitted by height (Fretboard `fit`): the column's width only sets how far apart the frets are. So the cap is the
+  // height of the reference drawing, whatever the width: strings and markers have one size on every window.
+  void boardWidth;
+  const natural = FB_CHROME + BOARD_REF_WIDTH / BOARD_ASPECT;
   const max = Math.max(FB_MIN, Math.min(natural, available - NB_MIN));
   const wanted = Math.round(available * (Number.isFinite(ratio) ? ratio : DEFAULT_SPLIT));
   return Math.round(Math.max(FB_MIN, Math.min(max, wanted)));

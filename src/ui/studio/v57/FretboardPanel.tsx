@@ -113,7 +113,7 @@ export function FretboardPanel({ height, legendHost }: { readonly height: number
     >
       <Toolbar />
       <div className="v57-board">
-        <Board foot="external" legendHost={legendHost} inspectorHost={inspectorHost} layerMarks={viz.layerMarks} boardImage={boardMaple} />
+        <Board foot="external" legendHost={legendHost} inspectorHost={inspectorHost} layerMarks={viz.layerMarks} boardImage={boardMaple} fit="height" />
         <div className="v57-inspector" ref={setInspectorHost} />
       </div>
     </section>
