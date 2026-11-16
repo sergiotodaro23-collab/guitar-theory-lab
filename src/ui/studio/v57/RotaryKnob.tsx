@@ -2,6 +2,10 @@
  * Rendered knob (handoff RotaryKnob): a static lit body, a rotating pointer
  * and slider semantics. −135°..+135°; drag 0.6 units per pixel; arrows ±2,
  * Shift ±10, PageUp/PageDown ±10, Home/End; double-click resets.
+ *
+ * With `sprite` the body is a strip of renders of the knob at every position
+ * of its travel (tools/blender): the frame for the value is shown, so the
+ * pointer turns while the light stays where it is. No pointer is drawn then.
  */
 import { useRef, type KeyboardEvent } from 'react';
 
@@ -10,10 +14,12 @@ export interface RotaryKnobProps {
   readonly onChange: (v: number) => void;
   readonly label: string;
   readonly valueText?: string;
-  readonly bodySrc: string;
+  readonly bodySrc?: string;
   readonly bodySize: number;
   readonly hitSize: number;
-  readonly pointer: { readonly length: number; readonly offset: number; readonly color: string; readonly width?: number };
+  readonly pointer?: { readonly length: number; readonly offset: number; readonly color: string; readonly width?: number };
+  /** A horizontal strip of `frames` square renders, first = minimum, last = maximum. */
+  readonly sprite?: { readonly src: string; readonly frames: number };
   readonly cx: number;
   readonly cy: number;
   readonly defaultValue?: number;
@@ -23,10 +29,14 @@ export interface RotaryKnobProps {
 
 const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
 
+/** The frame of a sprite strip that shows a value 0–100. */
+export const knobFrame = (value: number, frames: number): number => Math.round((clamp(value) / 100) * (frames - 1));
+
 export function RotaryKnob(p: RotaryKnobProps) {
   const drag = useRef<{ y: number; v: number } | null>(null);
   const angle = -135 + clamp(p.value) * 2.7;
-  const width = p.pointer.width ?? 3;
+  const width = p.pointer?.width ?? 3;
+  const frame = p.sprite ? knobFrame(p.value, p.sprite.frames) : 0;
   const key = (e: KeyboardEvent) => {
     const step = e.shiftKey ? 10 : 2;
     let n = p.value;
@@ -42,10 +52,19 @@ export function RotaryKnob(p: RotaryKnobProps) {
   };
   return (
     <>
-      <img src={p.bodySrc} alt="" draggable={false} className="v57-knob-body" style={{ left: p.cx - p.bodySize / 2, top: p.cy - p.bodySize / 2, width: p.bodySize, height: p.bodySize }} />
-      <span aria-hidden="true" className="v57-knob-ptr" style={{ left: p.cx, top: p.cy, transform: `rotate(${angle}deg)` }}>
-        <i style={{ left: -width / 2, top: -p.pointer.offset - p.pointer.length, width, height: p.pointer.length, background: p.pointer.color }} />
-      </span>
+      {p.sprite ? (
+        <span aria-hidden="true" className="v57-knob-body v57-knob-sprite" data-frame={frame}
+          style={{ left: p.cx - p.bodySize / 2, top: p.cy - p.bodySize / 2, width: p.bodySize, height: p.bodySize, backgroundImage: `url(${p.sprite.src})`, backgroundSize: `${p.sprite.frames * p.bodySize}px ${p.bodySize}px`, backgroundPosition: `${-frame * p.bodySize}px 0` }} />
+      ) : (
+        <>
+          <img src={p.bodySrc} alt="" draggable={false} className="v57-knob-body" style={{ left: p.cx - p.bodySize / 2, top: p.cy - p.bodySize / 2, width: p.bodySize, height: p.bodySize }} />
+          {p.pointer ? (
+            <span aria-hidden="true" className="v57-knob-ptr" style={{ left: p.cx, top: p.cy, transform: `rotate(${angle}deg)` }}>
+              <i style={{ left: -width / 2, top: -p.pointer.offset - p.pointer.length, width, height: p.pointer.length, background: p.pointer.color }} />
+            </span>
+          ) : null}
+        </>
+      )}
       <button
         type="button"
         role="slider"

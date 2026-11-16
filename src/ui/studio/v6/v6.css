@@ -186,17 +186,19 @@
 .v6-meter-out { flex: 1; max-width: 220px; }
 
 /* amplifier: tolex top with the script badge, gold faceplate, all six knobs inside the chassis */
-.v6-amp { align-self: center; border-radius: 7px; overflow: hidden; box-shadow: 0 0 0 1px #050505, 0 0 0 3px #8a6a3c, 0 0 0 4px #050505, 0 4px 8px rgba(0, 0, 0, .6); }
-.v6-amp-top { position: relative; height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px;
-  background: repeating-linear-gradient(35deg, #1d1d1d 0 2px, #272727 2px 3px, #141414 3px 5px); }
-.v6-amp-name { font: italic 600 22px/1 'Cormorant Garamond', Georgia, serif; color: #f0c67e; text-shadow: 0 2px 3px #000; white-space: nowrap; }
-.v6-amp-tape { padding: 2px 6px; font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #2a1a08; background: #e6d7a8; transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; }
-.v6-amp-panel { position: relative; height: 84px; background: linear-gradient(180deg, #e4c488, #cba15e 50%, #b88d4c); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .35), inset 0 -2px 3px rgba(0, 0, 0, .3); }
-.v6-amp-lab { position: absolute; top: 5px; transform: translateX(-50%); font: 600 9px/11px 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #26160c; white-space: nowrap; }
-.v6-amp-lamp { position: absolute; left: 6px; top: 68px; width: 8px; height: 8px; border-radius: 50%; background: #5a1a12; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .6); }
-.v6-amp-lamp[data-on='1'] { background: radial-gradient(circle at 40% 35%, #ffe0d6, #ff3b2f 45%, #a3140c); box-shadow: 0 0 8px 2px rgba(255, 59, 47, .8); }
-.v6-amp[data-on='0'] .v6-amp-panel { filter: saturate(.55) brightness(.8); }
-.v6-amp .v57-knob-body { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .5)); }
+.v6-amp { position: relative; align-self: center; flex: none; margin: 2px 0 12px; }
+/* Rendered body (tools/blender): larger than the device by its shadow margin, placed by the generated offset. */
+.v6-amp-body { position: absolute; max-width: none; pointer-events: none; user-select: none; }
+.v6-amp-top { position: absolute; display: grid; place-items: center; }
+.v6-amp-name { font: italic 600 21px/1 'Cormorant Garamond', Georgia, serif; color: #2b1907; text-shadow: 0 1px 0 rgba(255, 226, 160, .55); white-space: nowrap; }
+.v6-amp-tapebox { position: absolute; }
+.v6-amp-tape { display: block; padding: 2px 6px; font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #2a1a08; background: #e6d7a8; transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; }
+.v6-amp-panel { position: absolute; inset: 0; }
+.v6-amp-lab { position: absolute; transform: translateX(-50%); font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #2a1806; text-shadow: 0 1px 0 rgba(255, 226, 160, .4); white-space: nowrap; }
+.v6-amp-lamp { position: absolute; transform: translate(-50%, -50%); background-size: 100% 100%; }
+.v6-amp-lamp[data-on='1']::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 70, 40, .5), rgba(255, 60, 30, 0) 68%); pointer-events: none; }
+.v6-amp[data-on='0'] .v6-amp-body, .v6-amp[data-on='0'] .v57-knob-sprite { filter: brightness(.86) saturate(.85); }
+.v57-knob-sprite { background-repeat: no-repeat; }
 
 /* cabinet */
 .v6-cab { display: flex; align-items: center; gap: 10px; }
