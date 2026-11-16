@@ -380,3 +380,41 @@
 .v6-nam-facts div { display: grid; grid-template-columns: 78px 1fr; gap: 6px; }
 .v6-nam-facts dt { color: var(--ink-muted); font: 600 10px/15px 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 .v6-nam-facts dd { margin: 0; overflow-wrap: anywhere; }
+
+/* ---------- mixer: mode switch and compact face ---------- */
+.v6-mxmode { flex: none; display: inline-flex; padding: 2px; gap: 2px; border-radius: 5px; background: #0b0a09; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .8), 0 0 0 1px rgba(190, 150, 100, .25); }
+.v6-mxmode button { height: 18px; padding: 0 9px; cursor: pointer; border: 0; border-radius: 3px; color: var(--ink-muted); background: none; font: 600 10.5px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+.v6-mxmode button[aria-checked='true'] { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45); }
+.v6-mxmode button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+/* Extended: the switch stands in the column of the drawer's close key, so the faders keep all their travel. */
+.v6-mx { position: relative; }
+.v6-mx > .v6-mxmode { position: absolute; right: 5px; top: 44px; flex-direction: column; }
+.v6-mx > .v6-mxmode button { writing-mode: vertical-rl; width: 20px; height: auto; padding: 8px 0; }
+/* Compact: one row, never wrapped; it scrolls sideways when the eight channels do not fit, with a bar that is always there. */
+.v6-mc { position: relative; flex: none; display: flex; align-items: stretch; gap: 8px; min-width: 0; padding: 6px 8px 4px; border-radius: 4px; isolation: isolate; }
+.v6-mc::before { content: ''; position: absolute; inset: 0; z-index: -1; border: var(--bank-slice) solid transparent; border-image: var(--bank) var(--bank-slice-px) fill / var(--bank-slice) stretch; }
+.v6-mc > .v6-mxmode { flex-direction: column; align-self: center; }
+.v6-mc > .v6-mxmode button { height: 22px; }
+.v6-mc-row { flex: 1; min-width: 0; display: flex; flex-wrap: nowrap; gap: 5px; overflow-x: scroll; overflow-y: hidden; padding-bottom: 3px; scrollbar-width: thin; scrollbar-color: #8a6f52 #17120e; }
+.v6-mc-row::-webkit-scrollbar { height: 7px; }
+.v6-mc-row::-webkit-scrollbar-track { background: #17120e; border-radius: 4px; }
+.v6-mc-row::-webkit-scrollbar-thumb { background: #8a6f52; border-radius: 4px; }
+.v6-mc-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.v6-mc-cell { position: relative; isolation: isolate; flex: 1 0 96px; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 4px 3px; }
+.v6-mc-cell::before { content: ''; position: absolute; inset: 0; z-index: -1; border: var(--strip-slice) solid transparent; border-image: var(--strip) var(--strip-slice-px) fill / var(--strip-slice) stretch; }
+.v6-mc-cell[data-kind='group']::before { border-image-source: var(--strip-group); }
+.v6-mc-cell[data-kind='master']::before { border-image-source: var(--strip-master); }
+.v6-mc-cell .v6-mx-name { font-size: 11.5px; line-height: 13px; }
+.v6-mc-mid { display: flex; align-items: center; gap: 4px; }
+.v6-mc-dial { position: relative; flex: none; }
+.v6-mc-ring { position: absolute; inset: 0; pointer-events: none; }
+.v6-mc-ring circle { fill: var(--led-green); opacity: .16; }
+.v6-mc-ring circle[data-zone='warm'] { fill: var(--led-amber); }
+.v6-mc-ring circle[data-zone='hot'] { fill: var(--led-red); }
+.v6-mc-ring circle[data-on='1'] { opacity: 1; filter: drop-shadow(0 0 1.5px currentColor); }
+.v6-mc-keys { display: flex; flex-direction: column; gap: 3px; }
+.v6-mc-keys .v6-mx-key { min-width: 24px; width: 24px; height: 20px; font-size: 11px; letter-spacing: 0; border-width: 6px; border-image-width: 6px; }
+.v6-mc-cell .v6-mx-read { font-size: 10px; line-height: 11px; }
+/* settings: a row of choices */
+.v57-setrow { display: flex; gap: 6px; }
+.v57-setrow .v57-textbtn[data-on='1'] { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); }

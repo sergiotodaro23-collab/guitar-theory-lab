@@ -182,8 +182,13 @@ export interface UiPrefs {
   readonly rack: RackMode;
   /** Rack modules folded to their title bar. */
   readonly rackFolded: readonly RackModuleId[];
+  /** Studio V6: how the mixer drawer opens, with its long faders or as one row of knobs under the notebook. */
+  readonly mixerMode: MixerMode;
   readonly viz: VizPrefs;
 }
+
+export type MixerMode = 'extended' | 'compact';
+export const MIXER_MODES: readonly MixerMode[] = ['extended', 'compact'];
 
 export type RackMode = 'expanded' | 'compact';
 export const RACK_MODES: readonly RackMode[] = ['expanded', 'compact'];
@@ -194,7 +199,7 @@ export const RACK_WIDTH: Readonly<Record<RackMode, number>> = { expanded: 336, c
 
 /** Storage keys of the handoff (`STORAGE_KEYS`). Live monitor and tuner on/off are never stored; the rig lives in the session settings. */
 export const STORAGE_KEYS = {
-  split: 'gtl.v5.fbR', railExpanded: 'gtl.v5.railX', lcdExpanded: 'gtl.v5.lcdX', consoleCollapsed: 'gtl.v6.deckC', rack: 'gtl.v6.rack', rackFolded: 'gtl.v6.rackF', viz: 'gtl.v5.vz',
+  split: 'gtl.v5.fbR', railExpanded: 'gtl.v5.railX', lcdExpanded: 'gtl.v5.lcdX', consoleCollapsed: 'gtl.v6.deckC', rack: 'gtl.v6.rack', rackFolded: 'gtl.v6.rackF', mixerMode: 'gtl.v6.mixM', viz: 'gtl.v5.vz',
 } as const;
 
 export interface KeyValueStore {
@@ -236,6 +241,7 @@ export function loadPrefs(store: KeyValueStore, viewportWidth = RACK_OPEN_MIN_WI
     // 'hidden' was a third mode until the two sidebars became permanent: it migrates to the compact bar.
     rack: read(store, STORAGE_KEYS.rack) === 'hidden' ? 'compact' : oneOf(read(store, STORAGE_KEYS.rack), RACK_MODES, viewportWidth >= RACK_OPEN_MIN_WIDTH ? 'expanded' : 'compact'),
     rackFolded: foldedModules(read(store, STORAGE_KEYS.rackFolded)),
+    mixerMode: oneOf(read(store, STORAGE_KEYS.mixerMode), MIXER_MODES, 'extended'),
     viz: {
       layerMarks: oneOf(viz.layerMarks, ['bars', 'dots'] as const, VIZ_DEFAULTS.layerMarks),
       anim: oneOf(viz.anim, ['pulse', 'glow', 'static'] as const, VIZ_DEFAULTS.anim),

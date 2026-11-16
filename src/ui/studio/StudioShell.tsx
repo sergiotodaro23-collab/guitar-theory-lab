@@ -16,6 +16,7 @@ import { FretboardPanel } from './v57/FretboardPanel';
 import { DeviceBay, Notebook } from './v57/Notebook';
 import { Rail } from './v57/Rail';
 import { Header } from './v6/Header';
+import { MixerCompact } from './v6/MixerCompact';
 import { MixerHandle } from './v6/MixerHandle';
 import { Rack } from './v6/Rack';
 import { DEFAULT_SPLIT, FB_MIN, clampRatio, splitHeight } from './v57/layout';
@@ -49,6 +50,8 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
   const [deckRef, deck] = useBox<HTMLDivElement>();
   const [legendHost, setLegendHost] = useState<HTMLElement | null>(null);
   const [dragging, setDragging] = useState(false);
+  // Compact mixer: its own row between the notebook and the handle. The notebook only gets shorter: it stays mounted, with its tab and scroll.
+  const compactMixer = useStudioUi((u) => u.device === 'mixer' && u.mixerMode === 'compact');
   // Leaving Studio closes its panels and drawer, so coming back starts clean (no exit animation on mount).
   useEffect(() => () => { useStudioUi.setState({ settingsOpen: false, vizOpen: false, metroOpen: false, device: null, launcher: null }); }, []);
   const drag = useRef<{ y: number; h: number } | null>(null);
@@ -112,6 +115,7 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
               <Notebook onLegendHost={setLegendHost} />
               <DeviceBay />
             </div>
+            {compactMixer ? <MixerCompact /> : null}
             <MixerHandle />
           </div>
           <Rack />

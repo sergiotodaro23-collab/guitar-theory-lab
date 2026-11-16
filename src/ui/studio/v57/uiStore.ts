@@ -5,7 +5,7 @@
  */
 import { create } from 'zustand';
 import type { AppMode } from '../../../app/settings';
-import { loadPrefs, savePref, type KeyValueStore, type RackMode, type RackModuleId, type TabId, type UiPrefs, type VizPrefs } from './layout';
+import { loadPrefs, savePref, type KeyValueStore, type MixerMode, type RackMode, type RackModuleId, type TabId, type UiPrefs, type VizPrefs } from './layout';
 
 /** Drawer devices. Input and rig left the drawer for the rack (Studio V6). */
 export type DeviceId = 'mixer' | 'tuner';
@@ -38,6 +38,7 @@ export interface StudioUi extends UiPrefs {
   readonly setMetroOpen: (open: boolean) => void;
   readonly setRack: (rack: RackMode) => void;
   readonly toggleRackModule: (id: RackModuleId) => void;
+  readonly setMixerMode: (mixerMode: MixerMode) => void;
   readonly setViz: (change: Partial<VizPrefs>) => void;
   readonly openDevice: (device: DeviceId, launcher: HTMLElement | null) => void;
   readonly closeDevice: () => void;
@@ -62,6 +63,7 @@ export const useStudioUi = create<StudioUi>((set, get) => ({
   setLcd: (lcdExpanded) => { set({ lcdExpanded }); savePref(storage(), 'lcdExpanded', lcdExpanded); },
   setConsoleCollapsed: (consoleCollapsed) => { set({ consoleCollapsed }); savePref(storage(), 'consoleCollapsed', consoleCollapsed); },
   setRack: (rack) => { set({ rack }); savePref(storage(), 'rack', rack); },
+  setMixerMode: (mixerMode) => { set({ mixerMode }); savePref(storage(), 'mixerMode', mixerMode); },
   toggleRackModule: (id) => {
     const folded = get().rackFolded;
     const rackFolded = folded.includes(id) ? folded.filter((m) => m !== id) : [...folded, id];
