@@ -30,6 +30,8 @@ def plate(spec, samples):
     w, h = p['w'], p['h']
     P.rbox('tray', 0, 0, w, h, 0, 3, M.plain('tray', (0.01, 0.01, 0.011), 0.42, metal=1.0), corner=p['corner'], edge=1.6, segments=4)
     P.rbox('faceplate', 4, 4, w - 8, h - 8, 2, 4.4, M.anodized('faceplate', (0.05, 0.054, 0.062), rough=0.5), corner=p['corner'] - 2, edge=1.0, segments=4)
+    # A fine brass inlay runs round the faceplate, as on the approved V6.7 console (transport and toolbar frames).
+    P.outline('inlay', 6.2, 6.2, w - 12.4, h - 12.4, 4.4, M.brushed('inlay-brass', (0.78, 0.52, 0.2), rough=0.36), line=0.9)
     nickel, slot = M.nickel('plate-screw', 0.32), M.void('slot')
     i = p['screwInset']
     for (x, y) in ((i, i), (w - i, i), (i, h - i), (w - i, h - i)):
@@ -45,6 +47,8 @@ def lcd(spec, samples):
     # Bezel of four bars around the glass, which sits lower: no boolean on a flat face.
     for (x, y, bw, bh) in ((0, 0, w, b), (0, h - b, w, b), (0, 0, b, h), (w - b, 0, b, h)):
         P.rbox('bezel', x, y, bw, bh, 0, 4, gloss, edge=1.5, segments=4)
+    # The amber-gold lip of the readout's frame (V6.7 reference).
+    P.outline('lip', b - 1.6, b - 1.6, w - 2 * b + 3.2, h - 2 * b + 3.2, 4.0, M.brushed('lcd-lip', (0.82, 0.5, 0.14), rough=0.34), line=1.1)
     P.rbox('glass', b - 1, b - 1, w - 2 * b + 2, h - 2 * b + 2, 0, 1.6, M.plain('lcd-glass', (0.0022, 0.0016, 0.001), 0.3, spec=0.25))
     # The glass must stay dark under the amber readout: only a faint sheen from the lamps.
     _flat(w, h, key=0.3, fill=0.25)

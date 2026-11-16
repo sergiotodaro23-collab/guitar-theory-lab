@@ -218,3 +218,20 @@ describe('wood', () => {
     expect(css).toContain(`frame-rail9@2x.webp') ${rail.slice * 2} fill / ${rail.slice}px`);
   });
 });
+
+describe('header nameplate', () => {
+  it('uses the paths, colours and label of the approved V6.7 vector header, unchanged', () => {
+    const reference = readFileSync(resolve('docs/hardware/v6_7-vector-header.svg'), 'utf8');
+    const logo = readFileSync(resolve('src/ui/studio/v6/StudioLogo.tsx'), 'utf8');
+    const paths = [...reference.matchAll(/ d="([^"]+)"/g)].map((m) => m[1] ?? '');
+    // Plate outline, two stripe centre lines (each drawn twice in the reference) and the wordmark.
+    expect(new Set(paths).size).toBe(4);
+    for (const d of paths) expect(logo, d.slice(0, 30)).toContain(d);
+    for (const colour of ['#e5bd80', '#76100d', '#f6d9a8', '#e53b13', '#750b09', '#26150d', '#fbe6bd', '#ead0a0', '#9a673d']) {
+      expect(reference).toContain(colour);
+      expect(logo).toContain(colour);
+    }
+    expect(logo).toContain('STUDIO · VER. 6.0');
+    expect(reference).toContain('STUDIO · VER. 6.0');
+  });
+});

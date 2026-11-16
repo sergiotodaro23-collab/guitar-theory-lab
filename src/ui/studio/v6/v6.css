@@ -7,19 +7,20 @@
 .v57.v6 > .v57-desk { flex: 1; min-height: 0; height: auto; }
 
 /* ---------- global header: a thin brand strip, no transport ---------- */
-.v6-head { position: relative; z-index: 40; flex: none; height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px 0 16px; border-radius: 3px;
-  color: #6f1f12;
+.v6-head { position: relative; z-index: 40; flex: none; height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px 0 0; border-radius: 3px;
+  color: #6f1f12; --logo-over: 6px;
+  /* dark tolex behind the nameplate, as in the approved V6.7 header */
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, 0) 45%, rgba(60, 20, 8, .28)),
-    linear-gradient(100deg, #f1e2bd 0%, #e3cf9f 38%, #cfae7c 62%, #9a5236 100%);
-  box-shadow: inset 0 0 0 1px rgba(60, 24, 10, .55), inset 0 -3px 0 #8f2f1c, inset 0 -4px 0 rgba(255, 226, 180, .55), 0 3px 7px rgba(0, 0, 0, .6); }
-.v6-brand { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; min-width: 0; }
-.v6-brand strong { font: 600 25px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .09em; text-transform: uppercase; color: #8c2415; text-shadow: 0 1px 0 rgba(255, 246, 220, .75), 1px 2px 0 rgba(90, 30, 12, .28); }
-.v6-brand small { font: 600 12px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #3a2117; }
-/* Retro stripes after the name: decoration drawn in CSS, no artwork. */
-.v6-brand::after { content: ''; width: 150px; height: 14px; margin-left: 6px; align-self: center; opacity: .85; transform: skewX(-24deg);
-  background: linear-gradient(180deg, #8f2f1c 0 4px, transparent 4px 5px, #c9652c 5px 9px, transparent 9px 10px, #e2a44a 10px 14px);
-  -webkit-mask-image: linear-gradient(90deg, #000, transparent); mask-image: linear-gradient(90deg, #000, transparent); }
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .05) 0 1px, transparent 1.4px) 0 0 / 5px 5px,
+    radial-gradient(circle at 70% 75%, rgba(0, 0, 0, .5) 0 1.2px, transparent 1.6px) 0 0 / 7px 6px,
+    linear-gradient(180deg, #221915, #130d0a);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 220, 170, .08), 0 3px 7px rgba(0, 0, 0, .6); }
+/* The nameplate (StudioLogo.tsx) is taller than the bar: it uses the page's top margin and the gap under the header, so nothing below moves.
+   The stripes run on to the right inside the same SVG, above the toolbar, to the edge of the page. */
+.v6-brand { position: absolute; inset: 0; clip-path: inset(-8px -8px calc(var(--logo-over) * -1) -8px); pointer-events: none; }
+.v6-head .v6-tools { position: relative; margin-left: auto; }
+.v6-logo { position: absolute; left: -8px; top: -8px; height: calc(100% + 8px + var(--logo-over)); width: auto; overflow: visible; display: block; }
+.v6-logo text { user-select: none; }
 .v6-tools { position: relative; display: flex; align-items: center; gap: 5px; flex: none; }
 .v6-tool { position: relative; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px 0 9px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 5px; color: var(--ink-primary);
   font: 600 13px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .08em; text-transform: uppercase;
@@ -108,18 +109,14 @@
 
 @media (max-height: 820px) {
   .v57.v6 { gap: 5px; }
-  .v6-head { height: 32px; }
-  .v6-brand strong { font-size: 21px; }
+  .v6-head { height: 32px; --logo-over: 5px; }
   .v6-tool { height: 25px; }
   .v6-mixhandle { height: 22px; }
 }
 @media (max-width: 1100px) {
-  .v6-brand::after { display: none; }
   .v6-tool { padding: 0 8px; }
 }
 @media (max-width: 860px) {
-  .v6-brand small { display: none; }
-  .v6-brand strong { font-size: 18px; letter-spacing: .05em; }
   .v6-tool span { display: none; }
 }
 
