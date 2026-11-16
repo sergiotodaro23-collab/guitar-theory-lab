@@ -27,13 +27,13 @@ try {
     const wide = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
     await wide.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
     await wide.screenshot({ path: join(out, `${label}-page-${size}.png`) });
-    await wide.getByTestId('rack-expand').click({ timeout: 1500 }).catch(() => {});
+    if ((await wide.getByTestId('rack').getAttribute('data-mode')) === 'compact') await wide.getByTestId('rack-toggle').click();
     await wide.waitForTimeout(300);
     await wide.screenshot({ path: join(out, `${label}-page-rack-${size}.png`) });
     await wide.close();
     const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 2 });
     await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
-    await page.getByTestId('rack-expand').click({ timeout: 1500 }).catch(() => {});
+    if ((await page.getByTestId('rack').getAttribute('data-mode')) === 'compact') await page.getByTestId('rack-toggle').click();
     // Some states on: two knobs turned, two pedals lit.
     await page.getByTestId('amp-gain').focus();
     await page.keyboard.press('End');

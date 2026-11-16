@@ -16,7 +16,6 @@ import { StudioLogo } from './StudioLogo';
 const TOOLS: readonly { id: DeviceId; text: string; label: string; icon: string }[] = [
   { id: 'tuner', text: 'Accordatore', label: 'Accordatore cromatico', icon: 'M9 3v8a3 3 0 0 0 6 0V3M12 14v7M8 21h8' },
 ];
-const RIG_ICON = 'M3 6h18v12H3zM3 9.5h18M7 14h.01M11 14h.01M15 14h.01M18.5 14h.01';
 const LIBRARY_ICON = 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z';
 const METRO_ICON = 'M9 3h6l4 18H5zM12 17l4-10M7.5 13h9';
 
@@ -33,6 +32,20 @@ function Glyph({ d }: { readonly d: string }) {
  * subdivision (the console shows them, this is where they are set). Same
  * store as the mixer and the accent grid.
  */
+/** The one control of a sidebar's width: a window with its left or right pane marked, filled when the pane is open. */
+function SideToggle({ side, open, label, testId, onClick }: { readonly side: 'left' | 'right'; readonly open: boolean; readonly label: string; readonly testId: string; readonly onClick: () => void }) {
+  const x = side === 'left' ? 4.5 : 14.5;
+  return (
+    <button type="button" className="v6-side" data-side={side} aria-expanded={open} aria-label={open ? `Comprimi ${label}` : `Espandi ${label}`} title={open ? `Comprimi ${label}` : `Espandi ${label}`} data-testid={testId} onClick={onClick}>
+      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="4.5" width="18" height="15" rx="2.6" fill="none" stroke="currentColor" strokeWidth="1.9" />
+        <rect x={x} y="6" width="5" height="12" rx="1.2" fill="currentColor" opacity={open ? 1 : 0.28} />
+        <path d={side === 'left' ? 'M9.5 5v14' : 'M14.5 5v14'} stroke="currentColor" strokeWidth="1.9" />
+      </svg>
+    </button>
+  );
+}
+
 function MetronomePanel() {
   const close = useStudioUi((u) => u.setMetroOpen);
   const s = useApp((state) => state.settings);
@@ -88,6 +101,7 @@ export function Header() {
   }, [ui.metroOpen]);
   return (
     <header className="v6-head" data-testid="studio-header">
+      <SideToggle side="left" open={ui.railExpanded} label="la barra di navigazione" testId="rail-toggle" onClick={() => ui.setRail(!ui.railExpanded)} />
       <div className="v6-brand" data-testid="brand">
         <StudioLogo />
         <span className="v57-sr">Guitar Theory Lab · Studio · Ver. 6.0</span>
@@ -107,12 +121,10 @@ export function Header() {
             <Glyph d={tool.icon} /><span>{tool.text}</span>
           </button>
         ))}
-        <button type="button" className="v6-tool" data-on={ui.rack === 'hidden' ? '0' : '1'} aria-pressed={ui.rack !== 'hidden'} aria-label="Rack Audio e Rig" title={ui.rack === 'hidden' ? 'Mostra il rack Audio e Rig' : 'Nascondi il rack Audio e Rig'}
-          data-testid="rack-toggle" onClick={() => ui.setRack(ui.rack === 'hidden' ? 'expanded' : 'hidden')}>
-          <Glyph d={RIG_ICON} /><span>Rig</span>
-        </button>
         {ui.metroOpen ? <MetronomePanel /> : null}
       </div>
+      <i className="v6-head-sep" aria-hidden="true" />
+      <SideToggle side="right" open={ui.rack === 'expanded'} label="la barra Audio e Rig" testId="rack-toggle" onClick={() => ui.setRack(ui.rack === 'expanded' ? 'compact' : 'expanded')} />
       <PresetLibrary open={libraryOpen} onClose={() => setLibraryOpen(false)} />
     </header>
   );

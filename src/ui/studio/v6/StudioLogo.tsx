@@ -6,7 +6,8 @@
  * four stripe strokes, the wordmark traced from the original letters and the
  * label's text element. Two things are adapted to this app: the plate is
  * filled with the reference's own `enamel` gradient instead of its bitmap, so
- * the whole mark is vector, and the stripes go on along the top of the header
+ * the whole mark is vector (where the bitmap has a screw, at the plate's left
+ * end, the header puts the key of the left sidebar), and the stripes go on along the top of the header
  * past the reference's 635 units, straight, until the toolbar.
  */
 export const LOGO_VIEW = { w: 635, h: 85 } as const;
@@ -23,10 +24,8 @@ export function StudioLogo() {
     <svg className="v6-logo" viewBox={`0 0 ${LOGO_VIEW.w} ${LOGO_VIEW.h}`} role="img" aria-label="Guitar Theory Lab · Studio · Ver. 6.0" data-testid="studio-logo">
       <defs>
         <linearGradient id="gtl-enamel" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#fbe6bd" /><stop offset=".55" stopColor="#ead0a0" /><stop offset="1" stopColor="#9a673d" /></linearGradient>
-        <radialGradient id="gtl-screw" cx=".38" cy=".32" r=".8"><stop stopColor="#d8d2c4" /><stop offset=".55" stopColor="#8b8578" /><stop offset="1" stopColor="#3a352d" /></radialGradient>
       </defs>
       <path d={PLATE} fill="url(#gtl-enamel)" data-part="plate" />
-      <g data-part="screw"><circle cx="30" cy="20" r="7.5" fill="url(#gtl-screw)" stroke="#2a1d12" strokeWidth=".8" /><path d="M25.5 17.2 L34.5 22.8 M27.2 24.5 L32.8 15.5" stroke="#241a12" strokeWidth="1.5" strokeLinecap="round" /></g>
       <path d={STRIPE_UPPER + RUN} fill="none" stroke="#e5bd80" strokeWidth="19" strokeLinecap="round" data-part="stripe" />
       <path d={STRIPE_UPPER + RUN} fill="none" stroke="#76100d" strokeWidth="7" strokeLinecap="round" data-part="stripe" />
       <path d={STRIPE_LOWER + RUN} fill="none" stroke="#f6d9a8" strokeWidth="13" strokeLinecap="round" data-part="stripe" />

@@ -178,19 +178,19 @@ export interface UiPrefs {
   readonly lcdExpanded: boolean;
   /** Studio V6: the transport console folded into its one-line strip. */
   readonly consoleCollapsed: boolean;
-  /** Studio V6 rig rack on the right: full, a slim spine, or out of the way. */
+  /** Studio V6 rig rack on the right: full, or a slim permanent bar. It is never hidden (a saved 'hidden' from before comes back as the bar). */
   readonly rack: RackMode;
   /** Rack modules folded to their title bar. */
   readonly rackFolded: readonly RackModuleId[];
   readonly viz: VizPrefs;
 }
 
-export type RackMode = 'expanded' | 'compact' | 'hidden';
-export const RACK_MODES: readonly RackMode[] = ['expanded', 'compact', 'hidden'];
+export type RackMode = 'expanded' | 'compact';
+export const RACK_MODES: readonly RackMode[] = ['expanded', 'compact'];
 export type RackModuleId = 'input' | 'amp' | 'cab' | 'pedals' | 'routing';
 export const RACK_MODULES: readonly RackModuleId[] = ['input', 'amp', 'cab', 'pedals', 'routing'];
 /** Width the rack takes from the work column, in CSS px. */
-export const RACK_WIDTH: Readonly<Record<RackMode, number>> = { expanded: 336, compact: 46, hidden: 0 };
+export const RACK_WIDTH: Readonly<Record<RackMode, number>> = { expanded: 336, compact: 60 };
 
 /** Storage keys of the handoff (`STORAGE_KEYS`). Live monitor and tuner on/off are never stored; the rig lives in the session settings. */
 export const STORAGE_KEYS = {
@@ -233,7 +233,8 @@ export function loadPrefs(store: KeyValueStore, viewportWidth = RACK_OPEN_MIN_WI
     railExpanded: bool(read(store, STORAGE_KEYS.railExpanded), false),
     lcdExpanded: bool(read(store, STORAGE_KEYS.lcdExpanded), true),
     consoleCollapsed: bool(read(store, STORAGE_KEYS.consoleCollapsed), false),
-    rack: oneOf(read(store, STORAGE_KEYS.rack), RACK_MODES, viewportWidth >= RACK_OPEN_MIN_WIDTH ? 'expanded' : 'compact'),
+    // 'hidden' was a third mode until the two sidebars became permanent: it migrates to the compact bar.
+    rack: read(store, STORAGE_KEYS.rack) === 'hidden' ? 'compact' : oneOf(read(store, STORAGE_KEYS.rack), RACK_MODES, viewportWidth >= RACK_OPEN_MIN_WIDTH ? 'expanded' : 'compact'),
     rackFolded: foldedModules(read(store, STORAGE_KEYS.rackFolded)),
     viz: {
       layerMarks: oneOf(viz.layerMarks, ['bars', 'dots'] as const, VIZ_DEFAULTS.layerMarks),

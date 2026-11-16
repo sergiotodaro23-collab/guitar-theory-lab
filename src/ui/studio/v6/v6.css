@@ -7,7 +7,7 @@
 .v57.v6 > .v57-desk { flex: 1; min-height: 0; height: auto; }
 
 /* ---------- global header: a thin brand strip, no transport ---------- */
-.v6-head { position: relative; z-index: 40; flex: none; height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px 0 0; border-radius: 3px;
+.v6-head { position: relative; z-index: 40; flex: none; height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 0; border-radius: 3px;
   color: #6f1f12; --logo-over: 6px;
   /* dark tolex behind the nameplate, as in the approved V6.7 header */
   background:
@@ -22,6 +22,14 @@
 .v6-logo { position: absolute; left: -8px; top: -8px; height: calc(100% + 8px + var(--logo-over)); width: auto; overflow: visible; display: block; }
 .v6-logo text { user-select: none; }
 .v6-tools { position: relative; display: flex; align-items: center; gap: 5px; flex: none; }
+/* The two sidebar keys: one at each end of the header, apart from the tools. */
+.v6-side { position: relative; z-index: 1; flex: none; width: 30px; height: 26px; display: grid; place-items: center; padding: 0; cursor: pointer; color: #f1e3c4; border: 1px solid #0b0c0e; border-radius: 5px;
+  background: linear-gradient(180deg, #4a4037 0%, #2b2520 52%, #1c1815 100%); box-shadow: inset 0 1px 0 rgba(255, 236, 200, .3), inset 0 -2px 0 rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .5); }
+.v6-side:hover { filter: brightness(1.18); }
+.v6-side[aria-expanded='true'] { color: #ffd08a; }
+.v6-side:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.v6-side[data-side='left'] { margin-left: 5px; }
+.v6-head-sep { flex: none; width: 1px; height: 20px; margin: 0 3px 0 1px; background: linear-gradient(180deg, transparent, rgba(241, 202, 134, .5), transparent); }
 .v6-tool { position: relative; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px 0 9px; cursor: pointer; border: 1px solid #0b0c0e; border-radius: 5px; color: var(--ink-primary);
   font: 600 13px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .08em; text-transform: uppercase;
   background: linear-gradient(180deg, #4a4037 0%, #2b2520 52%, #1c1815 100%); box-shadow: inset 0 1px 0 rgba(255, 236, 200, .3), inset 0 -2px 0 rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .5); }
@@ -128,9 +136,11 @@
 .v57.v6 .v57-deck[data-collapsed='1'] { border: 1px solid #07080a; border-image: none; border-radius: 4px; padding: 5px 10px; background: linear-gradient(180deg, #3d4046, #25272b 55%, #1b1c1f); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 3px 6px rgba(0, 0, 0, .55); }
 
 /* ---------- rig rack (right sidebar) ---------- */
+/* Right sidebar: the same walnut as the left rail (frame-rail9, tools/blender). Always there: expanded or a compact bar as wide as the rail. */
 .v6-rack { flex: none; width: 336px; min-height: 0; display: flex; flex-direction: column; border-radius: 4px; color: var(--ink-primary); overflow: hidden;
-  background: linear-gradient(110deg, #1b1714, #2a211b); box-shadow: inset 0 0 0 1px #07080a, inset 0 0 0 2px rgba(190, 150, 100, .28), 0 4px 10px rgba(0, 0, 0, .6); }
-.v6-rack[data-mode='compact'] { width: 46px; align-items: center; gap: 6px; padding: 8px 0; }
+  border: 0; border-image: url('./hardware/assets/frame-rail9@2x.webp') 40 fill / 20px stretch; box-shadow: 0 4px 10px rgba(0, 0, 0, .6), 0 1px 2px rgba(0, 0, 0, .7); }
+.v6-rack[data-mode='compact'] { width: 60px; align-items: center; gap: 8px; padding: 30px 0 8px; }
+@media (max-width: 1250px) { .v6-rack[data-mode='compact'] { width: 54px; } }
 .v6-rack-title { flex: none; height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 8px; border-bottom: 2px solid #0b0c0e; box-shadow: 0 1px 0 rgba(255, 220, 170, .12);
   background: linear-gradient(180deg, #3a2c22, #241b15); }
 .v6-rack-title h2 { flex: 1; margin: 0; font: 600 17px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #f1ca86; white-space: nowrap; }

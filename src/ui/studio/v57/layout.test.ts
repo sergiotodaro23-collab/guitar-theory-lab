@@ -131,9 +131,12 @@ describe('UI preferences', () => {
     expect(loadPrefs(memory(), 1440).rack).toBe('expanded');
     expect(loadPrefs(memory(), 1024).rack).toBe('compact');
     const store = memory();
-    savePref(store, 'rack', 'hidden');
+    savePref(store, 'rack', 'compact');
     savePref(store, 'rackFolded', ['cab', 'pedals']);
-    expect(loadPrefs(store, 1440).rack).toBe('hidden');
+    expect(loadPrefs(store, 1440).rack).toBe('compact');
+    // The old third mode: a rack saved as hidden comes back as the permanent compact bar, at any width.
+    expect(loadPrefs(memory({ [STORAGE_KEYS.rack]: '"hidden"' }), 1440).rack).toBe('compact');
+    expect(loadPrefs(memory({ [STORAGE_KEYS.rack]: '"hidden"' }), 1024).rack).toBe('compact');
     expect(loadPrefs(store, 1024).rackFolded).toEqual(['cab', 'pedals']);
     // Unknown modes and modules are dropped, never trusted.
     expect(loadPrefs(memory({ [STORAGE_KEYS.rack]: '"wide"', [STORAGE_KEYS.rackFolded]: '["amp","nope",3]' }), 1440)).toMatchObject({ rack: 'expanded', rackFolded: ['amp'] });

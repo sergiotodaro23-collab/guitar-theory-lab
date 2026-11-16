@@ -65,21 +65,22 @@ test('the rack holds input, amp, cabinet, pedalboard and routing; it folds to a 
   await expect(page.getByTestId('rack').getByTestId('amp-gain')).toHaveCount(0);
   await page.getByTestId('rack-fold-amp').click();
   await expect(page.getByTestId('amp-gain')).toBeVisible();
-  // Spine, hidden, back: the work column takes the room, the neck stays whole.
+  // Compact bar and back, from the one key at the right end of the header: the work column takes the room, the neck stays whole.
   const neckWidth = () => page.locator('.v57-board .fretboard').evaluate((el) => el.getBoundingClientRect().width);
   const full = await neckWidth();
-  await page.getByTestId('rack-compact').click();
+  const toggle = page.getByTestId('rack-toggle');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await toggle.click();
   await expect(page.getByTestId('rack')).toHaveAttribute('data-mode', 'compact');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   await expect.poll(neckWidth).toBeGreaterThan(full + 200);
+  // The compact bar is permanent and still opens a module.
+  await page.reload();
+  await expect(page.getByTestId('rack')).toHaveAttribute('data-mode', 'compact');
   await page.getByTestId('rack').getByRole('button', { name: 'Pedaliera' }).click();
   await expect(page.getByTestId('rack')).toHaveAttribute('data-mode', 'expanded');
-  await page.getByTestId('rack-hide').click();
-  await expect(page.getByTestId('rack')).toHaveCount(0);
-  await expect(page.getByTestId('rack-toggle')).toHaveAttribute('aria-pressed', 'false');
-  await page.reload();
-  await expect(page.getByTestId('rack')).toHaveCount(0);
-  await page.getByTestId('rack-toggle').click();
-  await expect(page.getByTestId('rack')).toHaveAttribute('data-mode', 'expanded');
+  // The old controls of the whole rack are gone: the header key is the only one.
+  for (const old of ['rack-compact', 'rack-hide', 'rack-expand']) await expect(page.getByTestId(old)).toHaveCount(0);
   await expect(page.locator('.v57-board .fretboard .fret')).toHaveCount(24);
   expect(errors).toEqual([]);
 });

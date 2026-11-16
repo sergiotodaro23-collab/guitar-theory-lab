@@ -58,8 +58,6 @@
 .v57-rb:hover .v57-tip, .v57-rb:focus-visible .v57-tip { opacity: 1; visibility: visible; }
 .v57-rail[data-x='1'] .v57-rb .v57-tip { display: none; }
 .v57-rspacer { flex: 1; min-height: 6px; }
-.v57-rtog svg { transition: transform .18s; }
-.v57-rail[data-x='1'] .v57-rtog svg { transform: rotate(180deg); }
 .v57-np { margin: 8px 7px 0; padding: 6px 4px 5px; border-radius: 2px; text-align: center; color: #1d1e21; align-self: stretch;
   background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .18) 0 1px, rgba(0, 0, 0, 0) 1px 3px), linear-gradient(135deg, #d8dce1, #9aa1a9 50%, #c4c9cf);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .45), 0 1px 0 rgba(255, 255, 255, .12); }

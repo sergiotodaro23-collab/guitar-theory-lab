@@ -102,7 +102,7 @@ test('rail: guitar fader when compact; names, backing fader and mute when expand
   await expect(page.getByTestId('rail-fader-guitar')).toBeVisible();
   await expect(page.getByTestId('rail-fader-backing')).toBeHidden();
   const neck = await rect(page, NECK);
-  await rail.getByRole('button', { name: 'Espandi barra' }).click();
+  await page.getByTestId('rail-toggle').click();
   await expect(page.getByTestId('rail-fader-backing')).toBeVisible();
   // Lab names never run under their icons.
   const overlaps = await rail.locator('.v57-rb').evaluateAll((keys) => keys.filter((key) => {
@@ -127,7 +127,7 @@ test('rail: guitar fader when compact; names, backing fader and mute when expand
   await expect(page.getByTestId('rail-fader-backing')).toHaveValue('0.9');
   await expect(page.getByTestId('rail-mute-backing')).toHaveAttribute('aria-pressed', 'true');
   await page.getByTestId('rail-mute-backing').click();
-  await rail.getByRole('button', { name: 'Comprimi barra' }).click();
+  await page.getByTestId('rail-toggle').click();
   // Back to compact: the neck is where it was.
   await expect.poll(() => rect(page, NECK)).toEqual(neck);
 });

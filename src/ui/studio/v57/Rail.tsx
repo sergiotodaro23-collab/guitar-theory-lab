@@ -1,7 +1,7 @@
 /**
  * The physical navigation rail (Studio V6): the four laboratories, the
- * guitar and backing faders, settings and the collapse key, with the
- * nameplate at the foot. The devices moved out: tuner, input and rig are in
+ * guitar and backing faders and settings, with the nameplate at the foot.
+ * It is compact or expanded from the key at the left end of the header. The devices moved out: tuner, input and rig are in
  * the global header, the mixer has its own handle under the notebook.
  */
 import { useEffect, useRef } from 'react';
@@ -97,11 +97,6 @@ export function Rail({ studioAllowed }: { readonly studioAllowed: boolean }) {
           <button type="button" ref={settingsKey} className="v57-rb" data-on={ui.settingsOpen ? '1' : '0'} aria-label="Impostazioni e aspetto" aria-haspopup="dialog" aria-expanded={ui.settingsOpen}
             data-testid="studio-settings-toggle" onClick={() => ui.setSettingsOpen(!ui.settingsOpen)}>
             <Icon d={GEAR} width={1.6} /><span className="v57-rl">Impostazioni e aspetto</span><span className="v57-tip" role="tooltip">Impostazioni e aspetto</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" className="v57-rb v57-rtog" aria-label={expanded ? 'Comprimi barra' : 'Espandi barra'} aria-expanded={expanded} onClick={() => ui.setRail(!expanded)}>
-            <Icon d="M9 6l6 6-6 6" width={2.2} /><span className="v57-rl">Comprimi barra</span><span className="v57-tip" role="tooltip">{expanded ? 'Comprimi barra' : 'Espandi barra'}</span>
           </button>
         </li>
       </ul>
