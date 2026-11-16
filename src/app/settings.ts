@@ -117,7 +117,10 @@ export interface HarmonySettings {
   readonly muteBass: boolean;
   /** Guitar input (D-21): device, gain, monitor level; tuner reference and tuning; detected notes on the neck. */
   readonly inputDeviceId: string;
+  /** Gain of the dry signal that goes to the analysis (pitch tracking, tuner, calibration, the input meter). */
   readonly inputGain: number;
+  /** Gain of the signal that goes to the guitar rig, before its first stage. Independent of `inputGain`. */
+  readonly rigGain: number;
   readonly monitorVol: number;
   readonly tunerA4: number;
   readonly tunerTuning: string;
@@ -252,6 +255,7 @@ export const DEFAULT_SETTINGS: Settings = {
   muteBass: false,
   inputDeviceId: '',
   inputGain: 1,
+  rigGain: 1,
   monitorVol: 0.6,
   tunerA4: 440,
   tunerTuning: 'standard',
@@ -373,6 +377,10 @@ export function sanitizeSettings(raw: unknown): Settings {
     muteBass: r.muteBass === true,
     inputDeviceId: typeof r.inputDeviceId === 'string' ? r.inputDeviceId.slice(0, 200) : d.inputDeviceId,
     inputGain: typeof r.inputGain === 'number' && r.inputGain >= 0 && r.inputGain <= 4 ? r.inputGain : d.inputGain,
+    // Until the two gains were split, one gain fed both the analysis and the rig: settings saved before then keep, for the rig,
+    // the level they had (their single gain).
+    rigGain: typeof r.rigGain === 'number' && r.rigGain >= 0 && r.rigGain <= 4 ? r.rigGain
+      : typeof r.inputGain === 'number' && r.inputGain >= 0 && r.inputGain <= 4 ? r.inputGain : d.rigGain,
     monitorVol: number01(r.monitorVol, d.monitorVol),
     tunerA4: typeof r.tunerA4 === 'number' && r.tunerA4 >= 415 && r.tunerA4 <= 466 ? Math.round(r.tunerA4) : d.tunerA4,
     tunerTuning: oneOf(r.tunerTuning, TUNINGS.map((t) => t.id), d.tunerTuning),

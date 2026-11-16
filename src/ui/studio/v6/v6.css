@@ -476,3 +476,6 @@
 /* model facts: long titles and file names wrap inside the panel, they never widen it */
 .v6-nam-facts dd { min-width: 0; overflow-wrap: anywhere; }
 .v6-nam-origin span { min-width: 0; overflow-wrap: anywhere; }
+
+/* two gains: a two-line readout (R = rig, D = detection) */
+.v6-iface-read { text-align: right; line-height: 11px; font-size: 9.5px !important; }

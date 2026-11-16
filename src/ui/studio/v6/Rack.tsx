@@ -99,10 +99,24 @@ function InputModule() {
       <div className="v6-iface" data-on={on ? '1' : '0'} data-testid="iface-panel" style={{ width: IFACE.size.w, height: IFACE.size.h }}>
         <img className="v6-hw-body" src={ifaceBody} alt="" draggable={false} data-testid="iface-body" style={bodyBox(IFACE_HW.assets.body)} />
         <span className="v6-iface-lab" style={{ left: IFACE.jack.x, top: IFACE.labelY }}>Input</span>
-        <span className="v6-iface-lab" style={{ left: IFACE.knob.x, top: IFACE.labelY }}>Gain</span>
-        <RotaryKnob value={gainToKnob(s.inputGain)} onChange={(v) => { const inputGain = knobToGain(v); update({ inputGain }); liveInput.setGain(inputGain); }}
-          label="Gain d’ingresso" valueText={gainDb(s.inputGain)} sprite={{ src: ifaceKnobStrip, frames: IFACE.knob.frames }} bodySize={IFACE.knob.frame} hitSize={IFACE.knob.hit}
-          cx={IFACE.knob.x} cy={IFACE.knob.y} defaultValue={25} testId="iface-gain" />
+        {/* Two independent gains after the channel choice: Rig feeds the guitar rig, Detection feeds the analysis (tracking, tuner,
+            calibration, this meter). Neither is the monitor volume, the master, the NAM model's own input or the interface's hardware gain. */}
+        {IFACE.gains.ids.map((id, i) => {
+          const cx = IFACE.gains.first + IFACE.gains.pitch * i;
+          const rigKnob = id === 'rig';
+          const value = rigKnob ? s.rigGain : s.inputGain;
+          const set = (v: number) => {
+            const gain = knobToGain(v);
+            if (rigKnob) { update({ rigGain: gain }); liveInput.setRigGain(gain); } else { update({ inputGain: gain }); liveInput.setGain(gain); }
+          };
+          return (
+            <Fragment key={id}>
+              <span className="v6-iface-lab" style={{ left: cx, top: IFACE.labelY }}>{rigKnob ? 'Rig' : 'Detect'}</span>
+              <RotaryKnob value={gainToKnob(value)} onChange={set} label={rigKnob ? 'Gain del rig (livello verso amplificatore e pedali)' : 'Gain di rilevazione (livello verso l’analisi delle note)'} valueText={gainDb(value)}
+                sprite={{ src: ifaceKnobStrip, frames: IFACE.knob.frames }} bodySize={IFACE.gains.size} hitSize={IFACE.gains.hit} cx={cx} cy={IFACE.gains.y} defaultValue={25} testId={rigKnob ? 'iface-gain-rig' : 'iface-gain'} />
+            </Fragment>
+          );
+        })}
         <div className="v6-meter v6-iface-meter" role="meter" aria-label="Livello d’ingresso" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)} data-clip={live.clipping ? '1' : '0'}
           style={{ left: IFACE.meter.x, top: IFACE.meter.y, width: IFACE.meter.w, height: IFACE.meter.h }}>
           {Array.from({ length: 14 }, (_, i) => <i key={i} data-zone={i >= 12 ? 'hot' : i >= 9 ? 'warm' : 'ok'} data-on={i < Math.round(level * 14) ? '1' : '0'} />)}
@@ -115,7 +129,7 @@ function InputModule() {
                 aria-label={`Ingresso ${n}${s.inputChannel === 'mix' ? ' (ora: entrambi sommati)' : ''}`} onClick={() => pickChannel(n)}>{n}</button>
             ))}
           </div>
-          <span className="v6-silk">Gain <b>{gainDb(s.inputGain)}</b></span>
+          <span className="v6-silk v6-iface-read" data-testid="iface-gain-read">R <b>{gainDb(s.rigGain)}</b><br />D <b>{gainDb(s.inputGain)}</b></span>
         </div>
       </div>
       <div className="v6-line">

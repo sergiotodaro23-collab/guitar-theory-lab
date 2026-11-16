@@ -16,6 +16,19 @@ Click, Note, Accordi, Basso, Batteria → i loro fader → Master → uscita del
 
 L'analisi lavora sempre sul segnale pulito dopo il gain: l'ascolto, il fader Chitarra e il Master non cambiano il rilevamento.
 
+**Due gain d'ingresso (dal 17 novembre 2026).** Dopo la scelta del canale il segnale si divide in due rami, ciascuno con il suo `GainNode` (`src/audio/liveInput.ts`):
+
+```
+canale scelto (mono) ─┬─ Gain Detection (`inputGain`) ─→ analizzatore, worklet di cattura, registrazioni di calibrazione, misuratore d'ingresso
+                      └─ Gain Rig (`rigGain`) ────────→ rig (pedali, amplificatore o NAM, cabinet) ─→ ascolto ─→ Master
+```
+
+- **Gain Detection** cambia solo l'ampiezza che vedono tracking, accordatore e calibrazione. La calibrazione continua a regolare questo gain (`inputGain` nei profili).
+- **Gain Rig** cambia solo il livello che entra nel rig, prima del suo primo stadio.
+- Nessuno dei due è il volume dell'ascolto, il Master, il gain d'ingresso del modello NAM (manopola Gain/Input della testata) o il gain fisico della scheda.
+- Entrambi partono a 0 dB. Le impostazioni salvate prima della separazione avevano un solo gain: il rig eredita quel valore, così il livello di nessuno cambia.
+- Predisposto per la futura barra destra (pannello Scheda audio con le due manopole, pannello Rilevazione note): i due rami sono già separati, la grafica potrà spostare le manopole senza toccare il grafo.
+
 ## Passi
 
 1. **Uscita.** In *Ingresso → Diagnostica audio* premi *Suono di prova*. Se non senti il La, il problema è a valle dell'app: dispositivo di uscita del sistema operativo (le cuffie devono essere collegate al dispositivo che il sistema usa come uscita, spesso la scheda audio USB), volume del sistema e della scheda, fader Master.

@@ -185,7 +185,9 @@ Limiti dichiarati: nessuna prova con chitarra, scheda audio e capture reali; nes
 | «Sfoglia TONE3000» nella testata: flusso Select in una finestra, OAuth 2.0 con PKCE e `state` | implementato, **testato contro un servizio simulato** | unit `tone3000.test.ts`, `e2e/tone3000.spec.ts` |
 | Dettagli del tone, selettore dei modelli, caricamento nel motore NAM, attribuzione sulla testata | implementato, testato contro un servizio simulato | e2e |
 | Niente token, codici, indirizzi di download o modelli in memoria permanente | implementato | e2e (contenuto di `localStorage` e `sessionStorage`) |
-| Flusso con il servizio TONE3000 reale | **non eseguito**: manca la chiave pubblicabile | — |
+| Flusso con il servizio TONE3000 reale | **provato dal proprietario** (collegamento e importazione); non rieseguito dall'agente, che non ha la chiave | prova manuale del proprietario sulla PR #23 |
+| Sticker della testata: solo `DSP interno`, `NAM` o `TONE3000`, su nastro di larghezza fissa | implementato | `e2e/tone3000.spec.ts`, `hardware.test.ts` |
+| Due gain d'ingresso indipendenti dopo la scelta del canale: Rig (verso il rig) e Detection (verso l'analisi); impostazioni precedenti conservano il livello | implementato, **testato con segnale sintetico** (microfono finto di Chromium), non con una scheda audio reale | `inputGains.test.ts`, `e2e/input-gains.spec.ts` |
 
 ## Baseline
 

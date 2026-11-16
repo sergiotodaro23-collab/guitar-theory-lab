@@ -1,7 +1,7 @@
 """
 Audio interface of the Studio V6 rack: a dark anodised front panel between
-two brushed aluminium cheeks, a combined XLR/jack input, the gain knob
-(sprite strip) and a smoked window where the live HTML meter shows through.
+two brushed aluminium cheeks, a combined XLR/jack input, two gain knobs
+(one sprite strip for both) and a smoked window where the live HTML meter shows through.
 """
 from gtlkit import export
 from gtlkit import materials as M
@@ -28,9 +28,12 @@ def body(spec, samples):
         P.screw(sx, sy, 2.2, Z - 1.5, nickel, slot, turn=(sx + sy) * 4)
     j = spec['jack']
     P.combo_jack(j['x'], j['y'], j['r'], Z)
-    k = spec['knob']
-    P.tick_ring(k['x'], k['y'], k['tickRadius'], Z, ink, sweep=k['sweep'], start=-k['sweep'] / 2, dot=0.75)
-    P.cyl('shaft-hole', k['x'], k['y'], k['diameter'] * 0.3, Z - 1, Z + 0.05, slot, verts=32)
+    # Two gain knobs (rig, detection): a ring of marks and a shaft hole for each.
+    k, g = spec['knob'], spec['gains']
+    for i in range(len(g['ids'])):
+        cx = g['first'] + g['pitch'] * i
+        P.tick_ring(cx, g['y'], g['tickRadius'], Z, ink, sweep=k['sweep'], start=-k['sweep'] / 2, dot=0.65)
+        P.cyl('shaft-hole', cx, g['y'], g['size'] * 0.2, Z - 1, Z + 0.05, slot, verts=32)
     # Meter window: smoked glass in a thin bright bezel. A disc-and-plate on the panel, no boolean (see the amp's plate).
     m = spec['meter']
     P.rbox('window-bezel', m['x'] - 1.4, m['y'] - 1.4, m['w'] + 2.8, m['h'] + 2.8, Z - 0.2, Z + 0.7, M.chrome('bezel', 0.3), corner=3.4, edge=0.4, segments=2)

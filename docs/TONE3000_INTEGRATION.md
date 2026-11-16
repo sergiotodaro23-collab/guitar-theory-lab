@@ -1,6 +1,6 @@
 # TONE3000: scelta di un tone dal catalogo (D-52)
 
-Stato: **implementato; testato solo contro un TONE3000 simulato**. Il flusso con il servizio reale **non è stato eseguito**: serve una chiave pubblicabile, che non è stata né richiesta né inventata. Vedi «Cosa manca per la prova reale».
+Stato: **implementato; testato dall'agente contro un TONE3000 simulato; provato dal proprietario con il servizio reale** (17 novembre 2026: collegamento e importazione dei tone funzionanti, come riferito dal proprietario sulla PR #23; l'agente non ha una chiave e non ha rieseguito quella prova). Integrato nella Studio V6 con la PR di integrazione della #23. Sulla testata lo sticker dice solo `TONE3000`, `NAM` o `DSP interno`: titolo, autore e collegamento del tone stanno nei dati sotto la testata.
 
 Il collegamento è facoltativo. Senza chiave, senza rete o senza account TONE3000, Guitar Theory Lab funziona per intero: rig, DSP interno, modelli NAM da file.
 
@@ -57,7 +57,7 @@ Il token viaggia solo verso `https://www.tone3000.com`: gli indirizzi dei modell
 2. Se sulla chiave sono registrati indirizzi di ritorno, va aggiunto quello dell'app (la finestra lo mostra). `localhost` è sempre accettato, quindi la prima prova si può fare in locale.
 3. Verificare con il servizio vero ciò che la simulazione non può dire: che lo scambio del codice e le letture rispondano alle richieste del browser dall'origine dell'app (CORS), la forma esatta delle risposte, il comportamento della finestra con l'accesso reale, il download di un modello vero e il suo ascolto.
 
-Finché questo non è fatto, lo stato resta «testato contro un servizio simulato».
+La prova con il servizio reale è stata fatta dal proprietario (vedi lo stato in cima). Le prove automatiche del repository restano contro un servizio simulato: non dimostrano nulla del servizio vero.
 
 ## Limiti
 

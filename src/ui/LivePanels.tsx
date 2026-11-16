@@ -30,7 +30,7 @@ const CHANNEL_OPTIONS = [
 export function startInput(deviceId?: string): void {
   const s = useApp.getState().settings;
   liveInput.configure(analysisSettingsOf(s));
-  void liveInput.start(() => engine.audioOut(), deviceId ?? s.inputDeviceId, s.inputChannel).then(() => liveInput.setGain(useApp.getState().settings.inputGain));
+  void liveInput.start(() => engine.audioOut(), deviceId ?? s.inputDeviceId, s.inputChannel).then(() => { const now = useApp.getState().settings; liveInput.setGain(now.inputGain); liveInput.setRigGain(now.rigGain); });
 }
 
 /** The one line under the input: error, clipping, weak signal or all clear. Always the same height. */
@@ -83,7 +83,7 @@ export function InputControls() {
           onChange={(inputChannel) => { update({ inputChannel }); liveInput.route(inputChannel); }}
         />
       </Field>
-      <Field label={`Gain d’ingresso: ${pct(s.inputGain)}`}>
+      <Field label={`Gain di rilevazione: ${pct(s.inputGain)}`}>
         <input className="range" type="range" min={0} max={4} step={0.05} value={s.inputGain} aria-label="Gain d’ingresso"
           onChange={(e) => { const inputGain = Number(e.target.value); update({ inputGain }); liveInput.setGain(inputGain); }} />
       </Field>
