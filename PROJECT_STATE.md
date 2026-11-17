@@ -11,8 +11,8 @@ Ordine di lavoro dato dal proprietario: lotti A → F. Una PR per attività, uni
 | Attività | Stato | PR / branch | Prove | Residui · prossima azione |
 |---|---|---|---|---|
 | Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 (unita, merge `fec0e00`) | 564 unit, 211 e2e | Scheda audio reale non provata dall'agente |
-| A1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | `claude/sprint-a1-exercise-transpose` | `exercises/transpose.test.ts`, `app/transposeRoutine.test.ts`, e2e in `routine-arpeggio.spec.ts` | — |
-| A2 · Arpeggi: note mostrate = note suonate | MISSING | — | — | Prossima: cercare i casi divergenti tra `arpeggioBoardNotes` e la traccia riprodotta, test, fonte unica |
+| A1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | #39 (unita) | `exercises/transpose.test.ts`, `app/transposeRoutine.test.ts`, e2e in `routine-arpeggio.spec.ts` | — |
+| A2 · Arpeggi: note mostrate = note suonate | IMPLEMENTED | `claude/sprint-a2-arpeggio-coherence` | `app/arpCoherence.test.ts`: forme, personalizzazioni, corde, ritorno, accordi, progressioni, fasi delle routine | Nessuna divergenza trovata in 27 000 combinazioni: board e sequencer leggono già `arpeggioPlanOf`. Il test le tiene allineate. Prossima: A3 |
 | A3 · Legenda avanzata e forme sovrapposte | MISSING | — | — | Specifiche: `docs/MASTER_SPEC.md`, ROADMAP P1-06c, lotto 7 in `STUDIO_V6_PROGRESS.md` |
 | B1 · Selezione dispositivi audio | MISSING | — | — | |
 | B2 · Pannello Audio nella barra destra | MISSING | — | — | I due gain sono già separati (#38) |
