@@ -10,7 +10,8 @@ import { analysisSettingsOf, tuningOf } from '../app/settings';
 import { expectedAt, judge, trimHistory, type Expected } from '../app/feedback';
 import { useApp, usePlayhead } from '../app/store';
 import { CalibrationPanel } from './Calibration';
-import { liveInput, useLive } from '../audio/liveInput';
+import { initDevices, liveInput, useLive } from '../audio/liveInput';
+import { permissionHint, sampleRateMismatch, sinkSelectionSupported, totalLatencyMs } from '../audio/devices';
 import { midiInput, midiPitch, useMidi } from '../audio/midi';
 import { IN_TUNE_CENTS, MIN_CONFIDENCE, STRING_NAMES, TUNINGS, noteOf, positionsOf, tunerReading } from '../pitch';
 import { Field, Panel, Segmented, Select, Toggle } from './controls';
@@ -66,15 +67,7 @@ export function InputControls() {
         </span>
       </div>
       <InputMessage />
-      <Field label="Dispositivo">
-        <Select
-          label="Dispositivo d’ingresso"
-          testId="live-device"
-          value={on ? live.deviceId : ''}
-          options={on && live.devices.length > 0 ? live.devices.map((d) => ({ value: d.id, label: d.label })) : [{ value: '', label: 'Avvia l’ingresso per vedere i dispositivi' }]}
-          onChange={(id) => { update({ inputDeviceId: id }); startInput(id); }}
-        />
-      </Field>
+      <DeviceFields />
       <Field label="Canale della chitarra" group>
         <Segmented
           label="Canale della chitarra"
@@ -93,6 +86,59 @@ export function InputControls() {
       <MonitorControls />
       <InputDiagnostics />
     </div>
+  );
+}
+
+/** Input and output device, microphone permission, notices and latency. Device choice lives only here. */
+export function DeviceFields() {
+  const live = useLive();
+  const s = useApp((state) => state.settings);
+  const update = useApp((state) => state.update);
+  useEffect(() => { initDevices(); }, []);
+  const on = live.state === 'on';
+  const d = live.diagnostics;
+  const ms = (v: number | null) => (v === null ? 'n.d.' : `${Math.round(v * 1000)} ms`);
+  const total = d ? totalLatencyMs({ input: d.inputLatency, base: d.baseLatency, output: d.outputLatency }) : null;
+  const sink = typeof AudioContext !== 'undefined' && sinkSelectionSupported(AudioContext.prototype);
+  const inputOptions = live.devices.length > 0 ? live.devices.map((x) => ({ value: x.id, label: x.label })) : [{ value: '', label: 'Nessun ingresso trovato' }];
+  const outputOptions = [{ value: '', label: 'Uscita di sistema' }, ...live.outputs.map((x) => ({ value: x.id, label: x.label }))];
+  const permission = permissionHint(live.micPermission);
+  return (
+    <>
+      <Field label="Ingresso">
+        <Select
+          label="Dispositivo d’ingresso"
+          testId="live-device"
+          value={on ? live.deviceId : s.inputDeviceId}
+          options={inputOptions}
+          onChange={(id) => { update({ inputDeviceId: id }); startInput(id); }}
+        />
+      </Field>
+      {sink ? (
+        <Field label="Uscita">
+          <Select
+            label="Dispositivo d’uscita"
+            testId="output-device"
+            value={s.outputDeviceId}
+            options={outputOptions}
+            onChange={(outputDeviceId) => update({ outputDeviceId })}
+          />
+        </Field>
+      ) : (
+        <p className="field-hint" data-testid="output-unsupported">Questo browser usa sempre l’uscita audio di sistema: qui non si sceglie un’altra uscita.</p>
+      )}
+      {live.devices.length > 0 && live.micPermission !== 'granted' ? <p className="field-hint">Per i nomi dei dispositivi avvia l’ingresso.</p> : null}
+      {permission ? <p className="field-hint" data-testid="mic-permission">{permission}</p> : null}
+      {live.notice ? <p className="live-message is-warn" role="status" data-testid="device-notice">{live.notice}</p> : null}
+      {on && d ? (
+        <p className="field-hint" data-testid="latency-line">
+          Latenza stimata dal browser: ingresso {ms(d.inputLatency)} + base {ms(d.baseLatency)} + uscita {ms(d.outputLatency)} = {total === null ? 'non disponibile' : `${total} ms`}. È una stima, non una misura.
+        </p>
+      ) : null}
+      {on && d?.trackSampleRate && sampleRateMismatch(d.sampleRate, d.trackSampleRate) ? (
+        <p className="live-message is-warn" data-testid="rate-mismatch">Il dispositivo lavora a {d.trackSampleRate} Hz, il contesto a {d.sampleRate} Hz: il browser ricampiona.</p>
+      ) : null}
+    </>
   );
 }
 

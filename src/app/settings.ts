@@ -117,6 +117,8 @@ export interface HarmonySettings {
   readonly muteBass: boolean;
   /** Guitar input (D-21): device, gain, monitor level; tuner reference and tuning; detected notes on the neck. */
   readonly inputDeviceId: string;
+  /** Output device for the engine's context (setSinkId, where the browser has it). Per machine: never in a study preset. '' = system default. */
+  readonly outputDeviceId: string;
   /** Gain of the dry signal that goes to the analysis (pitch tracking, tuner, calibration, the input meter). */
   readonly inputGain: number;
   /** Gain of the signal that goes to the guitar rig, before its first stage. Independent of `inputGain`. */
@@ -254,6 +256,7 @@ export const DEFAULT_SETTINGS: Settings = {
   compTimbre: 'keys',
   muteBass: false,
   inputDeviceId: '',
+  outputDeviceId: '',
   inputGain: 1,
   rigGain: 1,
   monitorVol: 0.6,
@@ -376,6 +379,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     compTimbre: oneOf(r.compTimbre, Object.keys(COMP_TIMBRES) as CompTimbre[], d.compTimbre),
     muteBass: r.muteBass === true,
     inputDeviceId: typeof r.inputDeviceId === 'string' ? r.inputDeviceId.slice(0, 200) : d.inputDeviceId,
+    outputDeviceId: typeof r.outputDeviceId === 'string' ? r.outputDeviceId.slice(0, 200) : d.outputDeviceId,
     inputGain: typeof r.inputGain === 'number' && r.inputGain >= 0 && r.inputGain <= 4 ? r.inputGain : d.inputGain,
     // Until the two gains were split, one gain fed both the analysis and the rig: settings saved before then keep, for the rig,
     // the level they had (their single gain).

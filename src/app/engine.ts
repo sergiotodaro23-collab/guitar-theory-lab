@@ -3,7 +3,8 @@
  * Nothing else owns a clock: the UI reads positions derived from AudioContext time.
  */
 import { WebAudioSink, workerTimer } from '../audio/webAudioSink';
-import { liveInput } from '../audio/liveInput';
+import { liveInput, refreshOutputLatency, setDeviceNotice } from '../audio/liveInput';
+import { sinkSelectionSupported } from '../audio/devices';
 import {
   PPQ, TimelineScheduler, accentLevel, barBeatAt, ticksPerBar, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
   type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink,
@@ -71,12 +72,29 @@ class Engine {
     liveInput.setRig(settings.rig);
     useApp.subscribe((state, previous) => {
       if (state.settings !== previous.settings) this.onSettings(state.settings, previous.settings);
+      if (state.settings.outputDeviceId !== previous.settings.outputDeviceId) void this.applySink(state.settings.outputDeviceId);
     });
+  }
+
+  /** Routes the engine's output to the chosen device where the browser allows it ('' = system default). */
+  private async applySink(id: string): Promise<void> {
+    if (!sinkSelectionSupported(AudioContext.prototype)) return;
+    // A chosen output is applied at once: the choice comes from a user gesture, so the context may be created now.
+    const ctx = (this.ctx ?? (id ? this.ensureAudio() : null)) as (AudioContext & { setSinkId?: (sink: string) => Promise<void> }) | null;
+    if (!ctx) return;
+    try {
+      await ctx.setSinkId?.(id);
+      setDeviceNotice(null);
+    } catch {
+      setDeviceNotice('Impossibile usare l’uscita scelta: uso quella di sistema.');
+    }
   }
 
   private ensureAudio(): AudioContext {
     if (!this.ctx) {
       this.ctx = new AudioContext({ latencyHint: 'interactive' });
+      this.ctx.addEventListener('sinkchange', () => refreshOutputLatency(this.ctx as AudioContext));
+      void this.applySink(useApp.getState().settings.outputDeviceId);
       const secondsPerTick = () => {
         const { meter } = this.scheduler.timeConfig;
         return 60 / this.scheduler.bpm / ((PPQ * 4) / meter.beatUnit);

@@ -54,3 +54,26 @@ Sistema operativo e browser con versione, modello della scheda, dati della sezio
 - **Sensibilità**: Precisa per note tenute e accordatura, Bilanciata come compromesso, Rapida per legati e passaggi veloci (più sensibile ai rumori). Se compaiono note fantasma, passa a Bilanciata o Precisa, oppure rifai il passo "Silenzio" della calibrazione.
 - **Calibrazione**: crea un profilo (chitarra, pickup, scheda, canale), poi esegui i quattro passi con l'ingresso avviato. Ogni valore indica se è misurato o impostato a mano; "Ripristina" torna ai valori di partenza.
 - **Posizione stimata**: è una stima. Con una nota isolata non viene mostrata nessuna posizione piena; con alcune note di contesto segue la mano. La forma mostrata sulla tastiera è solo un indizio.
+
+## Selezione dispositivi (B1)
+
+Stato: **testato con dispositivi simulati; non verificato con scheda audio reale.** I test e2e (`e2e/device-selection.spec.ts`) stubbano elenco dispositivi, permesso del microfono e `setSinkId` nella pagina. Chromium headless non ha uscite reali né interfacce audio.
+
+Cosa fa l'interfaccia, nel pannello Ingresso (un solo componente, `DeviceFields`):
+
+- **Ingresso**: l'elenco è pronto anche prima di avviare l'ingresso (`enumerateDevices` su montaggio e su `devicechange`). Senza permesso del microfono il browser non dà i nomi: i dispositivi appaiono come «Ingresso n» con l'indicazione di avviare l'ingresso.
+- **Dispositivo salvato mancante**: se il browser risponde `OverconstrainedError` (id scaduto o dispositivo scollegato), l'ingresso riparte col predefinito e mostra «Dispositivo salvato non trovato». La scelta salvata non viene sovrascritta.
+- **Disconnessione durante l'uso**: quando la traccia termina, il messaggio dice che l'ingresso si è disconnesso dal sistema (non più il generico «occupato»).
+- **Uscita**: se il browser ha `AudioContext.prototype.setSinkId` (Chromium), il motore instrada l'uscita sul dispositivo scelto, alla creazione del contesto e a ogni cambio. Altrimenti il selettore non compare e il pannello dice che si usa l'uscita di sistema. Il valore è `outputDeviceId`: è un id della macchina, quindi **non entra mai in un preset di studio**.
+- **Permesso**: stato letto con `navigator.permissions.query({ name: 'microphone' })` dentro try/catch e aggiornato con `onchange`. Se negato, una riga spiega come riabilitarlo.
+- **Latenza**: sola visualizzazione. Ingresso (`track.getSettings().latency`, se dichiarato), latenza base e di uscita del contesto, e un totale marcato «stima del browser». Se la frequenza del dispositivo è diversa da quella del contesto, un avviso dice che il browser ricampiona.
+
+### Cosa non si può regolare (e perché non c'è un controllo)
+
+- **Dimensione del buffer**: la Web Audio API non espone né imposta la dimensione del buffer. Si può solo chiedere un compromesso con `latencyHint` (`'interactive'`, `'balanced'`, `'playback'`), e **solo alla creazione del contesto**. Il motore usa `'interactive'`. Cambiarlo richiederebbe di ricreare il contesto, che è il clock unico del `TimelineScheduler`, e la pipeline NAM assume nessun ricampionamento: per questo non c'è un selettore.
+- **Frequenza di campionamento**: il contesto usa la frequenza che il sistema gli assegna; la scelta richiederebbe anch'essa un contesto nuovo. Il pannello mostra la frequenza e avvisa del ricampionamento, senza controllarla.
+- **Uscita su browser senza `setSinkId`** (Safari, Firefox secondo la versione): nessun selettore; l'uscita è quella di sistema.
+
+### Da verificare con hardware reale (non fatto)
+
+Nomi reali delle interfacce, comportamento alla rimozione fisica del cavo, `setSinkId` con una cuffia USB diversa dal predefinito, permesso del microfono dopo il riavvio del browser, valori di latenza riportati dal sistema.
