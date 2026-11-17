@@ -78,7 +78,11 @@ class Engine {
 
   /** Routes the engine's output to the chosen device where the browser allows it ('' = system default). */
   private async applySink(id: string): Promise<void> {
+    // The system default is left untouched until the user chooses an output: calling setSinkId('') at creation
+    // silences the context in some browsers. Returning to the default after a choice still goes through setSinkId.
     if (!sinkSelectionSupported(AudioContext.prototype)) return;
+    if (!id && !this.sinkChosen) return;
+    this.sinkChosen = id !== '';
     // A chosen output is applied at once: the choice comes from a user gesture, so the context may be created now.
     const ctx = (this.ctx ?? (id ? this.ensureAudio() : null)) as (AudioContext & { setSinkId?: (sink: string) => Promise<void> }) | null;
     if (!ctx) return;
@@ -89,6 +93,8 @@ class Engine {
       setDeviceNotice('Impossibile usare l’uscita scelta: uso quella di sistema.');
     }
   }
+
+  private sinkChosen = false;
 
   private ensureAudio(): AudioContext {
     if (!this.ctx) {
