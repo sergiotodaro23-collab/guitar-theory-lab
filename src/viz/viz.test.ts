@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cagedPosition } from '../fretboard';
+import { DEFAULT_FRETS, STANDARD_TUNING, allFretNotes, cagedPosition } from '../fretboard';
 import { buildScale, parseChord } from '../theory';
 import { buildMarkerLayer, type MarkerInput } from './markers';
 
@@ -112,5 +112,23 @@ describe('interval labels (P2-05)', () => {
     const { markers } = buildMarkerLayer(input({ chord: null, nextChord: null, labelMode: 'interval' }));
     expect(markers.find((m) => m.pc === 4)?.label).toBe('3M');
     expect(markers.find((m) => m.pc === 5)?.label).toBe('4G');
+  });
+});
+
+describe('A3 · the arpeggio mark (D-55)', () => {
+  it('a note of the arpeggio is drawn and marked, and keeps its scale role; an arpeggio note outside the scale is drawn too', () => {
+    const scale = buildScale('C', 'ionian');
+    const arp = allFretNotes(DEFAULT_FRETS, STANDARD_TUNING).filter((n) => n.pc === 0 || n.pc === 4 || n.pc === 7).slice(0, 6);
+    const layer = buildMarkerLayer({
+      notes: [], scale, chord: null, nextChord: null, chords: [], chordIndex: 0, focus: 'all', profile: 'chord-scale',
+      labelMode: 'note', pinnedPc: null, overlays: [], wholeNeck: false, tuning: STANDARD_TUNING, arpeggio: arp,
+    });
+    const marked = layer.markers.filter((m) => m.arpeggio);
+    expect(marked.length).toBe(arp.length);
+    expect(layer.markers.filter((m) => !m.arpeggio).length).toBe(0);
+    // A tonic of the scale: role stays root (its circle), and it carries the arpeggio mark too.
+    const tonic = layer.markers.find((m) => m.pc === 0);
+    expect(tonic?.role).toBe('root');
+    expect(tonic?.arpeggio).toBe(true);
   });
 });

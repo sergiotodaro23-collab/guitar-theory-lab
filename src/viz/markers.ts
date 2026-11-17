@@ -22,6 +22,8 @@ export interface Marker extends FretNote {
   readonly layers: readonly number[];
   /** Part of the chord shape being studied. */
   readonly inVoicing: boolean;
+  /** Part of the arpeggio being played: drawn with an outline triangle, on top of its own shape (D-55). */
+  readonly arpeggio: boolean;
   readonly fn: ToneFunction | null;
 }
 
@@ -56,6 +58,8 @@ export interface MarkerInput {
   readonly wholeNeck: boolean;
   /** Draw only `notes` (plus overlays): an arpeggio route, not every chord tone in its frets. */
   readonly exact?: boolean;
+  /** The arpeggio being played: its notes are drawn and marked with the arpeggio's triangle (D-55). */
+  readonly arpeggio?: readonly FretNote[] | null;
   /** Fingers decided by the engine for these notes (a route that shifts position). */
   readonly fingers?: readonly FingeredNote[] | null;
   /** Open strings, low to high (standard when absent). */
@@ -114,6 +118,10 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
       if (overlayPcs[i]?.has(note.pc) && !drawn.has(key(note))) drawn.set(key(note), note);
     }
   });
+  const arpeggioKeys = new Set((input.arpeggio ?? []).map(key));
+  for (const note of input.arpeggio ?? []) {
+    if (!drawn.has(key(note))) drawn.set(key(note), note);
+  }
   const voicingKeys = new Set((input.voicing ?? []).map(key));
   for (const note of neck) {
     if (voicingKeys.has(key(note)) && !drawn.has(key(note))) drawn.set(key(note), note);
@@ -140,6 +148,7 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
     const scaleTone = scale.tones.find((t) => t.pc === note.pc);
     const inPrimary = scalePcs.has(note.pc);
     const layers = layersAt(note);
+    const arpeggio = arpeggioKeys.has(key(note));
     const owner = overlays.find((o) => o.index === layers[0]);
     const ownerTone = owner?.scale.tones.find((t) => t.pc === note.pc);
 
@@ -181,6 +190,7 @@ export function buildMarkerLayer(input: MarkerInput): MarkerLayer {
       target: note.midi === targetNow ? 'now' : note.midi === targetNext ? 'next' : null,
       layers,
       inVoicing: voicingKeys.has(key(note)),
+      arpeggio,
       fn,
     };
   });

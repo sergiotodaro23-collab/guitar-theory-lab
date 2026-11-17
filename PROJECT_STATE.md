@@ -13,7 +13,7 @@ Ordine di lavoro dato dal proprietario: lotti A → F. Una PR per attività, uni
 | Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 (unita, merge `fec0e00`) | 564 unit, 211 e2e | Scheda audio reale non provata dall'agente |
 | A1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | #39 (unita) | `exercises/transpose.test.ts`, `app/transposeRoutine.test.ts`, e2e in `routine-arpeggio.spec.ts` | — |
 | A2 · Arpeggi: note mostrate = note suonate | IMPLEMENTED | `claude/sprint-a2-arpeggio-coherence` | `app/arpCoherence.test.ts`: forme, personalizzazioni, corde, ritorno, accordi, progressioni, fasi delle routine | Nessuna divergenza trovata in 27 000 combinazioni: board e sequencer leggono già `arpeggioPlanOf`. Il test le tiene allineate. Prossima: A3 |
-| A3 · Legenda avanzata e forme sovrapposte | MISSING | — | — | Specifiche: `docs/MASTER_SPEC.md`, ROADMAP P1-06c, lotto 7 in `STUDIO_V6_PROGRESS.md` |
+| A3 · Legenda avanzata e forme sovrapposte | PARTIAL | `claude/sprint-a3-legend-arpeggio` | `viz/viz.test.ts`, `viz/legend.test.ts`, `e2e/arpeggio-mark.spec.ts`; screenshot in Arpeggios Lab | Fatto: triangolo a contorno per le note dell'arpeggio (D-55), sopra il cerchio di ruolo, voce in legenda. Mancano: legenda condivisa per intervalli e target notes, forme di più scale sulla stessa nota (P1-06c). |
 | B1 · Selezione dispositivi audio | MISSING | — | — | |
 | B2 · Pannello Audio nella barra destra | MISSING | — | — | I due gain sono già separati (#38) |
 | B3 · Via l'input legacy dal taccuino | MISSING | — | — | Dopo B2 |
