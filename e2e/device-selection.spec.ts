@@ -89,3 +89,13 @@ test('simulated: a saved input that the browser does not have falls back to the 
   await expect(page.getByTestId('device-notice')).toContainText('uso quello predefinito');
   await expect(page.getByTestId('live-status')).toHaveText('Ingresso attivo');
 });
+
+test('simulated: the right bar shows the device fields in an audio section open by default', async ({ page }) => {
+  await stub(page, { permission: 'granted', sink: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  const section = page.getByTestId('rack-audio-section');
+  await expect(section).toHaveJSProperty('open', true);
+  await expect(section.getByTestId('rack-live-device').locator('option')).toHaveText(['Interfaccia simulata', 'Ingresso 2']);
+  await expect(section.getByTestId('rack-output-device').locator('option')).toHaveText(['Uscita di sistema', 'Cuffie simulate']);
+});

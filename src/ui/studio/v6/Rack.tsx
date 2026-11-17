@@ -18,7 +18,7 @@ import { formatLabel, gearLabel } from '../../../app/tone3000';
 import { T3kMark, Tone3000Dialog, Tone3000Wordmark } from './Tone3000';
 import { useMidi } from '../../../audio/midi';
 import { noteOf } from '../../../pitch';
-import { startInput } from '../../LivePanels';
+import { DeviceFields, startInput } from '../../LivePanels';
 import { RotaryKnob } from '../v57/RotaryKnob';
 import { gainDb, gainToKnob, knobToGain, type RackModuleId } from '../v57/layout';
 import { AMP_LABELS, PEDAL_SIZE, Pedal, useRig } from '../v57/rig';
@@ -96,6 +96,10 @@ function InputModule() {
     <Module id="input" title="Scheda audio / Input" lit={on}
       power={<Switch on={on} label={on ? 'Ferma l’ingresso' : 'Avvia l’ingresso'} disabled={live.state === 'starting'} testId="iface-power" onClick={() => (on ? liveInput.stop() : startInput())} />}>
       <div className="v6-lcdline" data-testid="iface-lcd" role="status"><b>{statusText}</b><span>{pathText} · Rilevato: {note ? `${note.name}${note.octave}` : '—'}</span></div>
+      <details className="v6-audio-section" open data-testid="rack-audio-section">
+        <summary>Dispositivi e uscita</summary>
+        <DeviceFields idPrefix="rack-" />
+      </details>
       <div className="v6-iface" data-on={on ? '1' : '0'} data-testid="iface-panel" style={{ width: IFACE.size.w, height: IFACE.size.h }}>
         <img className="v6-hw-body" src={ifaceBody} alt="" draggable={false} data-testid="iface-body" style={bodyBox(IFACE_HW.assets.body)} />
         <span className="v6-iface-lab" style={{ left: IFACE.jack.x, top: IFACE.labelY }}>Input</span>
