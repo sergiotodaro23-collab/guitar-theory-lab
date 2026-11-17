@@ -126,7 +126,10 @@ class LiveInput {
   private splitter: ChannelSplitterNode | null = null;
   /** Mono guitar signal: the chosen channel, or both averaged. */
   private mono: GainNode | null = null;
+  /** Detection gain: the dry signal of the analysis (analyser, capture worklet, calibration recordings). */
   private gain: GainNode | null = null;
+  /** Rig gain: the signal that enters the guitar rig. A branch of its own after the channel choice. */
+  private rigIn: GainNode | null = null;
   private analyser: AnalyserNode | null = null;
   private worklet: AudioWorkletNode | null = null;
   private recorder: { samples: Float32Array; written: number; startTime: number; done: (startTime: number, samples: Float32Array) => void } | null = null;
@@ -143,6 +146,7 @@ class LiveInput {
   private buffer = new Float32Array(FRAME);
   private clipUntil = 0;
   private inputGain = 1;
+  private rigGain = 1;
   private monitorLevel = 0.6;
   private settings: AnalysisSettings = { sensitivity: 'balanced', minRms: 0.01, minConfidence: null };
   private sampleRate = 48000;
@@ -168,13 +172,17 @@ class LiveInput {
       this.splitter = ctx.createChannelSplitter(2);
       this.source.connect(this.splitter);
       this.route(channel);
+      // Two independent gains after the channel choice: one for what is analysed, one for what is played through the rig.
       this.gain = ctx.createGain();
       this.gain.gain.value = this.inputGain;
+      this.rigIn = ctx.createGain();
+      this.rigIn.gain.value = this.rigGain;
       this.analyser = ctx.createAnalyser();
       this.analyser.fftSize = FRAME;
       this.monitor = ctx.createGain();
       this.monitor.gain.value = 0;
       this.mono.connect(this.gain);
+      this.mono.connect(this.rigIn);
       this.gain.connect(this.analyser);
       this.rig = new GuitarRig(ctx);
       const changed = () => useLive.setState((s) => ({ rigRevision: s.rigRevision + 1 }));
@@ -184,7 +192,7 @@ class LiveInput {
       this.rig.setNam(namHost.nodeFor(ctx));
       this.rig.setCabFile(this.cabFile);
       this.rig.apply(this.rigSettings);
-      this.gain.connect(this.rig.input);
+      this.rigIn.connect(this.rig.input);
       this.rig.output.connect(this.monitor).connect(destination);
       this.sampleRate = ctx.sampleRate;
       await this.attachWorklet(ctx);
@@ -223,12 +231,12 @@ class LiveInput {
     this.worklet = null;
     this.sink = null;
     this.stream?.getTracks().forEach((t) => t.stop());
-    for (const node of [this.source, this.splitter, this.mono, this.gain, this.analyser, this.monitor]) node?.disconnect();
+    for (const node of [this.source, this.splitter, this.mono, this.gain, this.rigIn, this.analyser, this.monitor]) node?.disconnect();
     namHost.onNode = null;
     this.rig?.dispose();
     this.rig = null;
     this.stream = null;
-    this.source = this.splitter = this.mono = this.gain = this.analyser = this.monitor = null;
+    this.source = this.splitter = this.mono = this.gain = this.rigIn = this.analyser = this.monitor = null;
     this.tracker.reset();
     useLive.setState({ state: 'off', level: 0, clipping: false, pitch: null, monitorOn: false });
   }
@@ -335,9 +343,21 @@ class LiveInput {
     return times;
   }
 
+  /** Detection gain: level of the dry signal the analysis reads. It does not reach the rig. */
   setGain(value: number): void {
     this.inputGain = value;
     this.gain?.gain.setTargetAtTime(value, this.gain.context.currentTime, 0.02);
+  }
+
+  /** Rig gain: level of the signal that enters the rig. It does not reach the analysis. */
+  setRigGain(value: number): void {
+    this.rigGain = value;
+    this.rigIn?.gain.setTargetAtTime(value, this.rigIn.context.currentTime, 0.02);
+  }
+
+  /** The two gains as the graph has them now, for tests and diagnostics. */
+  gains(): { readonly detection: number; readonly rig: number; readonly separate: boolean } {
+    return { detection: this.inputGain, rig: this.rigGain, separate: this.gain !== null && this.rigIn !== null && this.gain !== this.rigIn };
   }
 
   /** Rig settings from the store; applied at once when the input runs, and on the next start. */

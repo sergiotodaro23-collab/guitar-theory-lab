@@ -1,14 +1,26 @@
 {
   "id": "iface",
-  "about": "Audio interface of the Studio V6 rack. All numbers are CSS pixels. The meter window and the control strip are places for live HTML: the meter changes every frame.",
+  "about": "Audio interface of the Studio V6 rack. All numbers are CSS pixels. The meter window and the control strip are places for live HTML: the meter changes every frame. Two gain knobs share one sprite strip (the strip is rendered at `knob`, drawn at `gains.size`).",
   "size": { "w": 300, "h": 78 },
   "margin": { "left": 8, "top": 5, "right": 12, "bottom": 15 },
   "corner": 5,
   "height": 26,
   "cheek": 9,
-  "jack": { "x": 37, "y": 39, "r": 17 },
+  "jack": { "x": 25, "y": 41, "r": 14 },
   "knob": { "x": 96, "y": 43, "diameter": 34, "frame": 50, "hit": 40, "frames": 31, "sweep": 270, "tickRadius": 21 },
   "labelY": 8,
-  "meter": { "x": 130, "y": 12, "w": 154, "h": 18 },
-  "controls": { "x": 130, "y": 38, "w": 154, "h": 30 }
+  "meter": { "x": 138, "y": 12, "w": 146, "h": 18 },
+  "controls": { "x": 138, "y": 38, "w": 146, "h": 30 },
+  "gains": {
+    "ids": [
+      "rig",
+      "detect"
+    ],
+    "first": 71,
+    "pitch": 43,
+    "y": 45,
+    "size": 42,
+    "hit": 36,
+    "tickRadius": 17.5
+  }
 }

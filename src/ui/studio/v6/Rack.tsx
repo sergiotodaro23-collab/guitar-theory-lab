@@ -14,6 +14,8 @@ import { useApp } from '../../../app/store';
 import { liveInput, useLive, type InputChannel } from '../../../audio/liveInput';
 import { namHost, useNam, type NamStatus } from '../../../audio/namHost';
 import { describeNamModel } from '../../../app/namModel';
+import { formatLabel, gearLabel } from '../../../app/tone3000';
+import { T3kMark, Tone3000Dialog, Tone3000Wordmark } from './Tone3000';
 import { useMidi } from '../../../audio/midi';
 import { noteOf } from '../../../pitch';
 import { startInput } from '../../LivePanels';
@@ -97,10 +99,24 @@ function InputModule() {
       <div className="v6-iface" data-on={on ? '1' : '0'} data-testid="iface-panel" style={{ width: IFACE.size.w, height: IFACE.size.h }}>
         <img className="v6-hw-body" src={ifaceBody} alt="" draggable={false} data-testid="iface-body" style={bodyBox(IFACE_HW.assets.body)} />
         <span className="v6-iface-lab" style={{ left: IFACE.jack.x, top: IFACE.labelY }}>Input</span>
-        <span className="v6-iface-lab" style={{ left: IFACE.knob.x, top: IFACE.labelY }}>Gain</span>
-        <RotaryKnob value={gainToKnob(s.inputGain)} onChange={(v) => { const inputGain = knobToGain(v); update({ inputGain }); liveInput.setGain(inputGain); }}
-          label="Gain d’ingresso" valueText={gainDb(s.inputGain)} sprite={{ src: ifaceKnobStrip, frames: IFACE.knob.frames }} bodySize={IFACE.knob.frame} hitSize={IFACE.knob.hit}
-          cx={IFACE.knob.x} cy={IFACE.knob.y} defaultValue={25} testId="iface-gain" />
+        {/* Two independent gains after the channel choice: Rig feeds the guitar rig, Detection feeds the analysis (tracking, tuner,
+            calibration, this meter). Neither is the monitor volume, the master, the NAM model's own input or the interface's hardware gain. */}
+        {IFACE.gains.ids.map((id, i) => {
+          const cx = IFACE.gains.first + IFACE.gains.pitch * i;
+          const rigKnob = id === 'rig';
+          const value = rigKnob ? s.rigGain : s.inputGain;
+          const set = (v: number) => {
+            const gain = knobToGain(v);
+            if (rigKnob) { update({ rigGain: gain }); liveInput.setRigGain(gain); } else { update({ inputGain: gain }); liveInput.setGain(gain); }
+          };
+          return (
+            <Fragment key={id}>
+              <span className="v6-iface-lab" style={{ left: cx, top: IFACE.labelY }}>{rigKnob ? 'Rig' : 'Detect'}</span>
+              <RotaryKnob value={gainToKnob(value)} onChange={set} label={rigKnob ? 'Gain del rig (livello verso amplificatore e pedali)' : 'Gain di rilevazione (livello verso l’analisi delle note)'} valueText={gainDb(value)}
+                sprite={{ src: ifaceKnobStrip, frames: IFACE.knob.frames }} bodySize={IFACE.gains.size} hitSize={IFACE.gains.hit} cx={cx} cy={IFACE.gains.y} defaultValue={25} testId={rigKnob ? 'iface-gain-rig' : 'iface-gain'} />
+            </Fragment>
+          );
+        })}
         <div className="v6-meter v6-iface-meter" role="meter" aria-label="Livello d’ingresso" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)} data-clip={live.clipping ? '1' : '0'}
           style={{ left: IFACE.meter.x, top: IFACE.meter.y, width: IFACE.meter.w, height: IFACE.meter.h }}>
           {Array.from({ length: 14 }, (_, i) => <i key={i} data-zone={i >= 12 ? 'hot' : i >= 9 ? 'warm' : 'ok'} data-on={i < Math.round(level * 14) ? '1' : '0'} />)}
@@ -113,7 +129,7 @@ function InputModule() {
                 aria-label={`Ingresso ${n}${s.inputChannel === 'mix' ? ' (ora: entrambi sommati)' : ''}`} onClick={() => pickChannel(n)}>{n}</button>
             ))}
           </div>
-          <span className="v6-silk">Gain <b>{gainDb(s.inputGain)}</b></span>
+          <span className="v6-silk v6-iface-read" data-testid="iface-gain-read">R <b>{gainDb(s.rigGain)}</b><br />D <b>{gainDb(s.inputGain)}</b></span>
         </div>
       </div>
       <div className="v6-line">
@@ -133,6 +149,11 @@ function InputModule() {
 const AMP = AMP_HEAD.spec;
 const AMP_BODY = AMP_HEAD.assets.body;
 
+/** What plays in the amp stage, for the sticker on the head: the built-in preamp, a local .nam file, or a model chosen on TONE3000. */
+export type AmpSource = 'internal' | 'nam' | 'tone3000';
+export const AMP_STICKER: Readonly<Record<AmpSource, string>> = { internal: 'DSP interno', nam: 'NAM', tone3000: 'TONE3000' };
+export const ampSourceOf = (namPlays: boolean, origin: { readonly kind: string } | null): AmpSource => (!namPlays ? 'internal' : origin?.kind === 'tone3000' ? 'tone3000' : 'nam');
+
 /** True when the settings ask for the model, the engine holds one, and it includes its cabinet: the rig's cabinet is skipped. */
 const namSkipsCab = (rig: { readonly amp: { readonly model: string; readonly namCab: boolean } }, nam: NamStatus): boolean => rig.amp.model === 'nam' && rig.amp.namCab && nam.phase === 'ready';
 
@@ -145,6 +166,8 @@ function NamPanel() {
   const live = useLive();
   const file = useRef<HTMLInputElement>(null);
   const [engineNow, setEngineNow] = useState<'internal' | 'nam' | null>(null);
+  const [browsing, setBrowsing] = useState(false);
+  const origin = nam.phase === 'ready' && nam.origin?.kind === 'tone3000' ? nam.origin : null;
   useEffect(() => { setEngineNow(liveInput.rigState()?.ampEngine ?? null); }, [rig, live.state, live.rigRevision, nam.phase]);
   const wanted = rig.amp.model === 'nam';
   const pick = (model: 'internal' | 'nam') => setRig((r) => ({ ...r, amp: { ...r.amp, model } }));
@@ -183,10 +206,21 @@ function NamPanel() {
         <button type="button" className="v6-minikey" data-testid="nam-load" disabled={busy} onClick={() => file.current?.click()}>Carica file .nam</button>
         <button type="button" className="v6-minikey" data-testid="nam-unload" disabled={busy || nam.phase !== 'ready'} onClick={() => namHost.unload()}>Rimuovi modello</button>
       </div>
+      <div className="v6-line">
+        <button type="button" className="v6-minikey" data-testid="nam-browse-t3k" aria-label="Sfoglia TONE3000" onClick={() => setBrowsing(true)}>Sfoglia <Tone3000Wordmark /></button>
+        <span className="v6-note">facoltativo</span>
+      </div>
+      <Tone3000Dialog open={browsing} onClose={() => setBrowsing(false)} />
       <input ref={file} type="file" accept=".nam,application/json" hidden data-testid="nam-file" onChange={(e) => void onFile(e.target.files?.[0])} />
       {nam.error ? <p className="v6-note v6-alert" role="alert" data-testid="nam-error">{nam.error}</p> : null}
       {nam.phase === 'ready' && s ? (
         <dl className="v6-nam-facts" data-testid="nam-facts">
+          {origin ? (
+            <div><dt>Origine</dt><dd className="v6-nam-origin" data-testid="nam-origin">
+              {origin.imageUrl ? <img src={origin.imageUrl} alt="" referrerPolicy="no-referrer" /> : null}
+              <span><T3kMark /> {origin.title} · {gearLabel(origin.gear)} · {formatLabel('nam')} · @{origin.author || 'sconosciuto'} · <a href={origin.toneUrl} target="_blank" rel="noreferrer noopener">pagina del tone</a></span>
+            </dd></div>
+          ) : <div><dt>Origine</dt><dd data-testid="nam-origin">file locale</dd></div>}
           <div><dt>Modello</dt><dd>{describeNamModel(s)}</dd></div>
           <div><dt>File</dt><dd>{s.fileName} · {(s.sizeBytes / 1024).toFixed(0)} kB · formato {s.version}</dd></div>
           {m ? <div><dt>Misurato qui</dt><dd data-testid="nam-measure">caricato in {Math.round(m.loadMs)} ms · costo stimato {percent(m.realtimeFactor)} del tempo audio ({Math.round(m.microsPerBlock)} µs per blocco su {Math.round(m.budgetMicros)}) · latenza aggiunta 0 campioni</dd></div> : null}
@@ -210,6 +244,7 @@ function AmpModule() {
   const amp = rig.amp;
   const heard = amp.power && !amp.bypass;
   const namReady = amp.model === 'nam' && nam.phase === 'ready' && nam.summary !== null;
+  const ampSource = ampSourceOf(namReady, nam.origin);
   return (
     <Module id="amp" title="Amplificatore" lit={heard}
       power={<Switch on={amp.power} label="Accensione dell’amplificatore" testId="amp-power" onClick={() => setRig((r) => ({ ...r, amp: { ...r.amp, power: !r.amp.power } }))} />}>
@@ -219,7 +254,8 @@ function AmpModule() {
           <span className="v6-amp-name">{namReady ? 'GTL NAM' : 'GTL Clean'}</span>
         </div>
         <div className="v6-amp-tapebox" style={{ right: AMP.tape.right, top: AMP.tape.y }}>
-          <span className="v6-amp-tape" data-testid="amp-tape">{namReady ? `NAM · ${nam.summary?.name ?? ''}` : amp.model === 'nam' ? 'DSP interno · NAM senza modello' : 'DSP interno'}</span>
+          {/* The sticker names the engine that plays, nothing else: a fixed word on a fixed tape. Titles, files and authors are in the facts under the head. */}
+          <span className="v6-amp-tape" data-testid="amp-tape" data-source={ampSource}>{AMP_STICKER[ampSource]}</span>
         </div>
         <div className="v6-amp-panel">
           <span className="v6-amp-lamp" data-on={amp.power ? 1 : 0} data-testid="amp-lamp" role="img" aria-label={amp.power ? 'Amplificatore acceso' : 'Amplificatore spento'}

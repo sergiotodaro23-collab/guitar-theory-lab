@@ -102,6 +102,8 @@ Come leggerle: il costo per blocco viene dal rendering offline, che esegue lo st
 - La copia a file unico (`npm run build:single`) non contiene il motore: lì il caricamento di un modello fallisce con un messaggio e resta il DSP interno.
 - Firefox e Safari non provati.
 
+Scelta di un tone dal catalogo TONE3000: `docs/TONE3000_INTEGRATION.md` (D-52).
+
 ## Test
 
 - Unit: `src/app/namModel.test.ts` (lettura dei file, rifiuti, frequenze, costo, trim), `src/app/rig.test.ts` (impostazioni, sessioni precedenti, niente file nelle impostazioni).

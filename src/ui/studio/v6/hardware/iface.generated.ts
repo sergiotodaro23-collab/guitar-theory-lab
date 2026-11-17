@@ -2,7 +2,7 @@
 export const IFACE_HW = {
   "spec": {
     "id": "iface",
-    "about": "Audio interface of the Studio V6 rack. All numbers are CSS pixels. The meter window and the control strip are places for live HTML: the meter changes every frame.",
+    "about": "Audio interface of the Studio V6 rack. All numbers are CSS pixels. The meter window and the control strip are places for live HTML: the meter changes every frame. Two gain knobs share one sprite strip (the strip is rendered at `knob`, drawn at `gains.size`).",
     "size": {
       "w": 300,
       "h": 78
@@ -17,9 +17,9 @@ export const IFACE_HW = {
     "height": 26,
     "cheek": 9,
     "jack": {
-      "x": 37,
-      "y": 39,
-      "r": 17
+      "x": 25,
+      "y": 41,
+      "r": 14
     },
     "knob": {
       "x": 96,
@@ -33,16 +33,28 @@ export const IFACE_HW = {
     },
     "labelY": 8,
     "meter": {
-      "x": 130,
+      "x": 138,
       "y": 12,
-      "w": 154,
+      "w": 146,
       "h": 18
     },
     "controls": {
-      "x": 130,
+      "x": 138,
       "y": 38,
-      "w": 154,
+      "w": 146,
       "h": 30
+    },
+    "gains": {
+      "ids": [
+        "rig",
+        "detect"
+      ],
+      "first": 71,
+      "pitch": 43,
+      "y": 45,
+      "size": 42,
+      "hit": 36,
+      "tickRadius": 17.5
     }
   },
   "assets": {

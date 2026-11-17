@@ -92,7 +92,7 @@ Stato: **implementati**; resi con Blender 5.3.0, verificati in Chromium headless
 | Spec | `specs/cab.json` | `specs/iface.json` |
 | Dimensioni | 300 × 92 px CSS | 300 × 78 px CSS |
 | Reso | tolex, bordino e angolari della testata; tela a trama aperta con due altoparlanti che si intravedono; targhetta | telaio in alluminio spazzolato, pannello anodizzato, presa combo XLR/jack, finestra fumé del misuratore, manopola in alluminio a 31 fotogrammi |
-| HTML | selettore della risposta all'impulso sotto l'immagine; l'immagine si attenua a cabinet escluso | manopola del gain, misuratore dentro la finestra (resta CSS: cambia a ogni frame), canali 1 e 2, lettura in dB |
+| HTML | selettore della risposta all'impulso sotto l'immagine; l'immagine si attenua a cabinet escluso | due manopole di gain (Rig e Detection, una sola striscia di fotogrammi), misuratore dentro la finestra (resta CSS: cambia a ogni frame), canali 1 e 2, letture in dB |
 | Peso | 46 kB | 55 kB |
 | Nel kit | `speaker`, tela `open_weave` | `combo_jack`; la manopola è `skirted_knob` con materiali d'alluminio |
 

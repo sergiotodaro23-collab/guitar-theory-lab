@@ -32,6 +32,11 @@ Branch remoti al momento dell'audit: `main`, i branch `claude/*` dei lotti già 
 - `matchingRigPreset` serializza i sette suoni a ogni disegno del selettore: costo piccolo, non misurato come problema.
 - Nessuna prova con chitarra e scheda audio reali: tutto il rig è **testato con segnali sintetici** (un WAV come microfono).
 
+## Dopo la revisione automatica della PR #21
+
+- **Corretto** (con la PR di TONE3000): un cambio di catena a contesto audio sospeso poteva essere sovrascritto da una riconnessione rimasta in attesa da quando il contesto girava. Ora il ramo senza clock annulla la riconnessione in attesa e riporta l'uscita a 1.
+- **Non corretto**: `rewireGain` legge `AudioParam.value` al momento della riconnessione. In Chromium segue l'automazione; su altri browser può riportare il valore programmato. Vale come prova in Chromium, non altrove.
+
 ## Baseline
 
 Baseline per il lavoro su NAM: `main` a `6c493be692dfe5c3b521d9339047e2e9366b5441` (PR #20 e #21 unite, CI verde).

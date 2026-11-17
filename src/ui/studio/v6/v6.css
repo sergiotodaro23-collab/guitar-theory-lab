@@ -216,7 +216,8 @@
 .v6-amp-top { position: absolute; display: grid; place-items: center; }
 .v6-amp-name { font: italic 600 17px/1 'Cormorant Garamond', Georgia, serif; color: #2b1907; text-shadow: 0 1px 0 rgba(255, 226, 160, .55); white-space: nowrap; }
 .v6-amp-tapebox { position: absolute; }
-.v6-amp-tape { display: block; padding: 2px 6px; font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #2a1a08; background: #e6d7a8; transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; }
+/* One fixed size for every word it can carry (DSP interno, NAM, TONE3000): the head never changes with the model's name. */
+.v6-amp-tape { display: block; box-sizing: border-box; width: 64px; text-align: center; overflow: hidden; padding: 2px 0; font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #2a1a08; background: #e6d7a8; transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; }
 .v6-amp-panel { position: absolute; inset: 0; }
 .v6-amp-lab { position: absolute; transform: translateX(-50%); font: 600 8.5px/11px 'Barlow Condensed', sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #2a1806; text-shadow: 0 1px 0 rgba(255, 226, 160, .4); white-space: nowrap; }
 .v6-amp-lamp { position: absolute; transform: translate(-50%, -50%); background-size: 100% 100%; }
@@ -443,3 +444,38 @@
 /* settings: a row of choices */
 .v57-setrow { display: flex; gap: 6px; }
 .v57-setrow .v57-textbtn[data-on='1'] { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); }
+/* TONE3000 (D-52) */
+.v6-t3k { width: min(680px, 94vw); }
+.v6-t3k-word { font: 700 20px/1 'Barlow Condensed', sans-serif; letter-spacing: .14em; color: #f2ead8; }
+.v6-minikey .v6-t3k-word { font-size: 12px; color: inherit; }
+.v6-pl-head h2 small { margin-left: 8px; font: 500 12px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; color: #a79f8f; }
+.v6-t3k-mark { display: inline-block; padding: 1px 4px; border-radius: 3px; background: #101010; color: #f2ead8; font: 700 9px/11px 'Barlow Condensed', sans-serif; letter-spacing: .12em; }
+.v6-t3k-block { display: grid; gap: 10px; }
+.v6-t3k-block p, .v6-t3k-info p { margin: 0; }
+.v6-t3k-block code { padding: 1px 4px; border-radius: 3px; background: #0c0d0f; font: 500 12px/18px 'IBM Plex Mono', monospace; overflow-wrap: anywhere; }
+.v6-t3k-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v6-t3k-row .v6-minikey, .v6-t3k-foot .v6-minikey { height: 30px; padding: 0 12px; font-size: 13px; }
+.v6-t3k-row .v6-minikey[data-on='1'], .v6-t3k-go { color: #2a1606; background: linear-gradient(180deg, #ffd08a, #f0a23c 55%, #c9741c); }
+.v6-t3k-field { display: grid; gap: 4px; }
+.v6-t3k-field > span, .v6-t3k-row > span { font: 600 11px/14px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #a79f8f; }
+.v6-t3k-tone { display: grid; grid-template-columns: 150px 1fr; gap: 14px; align-items: start; }
+.v6-t3k-img { width: 150px; height: 150px; border-radius: 6px; object-fit: cover; background: #0c0d0f; box-shadow: 0 0 0 1px #050505; }
+.v6-t3k-info { display: grid; gap: 8px; min-width: 0; }
+.v6-t3k-info h3 { margin: 0; font: 600 20px/24px 'Barlow Condensed', sans-serif; color: #f1ca86; overflow-wrap: anywhere; }
+.v6-t3k-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.v6-t3k-tags span { padding: 1px 7px; border-radius: 10px; background: #0c0d0f; font: 600 11px/18px 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.v6-t3k-by { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v6-t3k-by img { border-radius: 50%; }
+.v6-t3k-by a, .v6-nam-facts a { color: #f1ca86; }
+.v6-t3k-desc { max-height: 96px; overflow-y: auto; color: #cfc6b2; white-space: pre-line; }
+.v6-t3k-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-top: 8px; border-top: 1px solid rgba(140, 147, 155, .25); }
+.v6-nam-origin { display: flex; align-items: center; gap: 8px; }
+.v6-nam-origin img { width: 34px; height: 34px; border-radius: 4px; object-fit: cover; }
+@media (max-width: 560px) { .v6-t3k-tone { grid-template-columns: 1fr; } }
+
+/* model facts: long titles and file names wrap inside the panel, they never widen it */
+.v6-nam-facts dd { min-width: 0; overflow-wrap: anywhere; }
+.v6-nam-origin span { min-width: 0; overflow-wrap: anywhere; }
+
+/* two gains: a two-line readout (R = rig, D = detection) */
+.v6-iface-read { text-align: right; line-height: 11px; font-size: 9.5px !important; }

@@ -17,8 +17,8 @@
         98
       ],
       "scale": 2,
-      "bytes": 8816,
-      "sha256": "02d67b540444a514",
+      "bytes": 8908,
+      "sha256": "c2b951c58bc860fd",
       "use": "Audio interface: chassis, panel, input socket, meter window",
       "offset": [
         -8,
@@ -46,5 +46,5 @@
       ]
     }
   },
-  "renderSeconds": 62.9
+  "renderSeconds": 62.6
 }

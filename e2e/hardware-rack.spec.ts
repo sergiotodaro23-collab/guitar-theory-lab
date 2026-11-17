@@ -21,7 +21,7 @@ for (const [width, height] of [[1440, 900], [1366, 768], [1280, 720], [1024, 768
     const panel = await page.getByTestId('iface-panel').boundingBox();
     if (!panel) throw new Error('no interface panel');
     expect(panel.width).toBe(300);
-    const parts = [page.getByTestId('iface-gain'), page.getByRole('meter', { name: 'Livello d’ingresso' }), page.getByRole('radio', { name: /Ingresso 1/ }), page.getByRole('radio', { name: /Ingresso 2/ })];
+    const parts = [page.getByTestId('iface-gain'), page.getByTestId('iface-gain-rig'), page.getByRole('meter', { name: 'Livello d’ingresso' }), page.getByRole('radio', { name: /Ingresso 1/ }), page.getByRole('radio', { name: /Ingresso 2/ })];
     const boxes = [];
     for (const part of parts) {
       const box = await part.boundingBox();
@@ -33,8 +33,10 @@ for (const [width, height] of [[1440, 900], [1366, 768], [1280, 720], [1024, 768
       boxes.push(box);
     }
     // The knob does not cover the meter or the channel keys.
-    const [knob, ...others] = boxes;
-    if (!knob) throw new Error('no knob');
+    const [knob, rigKnob, ...others] = boxes;
+    if (!knob || !rigKnob) throw new Error('no knob');
+    // Rig on the left, Detection beside it, neither over the other, the meter or the channel keys.
+    expect(rigKnob.x + rigKnob.width).toBeLessThanOrEqual(knob.x);
     for (const other of others) expect(knob.x + knob.width).toBeLessThanOrEqual(other.x);
     expect(await page.locator('.v6-rack-body').evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
     expect(errors).toEqual([]);

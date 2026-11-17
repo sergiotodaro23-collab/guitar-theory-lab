@@ -54,7 +54,7 @@ test('the amp starts on the internal DSP and the engine is not downloaded until 
   // Asking for NAM without a model changes nothing in the sound path, and says so.
   await page.getByTestId('amp-engine-nam').click();
   await expect(page.getByTestId('nam-status')).toContainText('Nessun modello caricato: suona il DSP interno');
-  await expect(page.getByTestId('amp-tape')).toHaveText('DSP interno · NAM senza modello');
+  await expect(page.getByTestId('amp-tape')).toHaveText('DSP interno');
   expect((await rigState(page))?.ampEngine).toBe('internal');
   expect(engineFiles).toEqual([]);
   expect(errors).toEqual([]);
@@ -73,7 +73,7 @@ test('a local A1 model: the engine confirms it, the amp stage runs it, and going
   await expect.poll(async () => (await rigState(page))?.ampEngine).toBe('nam');
   await expect.poll(async () => (await rigState(page))?.namFed).toBe(true);
   await expect(page.getByTestId('nam-status')).toContainText('Modello attivo nello stadio amplificatore: Prova A1');
-  await expect(page.getByTestId('amp-tape')).toHaveText('NAM · Prova A1');
+  await expect(page.getByTestId('amp-tape')).toHaveText('NAM');
   await expect(page.getByTestId('nam-facts')).toContainText(`A1 · WaveNet · ${A1_STANDARD_WEIGHTS.toLocaleString('it-IT')} pesi`);
 
   // What was measured on this machine is real and shown.
@@ -158,7 +158,7 @@ test('bad files are refused with a reason, and a refused file leaves the loaded 
   await expect(error).toContainText('Il motore NAM ha rifiutato il modello', { timeout: 20_000 });
   await expect(error).toContainText('Resta caricato il modello precedente');
   await expect(page.getByTestId('nam-status')).toHaveAttribute('data-phase', 'ready');
-  await expect(page.getByTestId('amp-tape')).toHaveText('NAM · Buono');
+  await expect(page.getByTestId('amp-tape')).toHaveText('NAM');
   expect((await rigState(page))?.ampEngine).toBe('nam');
 });
 
@@ -191,7 +191,7 @@ test('listening off: the model is not fed; bypass and power keep working; removi
   await page.getByTestId('nam-unload').click();
   await expect(page.getByTestId('nam-status')).toHaveAttribute('data-phase', 'empty');
   await expect.poll(async () => (await rigState(page))?.ampEngine).toBe('internal');
-  await expect(page.getByTestId('amp-tape')).toHaveText('DSP interno · NAM senza modello');
+  await expect(page.getByTestId('amp-tape')).toHaveText('DSP interno');
 });
 
 test('the choice of NAM is saved, the model is not: after a reload the DSP plays and says so', async ({ page }) => {
@@ -204,7 +204,13 @@ test('the choice of NAM is saved, the model is not: after a reload the DSP plays
   await openRack(page);
   await expect(page.getByTestId('amp-engine-nam')).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByTestId('nam-status')).toContainText('Nessun modello caricato: suona il DSP interno');
-  await expect(page.getByTestId('amp-tape')).toHaveText('DSP interno · NAM senza modello');
+  await expect(page.getByTestId('amp-tape')).toHaveText('DSP interno');
   const saved = await page.evaluate(() => Object.entries(localStorage).map(([k, v]) => `${k}=${v}`).join('\n'));
   expect(saved).not.toContain('receptive_field');
+});
+
+test('the engine adds no latency: an impulse through a one-tap model comes out at the same sample', async ({ page }) => {
+  await open(page);
+  const delay = await page.evaluate(() => window.__gtl?.namTools?.latency(48000) ?? Number.NaN);
+  expect(delay).toBe(0);
 });

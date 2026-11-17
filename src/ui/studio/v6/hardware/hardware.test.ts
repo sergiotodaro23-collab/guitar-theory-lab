@@ -152,17 +152,22 @@ describe('pedals: the rendered bodies match the pedals of the rig', () => {
 });
 
 describe('audio interface and cabinet: live controls have their place on the pictures', () => {
-  it('interface: socket, knob with its marks, meter window and control strip lie on the panel without overlapping', () => {
-    const { size, cheek, jack, knob: k, meter, controls } = IFACE_HW.spec;
+  it('interface: socket, the two gain knobs with their marks, meter window and control strip lie on the panel without overlapping', () => {
+    const { size, cheek, jack, knob: k, gains: g, meter, controls } = IFACE_HW.spec;
     expect(size.w).toBeLessThanOrEqual(300);
+    expect(g.ids).toEqual(['rig', 'detect']);
+    const last = g.first + g.pitch * (g.ids.length - 1);
     expect(jack.x - jack.r).toBeGreaterThanOrEqual(cheek);
-    expect(jack.x + jack.r).toBeLessThanOrEqual(k.x - k.tickRadius);
-    expect(k.x + k.tickRadius).toBeLessThanOrEqual(meter.x);
-    expect(k.y + k.tickRadius).toBeLessThanOrEqual(size.h);
+    expect(jack.x + jack.r).toBeLessThanOrEqual(g.first - g.tickRadius);
+    expect(g.pitch).toBeGreaterThanOrEqual(g.tickRadius * 2);
+    expect(g.pitch).toBeGreaterThanOrEqual(g.hit);
+    expect(last + g.tickRadius).toBeLessThanOrEqual(meter.x);
+    expect(g.y + g.tickRadius).toBeLessThanOrEqual(size.h);
     expect(meter.x + meter.w).toBeLessThanOrEqual(size.w - cheek);
     expect(meter.y + meter.h).toBeLessThanOrEqual(controls.y);
     expect(controls.y + controls.h).toBeLessThanOrEqual(size.h);
-    expect(k.hit).toBeGreaterThanOrEqual(k.diameter);
+    // One strip for both knobs, drawn smaller than it was rendered.
+    expect(g.size).toBeLessThanOrEqual(k.frame);
     expect(IFACE_HW.assets.knob.frames).toBe(k.frames);
   });
   it('cabinet: as wide as the amplifier head above it, speakers inside the grille', () => {
@@ -233,5 +238,17 @@ describe('header nameplate', () => {
     }
     expect(logo).toContain('STUDIO · VER. 6.0');
     expect(reference).toContain('STUDIO · VER. 6.0');
+  });
+});
+
+describe('amplifier sticker', () => {
+  it('names the engine only: three fixed words, whatever the model is called', async () => {
+    const { AMP_STICKER, ampSourceOf } = await import('../Rack');
+    expect(AMP_STICKER).toEqual({ internal: 'DSP interno', nam: 'NAM', tone3000: 'TONE3000' });
+    expect(ampSourceOf(false, null)).toBe('internal');
+    expect(ampSourceOf(false, { kind: 'tone3000' })).toBe('internal');
+    expect(ampSourceOf(true, { kind: 'file' })).toBe('nam');
+    expect(ampSourceOf(true, null)).toBe('nam');
+    expect(ampSourceOf(true, { kind: 'tone3000' })).toBe('tone3000');
   });
 });
