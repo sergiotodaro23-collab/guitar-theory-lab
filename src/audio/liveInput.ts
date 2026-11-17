@@ -6,6 +6,7 @@
  * timer at about 25 Hz; it is not a musical clock and schedules no sound.
  */
 import { create } from 'zustand';
+import { deviceOptions, type MicPermission } from './devices';
 import { SENSITIVITY, detectPitch, PitchTracker, type Sensitivity, type TrackedPitch } from '../pitch';
 import { workerTimer } from './webAudioSink';
 import { DEFAULT_RIG, type RigSettings } from '../app/rig';
@@ -21,6 +22,8 @@ export interface LiveDiagnostics {
   readonly sampleRate: number;
   readonly baseLatency: number | null;
   readonly outputLatency: number | null;
+  /** The input track's own latency figure, when the browser reports one (seconds). */
+  readonly inputLatency: number | null;
   readonly deviceLabel: string;
   readonly inputChannels: number | null;
   readonly trackSampleRate: number | null;
@@ -32,7 +35,11 @@ export interface LiveSnapshot {
   readonly state: LiveState;
   readonly error: string | null;
   readonly devices: readonly { readonly id: string; readonly label: string }[];
+  readonly outputs: readonly { readonly id: string; readonly label: string }[];
   readonly deviceId: string;
+  readonly micPermission: MicPermission;
+  /** A short notice about the device choice (a saved device not found, a fallback). Null when none. */
+  readonly notice: string | null;
   /** Input level after the gain, RMS 0–1, and whether it clipped recently. */
   readonly level: number;
   readonly clipping: boolean;
@@ -44,7 +51,7 @@ export interface LiveSnapshot {
 }
 
 export const useLive = create<LiveSnapshot>(() => ({
-  state: 'off', error: null, devices: [], deviceId: '', level: 0, clipping: false, pitch: null, monitorOn: false, diagnostics: null, rigRevision: 0,
+  state: 'off', error: null, devices: [], outputs: [], deviceId: '', micPermission: 'unknown', notice: null, level: 0, clipping: false, pitch: null, monitorOn: false, diagnostics: null, rigRevision: 0,
 }));
 
 /** Readable Italian messages for what getUserMedia can throw. */
@@ -62,6 +69,8 @@ export function inputErrorMessage(error: unknown): string {
       return 'Il dispositivo scelto non è più disponibile. Scegline un altro.';
     case 'NoMediaDevices':
       return 'Questo browser non dà accesso all’ingresso audio (serve una pagina HTTPS o localhost).';
+    case 'DeviceDisconnected':
+      return 'L’ingresso si è disconnesso dal sistema (interfaccia scollegata o sospesa). Ricollegalo, poi riavvia l’ingresso o scegli un altro dispositivo.';
     case 'AudioSuspended':
       return 'L’audio del browser è sospeso. Premi Avvia (il trasporto) o fai clic nella pagina, poi riavvia l’ingresso.';
     default:
@@ -154,13 +163,23 @@ class LiveInput {
 
   async start(out: () => { ctx: AudioContext; destination: AudioNode }, deviceId: string, channel: InputChannel = 'mix'): Promise<void> {
     this.stop();
-    useLive.setState({ state: 'starting', error: null });
+    useLive.setState({ state: 'starting', error: null, notice: null });
     try {
       if (!navigator.mediaDevices?.getUserMedia) throw Object.assign(new Error('no media devices'), { name: 'NoMediaDevices' });
       // A guitar needs the raw signal: no echo cancellation, noise suppression or automatic gain.
       const audio: MediaTrackConstraints = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+      let notice: string | null = null;
       if (deviceId) audio.deviceId = { exact: deviceId };
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio });
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({ audio });
+      } catch (error) {
+        // The saved device is gone or its id is stale: use the system default and leave the saved choice alone.
+        if (!deviceId || !(error instanceof DOMException) || error.name !== 'OverconstrainedError') throw error;
+        const { deviceId: _saved, ...fallback } = audio;
+        void _saved;
+        this.stream = await navigator.mediaDevices.getUserMedia({ audio: fallback });
+        notice = 'Dispositivo salvato non trovato: uso quello predefinito. La scelta salvata non è cambiata.';
+      }
       const { ctx, destination } = out();
       if (ctx.state !== 'running') await ctx.resume();
       this.source = ctx.createMediaStreamSource(this.stream);
@@ -197,24 +216,24 @@ class LiveInput {
       this.sampleRate = ctx.sampleRate;
       await this.attachWorklet(ctx);
       this.configure(this.settings);
-      const devices = (await navigator.mediaDevices.enumerateDevices())
-        .filter((d) => d.kind === 'audioinput')
-        .map((d, i) => ({ id: d.deviceId, label: d.label || `Ingresso ${i + 1}` }));
       const track = this.stream.getAudioTracks()[0];
-      track?.addEventListener('ended', () => this.fail(Object.assign(new Error('ended'), { name: 'NotReadableError' })));
+      track?.addEventListener('ended', () => this.fail(Object.assign(new Error('ended'), { name: 'DeviceDisconnected' })));
       const settings = track?.getSettings();
+      const trackLatency = (settings as { latency?: number } | undefined)?.latency;
       const diagnostics: LiveDiagnostics = {
         contextState: ctx.state,
         sampleRate: ctx.sampleRate,
         baseLatency: typeof ctx.baseLatency === 'number' ? ctx.baseLatency : null,
         outputLatency: typeof ctx.outputLatency === 'number' ? ctx.outputLatency : null,
+        inputLatency: typeof trackLatency === 'number' ? trackLatency : null,
         deviceLabel: track?.label ?? '',
         inputChannels: settings?.channelCount ?? null,
         trackSampleRate: settings?.sampleRate ?? null,
         analysis: this.analysisPath,
       };
       if (ctx.state !== 'running') throw Object.assign(new Error('suspended'), { name: 'AudioSuspended' });
-      useLive.setState({ state: 'on', devices, deviceId: settings?.deviceId ?? deviceId, monitorOn: false, diagnostics });
+      useLive.setState({ state: 'on', deviceId: settings?.deviceId ?? deviceId, monitorOn: false, diagnostics, notice });
+      void listDevices();
       // A model loaded earlier in this visit comes back into the rig; the listening stays off.
       void namHost.attach(ctx);
     } catch (error) {
@@ -454,6 +473,47 @@ class LiveInput {
     }
     useLive.setState({ level, clipping: now < this.clipUntil, pitch });
   }
+}
+
+/** Lists the inputs and outputs. Works without an open input; labels appear only once the microphone permission is granted. */
+export async function listDevices(): Promise<void> {
+  if (!navigator.mediaDevices?.enumerateDevices) return;
+  try {
+    const list = await navigator.mediaDevices.enumerateDevices();
+    useLive.setState({ devices: deviceOptions(list, 'audioinput'), outputs: deviceOptions(list, 'audiooutput') });
+  } catch {
+    // Enumeration can be refused in some contexts: the lists stay as they were.
+  }
+}
+
+let devicesWatched = false;
+/** Once per page: enumerate, follow plug and unplug, and read the microphone permission state. */
+export function initDevices(): void {
+  if (devicesWatched || typeof navigator === 'undefined') return;
+  devicesWatched = true;
+  void listDevices();
+  navigator.mediaDevices?.addEventListener?.('devicechange', () => void listDevices());
+  void (async () => {
+    try {
+      const status = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      const set = () => useLive.setState({ micPermission: status.state });
+      set();
+      status.onchange = set;
+    } catch {
+      // The Permissions API does not know 'microphone' here: the state stays 'unknown'.
+    }
+  })();
+}
+
+/** Refreshes the output latency after the output device changed (the context's 'sinkchange' event). */
+export function refreshOutputLatency(ctx: AudioContext): void {
+  const latency = typeof ctx.outputLatency === 'number' ? ctx.outputLatency : null;
+  useLive.setState((s) => (s.diagnostics ? { diagnostics: { ...s.diagnostics, outputLatency: latency } } : s));
+}
+
+/** Shows a notice without changing the input's state (e.g. the output could not be chosen). */
+export function setDeviceNotice(notice: string | null): void {
+  useLive.setState({ notice });
 }
 
 export const liveInput = new LiveInput();
