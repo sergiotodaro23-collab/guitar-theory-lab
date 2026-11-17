@@ -17,7 +17,7 @@ import {
   type FretNote,
   type SpelledFretNote,
 } from '../fretboard';
-import { SCALES, TONICS, buildScale, diatonicSeventh, mod, tryParseChord, type Scale, type ScaleId } from '../theory';
+import { SCALES, TONICS, buildScale, chromaticName, diatonicSeventh, mod, noteName, parseNote, pitchClass, transposeNote, tryParseChord, type Scale, type ScaleId } from '../theory';
 import { arpeggioSequence } from './arpeggio';
 import { ticksPerBar, ticksPerBeat, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
 import { generateSequence, parseCustomPattern, type Direction, type ExerciseKind, type IntervalNumber, type PairMotion } from './generator';
@@ -243,6 +243,51 @@ export function routineTrack(routine: Routine, meter: Meter, tuning: readonly nu
     }
   });
   return { id: 'exercise', lengthTicks: plan.lengthTicks, loop: true, events };
+}
+
+/** A note name moved by `semitones`, spelled as the theory engine spells keys; always one of TONICS. */
+function transposeName(name: string, semitones: number): string {
+  const moved = noteName(transposeNote(parseNote(name), semitones));
+  if (TONICS.includes(moved)) return moved;
+  const pc = mod(pitchClass(parseNote(name)) + semitones, 12);
+  return chromaticName(pc, name.includes('b'));
+}
+
+/** A chord symbol with its root (and slash bass) moved by `semitones`; the quality is untouched. Unreadable symbols stay as they are. */
+export function transposeChordSymbol(symbol: string, semitones: number): string {
+  const match = /^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/.exec(symbol.trim());
+  if (!match || !match[1]) return symbol;
+  const bass = match[3] ? `/${transposeName(match[3], semitones)}` : '';
+  return `${transposeName(match[1], semitones)}${match[2] ?? ''}${bass}`;
+}
+
+const LAST_FRET = 24;
+
+/**
+ * The whole routine in another key: every phase keeps its scale, shape,
+ * direction and rhythm, and moves by the same interval, so the relations
+ * between phases (a ii–V, a relative minor) are kept. Tonics and chord roots
+ * are transposed; a fret window moves with them, by the nearest way that
+ * still fits the neck. CAGED forms and 3NPS starts are relative to the scale
+ * and follow by themselves.
+ */
+export function transposeRoutine(routine: Routine, semitones: number): Routine {
+  const shift = mod(semitones, 12);
+  if (shift === 0) return routine;
+  // The nearest way round the octave: up to a tritone up, otherwise down.
+  const nearest = shift > 6 ? shift - 12 : shift;
+  return {
+    ...routine,
+    phases: routine.phases.map((phase) => {
+      let position = phase.position;
+      if (position.kind === 'range') {
+        const { low, high } = position;
+        const move = [nearest, nearest - 12, nearest + 12].find((d) => low + d >= 0 && high + d <= LAST_FRET);
+        if (move !== undefined) position = { kind: 'range', low: low + move, high: high + move };
+      }
+      return { ...phase, tonic: transposeName(phase.tonic, shift), chord: phase.chord ? transposeChordSymbol(phase.chord, shift) : phase.chord, position };
+    }),
+  };
 }
 
 let idCounter = 0;
