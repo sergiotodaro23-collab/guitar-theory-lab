@@ -4,6 +4,28 @@ Versione 0.1.0 (package.json). Ultimo aggiornamento: 8 novembre 2026, branch `cl
 
 **Studio V6 in corso** (D-43, dal 13 novembre 2026): stato e prossimo lotto in `docs/STUDIO_V6_PROGRESS.md`. Consolidamento e audit del rig: `docs/STUDIO_V6_CONSOLIDATION.md`.
 
+## Sprint autonomo (dal 17 novembre 2026): tracker
+
+Ordine di lavoro dato dal proprietario: lotti A → F. Una PR per attività, unita dall'agente con CI verde (D-43 e autorizzazione del 17 novembre). Stati come in `docs/ROADMAP.md`.
+
+| Attività | Stato | PR / branch | Prove | Residui · prossima azione |
+|---|---|---|---|---|
+| Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 (unita, merge `fec0e00`) | 564 unit, 211 e2e | Scheda audio reale non provata dall'agente |
+| A1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | `claude/sprint-a1-exercise-transpose` | `exercises/transpose.test.ts`, `app/transposeRoutine.test.ts`, e2e in `routine-arpeggio.spec.ts` | — |
+| A2 · Arpeggi: note mostrate = note suonate | MISSING | — | — | Prossima: cercare i casi divergenti tra `arpeggioBoardNotes` e la traccia riprodotta, test, fonte unica |
+| A3 · Legenda avanzata e forme sovrapposte | MISSING | — | — | Specifiche: `docs/MASTER_SPEC.md`, ROADMAP P1-06c, lotto 7 in `STUDIO_V6_PROGRESS.md` |
+| B1 · Selezione dispositivi audio | MISSING | — | — | |
+| B2 · Pannello Audio nella barra destra | MISSING | — | — | I due gain sono già separati (#38) |
+| B3 · Via l'input legacy dal taccuino | MISSING | — | — | Dopo B2 |
+| C1 · Barre laterali: compatte al primo uso, tasti nelle barre | MISSING | — | — | |
+| C2 · Mixer: compatto predefinito | MISSING | — | — | |
+| C3 · Fader laterali (backing a sinistra, chitarra a destra) | MISSING | — | — | |
+| D1 · Count-in | MISSING | — | — | Solo sul clock esistente (`TimelineScheduler`) |
+| D2 · LCD | MISSING | — | — | |
+| E · Rifinitura skeuomorfica | MISSING | — | — | Dopo i lotti funzionali |
+| F · Ricerca TONE3000 incorporato | MISSING | — | — | Solo modalità ufficiali |
+| Backlog · registrazione, overdub, looper | MISSING | — | — | Solo documento architetturale |
+
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
 ## Verificato in questa sessione

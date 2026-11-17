@@ -378,6 +378,11 @@ class Engine {
     void ctx.resume().then(() => this.audio?.testTone());
   }
 
+  /** The tracks the sequencer plays for the settings as they are now: the same builder `syncTracks` uses. For tests and diagnostics. */
+  tracksNow(): ModeTracks {
+    return buildTracks(useApp.getState().settings);
+  }
+
   outputLevel(): number {
     const analyser = this.audio?.analyser;
     if (!analyser) return 0;
