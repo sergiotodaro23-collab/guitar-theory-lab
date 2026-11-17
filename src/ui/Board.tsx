@@ -176,6 +176,8 @@ export function Board({ legendHost = null, foot = 'inline', inspectorHost = null
     voicing,
     wholeNeck: context.wholeNeck,
     exact: 'exact' in context ? context.exact : false,
+    // In Arpeggios Lab the arpeggio being played is the notes just drawn: they carry the arpeggio's triangle (D-55).
+    arpeggio: settings.mode === 'arpeggio' ? context.notes : null,
     tuning: tuningOf(settings),
     fingers: 'fingers' in context ? context.fingers : null,
   }), [settings, context, scale, chord, nextChord, chords, chordIndex, pinnedPc, overlays, voicing, view]);

@@ -4,7 +4,7 @@
  */
 import type { Marker, MarkerRole } from './markers';
 
-export type LegendKind = MarkerRole | 'guide' | 'voicing' | 'target-now' | 'target-next' | 'played' | 'live-likely' | 'live-possible';
+export type LegendKind = MarkerRole | 'guide' | 'arpeggio' | 'voicing' | 'target-now' | 'target-next' | 'played' | 'live-likely' | 'live-possible';
 
 export interface LegendEntry {
   readonly kind: LegendKind;
@@ -16,6 +16,7 @@ const ORDER: readonly LegendEntry[] = [
   { kind: 'scale', label: 'Nota della scala' },
   { kind: 'guide', label: 'Guide tone (3ª e 7ª)' },
   { kind: 'chord-tone', label: "Nota dell'accordo" },
+  { kind: 'arpeggio', label: "Nota dell'arpeggio (triangolo)" },
   { kind: 'tension', label: 'Tensione' },
   { kind: 'avoid', label: 'Avoid contestuale' },
   { kind: 'outside', label: 'Nota esterna' },
@@ -33,6 +34,7 @@ export function legendEntries(markers: readonly Marker[], options: { readonly pl
   for (const m of markers) {
     present.add(m.role === 'chord-tone' && m.isGuide ? 'guide' : m.role);
     if (m.inVoicing) present.add('voicing');
+    if (m.arpeggio) present.add('arpeggio');
     if (m.target === 'now') present.add('target-now');
     if (m.target === 'next') present.add('target-next');
   }

@@ -108,6 +108,17 @@ function Shape({ marker, x, y }: { readonly marker: Marker; readonly x: number; 
   return <circle className="shape" cx={x} cy={y} r={marker.role === 'outside' ? r * 0.85 : r} />;
 }
 
+/**
+ * The arpeggio's mark (D-55): an outline triangle round the note, drawn over its own shape, so a note in
+ * a scale and in the arpeggio shows both at once. Outline only, so it does not read as the filled
+ * triangle of an avoid note.
+ */
+function ArpeggioMark({ x, y }: { readonly x: number; readonly y: number }) {
+  const r = RADIUS * 1.62;
+  const points = `${x},${y - r} ${x + r * 0.95},${y + r * 0.62} ${x - r * 0.95},${y + r * 0.62}`;
+  return <polygon className="arp-mark" points={points} fill="none" stroke="#1d1409" strokeWidth={1.9} strokeLinejoin="round" />;
+}
+
 /** Look of an overlaid scale, indexed by its position in the user's list. */
 export interface LayerStyle {
   /** Suffix of a `layer-*` CSS class. */
@@ -170,6 +181,7 @@ const MarkerGlyph = memo(function MarkerGlyph({ marker, geo, layerStyles, layerM
       {marker.isGuide && !marker.dim ? <circle className="guide-ring" cx={x} cy={y} r={RADIUS + 3.5} /> : null}
       {marker.target ? <circle className={`target-ring target-${marker.target}`} cx={x} cy={y} r={RADIUS + 6} /> : null}
       <Shape marker={marker} x={x} y={y} />
+      {marker.arpeggio ? <ArpeggioMark x={x} y={y} /> : null}
       <text className="marker-label" x={x} y={y + 1}>{marker.label}</text>
       {layerMarks === 'bars' ? marker.layers.map((index, i) => {
         // Bars sit under the note in list order: readable at a glance, no corner to decode.
