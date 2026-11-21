@@ -4,7 +4,7 @@
  * swing; tempo is a suggestion the user applies. All patterns are written
  * for a 4/4 bar in sixteenths; swing turns straight eighths into a shuffle.
  */
-import type { BassNote, BassPattern, BassTone } from './bass';
+import type { BassArticulation, BassNote, BassPattern, BassTone } from './bass';
 import { DEFAULT_KIT, pattern, type DrumKit } from './drums';
 import type { CompPattern } from './progression';
 import type { BassTimbre, CompTimbre, DrumKitSound } from '../audio/instruments';
@@ -28,10 +28,11 @@ export interface Genre {
 
 const TRIPLET = 1 / 3;
 
-/** Bass notes from a compact list: [step, length, tone]. */
-const line = (name: string, notes: readonly (readonly [number, number, BassTone])[]): BassPattern => ({
+/** Bass notes from a compact list: [step, length, tone, articulation?]. */
+type Written = readonly [number, number, BassTone] | readonly [number, number, BassTone, BassArticulation];
+const line = (name: string, notes: readonly Written[]): BassPattern => ({
   name,
-  notes: notes.map(([step, length, tone]): BassNote => ({ step, length, tone })),
+  notes: notes.map(([step, length, tone, articulation]): BassNote => (articulation ? { step, length, tone, articulation } : { step, length, tone })),
 });
 const every = (gap: number, length: number, tones: readonly BassTone[]): (readonly [number, number, BassTone])[] =>
   Array.from({ length: 16 / gap }, (_, i) => [i * gap, length, tones[i % tones.length] ?? 'root'] as const);
@@ -66,7 +67,7 @@ export const GENRES: readonly Genre[] = [
       line('Boogie', every(2, 2, ['root', 'third', 'fifth', 'sixth', 'seventh', 'sixth', 'fifth', 'third'])),
       line('Salita a semiminime', every(4, 4, ['root', 'third', 'fifth', 'sixth'])),
       line('Fondamentale, quinta, ottava', every(4, 4, ['root', 'fifth', 'octave', 'fifth'])),
-      line('Minime con avvicinamento', [[0, 8, 'root'], [8, 4, 'fifth'], [12, 4, 'approach']]),
+      line('Minime con avvicinamento', [[0, 8, 'root', 'slide'], [8, 4, 'fifth'], [12, 4, 'approach']]),
     ],
   },
   {
@@ -75,21 +76,23 @@ export const GENRES: readonly Genre[] = [
     sounds: { drums: 'brushes', bass: 'upright', comp: 'keys' },
     kit: {
       patterns: [
-        // Spang-a-lang on the ride, hi-hat foot on 2 and 4, feathered kick.
-        pattern({ ride: 'X...x.x.X...x.x.', hat: '....x.......x...', kick: 'g...g...g...g...' }),
+        // Spang-a-lang on the ride, hi-hat pedal on 2 and 4, feathered kick.
+        pattern({ ride: 'X...x.x.X...x.x.', pedal: '....x.......x...', kick: 'g...g...g...g...' }),
         // Comping snare: ghosted chatter with an accent on the and of four.
-        pattern({ ride: 'X...x.x.X...x.x.', hat: '....x.......x...', snare: '..g...g...g...X.' }),
+        pattern({ ride: 'X...x.x.X...x.x.', pedal: '....x.......x...', snare: '..g...g...g...X.' }),
         // Two feel: ride on the beat, kick on one and three.
-        pattern({ ride: 'X...x...X...x...', hat: '....x.......x...', kick: 'x.......x.......' }),
+        pattern({ ride: 'X...x...X...x...', pedal: '....x.......x...', kick: 'x.......x.......' }),
         // Brushes-like: snare sixteenths ghosted, ride light.
-        pattern({ snare: 'gggggggggggggggg', ride: 'x...x.x.x...x.x.', hat: '....x.......x...' }),
+        pattern({ snare: 'gggggggggggggggg', ride: 'x...x.x.x...x.x.', pedal: '....x.......x...' }),
       ],
       fill: pattern({ snare: 'x..x..x.x..x..x.', tom: '..........x..X..', ride: 'X...' }),
     },
     bass: [
       line('Walking in salita', every(4, 4, ['root', 'third', 'fifth', 'approach'])),
-      line('Walking in discesa', every(4, 4, ['root', 'seventh', 'fifth', 'approach'])),
-      line('In due', [[0, 8, 'root'], [8, 8, 'fifth']]),
+      // From the octave down: octave, seventh, fifth, then the half step into the next root.
+      line('Walking in discesa', every(4, 4, ['octave', 'seventh', 'fifth', 'approach'])),
+      // Scale steps: root, passing second, third, approach.
+      line('Walking per grado', every(4, 4, ['root', 'second', 'third', 'approach'])),
       line('In due con avvicinamento', [[0, 8, 'root'], [8, 4, 'fifth'], [12, 4, 'approach']]),
     ],
   },
@@ -107,8 +110,9 @@ export const GENRES: readonly Genre[] = [
       fill: pattern({ kick: 'X.x.....', snare: '....xxXxx.x.xX..', tom: '..........x...Xx' }),
     },
     bass: [
-      line('Sedicesimi sincopati', [[0, 2, 'root'], [3, 1, 'octave'], [6, 2, 'root'], [10, 1, 'seventh'], [11, 1, 'octave'], [14, 2, 'root']]),
-      line('Uno e quattro', [[0, 3, 'root'], [7, 1, 'root'], [8, 2, 'octave'], [13, 3, 'fifth']]),
+      // Dead notes (ghosts) fill the gaps between the syncopated hits.
+      line('Sedicesimi sincopati', [[0, 2, 'root'], [2, 1, 'root', 'ghost'], [3, 1, 'octave'], [5, 1, 'root', 'ghost'], [6, 2, 'root'], [9, 1, 'root', 'ghost'], [10, 1, 'seventh'], [11, 1, 'octave'], [13, 1, 'root', 'ghost'], [14, 2, 'root']]),
+      line('Uno e quattro', [[0, 3, 'root', 'staccato'], [7, 1, 'root'], [8, 2, 'octave', 'slide'], [13, 3, 'fifth']]),
       line('Ottave', [[0, 1, 'root'], [2, 1, 'octave'], [4, 1, 'root'], [6, 1, 'octave'], [9, 1, 'root'], [11, 1, 'octave'], [14, 2, 'seventh']]),
       line('Vamp con avvicinamento', [[0, 3, 'root'], [3, 1, 'root'], [6, 2, 'fifth'], [10, 2, 'root'], [15, 1, 'approach']]),
     ],
@@ -124,7 +128,7 @@ export const GENRES: readonly Genre[] = [
         // B: linear groove: kick, snare and hat never land together.
         pattern({ kick: 'X..X....X..X....', snare: '....X..g....X..g', hat: '.xx..xx..xx..xx.' }),
         // C: half time on the ride, backbeat on three, ghosts around it.
-        pattern({ kick: 'X.....x...x.....', snare: '...g....X..g..g.', ride: 'X.x.x.x.X.x.x.x.', hat: '....x.......x...' }),
+        pattern({ kick: 'X.....x...x.....', snare: '...g....X..g..g.', ride: 'X.x.x.x.X.x.x.x.', pedal: '....x.......x...' }),
         // D: songo-inspired: snare and toms answer the kick across the bar.
         pattern({ kick: '...x...x...x...x', snare: 'x.g..x.g.gx..x.g', tom: '......X.......X.', ride: 'x.x.x.x.x.x.x.x.' }),
       ],
@@ -133,7 +137,7 @@ export const GENRES: readonly Genre[] = [
     bass: [
       line('Sedicesimi con anticipo', [[0, 2, 'root'], [3, 1, 'octave'], [6, 2, 'seventh'], [8, 2, 'fifth'], [11, 1, 'octave'], [14, 4, 'anticipate']]),
       line('Ottave sincopate', [[0, 2, 'root'], [2, 1, 'octave'], [5, 1, 'root'], [7, 1, 'octave'], [10, 2, 'fifth'], [12, 2, 'seventh'], [15, 1, 'approach']]),
-      line('Linea melodica', [[0, 3, 'root'], [3, 3, 'third'], [6, 2, 'fifth'], [8, 3, 'seventh'], [11, 3, 'octave'], [14, 2, 'approach']]),
+      line('Linea melodica', [[0, 3, 'root'], [3, 3, 'third'], [6, 2, 'fifth'], [8, 3, 'seventh', 'slide'], [11, 3, 'octave'], [14, 2, 'approach']]),
       line('Pedale con anticipo', [[0, 10, 'root'], [10, 4, 'fifth'], [14, 4, 'anticipate']]),
     ],
   },
@@ -153,7 +157,8 @@ export const GENRES: readonly Genre[] = [
     bass: [
       line('Sedicesimi sulla fondamentale', every(1, 1, ['root'])),
       line('Galoppo', [[0, 2, 'root'], [2, 1, 'root'], [3, 1, 'root'], [4, 2, 'root'], [6, 1, 'root'], [7, 1, 'root'], [8, 2, 'root'], [10, 1, 'root'], [11, 1, 'root'], [12, 2, 'root'], [14, 1, 'root'], [15, 1, 'root']]),
-      line('Ottavi', every(2, 2, ['root'])),
+      // Palm-muted eighths: short and tight under the guitars.
+      line('Ottavi stoppati', every(2, 2, ['root']).map(([step, length, tone]) => [step, length, tone, 'staccato'] as const)),
       line('Minime, fondamentale e quinta', [[0, 8, 'root'], [8, 8, 'fifth']]),
     ],
   },
@@ -164,13 +169,13 @@ export const GENRES: readonly Genre[] = [
     kit: {
       patterns: [
         // Bossa nova: bass drum on 1 and the and of 2, cross-stick clave.
-        pattern({ kick: 'X..xX..xX..xX..x', clap: 'x..x..x...x..x..', hat: 'x.x.x.x.x.x.x.x.' }),
+        pattern({ kick: 'X..xX..xX..xX..x', cross: 'x..x..x...x..x..', hat: 'x.x.x.x.x.x.x.x.' }),
         // Samba.
         pattern({ kick: 'X..xX..xX..xX..x', snare: 'x.xx.x.x.xx.x.x.', hat: 'xxxxxxxxxxxxxxxx' }),
         // Son clave 3-2 with tumbao toms.
-        pattern({ clap: 'x..x..x...x.x...', tom: '......x.......x.', kick: '...x.......x....', hat: 'x.x.x.x.x.x.x.x.' }),
+        pattern({ cross: 'x..x..x...x.x...', tom: '......x.......x.', kick: '...x.......x....', hat: 'x.x.x.x.x.x.x.x.' }),
         // Cha-cha.
-        pattern({ kick: 'X.......X.......', clap: '....x.......x.x.', hat: 'x...x...x...x...', tom: '............x.x.' }),
+        pattern({ kick: 'X.......X.......', cross: '....x.......x.x.', hat: 'x...x...x...x...', tom: '............x.x.' }),
       ],
       fill: pattern({ tom: 'x.xx.x.xx.xXxXxX', kick: 'X.......' }),
     },

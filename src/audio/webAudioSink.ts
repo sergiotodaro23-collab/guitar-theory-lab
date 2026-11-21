@@ -8,7 +8,7 @@ import { midiToHz } from '../theory';
 import type { AccentLevel, ScheduledTrackEvent, TrackPayload } from '../timeline';
 import { SampleLibrary } from './sampler';
 import {
-  bassArticulation, drumVoiceFor, pickDrum, pickPitched, zonesForDrum, zonesForPitched,
+  SLIDE_SECONDS, bassArticulation, drumVoiceFor, slideRate, pickDrum, pickPitched, zonesForDrum, zonesForPitched,
   type DrumZone, type PitchedZone, type RoundRobin, type SampleSetId,
 } from './samplerMap';
 import { clickRecipe, type ClickSound } from './clickSounds';
@@ -157,7 +157,7 @@ export class WebAudioSink {
       jobs.push(need(bassSet, function* (zones) {
         for (const p of payloads) {
           if (p.type !== 'bass') continue;
-          for (const z of zonesForPitched(zones as PitchedZone[], bassArticulation(bassSet, p.durationTicks * seconds), p.midi, p.velocity)) yield z.file;
+          for (const z of zonesForPitched(zones as PitchedZone[], bassArticulation(bassSet, p.durationTicks * seconds, p.articulation), p.midi, p.velocity)) yield z.file;
         }
       }));
     }
@@ -177,7 +177,7 @@ export class WebAudioSink {
     if (payload.type === 'drum') {
       this.drum(payload.voice, payload.velocity, time);
     } else if (payload.type === 'bass') {
-      this.bassNote(payload.midi, payload.durationTicks * this.secondsPerTick(), payload.velocity, time);
+      this.bassNote(payload.midi, payload.durationTicks * this.secondsPerTick(), payload.velocity, time, payload.articulation, payload.slideFrom);
     } else if (payload.type === 'note') {
       this.pluck(payload.midi, time, payload.accent ? 0.62 : 0.42);
     } else if (payload.type === 'comp') {
@@ -257,6 +257,9 @@ export class WebAudioSink {
     }
     const voiceEntry: Voice = { start: time, end, gain: out, sources };
     this.voices.push(voiceEntry);
+    // The same hi-hat choke as the recorded kit: a closed hat or the pedal cuts the open one.
+    if (voice === 'hat' || voice === 'pedal') this.chokeHats(time);
+    if (voice === 'open') this.openHats.push(voiceEntry);
     const last = sources[0];
     if (last) {
       last.onended = () => {
@@ -305,18 +308,21 @@ export class WebAudioSink {
   }
 
   /** A bass note in the chosen timbre. */
-  bassNote(midi: number, duration: number, velocity: number, time: number): void {
-    if (this.sampledBass(midi, duration, velocity, time)) return;
+  bassNote(midi: number, duration: number, velocity: number, time: number, articulation?: 'ghost' | 'staccato' | 'slide', slideFrom?: number): void {
+    const glide = articulation === 'slide' && slideFrom !== undefined ? { from: slideFrom, seconds: Math.min(SLIDE_SECONDS, duration * 0.4) } : null;
+    if (this.sampledBass(midi, duration, velocity, time, articulation, glide)) return;
     const recipe = BASS_RECIPES[this.timbres.bass];
-    this.tone('bass', recipe, midiToHz(midi), time, duration, 0.55 * velocity * recipe.gain);
+    // A synthesised ghost is a muffled thud: the low-pass closes at once.
+    const played = articulation === 'ghost' ? { ...recipe, filter: { ...recipe.filter, from: Math.min(recipe.filter.from, 500), to: 150, time: 0.03 } } : recipe;
+    this.tone('bass', played, midiToHz(midi), time, duration, 0.55 * velocity * recipe.gain, glide && { ratio: 2 ** ((glide.from - midi) / 12), seconds: glide.seconds });
   }
 
-  private sampledBass(midi: number, duration: number, velocity: number, time: number): boolean {
+  private sampledBass(midi: number, duration: number, velocity: number, time: number, played?: 'ghost' | 'staccato' | 'slide', glide: { from: number; seconds: number } | null = null): boolean {
     const id = this.sampleSets().bass;
     const manifest = id ? this.samples.manifestNow(id) : undefined;
     if (!id || !manifest) return false;
     const zones = manifest.zones as PitchedZone[];
-    const articulation = bassArticulation(id, duration);
+    const articulation = bassArticulation(id, duration, played);
     const note = pickPitched(zones, articulation, midi, velocity, this.roundRobin, manifest.normalized);
     const buffer = note && this.samples.buffer(id, note.zone.file);
     if (!note || !buffer) {
@@ -325,7 +331,12 @@ export class WebAudioSink {
     }
     // With a pick the same strings sound brighter: a presence lift, no other change.
     const bright = this.timbres.bass === 'pick';
-    this.sample('bass', buffer, time, note.rate, note.gain * SAMPLE_TRIM.bass, duration, 0.07, bright);
+    const voice = this.sample('bass', buffer, time, note.rate, note.gain * SAMPLE_TRIM.bass, duration, played === 'ghost' ? 0.03 : 0.07, bright);
+    if (glide) {
+      const source = voice.sources[0] as AudioBufferSourceNode | undefined;
+      source?.playbackRate.setValueAtTime(slideRate(note.rate, midi, glide.from), time);
+      source?.playbackRate.exponentialRampToValueAtTime(note.rate, time + glide.seconds);
+    }
     return true;
   }
 
@@ -373,7 +384,7 @@ export class WebAudioSink {
    * One note from a recipe: partials into a low-pass that closes, an envelope
    * with attack, decay to a sustain level, and release.
    */
-  private tone(bus: AudioBus, recipe: ToneRecipe, frequency: number, time: number, duration: number, peak: number): void {
+  private tone(bus: AudioBus, recipe: ToneRecipe, frequency: number, time: number, duration: number, peak: number, glide: { ratio: number; seconds: number } | null = null): void {
     const end = time + duration + recipe.release;
     const out = this.ctx.createGain();
     out.gain.setValueAtTime(0, time);
@@ -391,6 +402,10 @@ export class WebAudioSink {
       const osc = this.ctx.createOscillator();
       osc.type = partial.type;
       osc.frequency.value = frequency * partial.ratio;
+      if (glide) {
+        osc.frequency.setValueAtTime(frequency * partial.ratio * glide.ratio, time);
+        osc.frequency.exponentialRampToValueAtTime(frequency * partial.ratio, time + glide.seconds);
+      }
       if (partial.detune) osc.detune.value = partial.detune;
       const level = this.ctx.createGain();
       level.gain.value = partial.level / recipe.partials.length;

@@ -87,10 +87,10 @@ describe('Fusion, rewritten', () => {
     expect(fusion.comp).toBe('push');
     expect(fusion.bass.some((b) => b.notes.some((n) => n.tone === 'anticipate'))).toBe(true);
   });
-  it('jazz keeps time on the ride with the hi-hat foot on two and four', () => {
+  it('jazz keeps time on the ride with the hi-hat pedal on two and four', () => {
     const jazz = genreOf('jazz').kit.patterns[0];
     expect(jazz.ride.filter((v) => v > 0).length).toBeGreaterThanOrEqual(6);
-    expect([4, 12].map((i) => jazz.hat[i])).toEqual([1, 1]);
+    expect([4, 12].map((i) => jazz.pedal[i])).toEqual([1, 1]);
   });
 });
 
@@ -110,10 +110,10 @@ describe('every genre stays in time in 4/4, 3/4 and 6/8', () => {
         for (const line of genre.bass) {
           const bass = bassTrack(p, meter, line, true).events;
           expect(bass.every((e) => e.tick < length)).toBe(true);
-          // Every change is heard: a root on the downbeat, or one already held over it.
+          // Every change is heard: a root (or its octave) on the downbeat, or one already held over it.
           for (const span of spans) {
             const root = bassPitch(span.chord, 'root');
-            const sounding = bass.some((e) => e.payload.midi === root && e.tick <= span.tick && e.tick + e.payload.durationTicks > span.tick - 1);
+            const sounding = bass.some((e) => (e.payload.midi === root || e.payload.midi === root + 12) && e.tick <= span.tick && e.tick + e.payload.durationTicks > span.tick - 1);
             expect(sounding, `${genre.id} ${line.name} ${span.chord.symbol}`).toBe(true);
           }
         }

@@ -55,7 +55,10 @@ export function drumVoiceFor(voice: string, velocity: number): string | null {
   switch (voice) {
     case 'kick': return 'kick';
     case 'snare': return 'snare';
+    case 'cross': return 'crossStick';
     case 'hat': return 'hhClosed';
+    case 'pedal': return 'hhPedal';
+    case 'crash': return 'crash';
     case 'open': return 'hhOpen';
     case 'ride': return 'ride';
     // An acoustic kit has no hand clap: a drummer plays the clave on the rim (cross-stick).
@@ -158,9 +161,18 @@ export function zonesForPitched(zones: readonly PitchedZone[], articulation: str
   return zones.filter((z) => z.articulation === articulation && z.root === root && z.velLo === velLo);
 }
 
-/** The electric bass picks its articulation from the written length: short notes are played staccato. */
-export const bassArticulation = (set: SampleSetId, seconds: number): string =>
-  set === 'upright' ? 'pizz' : seconds < 0.22 ? 'staccato' : 'sustain';
+/**
+ * The electric bass picks its recorded articulation from the written length
+ * and the note's articulation (J4): short, ghost and staccato notes are the
+ * staccato zones. The double bass has only pizzicato.
+ */
+export const bassArticulation = (set: SampleSetId, seconds: number, played?: 'ghost' | 'staccato' | 'slide'): string =>
+  set === 'upright' ? 'pizz' : seconds < 0.22 || played === 'ghost' || played === 'staccato' ? 'staccato' : 'sustain';
+
+/** A slide reaches its note in this long at most: quick, the way a finger moves along the string. */
+export const SLIDE_SECONDS = 0.08;
+/** Playback rate a slide starts from: the rate of the note shifted by the interval from `from`. */
+export const slideRate = (rate: number, midi: number, from: number): number => rate * 2 ** ((from - midi) / 12);
 
 export function isManifest(value: unknown): value is SampleManifest {
   if (!value || typeof value !== 'object') return false;
