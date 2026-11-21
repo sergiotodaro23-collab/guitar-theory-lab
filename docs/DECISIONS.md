@@ -2,6 +2,12 @@
 
 Una riga di contesto, la scelta, il perché. Le nuove in cima.
 
+## 2026-11-21
+
+**D-57 · Trasposizione relazionale con l'intervallo scritto.** Al cambio di tonalità le fasi che seguono si spostano dell'intervallo con la lettera fra la vecchia e la nuova tonalità (`transposeRoutineBetween`), non di un numero di semitoni: da Do a Re, La minore naturale e La minore melodica diventano Si minore naturale e Si minore melodica, Lab minore melodica diventa Sib; da Do a Reb e da Do a Do# lo spelling è diverso. Le scale non vengono mai sostituite con le relative. Ogni fase ha `link`: «Segue» (predefinito, anche per le routine salvate prima) o «Fissa» (trasposizione indipendente). Dove lo spelling esatto richiederebbe un doppio diesis o bemolle, o Cb, Fb, E#, B#, si usa l'enarmonico leggibile con bemolli se la nuova tonalità ne ha. Supera la parte in semitoni di D-54. Relazioni personalizzate (una fase ancorata a un'altra) nel piano come M2. Fonte: direttiva del proprietario del 21 novembre 2026.
+
+**D-56 · Piano verso la versione definitiva.** L'ordine operativo passa da lotti A–F a `docs/FINAL_PLAN.md`: sei fasi (motore, laboratori, Jam, Rig, Note e interfaccia, QA e rilascio) con attività e dipendenze, eseguite in onde su tre binari paralleli. Nessun requisito dei lotti A–F è stato tolto: ognuno ha la sua attività nel piano. Criterio di completamento: tutte le specifiche della versione definitiva con funzioni reali e verificate. Fonte: messaggio del proprietario del 21 novembre 2026.
+
 ## 2026-11-15
 
 **D-55 · Arpeggio: triangolo a contorno sopra la forma della nota.** Una nota che appartiene a una scala e all'arpeggio suonato mostra insieme il proprio simbolo di ruolo (cerchio, rombo, triangolo pieno per l'avoid) e un triangolo a contorno scuro più grande. Il triangolo a contorno è l'unica convenzione nuova; si distingue dal triangolo pieno dell'avoid perché è un contorno. Voce in legenda: «Nota dell'arpeggio (triangolo)». Fonte: lo sprint A3 del proprietario (17 novembre 2026).

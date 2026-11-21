@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { PresetRepository, type StorageLike } from '../persistence/presets';
-import { transposeRoutine } from '../exercises';
-import { parseNote, pitchClass } from '../theory';
+import { transposeRoutineBetween } from '../exercises';
 import { DEFAULT_SETTINGS, sanitizeSettings, type Settings } from './settings';
 
 function browserStorage(): StorageLike {
@@ -39,11 +38,11 @@ export const useApp = create<AppState>((set) => ({
   setEditorOpen: (editorOpen) => set({ editorOpen }),
   update: (change) => set((state) => {
     let settings = { ...state.settings, ...change };
-    // A new key moves the advanced exercise (the routine) with it, by the same interval: its phases have their own tonics, which
+    // A new key moves the advanced exercise (the routine) with it, by the spelled interval between the keys (M1): following phases
+    // keep their relation to the key, fixed ones stay. Its phases have their own tonics, which
     // would otherwise stay where they were. A change that brings its own routine (a preset, the editor) is taken as it is.
     if (change.tonic !== undefined && change.routine === undefined && change.tonic !== state.settings.tonic) {
-      const interval = pitchClass(parseNote(change.tonic)) - pitchClass(parseNote(state.settings.tonic));
-      settings = { ...settings, routine: transposeRoutine(settings.routine, interval) };
+      settings = { ...settings, routine: transposeRoutineBetween(settings.routine, state.settings.tonic, change.tonic) };
     }
     const last = Math.max(0, settings.progression.chords.length - 1);
     const lastPhase = Math.max(0, settings.routine.phases.length - 1);
