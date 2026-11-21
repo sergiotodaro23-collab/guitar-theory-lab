@@ -42,8 +42,8 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 |---|---|---|---|---|
 | M1 | Trasposizione relazionale: tonalità di riferimento dell'esercizio, intervallo con la lettera (Do→Re sposta La→Si, Lab→Sib; Do→Reb e Do→Do# danno spelling diversi), fasi che seguono il riferimento o restano fisse | PARTIAL (D-57) | — | Caso del proprietario: Do magg. rif., La min. naturale su + La min. melodica giù → Re magg.: Si naturale + Si melodica; con Lab melodica → Sib melodica. Scale mai sostituite con le relative. Unit + e2e |
 | M2 | Relazioni personalizzate: fase ancorata a un'altra fase o al riferimento con un intervallo scelto; trasposizione indipendente di una fase | MISSING | M1 | Unit su catene di relazioni, round-trip, nessun ciclo |
-| M3 | Modello ritmico: figure (intero…sedicesimo, terzine, quintine), punto, pause, legature di valore, battute di separazione tra fasi, count-in e countdown sul clock unico | PARTIAL | — | 5 note di pentatonica in crome in 4/4 attraversano la stanghetta correttamente; in 3/4 e 6/8 idem; count-in udibile senza spostare la battuta 1 |
-| M4 | Vincoli sul manico: corde utilizzate (1–6, insiemi qualsiasi), intervallo di tasti, posizione, string skipping, attraversamento dell'intera tastiera | PARTIAL | — | Ogni nota generata rispetta i vincoli; combinazioni impossibili segnalate con alternativa |
+| M3 | Modello ritmico: figure (intero…sedicesimo, terzine, quintine), punto, pause, legature di valore, battute di separazione tra fasi, count-in e countdown sul clock unico | PARTIAL (#45: esercizio singolo e fasi; manca Arpeggios Lab) | — | 5 note di pentatonica in crome in 4/4 attraversano la stanghetta correttamente; in 3/4 e 6/8 idem; count-in udibile senza spostare la battuta 1 |
+| M4 | Vincoli sul manico: corde utilizzate (1–6, insiemi qualsiasi), intervallo di tasti, posizione, string skipping, attraversamento dell'intera tastiera | PARTIAL (#45: corde e salto di corda; manca il percorso su tutta la tastiera) | — | Ogni nota generata rispetta i vincoli; combinazioni impossibili segnalate con alternativa |
 | M5 | Sequenze generative: gruppi di 3–5+ note, intervalli diatonici e cromatici, permutazioni, pattern irregolari, alternanza su/giù | PARTIAL | M3 | Casi da manuale (gruppi di 4 in Do, terze alternate, quarte) |
 | M6 | Quattro livelli (principiante, intermedio, avanzato, esperto) come dato dell'esercizio; migrazione dei preset a tre livelli | PARTIAL | — | Preset esistenti migrati senza perdite; filtro per livello |
 | M7 | Preset: salvataggio, export/import file, condivisione via link senza backend, versionamento e validazione | PARTIAL | M1–M6 | Round-trip file e link; preset malformati rifiutati con messaggio |
@@ -87,8 +87,8 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
-| J1 | Motore sampler: multisample per zona, velocity layer, round robin, caricamento pigro con cache, limite di voci, ripiego sintetico | MISSING | — | Test offline (OfflineAudioContext): layer e round robin scelti correttamente; CPU entro budget |
-| J2 | Ricerca e registro delle librerie con licenza compatibile (CC0, CC-BY, GPL): batteria, basso, piano acustico, piano elettrico, organo/tastiere; budget di dimensioni | MISSING | — | `docs/AUDIO_ASSETS.md` con fonte, licenza, attribuzione per ogni file |
+| J1 | Motore sampler: multisample per zona, velocity layer, round robin, caricamento pigro con cache, limite di voci, ripiego sintetico | PARTIAL (zone, layer, round robin, caricamento pigro, ripiego, polifonia; manca il budget CPU di J9) | — | Test offline (OfflineAudioContext): layer e round robin scelti correttamente; CPU entro budget |
+| J2 | Ricerca e registro delle librerie con licenza compatibile (CC0, CC-BY, GPL): batteria, basso, piano acustico, piano elettrico, organo/tastiere; budget di dimensioni | PARTIAL (batteria, piano, basso elettrico, contrabbasso in CC0; mancano piano elettrico e organo) | — | `docs/AUDIO_ASSETS.md` con fonte, licenza, attribuzione per ogni file |
 | J3 | Batteria: articolazioni, hi-hat chiuso/aperto/pedale, ghost notes, fill, velocity; sequencer Advanced (velocity, probabilità, 32/64 passi) | PARTIAL | J1, J2 | Ascolto del proprietario; test sui pattern |
 | J4 | Basso: dinamiche, articolazioni (staccato, ghost, slide), walking jazz | PARTIAL | J1 | Walking su ii–V–I con note di approccio corrette |
 | J5 | Tastiere con voicing coerenti dal motore (HA3) e voice leading nel comping | PARTIAL | HA3, J1 | Comping senza salti oltre la soglia |
@@ -173,4 +173,6 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | Data | Attività | PR | Esito |
 |---|---|---|---|
 | 21/11/2026 | Piano e tracker | questo branch | fatto |
-| 21/11/2026 | M1 · trasposizione relazionale: intervallo con la lettera, fasi Segue/Fissa (D-57) | questo branch | unit + e2e; M2 resta |
+| 21/11/2026 | M1 · trasposizione relazionale: intervallo con la lettera, fasi Segue/Fissa (D-57) | #44 | unit + e2e; M2 resta |
+| 21/11/2026 | M3 · ritmo a cicli, articolazione, attacco sul clock unico; M4 · corde e salto di corda (D-59) | #45 | unit + e2e; Arpeggios Lab e percorso su tutta la tastiera restano |
+| 21/11/2026 | J2 · quattro set CC0 convertiti e registrati; J1 · sampler con caricamento pigro e ripiego sintetico (D-60) | questo branch | unit sulle zone e sui manifest, e2e con segnale sui canali in Chromium; ascolto del proprietario da fare |

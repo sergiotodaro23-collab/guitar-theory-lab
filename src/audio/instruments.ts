@@ -1,7 +1,9 @@
 /**
- * Jam timbres (P3-07, D-32): drum kits, bass and comping sounds, all
- * synthesised from oscillators, noise and filters. No samples: nothing to
- * license, nothing to download. A recipe is data; the sink plays it. Pure.
+ * Jam timbres (P3-07, D-32): drum kits, bass and comping sounds synthesised
+ * from oscillators, noise and filters. The acoustic kit, the electric and
+ * double bass and the piano also have recorded samples (J1, D-60): these
+ * recipes are their fallback until the samples load. A recipe is data; the
+ * sink plays it. Pure.
  */
 import type { DrumRecipe } from './drumSounds';
 
@@ -11,7 +13,7 @@ export type CompTimbre = 'keys' | 'epiano' | 'organ' | 'clean' | 'pad';
 
 export const DRUM_KIT_SOUNDS: Readonly<Record<DrumKitSound, string>> = { acoustic: 'Acustica', electronic: 'Elettronica', brushes: 'Spazzole' };
 export const BASS_TIMBRES: Readonly<Record<BassTimbre, string>> = { finger: 'Elettrico a dita', pick: 'Elettrico col plettro', upright: 'Contrabbasso', synth: 'Synth bass' };
-export const COMP_TIMBRES: Readonly<Record<CompTimbre, string>> = { keys: 'Tastiera', epiano: 'Piano elettrico', organ: 'Organo', clean: 'Chitarra pulita', pad: 'Pad' };
+export const COMP_TIMBRES: Readonly<Record<CompTimbre, string>> = { keys: 'Pianoforte', epiano: 'Piano elettrico', organ: 'Organo', clean: 'Chitarra pulita', pad: 'Pad' };
 
 /** Kit variants over the acoustic recipes: only what differs. */
 const KIT_OVERRIDES: Readonly<Record<Exclude<DrumKitSound, 'acoustic'>, Readonly<Record<string, DrumRecipe>>>> = {
