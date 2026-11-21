@@ -4,3 +4,4 @@ export * from './arpeggio';
 export * from './arpShapes';
 export * from './rhythm';
 export * from './strings';
+export * from './levels';
