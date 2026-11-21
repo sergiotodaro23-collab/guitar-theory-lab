@@ -2,6 +2,7 @@
 import { exerciseTrack, generateSequence, progressionArpeggioTrack, progressionExerciseTrack, routineTrack } from '../exercises';
 import type { FretNote } from '../fretboard';
 import { chordAsScale, viewNotes, viewScale } from './chordViews';
+import { voicingMidis } from './harmonyVoicings';
 import { arrangementTracks, bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
 import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
@@ -64,7 +65,7 @@ export function buildTracks(s: Settings): ModeTracks {
   return {
     exercise,
     chords: auto ? chordTrack(s.progression, meter, loop) : null,
-    comp: auto && s.compOn ? compTrack(s.progression, meter, s.compPattern, loop, bassPlays) : null,
+    comp: auto && s.compOn ? compTrack(s.progression, meter, s.compPattern, loop, bassPlays, s.mode === 'harmony' ? voicingMidis(s) : undefined) : null,
     bass: bassPlays ? bassTrack(s.progression, meter, genreOf(s.jamGenre).bass[s.bassPattern] ?? genreOf(s.jamGenre).bass[0], loop) : null,
     drums: s.mode === 'jam' && s.drumOn ? drumTrack(s.drumKit, s.drumPattern, meter, s.drumFillEvery) : null,
     endTick: s.mode === 'jam' && !s.loop && hasProgression ? progressionLength(s.progression, meter) : null,
@@ -121,6 +122,8 @@ function arpeggioTracks(s: Settings): ModeTracks {
 export function manualCompMidis(s: Settings, chordIndex: number): readonly number[] {
   const chord = parsedChords(s.progression)[chordIndex];
   if (!chord) return [];
+  const own = s.mode === 'harmony' ? voicingMidis(s)[chordIndex] : null;
+  if (own) return own;
   const bass = 40 + (((chord.bass?.pc ?? chord.tones[0]?.pc ?? 0) - 4 + 12) % 12);
   return [bass, ...guideTones(chord).map((tone) => 60 + tone.pc), 72 + (chord.tones.find((t) => t.degree.includes('5'))?.pc ?? 0) - 12];
 }

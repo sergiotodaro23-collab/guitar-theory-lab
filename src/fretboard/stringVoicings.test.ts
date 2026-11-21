@@ -92,6 +92,10 @@ describe('tones a voicing keeps and leaves out', () => {
     expect(choice.omitted).toEqual(['5', '1']);
   });
 
+  it('a 7b9 in four voices leaves the root out: the diminished shape on the third', () => {
+    expect(chooseTones(parseChord('G7b9'), 4).tones.map((t) => t.name)).toEqual(['B', 'D', 'F', 'Ab']);
+  });
+
   it('a ninth chord drops the fifth; a triad in four voices doubles its root', () => {
     expect(chooseTones(parseChord('C9'), 4).tones.map((t) => t.degree)).toEqual(['1', '3', 'b7', '9']);
     expect(chooseTones(parseChord('C'), 4).tones.map((t) => t.degree)).toEqual(['1', '3', '5', '1']);

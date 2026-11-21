@@ -17,6 +17,7 @@ import { MAX_CHORDS, addChordLayer, moveChordLayer, resolveChordLayer, type Chor
 import { voicingKey } from '../fretboard';
 import { ChordDiagram } from '../viz/ChordDiagram';
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
+import { VoicingPanel } from './VoicingPanel';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
 import { RhythmFields } from './RhythmFields';
 import { StringsField } from './StringsField';
@@ -835,6 +836,7 @@ export function HarmonyPanel({ part = 'all' }: { readonly part?: 'all' | 'progre
         </div>
         ) : null}
       </Panel>
+      {show('voice') ? <VoicingPanel /> : null}
     </>
   );
 }

@@ -7,6 +7,7 @@ import { AVOID_PROFILES, chordOrigin, classifyTone, functionsAcross } from '../h
 import { parsedChords } from '../jam';
 import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale } from '../theory';
 import { resolveChordLayer } from '../app/chordLayers';
+import { progressionVoicings } from '../app/harmonyVoicings';
 import { Fretboard, type LayerMarks, type LayerStyle } from '../viz/Fretboard';
 import { legendEntries, type LegendEntry } from '../viz/legend';
 import { useLive } from '../audio/liveInput';
@@ -47,8 +48,10 @@ export function useHarmonyContext() {
     const chordIndex = Math.min(playheadChord ?? selected, Math.max(0, chords.length - 1));
     const chord = chords[chordIndex] ?? null;
     const nextChord = chords.length > 1 ? chords[(chordIndex + 1) % chords.length] ?? null : null;
-    return { chords, chord, nextChord, chordIndex, voicing: null };
-  }, [settings.mode, settings.chordLayers, settings.activeChord, settings.progression, settings.arpSource, settings.arpSymbol, song, playheadChord, selected, tuning]);
+    // Harmony Lab with engine voicings (D-64): the playing chord's voicing is drawn, as the comping plays it.
+    const voicing = settings.mode === 'harmony' ? progressionVoicings(settings)[chordIndex]?.notes ?? null : null;
+    return { chords, chord, nextChord, chordIndex, voicing };
+  }, [settings, song, playheadChord, selected, tuning]);
 }
 
 /** Colour, opacity and readable name of every overlay, by list position. */

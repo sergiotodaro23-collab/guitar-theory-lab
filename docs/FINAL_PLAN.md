@@ -66,9 +66,9 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 |---|---|---|---|---|
 | HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | IMPLEMENTED nel motore (D-64, `harmony/harmonize.test.ts`) | — | Tabelle da manuale per le quattro scale |
 | HA2 | Estesi 9/11/13, alterazioni, formula libera (P1-07b) | PARTIAL | — | Spelling da manuale |
-| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | PARTIAL (motore e test, D-64; manca l'uso nel laboratorio) | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
-| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | PARTIAL (motore e test, D-64; manca l'uso nel laboratorio) | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
-| HA5 | Preset di armonizzazione progressiva su gruppi di corde attraverso tutti i rivolti; accordi su 4–6 corde | MISSING | HA3, M8 | Preset per livello, suonabili |
+| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | IMPLEMENTED (D-64: motore, tastiera, comping, pannello «Voicing e armonizzazioni») | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
+| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | IMPLEMENTED (D-64; sostituzioni diatoniche solo nel motore) | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
+| HA5 | Preset di armonizzazione progressiva su gruppi di corde attraverso tutti i rivolti; accordi su 4–6 corde | IMPLEMENTED (24 preset, 6 per livello, `app/harmonyPresets.ts`, e2e `harmony-voicings.spec.ts`) | HA3, M8 | Preset per livello, suonabili |
 | HA6 | Visualizzazione che distingue note suonate, corde e gradi armonici | PARTIAL | N2 | e2e sulla legenda |
 
 **Arpeggios Lab**
@@ -180,3 +180,4 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | #48 | unit su casi da manuale e catene, e2e nell'editor |
 | 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | questo branch | unit su casi da manuale in Do, e2e sul sequencer |
 | 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-64) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
+| 21/11/2026 | HA3–HA5 nel laboratorio · voicing del motore su tastiera e comping, armonizza la scala, progressioni funzionali con tritoni, 24 preset su quattro livelli (D-64) | questo branch | unit + e2e in Studio e Semplificata; ascolto del proprietario da fare |

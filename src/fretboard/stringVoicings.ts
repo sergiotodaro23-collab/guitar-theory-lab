@@ -116,7 +116,9 @@ export interface ToneChoice {
 export function chooseTones(chord: Chord, voices: number, omit: readonly string[] = []): ToneChoice {
   let tones = chord.tones.filter((t) => !omit.includes(t.degree) || isEssential(t, chord));
   const omitted = chord.tones.filter((t) => !tones.includes(t)).map((t) => t.degree);
-  for (const degree of OMIT_ORDER) {
+  // A flat ninth over its own root is a minor ninth: four-voice 7b9 voicings leave the root out (B D F Ab for G7b9).
+  const order = chord.tones.some((t) => t.degree === 'b9') ? ['1', ...OMIT_ORDER.filter((d) => d !== '1')] : OMIT_ORDER;
+  for (const degree of order) {
     if (tones.length <= voices) break;
     const t = tones.find((x) => x.degree === degree);
     if (t && !isEssential(t, chord)) {

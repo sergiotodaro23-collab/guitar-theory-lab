@@ -161,13 +161,17 @@ const SHORT: ReadonlySet<CompPattern> = new Set(['stabs']);
  * bar line and is held across it (an anticipation), as fusion, funk and latin
  * players do; the downbeat is not struck again.
  */
-export function compTrack(p: Progression, meter: Meter, pattern: CompPattern, loop: boolean, bassLine = false): Omit<Track<CompPayload>, 'originTick'> {
+/**
+ * `voicings`, when given, fixes the notes of each chord (Harmony Lab's engine
+ * voicings, D-64); a null entry keeps the comping's own voice leading.
+ */
+export function compTrack(p: Progression, meter: Meter, pattern: CompPattern, loop: boolean, bassLine = false, fixed?: readonly (readonly number[] | null)[]): Omit<Track<CompPayload>, 'originTick'> {
   const beat = ticksPerBeat(meter);
   const bar = ticksPerBar(meter);
   const patternTicks = patternBeats(pattern, meter.beatsPerBar).map((b) => b * beat);
   const spans = chordSpans(p, meter);
   const voicings: (readonly number[])[] = [];
-  spans.forEach((span, i) => voicings.push(voiceChord(span.chord, voicings[i - 1])));
+  spans.forEach((span, i) => voicings.push(fixed?.[i] ?? voiceChord(span.chord, voicings[i - 1])));
 
   type Hit = { tick: number; chord: number; anticipated: boolean };
   const hits: Hit[] = [];
