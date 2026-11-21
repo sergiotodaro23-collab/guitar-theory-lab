@@ -64,10 +64,10 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
-| HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | IMPLEMENTED nel motore (D-64, `harmony/harmonize.test.ts`) | — | Tabelle da manuale per le quattro scale |
+| HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | IMPLEMENTED nel motore (D-65, `harmony/harmonize.test.ts`) | — | Tabelle da manuale per le quattro scale |
 | HA2 | Estesi 9/11/13, alterazioni, formula libera (P1-07b) | PARTIAL | — | Spelling da manuale |
-| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | PARTIAL (motore e test, D-64; manca l'uso nel laboratorio) | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
-| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | PARTIAL (motore e test, D-64; manca l'uso nel laboratorio) | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
+| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | PARTIAL (motore e test, D-65; manca l'uso nel laboratorio) | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
+| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | PARTIAL (motore e test, D-65; manca l'uso nel laboratorio) | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
 | HA5 | Preset di armonizzazione progressiva su gruppi di corde attraverso tutti i rivolti; accordi su 4–6 corde | MISSING | HA3, M8 | Preset per livello, suonabili |
 | HA6 | Visualizzazione che distingue note suonate, corde e gradi armonici | PARTIAL | N2 | e2e sulla legenda |
 
@@ -89,8 +89,8 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 |---|---|---|---|---|
 | J1 | Motore sampler: multisample per zona, velocity layer, round robin, caricamento pigro con cache, limite di voci, ripiego sintetico | PARTIAL (zone, layer, round robin, caricamento pigro, ripiego, polifonia; manca il budget CPU di J9) | — | Test offline (OfflineAudioContext): layer e round robin scelti correttamente; CPU entro budget |
 | J2 | Ricerca e registro delle librerie con licenza compatibile (CC0, CC-BY, GPL): batteria, basso, piano acustico, piano elettrico, organo/tastiere; budget di dimensioni | PARTIAL (batteria, piano, basso elettrico, contrabbasso in CC0; mancano piano elettrico e organo) | — | `docs/AUDIO_ASSETS.md` con fonte, licenza, attribuzione per ogni file |
-| J3 | Batteria: articolazioni, hi-hat chiuso/aperto/pedale, ghost notes, fill, velocity; sequencer Advanced (velocity, probabilità, 32/64 passi) | PARTIAL | J1, J2 | Ascolto del proprietario; test sui pattern |
-| J4 | Basso: dinamiche, articolazioni (staccato, ghost, slide), walking jazz | PARTIAL | J1 | Walking su ii–V–I con note di approccio corrette |
+| J3 | Batteria: articolazioni, hi-hat chiuso/aperto/pedale, ghost notes, fill, velocity; sequencer Advanced (velocity, probabilità, 32/64 passi) | PARTIAL (pedale, crash, cross-stick, crash dopo il fill, choke: D-64; manca il sequencer Advanced) | J1, J2 | Ascolto del proprietario; test sui pattern |
+| J4 | Basso: dinamiche, articolazioni (staccato, ghost, slide), walking jazz | IMPLEMENTED (D-64; ascolto del proprietario da fare) | J1 | Walking su ii–V–I con note di approccio corrette |
 | J5 | Tastiere con voicing coerenti dal motore (HA3) e voice leading nel comping | PARTIAL | HA3, J1 | Comping senza salti oltre la soglia |
 | J6 | Groove, stili, swing, humanization deterministica (tempo, velocity) | PARTIAL | — | Test con seme fisso |
 | J7 | Mixer: volume, pan, mute, solo, meter per bus | PARTIAL | — | Pan reale misurato sui canali |
@@ -178,5 +178,6 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | J2 · quattro set CC0 convertiti e registrati; J1 · sampler con caricamento pigro e ripiego sintetico (D-60) | #46 | unit sulle zone e sui manifest, e2e con segnale sui canali in Chromium; ascolto del proprietario da fare |
 | 21/11/2026 | M6 · quattro livelli come dato dello studio, «Base» → Principiante, livello scelto al salvataggio (D-61) | #47 | unit + e2e della biblioteca |
 | 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | #48 | unit su casi da manuale e catene, e2e nell'editor |
-| 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | questo branch | unit su casi da manuale in Do, e2e sul sequencer |
-| 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-64) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
+| 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | #49 | unit su casi da manuale in Do, e2e sul sequencer |
+| 21/11/2026 | J3 · pedale, crash, cross-stick, crash dopo il fill; J4 · seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | questo branch | unit su ii–V–I, clave e pattern, e2e dei generi e dei campioni; ascolto del proprietario da fare |
+| 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-65) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |

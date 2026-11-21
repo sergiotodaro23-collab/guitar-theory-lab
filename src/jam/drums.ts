@@ -1,18 +1,21 @@
 /**
- * Jam Studio's drum step sequencer, Simple level: six kit pieces, 16 steps of
- * a sixteenth note, each step off, on or accented. Four patterns A–D and a
- * fill. Patterns become a timeline track like everything else: same clock,
+ * Jam Studio's drum step sequencer, Simple level: ten kit pieces, 16 steps of
+ * a sixteenth note, each step off, on, accented or ghosted. Four patterns A–D
+ * and a fill; the bar after a fill opens with a crash (J3). Patterns become a timeline track like everything else: same clock,
  * same swing, pattern changes at the next bar line. Pure, no DOM.
  */
 import { PPQ, ticksPerBar, type DrumPayload, type Meter, type Track, type TrackEvent } from '../timeline';
 
-export type DrumVoice = 'kick' | 'snare' | 'hat' | 'open' | 'ride' | 'clap' | 'tom';
+export type DrumVoice = 'kick' | 'snare' | 'cross' | 'hat' | 'pedal' | 'open' | 'ride' | 'crash' | 'clap' | 'tom';
 export const DRUM_VOICES: readonly { readonly voice: DrumVoice; readonly label: string }[] = [
   { voice: 'kick', label: 'Cassa' },
   { voice: 'snare', label: 'Rullante' },
+  { voice: 'cross', label: 'Cross-stick' },
   { voice: 'hat', label: 'Hi-hat chiuso' },
+  { voice: 'pedal', label: 'Hi-hat a pedale' },
   { voice: 'open', label: 'Hi-hat aperto' },
   { voice: 'ride', label: 'Ride' },
+  { voice: 'crash', label: 'Crash' },
   { voice: 'clap', label: 'Battimani' },
   { voice: 'tom', label: 'Tom' },
 ];
@@ -33,8 +36,9 @@ export const steps = (text: string): readonly DrumStep[] =>
   Array.from({ length: DRUM_STEPS }, (_, i) => (text[i] === 'X' ? 2 : text[i] === 'x' ? 1 : text[i] === 'g' ? 3 : 0));
 
 export const pattern = (rows: Partial<Record<DrumVoice, string>>): DrumPattern => ({
-  kick: steps(rows.kick ?? ''), snare: steps(rows.snare ?? ''), hat: steps(rows.hat ?? ''),
-  open: steps(rows.open ?? ''), ride: steps(rows.ride ?? ''), clap: steps(rows.clap ?? ''), tom: steps(rows.tom ?? ''),
+  kick: steps(rows.kick ?? ''), snare: steps(rows.snare ?? ''), cross: steps(rows.cross ?? ''),
+  hat: steps(rows.hat ?? ''), pedal: steps(rows.pedal ?? ''), open: steps(rows.open ?? ''),
+  ride: steps(rows.ride ?? ''), crash: steps(rows.crash ?? ''), clap: steps(rows.clap ?? ''), tom: steps(rows.tom ?? ''),
 });
 
 /** Starting kit: four everyday grooves and a tom fill, all in 4/4 sixteenths. */
@@ -67,7 +71,7 @@ export const stepAt = (sixteenth: number): number => sixteenth % DRUM_STEPS;
 export const stepVelocity = (step: DrumStep): number => (step === 2 ? 1 : step === 1 ? 0.7 : step === 3 ? 0.3 : 0);
 
 /** Cymbals keep time with a pulse: strongest on the beat, then the eighth, then the sixteenths. */
-const TIMEKEEPERS: ReadonlySet<DrumVoice> = new Set(['hat', 'open', 'ride']);
+const TIMEKEEPERS: ReadonlySet<DrumVoice> = new Set(['hat', 'pedal', 'open', 'ride']);
 export function pulseFactor(sixteenth: number): number {
   if (sixteenth % 4 === 0) return 1;
   if (sixteenth % 2 === 0) return 0.84;
@@ -93,14 +97,34 @@ function barEvents(p: DrumPattern, meter: Meter, offset: number): TrackEvent<Dru
 }
 
 /**
+ * The bar after a fill: a drummer closes the fill on the next downbeat with a
+ * crash and the kick under it. Where the groove already crashes there, nothing
+ * changes; a kit with nothing on the downbeat (ambient) is left alone too.
+ */
+export function landingBar(p: DrumPattern): DrumPattern {
+  if ((p.crash[0] ?? 0) > 0) return p;
+  const downbeat = DRUM_VOICES.some(({ voice }) => (p[voice][0] ?? 0) > 0);
+  if (!downbeat) return p;
+  const set = (row: readonly DrumStep[], step: DrumStep): readonly DrumStep[] => row.map((v, i) => (i === 0 ? step : v));
+  return { ...p, crash: set(p.crash, 2), kick: set(p.kick, Math.max(p.kick[0] ?? 0, 1) as DrumStep) };
+}
+
+/**
  * The drum track: the chosen pattern, with the fill as the last bar of every
- * `fillEvery` bars (0 = never). Loops forever.
+ * `fillEvery` bars (0 = never), and a crash landing on the bar after it (the
+ * loop's first bar, so the very first bar of a jam opens with one as well).
+ * Loops forever.
  */
 export function drumTrack(kit: DrumKit, active: number, meter: Meter, fillEvery: number): Omit<Track<DrumPayload>, 'originTick'> {
   const bar = ticksPerBar(meter);
   const bars = fillEvery > 0 ? fillEvery : 1;
   const main = kit.patterns[active] ?? kit.patterns[0];
-  const events = Array.from({ length: bars }, (_, i) => barEvents(fillEvery > 0 && i === bars - 1 ? kit.fill : main, meter, i * bar)).flat();
+  const barPattern = (i: number): DrumPattern => {
+    if (fillEvery <= 0) return main;
+    if (i === bars - 1) return kit.fill;
+    return i === 0 ? landingBar(main) : main;
+  };
+  const events = Array.from({ length: bars }, (_, i) => barEvents(barPattern(i), meter, i * bar)).flat();
   return { id: 'drums', lengthTicks: bar * bars, loop: true, events };
 }
 
