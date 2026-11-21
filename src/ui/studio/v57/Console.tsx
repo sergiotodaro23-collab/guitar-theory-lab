@@ -8,7 +8,7 @@ import { engine } from '../../../app/engine';
 import { useApp, usePlayhead } from '../../../app/store';
 import { AccentGrid } from '../../AccentGrid';
 import { Knob } from '../../hardware';
-import { BeatLights, BpmInput, useCurrentChordText, useTap } from '../../Transport';
+import { BeatLights, BpmInput, CountInBadge, useCurrentChordText, useTap } from '../../Transport';
 import { HardwareKey } from './HardwareKey';
 import { useNowNext } from './hooks';
 import { lcdModel, positionText } from './layout';
@@ -109,6 +109,7 @@ function Strip() {
         <StateLed />
         <span className="now-chord" data-none={text.none ? '1' : '0'} data-testid="current-chord">{text.current}</span>
         <span data-testid="strip-tempo">{bpm} BPM · {meterId}</span>
+        <CountInBadge />
         <BeatLights />
       </div>
     </div>
@@ -124,6 +125,7 @@ function Lcd() {
   const nextText = text.next ?? model.next;
   return (
     <div className="v57-lcdscreen" role="group" aria-label="Display principale: tonalità e scala, accordo, tempo" data-testid="lcd">
+      <CountInBadge />
       <div className="v57-lmain">
         <div className="v57-lz" aria-label="Tonalità e scala">
           <div className="v57-lval"><span className="v57-lbig" data-testid="lcd-tonic">{model.tonic}</span><span className="v57-lscale">{model.scaleName}</span></div>

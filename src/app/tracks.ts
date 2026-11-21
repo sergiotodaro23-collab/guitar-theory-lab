@@ -6,7 +6,7 @@ import { arrangementTracks, bassTrack, chordSpans, chordTrack, compTrack, drumTr
 import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
 import { ticksPerBeat, type Track } from '../timeline';
-import { arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, exerciseSpecOf, meterOf, tuningOf, type Settings } from './settings';
+import { exerciseRhythmOf, arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, exerciseSpecOf, meterOf, tuningOf, type Settings } from './settings';
 
 export type TrackSpec = Omit<Track, 'originTick'>;
 
@@ -41,7 +41,7 @@ export function buildTracks(s: Settings): ModeTracks {
     );
   } else if (s.exerciseOn) {
     const sequence = currentExerciseSequence(s);
-    if (sequence.length > 0) exercise = exerciseTrack(sequence, meter, s.notesPerBeat);
+    if (sequence.length > 0) exercise = exerciseTrack(sequence, meter, s.notesPerBeat, exerciseRhythmOf(s), s.exerciseArticulation);
   }
   // A song form: the band follows the sections; the exercise keeps its own loop.
   if (s.mode === 'jam' && auto && s.arrangementOn && s.arrangement.length > 0) {

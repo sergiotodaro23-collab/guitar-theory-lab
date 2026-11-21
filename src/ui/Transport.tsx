@@ -127,7 +127,29 @@ export function PlayControls() {
         {state === 'playing' ? 'Pausa' : state === 'paused' ? 'Riprendi' : 'Avvia'}
       </button>
       <button type="button" className="stop" data-testid="stop" disabled={state === 'stopped'} onClick={() => engine.stop()}>Ferma</button>
+      <CountInBadge />
     </div>
+  );
+}
+
+/** Count-in before bar 1 (M3): the beats still to come, read from the shared clock. */
+export function CountInBadge() {
+  const left = usePlayhead((p) => p.countIn);
+  if (left <= 0) return null;
+  return <span className="count-in" role="status" data-testid="count-in">Attacco {left}</span>;
+}
+
+export function CountInSelect() {
+  const countInBars = useApp((s) => s.settings.countInBars);
+  const update = useApp((s) => s.update);
+  return (
+    <Select<0 | 1 | 2>
+      label="Battute di attacco"
+      testId="count-in-bars"
+      value={countInBars}
+      options={[{ value: 0, label: 'Nessuno' }, { value: 1, label: '1 battuta' }, { value: 2, label: '2 battute' }]}
+      onChange={(value) => update({ countInBars: value })}
+    />
   );
 }
 

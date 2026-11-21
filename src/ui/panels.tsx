@@ -18,6 +18,8 @@ import { voicingKey } from '../fretboard';
 import { ChordDiagram } from '../viz/ChordDiagram';
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
+import { RhythmFields } from './RhythmFields';
+import { StringsField } from './StringsField';
 import { ArpShapeControls } from './ArpShapePanel';
 
 export const tonicOptions = TONICS.map((t) => ({ value: t, label: t }));
@@ -356,6 +358,13 @@ function SingleExercise({ validCustom }: { readonly validCustom: boolean }) {
           />
         </Field>
       </div>
+      <StringsField strings={s.exerciseStrings} name="dell'esercizio" onChange={(exerciseStrings) => update({ exerciseStrings })} />
+      <RhythmFields
+        rhythm={s.exerciseRhythm}
+        articulation={s.exerciseArticulation}
+        name="dell'esercizio"
+        onChange={(change) => update({ ...(change.rhythm !== undefined ? { exerciseRhythm: change.rhythm } : {}), ...(change.articulation ? { exerciseArticulation: change.articulation } : {}) })}
+      />
     </>
   );
 }

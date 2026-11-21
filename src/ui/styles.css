@@ -602,3 +602,13 @@ button, select, input { font: inherit; color: inherit; }
 .arrangement-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
 .arrangement-item { border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px; }
 .arrangement-item.is-now { border-color: var(--hot); box-shadow: 0 0 0 1px var(--hot); }
+
+/* Count-in (M3): over the display while bar 1 is coming. */
+.count-in { font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; background: rgba(0, 0, 0, 0.55); color: var(--led-amber, #ffb347); }
+.v57-lcdscreen > .count-in { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; z-index: 2; border-radius: 3px; }
+
+/* Strings of an exercise (M4). */
+.string-picks { display: flex; gap: 4px; }
+.string-pick { min-width: 28px; height: 28px; border-radius: 4px; border: 1px solid currentColor; background: transparent; color: inherit; opacity: 0.45; font-variant-numeric: tabular-nums; cursor: pointer; }
+.string-pick.is-on { opacity: 1; font-weight: 700; }
+.string-pick:focus-visible { outline: 2px solid var(--accent, #ff8a3d); outline-offset: 2px; }

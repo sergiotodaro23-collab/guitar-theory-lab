@@ -4,7 +4,8 @@
  */
 import { spellPosition, type FretNote, type SpelledFretNote } from '../fretboard';
 import type { Scale } from '../theory';
-import { ticksPerBar, ticksPerBeat, type Meter, type NotePayload, type Track } from '../timeline';
+import { ticksPerBar, ticksPerBeat, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
+import { layoutRhythm, uniformRhythm, type Articulation, type RhythmStep } from './rhythm';
 
 export type ExerciseKind = 'scale' | 'interval' | 'custom';
 export type Direction = 'up' | 'down' | 'updown';
@@ -81,19 +82,25 @@ export function generateSequence(position: readonly FretNote[], scale: Scale, sp
   return applyDirection(groups, spec.direction, (g) => [...g].reverse());
 }
 
-/** Rests up to the bar line, so every repetition starts on the downbeat. */
-export function exerciseTrack(sequence: readonly FretNote[], meter: Meter, notesPerBeat: number): Omit<Track<NotePayload>, 'originTick'> {
-  const step = ticksPerBeat(meter) / notesPerBeat;
+/**
+ * Rests up to the bar line, so every repetition starts on the downbeat. The
+ * notes fall on `rhythm` (M3) when given, otherwise `notesPerBeat` to the beat.
+ */
+export function exerciseTrack(
+  sequence: readonly FretNote[], meter: Meter, notesPerBeat: Subdivision,
+  rhythm: readonly RhythmStep[] = uniformRhythm(meter, notesPerBeat), articulation: Articulation = 'legato',
+): Omit<Track<NotePayload>, 'originTick'> {
   const bar = ticksPerBar(meter);
-  const lengthTicks = Math.max(bar, Math.ceil((sequence.length * step) / bar) * bar);
+  const layout = layoutRhythm(sequence.length, rhythm, articulation);
+  const lengthTicks = Math.max(bar, Math.ceil(layout.lengthTicks / bar) * bar);
   return {
     id: 'exercise',
     lengthTicks,
     loop: true,
-    events: sequence.map((note, index) => ({
-      tick: index * step,
-      payload: { type: 'note', midi: note.midi, string: note.string, fret: note.fret, durationTicks: step, index },
-    })),
+    events: layout.notes.map(({ index, tick, durationTicks }) => {
+      const note = sequence[index] as FretNote;
+      return { tick, payload: { type: 'note', midi: note.midi, string: note.string, fret: note.fret, durationTicks, index } };
+    }),
   };
 }
 

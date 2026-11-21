@@ -35,6 +35,8 @@ export interface TimelineSink {
   metronome(event: MetronomeEvent, time: number): void;
   trackEvent(event: ScheduledTrackEvent, time: number): void;
   loopBoundary?(event: LoopBoundary, time: number): void;
+  /** A count-in click before bar 1 (M3): `beat` from 0, `of` beats in all. */
+  countIn?(beat: number, of: number, beatsPerBar: number, time: number): void;
   /** Silence everything scheduled at or after this time. */
   cancelAfter(time: number): void;
 }
@@ -72,6 +74,8 @@ export class TimelineScheduler {
   /** End position relative to a track's origin, so it follows the track when it restarts. */
   private end: { readonly ticks: number; readonly trackId: string | null } | null = null;
   private onEnd: (() => void) | null = null;
+  /** Count-in in progress: audio time of bar 1 and of one count-in beat. */
+  private countIn: { readonly start: number; readonly beat: number; readonly beats: number } | null = null;
 
   constructor(
     private readonly clock: Clock,
@@ -110,17 +114,38 @@ export class TimelineScheduler {
     return this.positionAt(this.clock.now());
   }
 
+  /** Count-in beats still to come (with the current one), 0 when none is running. */
+  countInLeftAt(time: number): number {
+    if (this.state !== 'playing' || !this.countIn || time >= this.countIn.start) return 0;
+    return Math.min(this.countIn.beats, Math.ceil((this.countIn.start - time) / this.countIn.beat - 1e-9));
+  }
+
   /** Audio-clock time of a straight tick, swing included. */
   timeOf(tick: number): number {
     if (!this.tempo) return 0;
     return this.tempo.timeAt(swingTick(tick, this.config));
   }
 
-  play(): void {
+  /**
+   * Start or resume. From a stop, `countInBars` bars of the current meter are
+   * clicked first at the current tempo (M3): tick 0 moves later on the same
+   * audio clock, so nothing else changes and everything stays in sync.
+   */
+  play(countInBars = 0): void {
     if (this.state === 'playing') return;
     const from = this.state === 'paused' ? this.pausedTick : 0;
     const now = this.clock.now();
-    this.tempo = this.buildTempo(now + this.startDelay, from);
+    let start = now + this.startDelay;
+    this.countIn = null;
+    if (this.state === 'stopped' && countInBars > 0) {
+      const { beatsPerBar } = this.config.meter;
+      const beat = 60 / this.bpmValue;
+      const beats = Math.round(countInBars) * beatsPerBar;
+      for (let i = 0; i < beats; i += 1) this.sink.countIn?.(i, beats, beatsPerBar, start + i * beat);
+      this.countIn = { start: start + beats * beat, beat, beats };
+      start += beats * beat;
+    }
+    this.tempo = this.buildTempo(start, from);
     this.cursor = from;
     this.state = 'playing';
     this.stopTimer = this.timer.start(() => this.pump(), this.intervalMs);
@@ -132,6 +157,7 @@ export class TimelineScheduler {
     const now = this.clock.now();
     this.pausedTick = this.positionAt(now);
     this.state = 'paused';
+    this.countIn = null;
     this.halt();
     this.sink.cancelAfter(now);
   }
@@ -148,6 +174,7 @@ export class TimelineScheduler {
   stop(): void {
     if (this.state === 'stopped') return;
     this.state = 'stopped';
+    this.countIn = null;
     // A fresh start counts bars from the meter chosen last.
     this.config = { meter: this.config.meter, subdivision: this.config.subdivision, swing: this.config.swing };
     this.pausedTick = 0;
