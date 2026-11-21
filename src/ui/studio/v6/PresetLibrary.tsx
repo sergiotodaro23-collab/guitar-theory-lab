@@ -9,6 +9,7 @@ import { LAB_NAMES, NO_FILTER, PRESET_LEVELS, PRESET_TYPES, buildLibrary, filter
 import type { AppMode } from '../../../app/settings';
 import { presetRepository, useApp } from '../../../app/store';
 import { loadStudyPreset, pickStudy } from '../../panels';
+import { LevelSelect } from '../../LevelSelect';
 
 const LABS = Object.keys(LAB_NAMES) as AppMode[];
 
@@ -102,7 +103,7 @@ export function PresetLibrary({ open, onClose }: { readonly open: boolean; reado
               <option value="user">Tuoi</option>
             </select>
           </div>
-          <p className="v6-pl-count" role="status" data-testid="preset-count">{shown.length} di {library.length} preset{filter.level ? ' · la difficoltà è indicata solo sui preset di partenza' : ''}</p>
+          <p className="v6-pl-count" role="status" data-testid="preset-count">{shown.length} di {library.length} preset{filter.level ? ' · i tuoi preset compaiono se salvati con un livello' : ''}</p>
           <ul className="v6-pl-grid" data-testid="preset-results">
             {shown.map((entry) => (
               <Card key={entry.id} entry={entry}
@@ -116,10 +117,11 @@ export function PresetLibrary({ open, onClose }: { readonly open: boolean; reado
             <label>Salva lo studio corrente come preset
               <input className="v6-pl-input" data-testid="preset-name" placeholder="Nome del preset" value={name} onChange={(e) => setName(e.target.value)} />
             </label>
+            <LevelSelect className="v6-select" />
             <button type="submit" className="v6-minikey" data-testid="preset-save">Salva preset</button>
             <span className="v6-pl-msg" role="status" data-testid="preset-status">{message}</span>
           </form>
-          <p className="v6-pl-foot">Un preset conserva lo studio (laboratorio, scala, accordi, esercizio, tempo). Mixer, rig, ingresso e aspetto restano i tuoi. Un nome già usato sovrascrive quel preset.</p>
+          <p className="v6-pl-foot">Un preset conserva lo studio (laboratorio, scala, accordi, esercizio, tempo, livello). Mixer, rig, ingresso e aspetto restano i tuoi. Un nome già usato sovrascrive quel preset.</p>
         </div>
       ) : null}
     </dialog>

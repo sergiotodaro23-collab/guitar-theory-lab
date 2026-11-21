@@ -20,6 +20,7 @@ import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
 import { RhythmFields } from './RhythmFields';
 import { StringsField } from './StringsField';
+import { LevelSelect } from './LevelSelect';
 import { ArpShapeControls } from './ArpShapePanel';
 
 export const tonicOptions = TONICS.map((t) => ({ value: t, label: t }));
@@ -1018,6 +1019,7 @@ export function PresetsPanel() {
         }}
       >
         <Field label="Nome"><input className="text-input" data-testid="preset-name" value={name} onChange={(event) => setName(event.target.value)} /></Field>
+        <Field label="Livello"><LevelSelect /></Field>
         <button type="submit" className="btn" data-testid="preset-save">Salva preset</button>
       </form>
       {saved.length > 0 ? (

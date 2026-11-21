@@ -1,5 +1,5 @@
 /** Starter presets: a place to begin, not data. They are never written to storage. */
-import { ROUTINE_TEMPLATES } from '../exercises';
+import { ROUTINE_TEMPLATES, type ExerciseLevel } from '../exercises';
 import { PROGRESSION_TEMPLATES, instantiateTemplate } from '../jam';
 import type { ChordLayer } from './chordLayers';
 import type { Settings } from './settings';
@@ -12,7 +12,8 @@ export interface BuiltinPreset {
   readonly data: Partial<Settings>;
 }
 
-export type PresetLevel = 'Base' | 'Intermedio' | 'Avanzato';
+/** The level a starter preset is filed under (M6): the four exercise levels. */
+export type PresetLevel = ExerciseLevel;
 
 const template = (id: string, key: string) => {
   const found = PROGRESSION_TEMPLATES.find((t) => t.id === id);
@@ -28,11 +29,11 @@ const routine = (index: number) => {
   return found;
 };
 
-export const STUDY_PRESETS: readonly BuiltinPreset[] = [
+const STARTERS: readonly BuiltinPreset[] = [
   {
     id: 'thirds-c',
     name: 'Terze in Do maggiore, forma E',
-    level: 'Base',
+    level: 'Principiante',
     data: { mode: 'fretboard', tonic: 'C', scaleId: 'ionian', positionType: 'caged', cagedForm: 'E', exerciseOn: true, exerciseMode: 'single', exerciseKind: 'interval', interval: 3, direction: 'updown', pairMotion: 'ascending', notesPerBeat: 2, bpm: 72, chordLayers: [] },
   },
   {
@@ -50,7 +51,7 @@ export const STUDY_PRESETS: readonly BuiltinPreset[] = [
   {
     id: 'sequence-1235',
     name: 'Sequenza 1-2-3-5 in Sol maggiore',
-    level: 'Base',
+    level: 'Principiante',
     data: { mode: 'fretboard', tonic: 'G', scaleId: 'ionian', positionType: '3nps', npsStart: 0, exerciseOn: true, exerciseMode: 'single', exerciseKind: 'custom', customText: '1 2 3 5', direction: 'updown', notesPerBeat: 4, bpm: 70, chordLayers: [] },
   },
   {
@@ -68,13 +69,13 @@ export const STUDY_PRESETS: readonly BuiltinPreset[] = [
   {
     id: 'arp-cmaj7-inversions',
     name: 'Arpeggio di Cmaj7 dalla terza, sale e scende',
-    level: 'Base',
+    level: 'Principiante',
     data: { mode: 'arpeggio', arpSource: 'chord', arpSymbol: 'Cmaj7', arpLow: 7, arpStart: 1, arpDirection: 'updown', arpCustomOn: false, arpNotesPerBeat: 2, labelMode: 'function', bpm: 72 },
   },
   {
     id: 'arp-251-connected',
     name: 'Arpeggi collegati su ii–V–I in Do',
-    level: 'Avanzato',
+    level: 'Esperto',
     data: { mode: 'arpeggio', harmonyKey: 'C', harmonyMode: 'ionian', arpSource: 'progression', arpLink: 'connect', arpLow: 5, arpStart: 0, arpDirection: 'up', arpCustomOn: false, arpNotesPerBeat: 2, labelMode: 'function', bpm: 80, progression: template('ii-v-i', 'C'), compOn: true },
   },
   {
@@ -86,13 +87,16 @@ export const STUDY_PRESETS: readonly BuiltinPreset[] = [
   {
     id: 'thirds-251',
     name: 'Terze sopra un ii–V–I',
-    level: 'Avanzato',
+    level: 'Esperto',
     data: { mode: 'harmony', harmonyKey: 'C', harmonyMode: 'ionian', tonic: 'C', scaleId: 'ionian', positionType: 'caged', cagedForm: 'E', exerciseOn: true, exerciseMode: 'single', exerciseKind: 'interval', interval: 3, direction: 'updown', pairMotion: 'ascending', notesPerBeat: 2, focus: 'all', changeMode: 'auto', labelMode: 'function', bpm: 72, progression: template('ii-v-i', 'C'), compOn: true },
   },
   {
     id: 'blues-a',
     name: 'Jam: blues in La',
-    level: 'Base',
+    level: 'Principiante',
     data: { mode: 'jam', harmonyKey: 'A', harmonyMode: 'ionian', tonic: 'A', scaleId: 'minorBlues', positionType: 'caged', cagedForm: 'G', exerciseOn: false, focus: 'all', labelMode: 'function', bpm: 96, swing: 0.3, subdivision: 1, progression: template('blues', 'A'), compOn: true, compPattern: 'charleston', loop: true },
   },
 ];
+
+/** The level is part of the study (M6): loading a starter preset sets it, saving keeps it. */
+export const STUDY_PRESETS: readonly BuiltinPreset[] = STARTERS.map((p) => ({ ...p, data: { ...p.data, studyLevel: p.level } }));

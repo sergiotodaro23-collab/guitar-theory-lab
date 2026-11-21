@@ -2,15 +2,17 @@
  * The global preset library (Studio V6): starter presets and the user's own,
  * described by what they contain so they can be searched and filtered. Pure.
  * Laboratory, key and type are read from the preset's data, never typed by
- * hand; only the level of a starter preset is editorial.
+ * hand. The level is the study's own (`studyLevel`, M6), editorial on the
+ * starter presets and chosen by the user on their own.
  */
+import { EXERCISE_LEVELS, parseLevel } from '../exercises';
 import { SCALES, tryParseChord } from '../theory';
 import { STUDY_PRESETS, type PresetLevel } from './builtins';
 import type { AppMode, Settings } from './settings';
 
 export type PresetType = 'Scala' | 'Intervalli' | 'Sequenza' | 'Percorso' | 'Arpeggi' | 'Armonia' | 'Jam';
 export const PRESET_TYPES: readonly PresetType[] = ['Scala', 'Intervalli', 'Sequenza', 'Percorso', 'Arpeggi', 'Armonia', 'Jam'];
-export const PRESET_LEVELS: readonly PresetLevel[] = ['Base', 'Intermedio', 'Avanzato'];
+export const PRESET_LEVELS: readonly PresetLevel[] = EXERCISE_LEVELS;
 export const LAB_NAMES: Readonly<Record<AppMode, string>> = { fretboard: 'Scales', arpeggio: 'Arpeggios', harmony: 'Harmony', jam: 'Jam' };
 
 export interface LibraryEntry {
@@ -23,7 +25,7 @@ export interface LibraryEntry {
   readonly key: string;
   /** One line under the name: scale or progression, position, tempo. */
   readonly summary: string;
-  /** Starter presets only: the user's own carry no level. */
+  /** Null for a user's preset saved without one. */
   readonly level: PresetLevel | null;
   readonly data: Partial<Settings>;
 }
@@ -58,7 +60,7 @@ function summaryOf(d: Data, lab: AppMode): string {
   return parts.join(' · ');
 }
 
-export function describePreset(id: string, name: string, source: LibraryEntry['source'], data: Data, level: PresetLevel | null = null): LibraryEntry {
+export function describePreset(id: string, name: string, source: LibraryEntry['source'], data: Data, level: PresetLevel | null = parseLevel(data.studyLevel)): LibraryEntry {
   const lab = data.mode ?? 'fretboard';
   return { id, name, source, lab, type: typeOf(data, lab), key: keyOf(data, lab), summary: summaryOf(data, lab), level, data };
 }

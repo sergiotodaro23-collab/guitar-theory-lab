@@ -290,12 +290,12 @@ test('preset library: search and combined filters; load, save, rename and delete
   // Filters combine; the search ignores case.
   await page.getByTestId('preset-filter-lab').selectOption('fretboard');
   await expect(cards).toHaveCount(6);
-  await page.getByTestId('preset-filter-level').selectOption('Base');
+  await page.getByTestId('preset-filter-level').selectOption('Principiante');
   await expect(cards).toHaveCount(2);
   await page.getByTestId('preset-search').fill('TERZE');
   await expect(cards).toHaveCount(1);
   await expect(cards.first()).toContainText('Terze in Do maggiore, forma E');
-  await expect(cards.first()).toContainText('Scales · Intervalli · C · Base');
+  await expect(cards.first()).toContainText('Scales · Intervalli · C · Principiante');
   await page.getByTestId('preset-filter-key').selectOption('A');
   await expect(cards).toHaveCount(0);
   await expect(library).toContainText('Nessun preset con questi filtri.');
@@ -312,12 +312,20 @@ test('preset library: search and combined filters; load, save, rename and delete
   await page.getByTestId('preset-library-open').click();
   await page.getByTestId('preset-save').click();
   await expect(page.getByTestId('preset-status')).toHaveText('Dai un nome al preset.');
+  // The starter's level came with it (M6); the user files their own under another.
+  await expect(library.getByTestId('study-level')).toHaveValue('Principiante');
+  await library.getByTestId('study-level').selectOption('Intermedio');
   await page.getByTestId('preset-name').fill('Blues a 101');
   await page.getByTestId('preset-save').click();
   await expect(page.getByTestId('preset-status')).toHaveText('Salvato: Blues a 101');
   await page.getByTestId('preset-filter-source').selectOption('user');
   await expect(cards).toHaveCount(1);
-  await expect(cards.first()).toContainText('Jam · Jam · A');
+  await expect(cards.first()).toContainText('Jam · Jam · A · Intermedio');
+  await page.getByTestId('preset-filter-level').selectOption('Esperto');
+  await expect(cards).toHaveCount(0);
+  await page.getByTestId('preset-filter-level').selectOption('Intermedio');
+  await expect(cards).toHaveCount(1);
+  await page.getByTestId('preset-filter-level').selectOption('');
   await library.getByRole('button', { name: 'Rinomina Blues a 101' }).click();
   await library.getByRole('textbox', { name: 'Nuovo nome per Blues a 101' }).fill('Blues lento');
   await library.getByRole('button', { name: 'Salva', exact: true }).click();
