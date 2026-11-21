@@ -120,10 +120,14 @@ describe('sampler zones (J1)', () => {
       for (const { voice } of DRUM_VOICES) expect(voices.has(drumVoiceFor(voice, 0.8, set) ?? ''), `${set} ${voice}`).toBe(true);
       expect(voices.has(drumVoiceFor('tom', 1, set) ?? ''), set).toBe(true);
     }
-    // The clap row: cross-stick with sticks, hi-hat foot with brushes, a hand clap on the drum machine.
+    // The clap row: cross-stick on a real kit, a hand clap on the drum machine, whose rim shot and closed hat
+    // stand in for the cross-stick and the hi-hat foot it lacks.
     expect(drumVoiceFor('clap', 0.8)).toBe('crossStick');
-    expect(drumVoiceFor('clap', 0.8, 'brushes')).toBe('hhPedal');
+    expect(drumVoiceFor('clap', 0.8, 'brushes')).toBe('crossStick');
     expect(drumVoiceFor('clap', 0.8, 'electronic')).toBe('clap');
+    expect(drumVoiceFor('cross', 0.8, 'electronic')).toBe('rimshot');
+    expect(drumVoiceFor('pedal', 0.8, 'electronic')).toBe('hhClosed');
+    expect(drumVoiceFor('pedal', 0.8, 'brushes')).toBe('hhPedal');
     expect(bassArticulation('ebass', 0.12)).toBe('staccato');
     expect(bassArticulation('ebass', 0.6)).toBe('sustain');
     expect(bassArticulation('upright', 0.12)).toBe('pizz');

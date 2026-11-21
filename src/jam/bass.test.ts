@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseChord } from '../theory';
 import { PPQ } from '../timeline';
-import { approachPitch, BASS_LOW, bassPitch, bassTrack } from './bass';
+import { approachPitch, BASS_LOW, bassPitch, bassTrack, bassVelocity, slideStart } from './bass';
 import { GENRES, genreOf } from './genres';
 import { DRUM_STEPS, DRUM_VOICES } from './drums';
 import { COMP_PATTERNS, compTrack, withChord, type Progression } from './progression';
@@ -99,7 +99,58 @@ describe('genres', () => {
   });
 
   it('the son clave 3-2 in Latin C: hits on 1, the and of 2, 4, then 2 and 3', () => {
-    const clave = genreOf('latin').kit.patterns[2].clap;
+    const clave = genreOf('latin').kit.patterns[2].cross;
     expect(clave.flatMap((v, i) => (v ? [i] : []))).toEqual([0, 3, 6, 10, 12]);
+  });
+});
+
+describe('bass articulations and dynamics (J4)', () => {
+  it('the passing second is a whole tone above the root, a half step on b9 and #9 chords', () => {
+    expect(bassPitch(parseChord('Dm7'), 'second')).toBe(40);
+    expect(bassPitch(parseChord('G7b9'), 'second') - bassPitch(parseChord('G7b9'), 'root')).toBe(1);
+    expect(bassPitch(parseChord('C7#9'), 'second') - 36).toBe(1);
+  });
+
+  it('walking by step on ii–V–I: D E F, then a half step into G; G A B, then into C', () => {
+    const notes = pitches(prog('Dm7', 'G7', 'Cmaj7'), 'jazz', 2).map((n) => n.midi);
+    expect(notes.slice(0, 3)).toEqual([38, 40, 41]);
+    expect(Math.abs((notes[3] ?? 0) - 31)).toBe(1);
+    expect(notes.slice(4, 7)).toEqual([31, 33, 35]);
+    expect(Math.abs((notes[7] ?? 0) - 36)).toBe(1);
+  });
+
+  it('walking down from the octave: D3 C3 A2, then the approach', () => {
+    const notes = pitches(prog('Dm7', 'G7'), 'jazz', 1).map((n) => n.midi);
+    expect(notes.slice(0, 3)).toEqual([50, 48, 45]);
+  });
+
+  it('dynamics: downbeat strongest, then the beats, then the off-beats; ghosts barely there', () => {
+    expect(bassVelocity(0, 'root')).toBeGreaterThan(bassVelocity(4, 'fifth'));
+    expect(bassVelocity(4, 'fifth')).toBeGreaterThan(bassVelocity(6, 'fifth'));
+    expect(bassVelocity(6, 'fifth')).toBeGreaterThan(bassVelocity(7, 'fifth'));
+    expect(bassVelocity(5, 'root', 'ghost')).toBeLessThan(0.4);
+  });
+
+  it('funk dead notes are quiet and short; staccato halves a note; a slide starts from the note before', () => {
+    const funk = bassTrack(prog('E7'), m44, genreOf('funk').bass[0] as never, true).events;
+    const ghost = funk.find((e) => e.tick === 2 * (PPQ / 4));
+    expect(ghost?.payload.articulation).toBe('ghost');
+    expect(ghost?.payload.velocity).toBeLessThan(0.4);
+    expect(ghost?.payload.durationTicks).toBeLessThanOrEqual(PPQ / 4);
+    const second = bassTrack(prog('E7'), m44, genreOf('funk').bass[1] as never, true).events;
+    const short = second[0];
+    expect(short?.payload.articulation).toBe('staccato');
+    expect(short?.payload.durationTicks).toBeLessThanOrEqual(PPQ / 4);
+    const slide = second.find((e) => e.payload.articulation === 'slide');
+    // E2 octave (40) slides from the E1 (28) before it? Too far: from two frets below.
+    expect(slideStart(40, 28)).toBe(38);
+    expect(slide?.payload.slideFrom).toBe(slideStart(slide?.payload.midi ?? 0, second[1]?.payload.midi ?? null));
+    expect(slideStart(33, 31)).toBe(31);
+  });
+
+  it('a ghost never falls on a chord change: the change states the root at full weight', () => {
+    const notes = bassTrack(prog('E7', 'A7'), m44, { name: 't', notes: [{ step: 0, length: 1, tone: 'root', articulation: 'ghost' }] }, true).events;
+    expect(notes.every((n) => n.payload.articulation !== 'ghost')).toBe(true);
+    expect(notes[0]?.payload.velocity).toBe(0.9);
   });
 });

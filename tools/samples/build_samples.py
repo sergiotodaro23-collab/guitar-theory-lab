@@ -367,6 +367,8 @@ def build_upright() -> dict:
 BRUSHES = [
     ('kick', 'kick_24/kick', 'k', (('kick', 1.0), ('oh', 0.5)), 14, 4, 1.0),
     ('snare', 'snare_14/brush', 'sn_b', (('top', 1.0), ('btm', 0.25), ('oh', 0.6)), 8, 4, 1.2),
+    # Cross-stick: the brush handle on the rim, as for a bossa nova.
+    ('crossStick', 'snare_14/sidestick', 'sn_ss', (('top', 1.0), ('btm', 0.25), ('oh', 0.6)), 4, 4, 0.6),
     ('hhClosed', 'hihat_14/cl_brush', 'ht_cl_b', (('cl', 0.7), ('oh', 0.8)), 5, 4, 0.8),
     ('hhHalf', 'hihat_14/lc_brush', 'ht_lc_b', (('cl', 0.7), ('oh', 0.8)), 5, 4, 1.2),
     ('hhOpen', 'hihat_14/open_brush', 'ht_open_b', (('cl', 0.7), ('oh', 0.8)), 4, 4, 2.0),
@@ -378,7 +380,7 @@ BRUSHES = [
 ]
 
 # Peak of each voice's loudest layer, in dBFS: a brush kit as mixed for a jazz trio.
-BRUSH_PEAK_DB = {'kick': -4, 'snare': -3, 'hhClosed': -10, 'hhHalf': -9, 'hhOpen': -8, 'hhPedal': -10,
+BRUSH_PEAK_DB = {'kick': -4, 'snare': -3, 'crossStick': -8, 'hhClosed': -10, 'hhHalf': -9, 'hhOpen': -8, 'hhPedal': -10,
                  'ride': -7, 'crash': -5, 'tomHigh': -4, 'tomLow': -4}
 
 

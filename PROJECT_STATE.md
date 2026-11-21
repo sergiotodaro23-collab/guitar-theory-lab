@@ -14,11 +14,13 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 |---|---|---|---|---|
 | Piano e tracker (D-56) | IMPLEMENTED | `claude/project-thread-inqgn7` | — | — |
 | M1 · Trasposizione relazionale (D-57) | IMPLEMENTED | #44 | `exercises/relational.test.ts` (caso del proprietario, tutte le tonalità, fasi fisse), e2e in `routine-arpeggio.spec.ts` | Fatto: intervallo con la lettera, fasi «Segue»/«Fissa», modello d'esempio. Relazioni personalizzate in M2 |
-| M5 · Sequenze generative (D-63) | IMPLEMENTED | `claude/project-thread-inqgn7` | `exercises/sequences.test.ts`, `e2e/sequences.spec.ts` | — |
+| M5 · Sequenze generative (D-63) | IMPLEMENTED | #49 | `exercises/sequences.test.ts`, `e2e/sequences.spec.ts` | — |
 | M2 · Fasi ancorate (D-62) | IMPLEMENTED | #48 | `exercises/anchors.test.ts`, `e2e/routine-arpeggio.spec.ts` | — |
 | M3 · Ritmo, articolazione, attacco (D-59) | PARTIAL | #45 | `exercises/rhythm.test.ts`, `timeline/countIn.test.ts`, `e2e/rhythm.spec.ts` | Manca il ritmo nell'Arpeggios Lab |
 | M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |
-| J2 · Campioni CC0 e CC BY (D-60, D-64) | PARTIAL | #46, PR di questo incremento | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, licenze, copertura, intonazione), `e2e/samples.spec.ts` | Organo ancora sintetizzato (nessuna fonte libera); ascolto del proprietario |
+| J3 · Batteria: pedale, crash, cross-stick, crash dopo il fill (D-64) | PARTIAL | `claude/project-thread-inqgn7` | `jam/kitPieces.test.ts`, `jam/arrangement.test.ts`, `e2e/genres.spec.ts` | Sequencer Advanced (velocity, probabilità, 32/64 passi); ascolto del proprietario |
+| J4 · Basso: seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | IMPLEMENTED | `claude/project-thread-inqgn7` | `jam/bass.test.ts` (walking per grado su ii–V–I), `jam/groove.test.ts` | Ascolto del proprietario |
+| J2 · Campioni CC0 e CC BY (D-60, D-65) | PARTIAL | #46, PR di questo incremento | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, licenze, copertura, intonazione), `e2e/samples.spec.ts` | Organo ancora sintetizzato (nessuna fonte libera); ascolto del proprietario |
 | J1 · Sampler (D-60) | PARTIAL | #46 | `audio/samplerMap.test.ts`, `e2e/samples.spec.ts` | Budget CPU (J9); ascolto del proprietario |
 | M6 · Quattro livelli (D-61) | IMPLEMENTED | #47 | `exercises/levels.test.ts`, `app/presetLibrary.test.ts`, `e2e/studio-v6-shell.spec.ts` | Preset per ogni livello con FB/HA/AR |
 | Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 | 564 unit, 211 e2e | Scheda audio reale non provata (R10) |
@@ -31,7 +33,13 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | F → R7 · NAM e TONE3000 (R5–R7) | MISSING, sospese (D-58) | — | — | Onda 5; il rig esistente resta intatto |
 | Q9 · PWA installabile (D-58) | MISSING | — | — | Onda 4 |
 
-Prossimo: M7 (condivisione dei preset) e M8 (esercizio unico per i laboratori) sul binario motore; J3/J4 (batteria e basso con le nuove articolazioni) sul binario audio; poi le onde successive senza attese.
+Lavoro in parallelo (dal 21 novembre 2026, approvato dal proprietario), un thread per binario, senza toccare le aree degli altri:
+- motore musicale e Jam (J3–J9, M7, M8): thread «motore e Jam»;
+- preset di Harmony Lab e Arpeggios Lab: thread dedicato;
+- pannello Note e interfaccia Studio: thread dedicato;
+- campioni liberi di piano elettrico, organo, spazzole e kit elettronico (J2): thread dedicato.
+
+Prossimo sul binario motore e Jam: sequencer Advanced della batteria (J3), humanization deterministica (J6), M7 e M8.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
