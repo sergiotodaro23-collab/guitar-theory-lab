@@ -128,3 +128,34 @@ test('on a phone the grid splits into two halves of 8, with no overflow', async 
   expect(first?.width ?? 0).toBeGreaterThanOrEqual(24);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });
+
+test('Advanced: a two-bar pattern, a softer step and a step played by chance', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const errors = await open(page);
+  await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
+  await reveal(page, page.getByTestId('drum-fill-every'));
+  await page.getByTestId('drum-fill-every').selectOption('0');
+  await reveal(page, page.getByTestId('drum-length'));
+  await page.getByTestId('drum-length').selectOption('32');
+  // Bar 2 of the pattern: a crash on its downbeat (step 17).
+  await page.getByRole('group', { name: 'Battuta del pattern da modificare' }).getByRole('button', { name: '2' }).click();
+  await reveal(page, page.getByTestId('drum-crash-16'));
+  await page.getByTestId('drum-crash-16').click();
+  await expect(page.getByTestId('drum-crash-16')).toHaveAttribute('data-step', '1');
+  // Softer: the bar-2 snare on beat 2 (step 21) at 85%.
+  await page.getByRole('group', { name: 'Che cosa cambia un tocco' }).getByRole('button', { name: 'Intensità' }).click();
+  await page.getByTestId('drum-snare-20').click();
+  await expect(page.getByTestId('drum-snare-20')).toHaveAttribute('data-level', '85');
+  // By chance: the bar-2 kick at 75%.
+  await page.getByRole('group', { name: 'Che cosa cambia un tocco' }).getByRole('button', { name: 'Probabilità' }).click();
+  await page.getByTestId('drum-kick-16').click();
+  await expect(page.getByTestId('drum-kick-16')).toHaveAttribute('data-chance', '75');
+
+  await page.getByTestId('bpm').fill('240');
+  await page.getByTestId('play').click();
+  await expect.poll(() => hits(page, 'crash'), { timeout: 8000 }).not.toEqual([]);
+  // The crash falls on the second bar of every two.
+  for (const tick of await hits(page, 'crash')) expect(tick % (2 * BAR)).toBe(BAR);
+  await page.getByTestId('play').click();
+  expect(errors).toEqual([]);
+});
