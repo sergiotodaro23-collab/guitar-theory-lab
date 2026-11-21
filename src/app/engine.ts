@@ -44,6 +44,12 @@ class Engine {
         this.audio?.click(clickSound, level, time);
         this.debug?.scheduled.push({ kind: event.kind, tick: event.tick, time, step: event.step, level });
       },
+      countIn: (beat: number, _of: number, beatsPerBar: number, time: number) => {
+        // Always audible, even with the click off: the count-in is how the player knows when bar 1 starts.
+        const level = beat % beatsPerBar === 0 ? 3 : 2;
+        this.audio?.click(useApp.getState().settings.clickSound, level, time);
+        this.debug?.scheduled.push({ kind: 'countIn', tick: beat, time, level });
+      },
       trackEvent: (event: ScheduledTrackEvent, time: number) => {
         this.audio?.trackEvent(event, time);
         if (this.debug) {
@@ -184,7 +190,8 @@ class Engine {
         this.queueManualComp(settings, selectedChord, 0);
       }
     }
-    this.scheduler.play();
+    const countIn = this.scheduler.transportState === 'stopped' ? useApp.getState().settings.countInBars : 0;
+    this.scheduler.play(countIn);
     this.afterTransport();
   }
 
@@ -252,6 +259,13 @@ class Engine {
   }
 
   /** The tick the listener is hearing now, net of output latency. */
+  /** Count-in beats still to hear, measured at the output like the playhead. */
+  private countInLeft(): number {
+    const ctx = this.ctx;
+    if (!ctx) return 0;
+    return this.scheduler.countInLeftAt(ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0));
+  }
+
   private audibleTick(): number {
     const ctx = this.ctx;
     if (!ctx) return 0;
@@ -362,11 +376,12 @@ class Engine {
       note,
       trail,
       ...this.drumPositionAt(tick, state !== 'stopped'),
+      countIn: this.countInLeft(),
     };
     const current = usePlayhead.getState();
     const changed = current.state !== next.state || current.bar !== next.bar || current.beat !== next.beat
       || current.subdivision !== next.subdivision || current.chordIndex !== next.chordIndex || current.phase !== next.phase || current.beatsPerBar !== next.beatsPerBar
-      || current.note?.index !== next.note?.index || current.drumStep !== next.drumStep || current.drumFill !== next.drumFill;
+      || current.note?.index !== next.note?.index || current.drumStep !== next.drumStep || current.drumFill !== next.drumFill || current.countIn !== next.countIn;
     if (!changed) return;
     if (this.debug && this.ctx && state === 'playing') {
       const segment = segmentAt(this.scheduler.timeConfig, tick);

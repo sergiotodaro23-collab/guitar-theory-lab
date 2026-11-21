@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CLICK_SOUNDS } from '../../../audio/clickSounds';
 import { useApp } from '../../../app/store';
 import { Select } from '../../controls';
-import { ClickSelect, MeterSelect } from '../../Transport';
+import { ClickSelect, CountInSelect, MeterSelect } from '../../Transport';
 import { useStudioUi, type DeviceId } from '../v57/uiStore';
 import { PresetLibrary } from './PresetLibrary';
 import { StudioLogo } from './StudioLogo';
@@ -83,8 +83,9 @@ function MetronomePanel() {
           </label>
           <label className="v6-metro-field"><span>Metrica</span><MeterSelect /></label>
           <label className="v6-metro-field"><span>Suddivisione</span><ClickSelect /></label>
+          <label className="v6-metro-field"><span>Attacco</span><CountInSelect /></label>
         </div>
-        <p>Il click segue l’unico orologio audio dell’app e parte con la riproduzione. La metrica nuova entra alla stanghetta successiva. Accenti personali: tasto «Accenti» nella console.</p>
+        <p>Il click segue l’unico orologio audio dell’app e parte con la riproduzione. La metrica nuova entra alla stanghetta successiva. L’attacco conta le battute scelte prima di partire da fermo, anche a click spento. Accenti personali: tasto «Accenti» nella console.</p>
       </div>
     </>
   );

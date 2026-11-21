@@ -51,3 +51,24 @@ test('advanced editor: dotted rhythm and a separation bar in a phase', async ({ 
   expect(after.length).toBeGreaterThan(before.length);
   expect(after.length % 1920).toBe(0);
 });
+
+test('count-in: one bar of clicks before bar 1, shown on the display, then the exercise on the beat', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  await page.getByTestId('metronome-toggle').click();
+  await page.getByTestId('count-in-bars').selectOption('1');
+  await page.keyboard.press('Escape');
+  await page.getByTestId('bpm').fill('60');
+  await page.getByTestId('play').first().click();
+  await expect(page.getByTestId('count-in').first()).toBeVisible();
+  await expect.poll(async () => page.evaluate(() => (window.__gtl?.debug.scheduled ?? []).filter((e) => e.kind === 'note').length), { timeout: 10000 }).toBeGreaterThan(0);
+  const log = await page.evaluate(() => (window.__gtl?.debug.scheduled ?? []).map((e) => ({ kind: e.kind, tick: e.tick, time: e.time })));
+  const counts = log.filter((e) => e.kind === 'countIn');
+  expect(counts.length).toBe(4);
+  const firstNote = log.find((e) => e.kind === 'note' && e.tick === 0);
+  expect(firstNote).toBeDefined();
+  // At 60 BPM a beat is one second: bar 1 one beat after the last count.
+  expect((firstNote?.time ?? 0) - (counts[3]?.time ?? 0)).toBeCloseTo(1, 3);
+  await expect(page.getByTestId('count-in')).toHaveCount(0, { timeout: 6000 });
+  await page.getByTestId('stop').first().click();
+});

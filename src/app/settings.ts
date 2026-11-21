@@ -60,6 +60,8 @@ export interface StudySettings {
   readonly notesPerBeat: Subdivision;
   /** Rhythm cycle of the single exercise (M3), text form of `parseRhythm`; empty = notes per beat. */
   readonly exerciseRhythm: string;
+  /** Bars clicked before bar 1 when playback starts from a stop (M3): 0, 1 or 2. */
+  readonly countInBars: 0 | 1 | 2;
   readonly exerciseArticulation: Articulation;
   readonly bpm: number;
   readonly meterId: string;
@@ -216,6 +218,7 @@ export const DEFAULT_SETTINGS: Settings = {
   customText: '1 2 3 5',
   notesPerBeat: 2,
   exerciseRhythm: '',
+  countInBars: 0,
   exerciseArticulation: 'legato',
   bpm: 80,
   meterId: '4/4',
@@ -341,6 +344,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     customText: typeof r.customText === 'string' ? r.customText : d.customText,
     notesPerBeat: oneOf(r.notesPerBeat, [1, 2, 3, 4] as const, d.notesPerBeat),
     exerciseRhythm: typeof r.exerciseRhythm === 'string' && (r.exerciseRhythm.trim() === '' || !isRhythmError(parseRhythm(r.exerciseRhythm))) ? r.exerciseRhythm.slice(0, 200) : d.exerciseRhythm,
+    countInBars: oneOf(r.countInBars, [0, 1, 2] as const, d.countInBars),
     exerciseArticulation: oneOf(r.exerciseArticulation, ['legato', 'normal', 'staccato'] as const, d.exerciseArticulation),
     bpm: typeof r.bpm === 'number' && Number.isFinite(r.bpm) ? clamp(Math.round(r.bpm), BPM_MIN, BPM_MAX) : d.bpm,
     meterId: oneOf(r.meterId, Object.keys(METERS), d.meterId),
