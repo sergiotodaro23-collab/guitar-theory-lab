@@ -213,19 +213,6 @@ export function landingBar(p: DrumPattern, patternBar = 0): DrumPattern {
 }
 
 /**
- * The bar after a fill: a drummer closes the fill on the next downbeat with a
- * crash and the kick under it. Where the groove already crashes there, nothing
- * changes; a kit with nothing on the downbeat (ambient) is left alone too.
- */
-export function landingBar(p: DrumPattern): DrumPattern {
-  if ((p.crash[0] ?? 0) > 0) return p;
-  const downbeat = DRUM_VOICES.some(({ voice }) => (p[voice][0] ?? 0) > 0);
-  if (!downbeat) return p;
-  const set = (row: readonly DrumStep[], step: DrumStep): readonly DrumStep[] => row.map((v, i) => (i === 0 ? step : v));
-  return { ...p, crash: set(p.crash, 2), kick: set(p.kick, Math.max(p.kick[0] ?? 0, 1) as DrumStep) };
-}
-
-/**
  * The drum track: the chosen pattern, with the fill as the last bar of every
  * `fillEvery` bars (0 = never), and a crash landing on the bar after it (the
  * loop's first bar, so the very first bar of a jam opens with one as well).
