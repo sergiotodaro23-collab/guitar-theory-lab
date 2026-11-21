@@ -106,3 +106,33 @@ test('relational transposition (M1): C → D moves A minor phases to B, a fixed 
   await expect(summary.locator('li').nth(0)).toContainText('C# Minore naturale');
   await expect(summary.locator('li').nth(1)).toContainText('B Minore melodica');
 });
+
+test('custom relation (M2): phase 2 anchored a major sixth above phase 1 follows its tonic and the key', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/?debug=1');
+  await reveal(page, page.getByTestId('open-editor'));
+  await page.getByTestId('open-editor').click();
+  const editor = page.getByTestId('routine-editor');
+  await editor.getByLabel('Parti da un modello').selectOption({ label: 'Rispetto alla tonalità: La minore naturale su, La minore melodica giù' });
+  await editor.getByLabel('Tonica della fase 1', { exact: true }).selectOption('C');
+  await editor.getByRole('group', { name: 'Trasposizione della fase 2' }).getByRole('button', { name: 'Ancorata' }).click();
+  await editor.getByLabel('Intervallo dalla fase di riferimento della fase 2').selectOption('M6');
+  await expect(editor.getByLabel('Tonica della fase 2', { exact: true })).toHaveValue('A');
+  // The phase it hangs on moves: Eb major brings C minor, spelled by letter.
+  await editor.getByLabel('Tonica della fase 1', { exact: true }).selectOption('Eb');
+  await expect(editor.getByLabel('Tonica della fase 2', { exact: true })).toHaveValue('C');
+  await editor.getByTestId('routine-apply').click();
+  const summary = page.getByTestId('routine-summary');
+  await reveal(page, summary);
+  await expect(summary.locator('li').nth(0)).toContainText('Eb');
+  await expect(summary.locator('li').nth(1)).toContainText('C Minore melodica');
+  // A key change C → D moves phase 1 (it follows) and phase 2 with it.
+  await reveal(page, page.getByTestId('tonic'));
+  await page.getByTestId('tonic').selectOption('D');
+  await reveal(page, summary);
+  await expect(summary.locator('li').nth(0)).toContainText('F');
+  await expect(summary.locator('li').nth(1)).toContainText('D Minore melodica');
+  expect(errors).toEqual([]);
+});
