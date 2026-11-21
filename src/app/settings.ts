@@ -57,6 +57,8 @@ export interface StudySettings {
   readonly direction: Direction;
   readonly pairMotion: PairMotion;
   readonly customText: string;
+  /** How each group of a sequence runs (M5). */
+  readonly groupMotion: PairMotion;
   readonly notesPerBeat: Subdivision;
   /** Rhythm cycle of the single exercise (M3), text form of `parseRhythm`; empty = notes per beat. */
   readonly exerciseRhythm: string;
@@ -220,6 +222,7 @@ export const DEFAULT_SETTINGS: Settings = {
   direction: 'updown',
   pairMotion: 'ascending',
   customText: '1 2 3 5',
+  groupMotion: 'ascending',
   notesPerBeat: 2,
   exerciseRhythm: '',
   countInBars: 0,
@@ -348,6 +351,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     direction: oneOf(r.direction, ['up', 'down', 'updown'] as const, d.direction),
     pairMotion: oneOf(r.pairMotion, ['ascending', 'descending', 'alternating'] as const, d.pairMotion),
     customText: typeof r.customText === 'string' ? r.customText : d.customText,
+    groupMotion: oneOf(r.groupMotion, ['ascending', 'descending', 'alternating'] as const, d.groupMotion),
     notesPerBeat: oneOf(r.notesPerBeat, [1, 2, 3, 4] as const, d.notesPerBeat),
     exerciseRhythm: typeof r.exerciseRhythm === 'string' && (r.exerciseRhythm.trim() === '' || !isRhythmError(parseRhythm(r.exerciseRhythm))) ? r.exerciseRhythm.slice(0, 200) : d.exerciseRhythm,
     countInBars: oneOf(r.countInBars, [0, 1, 2] as const, d.countInBars),
@@ -472,7 +476,8 @@ export function exerciseSpecOf(s: StudySettings): ExerciseSpec {
     interval: s.interval,
     direction: s.direction,
     pairMotion: s.pairMotion,
-    customPattern: parseCustomPattern(s.customText) ?? [1],
+    customPattern: parseCustomPattern(s.customText, { chromatic: true }) ?? [1],
+    groupMotion: s.groupMotion,
   };
 }
 

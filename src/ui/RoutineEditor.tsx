@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { meterOf, tuningOf } from '../app/settings';
 import { useApp } from '../app/store';
+import { SequenceFields } from './SequenceFields';
 import {
   ANCHOR_INTERVALS,
   INTERVAL_NAMES,
@@ -191,9 +192,7 @@ function PhaseBlock({ phase, index, count, selected, summary, targets, issues, o
             </div>
           ) : null}
           {phase.kind === 'custom' ? (
-            <Field label="Passi della scala" hint="Riparte da ogni nota: 1 3 2 4 fa Do Mi Re Fa, Re Fa Mi Sol…">
-              <input className="text-input" aria-label={`Pattern della fase ${n}`} value={phase.customText} onChange={(e) => onChange({ customText: e.target.value })} />
-            </Field>
+            <SequenceFields text={phase.customText} motion={phase.groupMotion} name={`della fase ${n}`} onChange={onChange} />
           ) : null}
         </fieldset>
 
