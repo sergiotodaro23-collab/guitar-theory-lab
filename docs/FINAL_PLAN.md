@@ -105,10 +105,10 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | R2 | Pannello Audio nella barra destra (B2) e via l'input legacy dal taccuino (B3) | MISSING | — | Un solo posto per ingresso, gain, meter |
 | R3 | Calibrazione del livello d'ingresso per NAM, meter in dBFS, clipping protection (limiter sul master), gestione errori | PARTIAL | R2 | Test sintetici: nessun campione oltre 0 dBFS |
 | R4 | Accordatore cromatico e per corde | IMPLEMENTED (sintetico) | — | Da verificare con chitarra |
-| R5 | NAM: persistenza dei modelli (IndexedDB), normalizzazione del livello, misure di costo, ripiego | PARTIAL | R3 | Modello ricaricato dopo riavvio; D-4 dei criteri V6 |
-| R6 | Modelli NAM e IR di partenza con licenza compatibile (ricerca), oppure catalogo TONE3000 | MISSING | — | Registro licenze; nessun modello senza permesso esplicito |
-| R7 | TONE3000 incorporato in modalità ufficiali (F) | BLOCKED parziale | — | In attesa della chiave pubblicabile del proprietario; il resto del rig non ne dipende |
-| R8 | Preset clean, crunch, distortion, jazz, fuzz, ambient sulla catena reale; routing modificabile e bypass | PARTIAL | R5 | Ogni preset cambia il grafo misurato |
+| R5 | NAM: persistenza dei modelli (IndexedDB), normalizzazione del livello, misure di costo, ripiego · **sospesa fino all'onda 5 (D-58)** | PARTIAL | R3, U6 | Modello ricaricato dopo riavvio; D-4 dei criteri V6 |
+| R6 | Modelli NAM e IR di partenza con licenza compatibile (ricerca), oppure catalogo TONE3000 · **sospesa fino all'onda 5 (D-58)** | MISSING | R5 | Registro licenze; nessun modello senza permesso esplicito |
+| R7 | TONE3000 incorporato in modalità ufficiali (F) · **sospesa fino all'onda 5 (D-58)** | MISSING | R5 | Chiave pubblicabile da chiedere solo all'onda 5; il resto del rig non ne dipende |
+| R8 | Preset clean, crunch, distortion, jazz, fuzz, ambient sulla catena reale (DSP interno; NAM opzionale quando R5 c'è); routing modificabile e bypass | PARTIAL | R3 | Ogni preset cambia il grafo misurato |
 | R9 | Monitoring a bassa latenza: `latencyHint`, misura e dichiarazione dei limiti del browser | PARTIAL | — | Valori misurati in `docs/AUDIO_DIAGNOSTICS.md` |
 | R10 | Prova con hardware reale (proprietario) | BLOCKED | R1–R9 | Procedura scritta; esito registrato |
 
@@ -140,17 +140,18 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | Q5 | Firefox e WebKit in CI | BLOCKED (ambiente) | — | Progetti Playwright in CI |
 | Q6 | Ottimizzazione: bundle, CPU, memoria, caricamento campioni | PARTIAL | J1 | Soglie in `docs/PERFORMANCE.md` |
 | Q7 | Documentazione utente e tecnica aggiornata | PARTIAL | — | README, guida, licenze degli asset |
-| Q8 | Rilascio desktop definitivo (tag, release, eventuale installabile) | MISSING | tutto | **Approvazione del proprietario** |
+| Q9 | PWA installabile: manifest, icone, service worker, uso offline, cache dei campioni audio (D-58) | MISSING | J1 | Installazione e avvio offline in Chromium; aggiornamento senza perdere sessione e preset |
+| Q8 | Rilascio desktop definitivo come PWA (tag, release) | MISSING | tutto | **Approvazione del proprietario** |
 
 ## 4. Ordine di esecuzione (onde)
 
-Le onde si sovrappongono; dentro un'onda i binari lavorano in parallelo.
+Le onde si sovrappongono; dentro un'onda i binari lavorano in parallelo. Dal 21 novembre 2026 (D-58) lo sviluppo NAM/TONE3000 è sospeso fino all'onda 5: il codice del rig esistente resta intatto e coperto dai suoi test.
 
 1. **Onda 1 · fondamenta**: M1, M3, M4, M6 (motore) · J1, J2 (sampler e licenze) · R2, R3 (audio).
 2. **Onda 2 · generazione**: M2, M5, M7, M8 · HA1, HA2, HA3 · FB1 · J3, J4 · N2.
-3. **Onda 3 · laboratori completi**: FB2, FB3, HA4–HA6, AR2–AR7 · J5–J8 · R5, R6, R8, R9 · N1, N3–N5.
-4. **Onda 4 · integrazione e interfaccia**: M9, N6 · U1–U6 · J9 · R7 se la chiave è disponibile.
-5. **Onda 5 · chiusura**: Q1–Q7, prova hardware del proprietario (R10), Q8 su approvazione.
+3. **Onda 3 · laboratori completi**: FB2, FB3, HA4–HA6, AR2–AR7 · J5–J8 · R8, R9 · N1, N3–N5.
+4. **Onda 4 · integrazione e interfaccia**: M9, N6 · U1–U6 · J9 · Q9.
+5. **Onda 5 · NAM e chiusura**: R5, R6, R7 (NAM e TONE3000, D-58) · Q1–Q7, prova hardware del proprietario (R10), Q8 su approvazione.
 
 Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N2/FB3, B1 → R1, B2/B3 → R2/N1, C1 → U1, C2/C3 → U2, D1 → M3/J8, D2 → U3, E → U5, F → R7, backlog registrazione/looper → fuori dalla versione definitiva salvo nuova richiesta.
 
@@ -163,9 +164,9 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 ## 6. Decisioni e blocchi da segnalare al proprietario
 
 - Prova con chitarra, scheda audio e cuffie reali (R10): solo il proprietario può farla.
-- Chiave pubblicabile TONE3000 (R7).
+- Chiave pubblicabile TONE3000 e modelli NAM (R5–R7): non richiesti fino all'onda 5 (D-58).
 - Rilascio e tag (Q8). Il push dei tag dall'ambiente cloud è bloccato (P0-10).
-- Forma del «software desktop»: oggi web app nel browser. Proposta: PWA installabile (nessun cambio di stack). Un pacchetto Electron/Tauri sarebbe un cambio radicale e richiede approvazione.
+- Forma del «software desktop»: **PWA installabile, approvata dal proprietario il 21 novembre 2026 (D-58)**; stack invariato, niente Electron o Tauri salvo necessità tecniche concrete. Attività Q9 (manifest, service worker, cache dei campioni, installazione) nell'onda 4.
 
 ## 7. Avanzamento
 

@@ -20,9 +20,11 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | A3 → N2/FB3 · Legenda avanzata e forme sovrapposte | PARTIAL | #41 | `viz/legend.test.ts` | Legenda condivisa per intervalli e target, forme di più scale |
 | B1 → R1 · Selezione dispositivi audio | PARTIAL | #42 | dispositivi simulati | Da verificare con scheda reale |
 | B2, B3 → R2, N1 | MISSING | — | — | Onda 1 |
-| C1–C3 → U1, U2 · D1 → M3/J8 · D2 → U3 · E → U5 · F → R7 | MISSING | — | — | Secondo le onde del piano |
+| C1–C3 → U1, U2 · D1 → M3/J8 · D2 → U3 · E → U5 | MISSING | — | — | Secondo le onde del piano |
+| F → R7 · NAM e TONE3000 (R5–R7) | MISSING, sospese (D-58) | — | — | Onda 5; il rig esistente resta intatto |
+| Q9 · PWA installabile (D-58) | MISSING | — | — | Onda 4 |
 
-Prossimo: M3 (modello ritmico, count-in) e M4 (corde e vincoli sul manico) sul binario motore; J1/J2 (sampler e licenze dei campioni) e R2/R3 sul binario audio.
+Prossimo: M3 (modello ritmico, count-in) e M4 (corde e vincoli sul manico) sul binario motore; J1/J2 (sampler e licenze dei campioni) sul binario audio; poi le onde successive senza attese.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
