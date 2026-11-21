@@ -6,7 +6,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { meterOf, tuningOf } from '../app/settings';
 import { useApp } from '../app/store';
 import {
+  ANCHOR_INTERVALS,
   INTERVAL_NAMES,
+  anchorTargets,
+  applyAnchors,
+  type AnchorIntervalId,
   MAX_PHASES,
   MAX_BARS_AFTER,
   MAX_REPEATS,
@@ -91,6 +95,8 @@ interface BlockProps {
   readonly count: number;
   readonly selected: boolean;
   readonly summary: string;
+  /** Phases this one may be anchored to (M2). */
+  readonly targets: readonly { readonly id: string; readonly label: string }[];
   readonly issues: ReturnType<typeof planRoutine>['phases'][number]['issues'];
   readonly onSelect: () => void;
   readonly onChange: (change: Partial<RoutinePhase>) => void;
@@ -99,7 +105,7 @@ interface BlockProps {
   readonly onRemove: () => void;
 }
 
-function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, onChange, onMove, onDuplicate, onRemove }: BlockProps) {
+function PhaseBlock({ phase, index, count, selected, summary, targets, issues, onSelect, onChange, onMove, onDuplicate, onRemove }: BlockProps) {
   const n = index + 1;
   return (
     <li className={`phase-block ${selected ? 'is-selected' : ''}`} data-testid="phase-block" onFocusCapture={onSelect} onClick={onSelect}>
@@ -119,7 +125,7 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
           <legend>Scala</legend>
           <div className="row">
             <Field label="Tonica">
-              <Select label={`Tonica della fase ${n}`} value={phase.tonic} options={TONICS.map((t) => ({ value: t, label: t }))} onChange={(tonic) => onChange({ tonic })} />
+              <Select label={`Tonica della fase ${n}`} value={phase.tonic} options={TONICS.map((t) => ({ value: t, label: t, disabled: phase.link === 'anchor' && t !== phase.tonic }))} onChange={(tonic) => onChange({ tonic })} />
             </Field>
             <Field label="Scala">
               <Select<ScaleId> label={`Scala della fase ${n}`} value={phase.scaleId} options={SCALE_IDS.map((id) => ({ value: id, label: SCALES[id].name }))} onChange={(scaleId) => onChange({ scaleId })} />
@@ -129,10 +135,20 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
             <Segmented<PhaseLink>
               label={`Trasposizione della fase ${n}`}
               value={phase.link}
-              options={[{ value: 'follow', label: 'Segue' }, { value: 'fixed', label: 'Fissa' }]}
-              onChange={(link) => onChange({ link })}
+              options={[{ value: 'follow', label: 'Segue' }, { value: 'fixed', label: 'Fissa' }, { value: 'anchor', label: 'Ancorata', disabled: targets.length === 0 }]}
+              onChange={(link) => onChange(link === 'anchor' && !targets.some((t) => t.id === phase.anchorTo) ? { link, anchorTo: targets[Math.max(0, index - 1)]?.id ?? '' } : { link })}
             />
           </Field>
+          {phase.link === 'anchor' ? (
+            <div className="row">
+              <Field label="Ancorata a">
+                <Select label={`Fase di riferimento della fase ${n}`} value={phase.anchorTo} options={targets.map((t) => ({ value: t.id, label: t.label }))} onChange={(anchorTo) => onChange({ anchorTo })} />
+              </Field>
+              <Field label="Intervallo" hint="La tonica resta a questo intervallo dalla fase di riferimento, anche quando cambia">
+                <Select<AnchorIntervalId> label={`Intervallo dalla fase di riferimento della fase ${n}`} value={phase.anchorInterval} options={ANCHOR_INTERVALS.map((a) => ({ value: a.id, label: a.label }))} onChange={(anchorInterval) => onChange({ anchorInterval })} />
+              </Field>
+            </div>
+          ) : null}
         </fieldset>
 
         <fieldset className="block-group">
@@ -314,7 +330,9 @@ export function RoutineEditor({ open, onClose }: { readonly open: boolean; reado
   }, [open]);
 
   const plan = useMemo(() => planRoutine(draft, { beatsPerBar: 4, beatUnit: 4 }), [draft]);
-  const setPhases = (phases: readonly RoutinePhase[]) => setDraft({ ...draft, phases });
+  // Anchored phases (M2) follow the phase they hang on at every edit of the draft.
+  const setPhases = (phases: readonly RoutinePhase[]) => setDraft(applyAnchors({ ...draft, phases }).routine);
+  const anchorIssues = useMemo(() => applyAnchors(draft).issues, [draft]);
   const changePhase = (index: number, change: Partial<RoutinePhase>) =>
     setPhases(draft.phases.map((p, i) => (i === index ? { ...p, ...change } : p)));
 
@@ -392,7 +410,8 @@ export function RoutineEditor({ open, onClose }: { readonly open: boolean; reado
                       count={draft.phases.length}
                       selected={i === selected}
                       summary={resolved ? `${resolved.scale.tonicName} ${resolved.scale.definition.name} · ${resolved.label} · ${describeDirection(phase.direction)}` : ''}
-                      issues={resolved?.issues ?? []}
+                      targets={anchorTargets(draft, phase.id)}
+                      issues={[...(anchorIssues.get(phase.id) ? [anchorIssues.get(phase.id) as NonNullable<ReturnType<typeof anchorIssues.get>>] : []), ...(resolved?.issues ?? [])]}
                       onSelect={() => setSelected(i)}
                       onChange={(change) => changePhase(i, change)}
                       onMove={(delta) => {

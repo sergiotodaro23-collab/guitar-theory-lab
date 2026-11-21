@@ -19,6 +19,7 @@ import {
 } from '../fretboard';
 import { SCALES, TONICS, buildScale, chromaticName, diatonicSeventh, mod, noteName, parseNote, pitchClass, spelledIntervalBetween, transposeBySpelled, tryParseChord, type Scale, type ScaleId, type SpelledInterval } from '../theory';
 import { arpeggioSequence } from './arpeggio';
+import { ANCHOR_INTERVAL_IDS, applyAnchors, type AnchorIntervalId } from './anchors';
 import { ticksPerBar, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
 import { describeStrings, normalizeStrings, onStrings, type StringNumber } from './strings';
 import { isRhythmError, layoutRhythm, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, type TimedNote } from './rhythm';
@@ -52,9 +53,13 @@ export interface RoutinePhase {
   /**
    * How the phase moves when the exercise's key changes (M1). "follow" keeps
    * the interval between its tonic and the key, so A minor under C becomes
-   * B minor under D; "fixed" stays where it is (an independent phase).
+   * B minor under D; "fixed" stays where it is (an independent phase);
+   * "anchor" (M2) keeps its tonic at `anchorInterval` above phase `anchorTo`.
    */
   readonly link: PhaseLink;
+  /** Id of the phase an anchored phase hangs on. */
+  readonly anchorTo: string;
+  readonly anchorInterval: AnchorIntervalId;
   /**
    * Rhythm cycle in the text form of `parseRhythm` (M3), e.g. "8. 16".
    * Empty means `notesPerBeat` notes on every beat of the meter.
@@ -72,8 +77,8 @@ export interface RoutinePhase {
 export type RepeatStart = 'continuous' | 'bar';
 export const MAX_BARS_AFTER = 4;
 
-export type PhaseLink = 'follow' | 'fixed';
-export const PHASE_LINKS: readonly PhaseLink[] = ['follow', 'fixed'];
+export type PhaseLink = 'follow' | 'fixed' | 'anchor';
+export const PHASE_LINKS: readonly PhaseLink[] = ['follow', 'fixed', 'anchor'];
 
 export interface Routine {
   readonly name: string;
@@ -387,7 +392,8 @@ export function transposeRoutineBetween(routine: Routine, fromKey: string, toKey
 }
 
 function movePhases(routine: Routine, interval: SpelledInterval, preferFlat: (name: string) => boolean): Routine {
-  return { ...routine, phases: routine.phases.map((phase) => (phase.link === 'fixed' ? phase : transposePhaseBy(phase, interval, preferFlat))) };
+  // Anchored phases are recomputed from the phase they hang on, which has moved (or not) by its own link.
+  return applyAnchors({ ...routine, phases: routine.phases.map((phase) => (phase.link === 'follow' ? transposePhaseBy(phase, interval, preferFlat) : phase)) }).routine;
 }
 
 let idCounter = 0;
@@ -413,6 +419,8 @@ export function defaultPhase(id: string, base?: Partial<RoutinePhase>): RoutineP
     repeats: 1,
     chord: 'Cmaj7',
     link: 'follow',
+    anchorTo: '',
+    anchorInterval: 'P5',
     rhythm: '',
     articulation: 'legato',
     repeatStart: 'continuous',
@@ -462,6 +470,8 @@ export function sanitizeRoutine(raw: unknown, fallback: Routine): Routine {
       notesPerBeat: oneOf(p.notesPerBeat, [1, 2, 3, 4] as const, d.notesPerBeat),
       repeats: clampInt(p.repeats, 1, MAX_REPEATS, 1),
       link: oneOf(p.link, PHASE_LINKS, d.link),
+      anchorTo: typeof p.anchorTo === 'string' ? p.anchorTo.slice(0, 64) : d.anchorTo,
+      anchorInterval: oneOf(p.anchorInterval, ANCHOR_INTERVAL_IDS, d.anchorInterval),
       rhythm: typeof p.rhythm === 'string' && !isRhythmError(parseRhythm(p.rhythm)) ? p.rhythm.slice(0, 200) : d.rhythm,
       articulation: oneOf(p.articulation, ['legato', 'normal', 'staccato'] as const, d.articulation),
       repeatStart: oneOf(p.repeatStart, ['continuous', 'bar'] as const, d.repeatStart),
@@ -470,7 +480,7 @@ export function sanitizeRoutine(raw: unknown, fallback: Routine): Routine {
     };
   });
   if (phases.length === 0) return fallback;
-  return { name: typeof raw.name === 'string' ? raw.name.slice(0, 80) : fallback.name, phases };
+  return applyAnchors({ name: typeof raw.name === 'string' ? raw.name.slice(0, 80) : fallback.name, phases }).routine;
 }
 
 /** Ready-made routines that show what phases are for. */
