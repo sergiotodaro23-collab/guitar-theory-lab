@@ -39,8 +39,8 @@ for (const look of ['Studio', 'Semplificata'] as const) {
     await expect(page.getByTestId('drum-ride-6')).toHaveAttribute('data-step', '1');
     await reveal(page, page.getByTestId('drum-ride-2'));
     await expect(page.getByTestId('drum-ride-2')).toHaveAttribute('data-step', '0');
-    await reveal(page, page.getByTestId('drum-hat-4'));
-    await expect(page.getByTestId('drum-hat-4')).toHaveAttribute('data-step', '1');
+    await reveal(page, page.getByTestId('drum-pedal-4'));
+    await expect(page.getByTestId('drum-pedal-4')).toHaveAttribute('data-step', '1');
     await reveal(page, page.getByTestId('drum-kick-0'));
     await expect(page.getByTestId('drum-kick-0')).toHaveAttribute('data-step', '3');
     // The genre also suggests the balance: brushes-quiet drums, the bass up front.
