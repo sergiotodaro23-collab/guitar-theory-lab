@@ -6,7 +6,7 @@ import { voicingMidis } from './harmonyVoicings';
 import { arrangementTracks, bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
 import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
-import { ticksPerBeat, type Track } from '../timeline';
+import { ticksPerBeat, type NotePayload, type Track } from '../timeline';
 import { exerciseRhythmOf, arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, exerciseSpecOf, meterOf, tuningOf, type Settings } from './settings';
 
 export type TrackSpec = Omit<Track, 'originTick'>;
@@ -97,24 +97,46 @@ function arpeggioTracks(s: Settings): ModeTracks {
   const spec = arpeggioSpecOf(s);
   if (s.arpSource === 'chord') {
     const sequence = arpeggioPlanOf(tryParseChord(s.arpSymbol), s)?.sequence ?? [];
-    return { exercise: sequence.length ? exerciseTrack(sequence, meter, s.arpNotesPerBeat) : null, chords: null, comp: null, drums: null, bass: null, endTick: null };
+    const track = sequence.length ? accented(exerciseTrack(sequence, meter, s.arpNotesPerBeat), s, () => 0, ticksPerBeat(meter) / s.arpNotesPerBeat) : null;
+    return { exercise: track, chords: null, comp: null, drums: null, bass: null, endTick: null };
   }
   if (s.progression.chords.length === 0) return { exercise: null, chords: null, comp: null, drums: null, bass: null, endTick: null };
   const lengthTicks = progressionLength(s.progression, meter);
-  const route = s.arpShape === 'octaves' || s.arpShape === 'sweep' || s.arpShape === 'skip';
+  // A route or a pattern plays a fixed line for each chord.
+  const route = s.arpShape === 'octaves' || s.arpShape === 'sweep' || s.arpShape === 'skip' || s.arpPattern !== 'none';
   const exercise = progressionArpeggioTrack({
     spans: chordSpans(s.progression, meter), lengthTicks, loop: true, meter, low: s.arpLow, spec, notesPerBeat: s.arpNotesPerBeat, link: s.arpLink,
     target: s.arpTarget,
     notesOf: (chord) => arpeggioPlanOf(chord, s)?.notes ?? [],
     ...(route ? { sequenceOf: (chord: Chord) => arpeggioPlanOf(chord, s)?.sequence ?? [] } : {}),
   });
+  const spans = chordSpans(s.progression, meter);
+  const spanStart = (tick: number) => spans.reduce((start, span) => (span.tick <= tick ? span.tick : start), 0);
   return {
-    exercise: exercise.events.length ? exercise : null,
+    exercise: exercise.events.length ? accented(exercise, s, spanStart, ticksPerBeat(meter) / s.arpNotesPerBeat) : null,
     chords: chordTrack(s.progression, meter, true),
     comp: s.compOn ? compTrack(s.progression, meter, s.compPattern, true) : null,
     drums: null,
     bass: null,
     endTick: null,
+  };
+}
+
+/**
+ * Irregular groups (AR4): the first note of every group is accented, counted
+ * from the start of each chord, so groups of three run across the beats of
+ * a 4/4 bar as the exercise intends.
+ */
+function accented<T extends TrackSpec>(track: T, s: Settings, startOf: (tick: number) => number, step: number): T {
+  if (s.arpPattern !== 'group') return track;
+  return {
+    ...track,
+    events: track.events.map((e) => {
+      const payload = e.payload as NotePayload;
+      if (payload.type !== 'note') return e;
+      const local = Math.round((e.tick - startOf(e.tick)) / step);
+      return { ...e, payload: { ...payload, accent: local % s.arpGroup === 0 } };
+    }),
   };
 }
 

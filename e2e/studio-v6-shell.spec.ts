@@ -286,7 +286,7 @@ test('preset library: search and combined filters; load, save, rename and delete
   const cards = library.getByTestId('preset-card');
   await page.getByTestId('preset-library-open').click();
   await expect(library).toBeVisible();
-  await expect(page.getByTestId('preset-count')).toHaveText('11 di 11 preset');
+  await expect(page.getByTestId('preset-count')).toHaveText('59 di 59 preset');
   // Filters combine; the search ignores case.
   await page.getByTestId('preset-filter-lab').selectOption('fretboard');
   await expect(cards).toHaveCount(6);
@@ -339,7 +339,7 @@ test('preset library: search and combined filters; load, save, rename and delete
   await expect(page.getByTestId('bpm')).toHaveValue('101');
   await page.getByTestId('preset-library-open').click();
   await library.getByRole('button', { name: 'Elimina Blues lento' }).click();
-  await expect(page.getByTestId('preset-count')).toHaveText('11 di 11 preset');
+  await expect(page.getByTestId('preset-count')).toHaveText('59 di 59 preset');
   await page.getByTestId('preset-library-close').click();
   await expect(library).toBeHidden();
   expect(errors).toEqual([]);

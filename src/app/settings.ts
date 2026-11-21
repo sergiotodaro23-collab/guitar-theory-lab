@@ -1,6 +1,6 @@
 /** Everything the user can configure and save. Pure and framework-free. */
 import { VOICING_TYPES, findStringSet, type VoicingType, CAGED_FORMS, STANDARD_TUNING, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
-import { parseLevel, type ExerciseLevel, ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, normalizeStrings, onStrings, type StringNumber, isRhythmError, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
+import { ARP_PATTERNS, UPPER_STRUCTURES, parsePermutation, patternLine, type ArpPattern, type UpperStructure, parseLevel, type ExerciseLevel, ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, normalizeStrings, onStrings, type StringNumber, isRhythmError, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
 import { HOME_MODES, type AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
@@ -10,7 +10,7 @@ import { COMP_PATTERNS, DEFAULT_BACKING, DEFAULT_KIT, GENRES, sanitizeBacking, s
 import { SCALES, TONICS, buildScale, mod, type Chord, type Scale, type ScaleId } from '../theory';
 import { sanitizeAccents, type AccentLevel, type Meter, type Subdivision } from '../timeline';
 import { sanitizeLayers, type ScaleLayer } from './scaleLayers';
-import { sanitizeChordViews, type ChordViews } from './chordViews';
+import { defaultScaleFor, sanitizeChordViews, type ChordViews } from './chordViews';
 import { clampActive, sanitizeChordLayers, type ChordLayer } from './chordLayers';
 import { DEFAULT_RIG, sanitizeRig, type RigSettings } from './rig';
 
@@ -192,6 +192,13 @@ export interface ArpeggioSettings {
   readonly arpReturn: ArpReturn;
   /** On a progression, "target": each chord starts on this tone (0 root, 1 third…). */
   readonly arpTarget: number;
+  /** Vocabulary over the shape (AR2–AR4): permutation, enclosure, triad pair, upper structure, irregular groups. */
+  readonly arpPattern: ArpPattern;
+  /** Permutation order in chord degrees, "1 5 3 7"; 8 is the root an octave up. */
+  readonly arpPerm: string;
+  readonly arpUpper: UpperStructure;
+  /** Notes per irregular group; the first of each group is accented. */
+  readonly arpGroup: 3 | 4 | 5 | 7;
 }
 
 /** Two permanent looks over the same state: Semplificata (the console) and Studio (the workbench). */
@@ -326,6 +333,10 @@ export const DEFAULT_SETTINGS: Settings = {
   arpStrings: 5,
   arpReturn: 'same',
   arpTarget: 1,
+  arpPattern: 'none',
+  arpPerm: '1 5 3 7',
+  arpUpper: 'II',
+  arpGroup: 3,
 };
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -464,6 +475,10 @@ export function sanitizeSettings(raw: unknown): Settings {
     arpStrings: oneOf(r.arpStrings, [3, 4, 5, 6] as const, d.arpStrings),
     arpReturn: oneOf(r.arpReturn, ['same', 'other'] as const, d.arpReturn),
     arpTarget: typeof r.arpTarget === 'number' ? clamp(Math.round(r.arpTarget), 0, 5) : d.arpTarget,
+    arpPattern: oneOf(r.arpPattern, ARP_PATTERNS, d.arpPattern),
+    arpPerm: typeof r.arpPerm === 'string' && parsePermutation(r.arpPerm) ? r.arpPerm.slice(0, 40) : d.arpPerm,
+    arpUpper: oneOf(r.arpUpper, UPPER_STRUCTURES, d.arpUpper),
+    arpGroup: oneOf(r.arpGroup, [3, 4, 5, 7] as const, d.arpGroup),
   };
 }
 
@@ -532,7 +547,14 @@ export function arpeggioPlanOf(chord: Chord | null, s: ArpeggioSettings & Pick<S
   if (!chord) return null;
   const choice = shapeChoiceOf(s);
   const form = s.arpSource === 'progression' && s.arpShape === 'caged' ? nearestCagedForm(chord, s.arpLow + 2) : s.arpForm;
-  return arpeggioPlan(chord, { ...choice, form }, arpeggioSpecOf(s), tuningOf(s));
+  const plan = arpeggioPlan(chord, { ...choice, form }, arpeggioSpecOf(s), tuningOf(s));
+  if (s.arpPattern === 'none' || !plan.playable) return plan;
+  // A pattern (AR2–AR4) plays its own line over the notes the shape offers: drawn exactly, fingered by the board.
+  const line = patternLine(chord, plan.notes, {
+    pattern: s.arpPattern, perm: parsePermutation(s.arpPerm) ?? [1, 3, 5, 7], upper: s.arpUpper, group: s.arpGroup,
+    direction: s.arpDirection, scale: buildScale(chord.rootName, defaultScaleFor(chord)), tuning: tuningOf(s),
+  });
+  return { ...plan, notes: line.notes, sequence: line.sequence, fingers: null, playable: line.sequence.length > 0, route: true };
 }
 
 /** What the board draws for the arpeggio. */

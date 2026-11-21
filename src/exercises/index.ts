@@ -6,3 +6,4 @@ export * from './rhythm';
 export * from './strings';
 export * from './levels';
 export * from './anchors';
+export * from './arpPatterns';
