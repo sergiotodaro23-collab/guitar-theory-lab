@@ -17,7 +17,7 @@ import {
   type FretNote,
   type SpelledFretNote,
 } from '../fretboard';
-import { SCALES, TONICS, buildScale, chromaticName, diatonicSeventh, mod, noteName, parseNote, pitchClass, transposeNote, tryParseChord, type Scale, type ScaleId } from '../theory';
+import { SCALES, TONICS, buildScale, chromaticName, diatonicSeventh, mod, noteName, parseNote, pitchClass, spelledIntervalBetween, transposeBySpelled, tryParseChord, type Scale, type ScaleId, type SpelledInterval } from '../theory';
 import { arpeggioSequence } from './arpeggio';
 import { ticksPerBar, ticksPerBeat, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
 import { generateSequence, parseCustomPattern, type Direction, type ExerciseKind, type IntervalNumber, type PairMotion } from './generator';
@@ -47,7 +47,16 @@ export interface RoutinePhase {
   readonly notesPerBeat: Subdivision;
   /** How many times the phase plays before the next one, 1–8. */
   readonly repeats: number;
+  /**
+   * How the phase moves when the exercise's key changes (M1). "follow" keeps
+   * the interval between its tonic and the key, so A minor under C becomes
+   * B minor under D; "fixed" stays where it is (an independent phase).
+   */
+  readonly link: PhaseLink;
 }
+
+export type PhaseLink = 'follow' | 'fixed';
+export const PHASE_LINKS: readonly PhaseLink[] = ['follow', 'fixed'];
 
 export interface Routine {
   readonly name: string;
@@ -245,49 +254,86 @@ export function routineTrack(routine: Routine, meter: Meter, tuning: readonly nu
   return { id: 'exercise', lengthTicks: plan.lengthTicks, loop: true, events };
 }
 
-/** A note name moved by `semitones`, spelled as the theory engine spells keys; always one of TONICS. */
-function transposeName(name: string, semitones: number): string {
-  const moved = noteName(transposeNote(parseNote(name), semitones));
+/** A note name moved by a spelled interval; always one of TONICS (the readable spellings). */
+function transposeNameBy(name: string, interval: SpelledInterval, preferFlat: boolean): string {
+  const moved = noteName(transposeBySpelled(parseNote(name), interval, preferFlat));
   if (TONICS.includes(moved)) return moved;
-  const pc = mod(pitchClass(parseNote(name)) + semitones, 12);
-  return chromaticName(pc, name.includes('b'));
+  return chromaticName(pitchClass(parseNote(moved)), preferFlat);
+}
+
+/** The interval that `semitones` means without a key to read it from: C→D is a second, C→Eb a minor third. */
+function plainInterval(semitones: number): SpelledInterval {
+  const shift = mod(semitones, 12);
+  return spelledIntervalBetween(parseNote('C'), parseNote(chromaticName(shift, [1, 3, 8, 10].includes(shift))));
+}
+
+const CHORD_SYMBOL = /^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/;
+
+function transposeChordBy(symbol: string, interval: SpelledInterval, preferFlat: boolean): string {
+  const match = CHORD_SYMBOL.exec(symbol.trim());
+  if (!match || !match[1]) return symbol;
+  const bass = match[3] ? `/${transposeNameBy(match[3], interval, preferFlat)}` : '';
+  return `${transposeNameBy(match[1], interval, preferFlat)}${match[2] ?? ''}${bass}`;
 }
 
 /** A chord symbol with its root (and slash bass) moved by `semitones`; the quality is untouched. Unreadable symbols stay as they are. */
 export function transposeChordSymbol(symbol: string, semitones: number): string {
-  const match = /^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/.exec(symbol.trim());
-  if (!match || !match[1]) return symbol;
-  const bass = match[3] ? `/${transposeName(match[3], semitones)}` : '';
-  return `${transposeName(match[1], semitones)}${match[2] ?? ''}${bass}`;
+  return transposeChordBy(symbol, plainInterval(semitones), symbol.includes('b'));
 }
 
 const LAST_FRET = 24;
 
+function transposePhaseBy(phase: RoutinePhase, interval: SpelledInterval, preferFlat: (name: string) => boolean): RoutinePhase {
+  let position = phase.position;
+  if (position.kind === 'range') {
+    // The nearest way round the octave: up to a tritone up, otherwise down.
+    const nearest = interval.semitones > 6 ? interval.semitones - 12 : interval.semitones;
+    const { low, high } = position;
+    const move = [nearest, nearest - 12, nearest + 12].find((d) => low + d >= 0 && high + d <= LAST_FRET);
+    if (move !== undefined) position = { kind: 'range', low: low + move, high: high + move };
+  }
+  return {
+    ...phase,
+    tonic: transposeNameBy(phase.tonic, interval, preferFlat(phase.tonic)),
+    chord: phase.chord ? transposeChordBy(phase.chord, interval, preferFlat(phase.chord)) : phase.chord,
+    position,
+  };
+}
+
 /**
- * The whole routine in another key: every phase keeps its scale, shape,
- * direction and rhythm, and moves by the same interval, so the relations
- * between phases (a ii–V, a relative minor) are kept. Tonics and chord roots
- * are transposed; a fret window moves with them, by the nearest way that
- * still fits the neck. CAGED forms and 3NPS starts are relative to the scale
- * and follow by themselves.
+ * The whole routine in another key, by semitones: every following phase keeps
+ * its scale, shape, direction and rhythm, and moves by the same interval.
+ * Prefer `transposeRoutineBetween` when the two keys are known, because only
+ * the keys tell C→Db from C→C#.
  */
 export function transposeRoutine(routine: Routine, semitones: number): Routine {
-  const shift = mod(semitones, 12);
-  if (shift === 0) return routine;
-  // The nearest way round the octave: up to a tritone up, otherwise down.
-  const nearest = shift > 6 ? shift - 12 : shift;
-  return {
-    ...routine,
-    phases: routine.phases.map((phase) => {
-      let position = phase.position;
-      if (position.kind === 'range') {
-        const { low, high } = position;
-        const move = [nearest, nearest - 12, nearest + 12].find((d) => low + d >= 0 && high + d <= LAST_FRET);
-        if (move !== undefined) position = { kind: 'range', low: low + move, high: high + move };
-      }
-      return { ...phase, tonic: transposeName(phase.tonic, shift), chord: phase.chord ? transposeChordSymbol(phase.chord, shift) : phase.chord, position };
-    }),
-  };
+  if (mod(semitones, 12) === 0) return routine;
+  const interval = plainInterval(semitones);
+  return movePhases(routine, interval, (name) => name.includes('b'));
+}
+
+/**
+ * Relational transposition (M1): the exercise was written under `fromKey` and
+ * now reads under `toKey`. Each phase that follows the key keeps the interval,
+ * letters included, between its tonic and the key: with C as reference, A
+ * natural minor up and A melodic minor down become, under D, B natural minor
+ * and B melodic minor; Ab melodic minor becomes Bb melodic minor. Scales are
+ * never swapped (a minor phase is not replaced by the relative of the new
+ * key), and fixed phases do not move. CAGED forms and 3NPS starts are relative
+ * to the scale and follow by themselves; a fret window moves the nearest way
+ * that still fits the neck.
+ */
+export function transposeRoutineBetween(routine: Routine, fromKey: string, toKey: string): Routine {
+  const from = parseNote(fromKey);
+  const to = parseNote(toKey);
+  const interval = spelledIntervalBetween(from, to);
+  if (interval.semitones === 0 && interval.letters === 0) return routine;
+  // For enharmonic fallbacks the new key decides sharps or flats (Db brings flats, C# sharps); a natural key keeps the note's own.
+  return movePhases(routine, interval, (name) => (to.accidental === 0 ? name.includes('b') : to.accidental < 0));
+}
+
+function movePhases(routine: Routine, interval: SpelledInterval, preferFlat: (name: string) => boolean): Routine {
+  return { ...routine, phases: routine.phases.map((phase) => (phase.link === 'fixed' ? phase : transposePhaseBy(phase, interval, preferFlat))) };
 }
 
 let idCounter = 0;
@@ -312,6 +358,7 @@ export function defaultPhase(id: string, base?: Partial<RoutinePhase>): RoutineP
     notesPerBeat: 2,
     repeats: 1,
     chord: 'Cmaj7',
+    link: 'follow',
     ...base,
   };
 }
@@ -355,6 +402,7 @@ export function sanitizeRoutine(raw: unknown, fallback: Routine): Routine {
       customText: typeof p.customText === 'string' ? p.customText.slice(0, 200) : d.customText,
       notesPerBeat: oneOf(p.notesPerBeat, [1, 2, 3, 4] as const, d.notesPerBeat),
       repeats: clampInt(p.repeats, 1, MAX_REPEATS, 1),
+      link: oneOf(p.link, PHASE_LINKS, d.link),
     };
   });
   if (phases.length === 0) return fallback;
@@ -403,5 +451,13 @@ export const ROUTINE_TEMPLATES: readonly Routine[] = [
     name: 'Terze in Do attraverso le cinque forme',
     phases: CAGED_FORMS.map((form, i) =>
       defaultPhase(`t5${i}`, { position: { kind: 'caged', form }, kind: 'interval', interval: 3, direction: i % 2 === 0 ? 'up' : 'down' })),
+  },
+  {
+    // M1: written with C as the key. Changing the key keeps the relation (a major sixth down to A), never the relative minor.
+    name: 'Rispetto alla tonalità: La minore naturale su, La minore melodica giù',
+    phases: [
+      defaultPhase('t7a', { tonic: 'A', scaleId: 'aeolian', position: { kind: 'caged', form: 'E' }, direction: 'up' }),
+      defaultPhase('t7b', { tonic: 'A', scaleId: 'melodicMinor', position: { kind: 'caged', form: 'E' }, direction: 'down' }),
+    ],
   },
 ];

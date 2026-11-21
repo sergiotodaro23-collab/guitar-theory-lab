@@ -93,6 +93,43 @@ export function diatonicIndex(midi: number, note: SpelledNote): number {
   return octave * 7 + note.letter;
 }
 
+/**
+ * An interval with its letter distance: C→D and C→Ebb are both two semitones
+ * up, but only the first is a major second. Keeping the letters is what makes
+ * a transposition from C to Db different from one from C to C#.
+ */
+export interface SpelledInterval {
+  /** Letter steps up, 0–6. */
+  readonly letters: number;
+  /** Semitones up, 0–11. */
+  readonly semitones: number;
+}
+
+/** The interval that takes `from` to `to`, upwards within the octave. */
+export function spelledIntervalBetween(from: SpelledNote, to: SpelledNote): SpelledInterval {
+  return { letters: mod(to.letter - from.letter, 7), semitones: mod(pitchClass(to) - pitchClass(from), 12) };
+}
+
+const READABLE_EXCLUDED = ['Cb', 'Fb', 'E#', 'B#'];
+
+/**
+ * Move a note by a spelled interval: the letter moves by the interval's
+ * letters, the accidental follows. When the exact spelling would need a
+ * double accidental, or one of Cb, Fb, E#, B#, the enharmonic is used instead,
+ * with flats when `preferFlat`.
+ */
+export function transposeBySpelled(note: SpelledNote, interval: SpelledInterval, preferFlat = note.accidental < 0): SpelledNote {
+  const letter = mod(note.letter + interval.letters, 7);
+  const target = pitchClass(note) + interval.semitones;
+  let accidental = mod(target - (LETTER_PC[letter] as number), 12);
+  if (accidental > 6) accidental -= 12;
+  const result = { letter, accidental };
+  if (Math.abs(accidental) >= 2 || READABLE_EXCLUDED.includes(noteName(result))) {
+    return parseNote(chromaticName(target, preferFlat));
+  }
+  return result;
+}
+
 const TRANSPOSE_LETTER_STEPS: readonly number[] = [0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6];
 
 /** Transpose keeping readable spelling: no double accidentals, Cb, Fb, E# or B#. */

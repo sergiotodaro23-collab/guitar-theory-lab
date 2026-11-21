@@ -15,6 +15,7 @@ import {
   newPhaseId,
   planRoutine,
   type IntervalNumber,
+  type PhaseLink,
   type PhasePosition,
   type Routine,
   type RoutinePhase,
@@ -120,6 +121,14 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
               <Select<ScaleId> label={`Scala della fase ${n}`} value={phase.scaleId} options={SCALE_IDS.map((id) => ({ value: id, label: SCALES[id].name }))} onChange={(scaleId) => onChange({ scaleId })} />
             </Field>
           </div>
+          <Field label="Al cambio di tonalità">
+            <Segmented<PhaseLink>
+              label={`Trasposizione della fase ${n}`}
+              value={phase.link}
+              options={[{ value: 'follow', label: 'Segue' }, { value: 'fixed', label: 'Fissa' }]}
+              onChange={(link) => onChange({ link })}
+            />
+          </Field>
         </fieldset>
 
         <fieldset className="block-group">

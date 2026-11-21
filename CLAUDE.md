@@ -3,7 +3,7 @@
 Web app local-first per studiare scale, intervalli e funzioni armoniche. React + TypeScript strict, nessun backend. Gratuita e open source.
 
 - Comandi: `npm run check` (lint, types, unit, build), `npm run test:e2e` (Playwright, Chromium).
-- Riprendere il lavoro: `PROJECT_STATE.md` → `docs/ROADMAP.md` (registro con stati `IMPLEMENTED | PARTIAL | BROKEN | MISSING | BLOCKED`).
+- Riprendere il lavoro: `PROJECT_STATE.md` → `docs/FINAL_PLAN.md` (ordine operativo, D-56) → `docs/ROADMAP.md` (registro con stati `IMPLEMENTED | PARTIAL | BROKEN | MISSING | BLOCKED`).
 - Requisiti: `docs/MASTER_SPEC.md`. Scelte: `docs/DECISIONS.md`. Verifiche: `docs/QA_REPORT.md`. Moduli: `docs/ARCHITECTURE.md`. GitHub: `docs/GITHUB_AND_RELEASES.md`. Audio: `docs/AUDIO_DIAGNOSTICS.md`.
 - Audit del rig e consolidamento V6: `docs/STUDIO_V6_CONSOLIDATION.md`. NAM: `docs/NAM_INTEGRATION.md`. TONE3000: `docs/TONE3000_INTEGRATION.md`. Sistema grafico e pipeline Blender: `docs/STUDIO_V6_HARDWARE_PIPELINE.md`, `tools/blender/README.md`.
 - Regole: i motori in `src/{theory,fretboard,harmony,exercises,timeline,jam,persistence}` restano puri e senza DOM. Un solo clock: `TimelineScheduler` su `AudioContext.currentTime`. L'interfaccia non crea timer musicali.

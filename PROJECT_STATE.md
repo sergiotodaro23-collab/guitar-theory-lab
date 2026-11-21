@@ -2,29 +2,29 @@
 
 Versione 0.1.0 (package.json). Ultimo aggiornamento: 8 novembre 2026, branch `claude/lucid-rubin-19dvsp`: integrazione della Studio V5.7 (D-40, D-41), partita dai due commit di Codex. Strategia: **desktop-first** (D-23); ordine operativo in `docs/ROADMAP.md`.
 
+**Piano verso la versione definitiva** (D-56, dal 21 novembre 2026): `docs/FINAL_PLAN.md`.
+
 **Studio V6 in corso** (D-43, dal 13 novembre 2026): stato e prossimo lotto in `docs/STUDIO_V6_PROGRESS.md`. Consolidamento e audit del rig: `docs/STUDIO_V6_CONSOLIDATION.md`.
 
-## Sprint autonomo (dal 17 novembre 2026): tracker
+## Piano verso la versione definitiva (dal 21 novembre 2026): tracker
 
-Ordine di lavoro dato dal proprietario: lotti A → F. Una PR per attività, unita dall'agente con CI verde (D-43 e autorizzazione del 17 novembre). Stati come in `docs/ROADMAP.md`.
+Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con ID, dipendenze e criteri di accettazione. I lotti A–F dello sprint del 17 novembre sono confluiti nel piano (corrispondenza nel §4 del piano). Una PR per attività, unita dall'agente con CI verde (D-43).
 
 | Attività | Stato | PR / branch | Prove | Residui · prossima azione |
 |---|---|---|---|---|
-| Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 (unita, merge `fec0e00`) | 564 unit, 211 e2e | Scheda audio reale non provata dall'agente |
-| A1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | #39 (unita) | `exercises/transpose.test.ts`, `app/transposeRoutine.test.ts`, e2e in `routine-arpeggio.spec.ts` | — |
-| A2 · Arpeggi: note mostrate = note suonate | IMPLEMENTED | `claude/sprint-a2-arpeggio-coherence` | `app/arpCoherence.test.ts`: forme, personalizzazioni, corde, ritorno, accordi, progressioni, fasi delle routine | Nessuna divergenza trovata in 27 000 combinazioni: board e sequencer leggono già `arpeggioPlanOf`. Il test le tiene allineate. Prossima: A3 |
-| A3 · Legenda avanzata e forme sovrapposte | PARTIAL | `claude/sprint-a3-legend-arpeggio` | `viz/viz.test.ts`, `viz/legend.test.ts`, `e2e/arpeggio-mark.spec.ts`; screenshot in Arpeggios Lab | Fatto: triangolo a contorno per le note dell'arpeggio (D-55), sopra il cerchio di ruolo, voce in legenda. Mancano: legenda condivisa per intervalli e target notes, forme di più scale sulla stessa nota (P1-06c). |
-| B1 · Selezione dispositivi audio | PARTIAL | claude/sprint-b1-audio-devices | (in PR) | Testato con dispositivi simulati, non verificato con scheda audio reale. Buffer non regolabile via Web Audio (documentato in AUDIO_DIAGNOSTICS.md). Prossimo: B2 |
-| B2 · Pannello Audio nella barra destra | MISSING | — | — | I due gain sono già separati (#38) |
-| B3 · Via l'input legacy dal taccuino | MISSING | — | — | Dopo B2 |
-| C1 · Barre laterali: compatte al primo uso, tasti nelle barre | MISSING | — | — | |
-| C2 · Mixer: compatto predefinito | MISSING | — | — | |
-| C3 · Fader laterali (backing a sinistra, chitarra a destra) | MISSING | — | — | |
-| D1 · Count-in | MISSING | — | — | Solo sul clock esistente (`TimelineScheduler`) |
-| D2 · LCD | MISSING | — | — | |
-| E · Rifinitura skeuomorfica | MISSING | — | — | Dopo i lotti funzionali |
-| F · Ricerca TONE3000 incorporato | MISSING | — | — | Solo modalità ufficiali |
-| Backlog · registrazione, overdub, looper | MISSING | — | — | Solo documento architetturale |
+| Piano e tracker (D-56) | IMPLEMENTED | `claude/project-thread-inqgn7` | — | — |
+| M1 · Trasposizione relazionale (D-57) | PARTIAL | `claude/project-thread-inqgn7` | `exercises/relational.test.ts` (caso del proprietario, tutte le tonalità, fasi fisse), e2e in `routine-arpeggio.spec.ts` | Fatto: intervallo con la lettera, fasi «Segue»/«Fissa», modello d'esempio. Manca: relazioni personalizzate (M2) |
+| Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 | 564 unit, 211 e2e | Scheda audio reale non provata (R10) |
+| A1 → M1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | #39 | `exercises/transpose.test.ts` | Raffinata da D-57 |
+| A2 → AR5 · Arpeggi: note mostrate = note suonate | IMPLEMENTED | #40 | `app/arpCoherence.test.ts` | — |
+| A3 → N2/FB3 · Legenda avanzata e forme sovrapposte | PARTIAL | #41 | `viz/legend.test.ts` | Legenda condivisa per intervalli e target, forme di più scale |
+| B1 → R1 · Selezione dispositivi audio | PARTIAL | #42 | dispositivi simulati | Da verificare con scheda reale |
+| B2, B3 → R2, N1 | MISSING | — | — | Onda 1 |
+| C1–C3 → U1, U2 · D1 → M3/J8 · D2 → U3 · E → U5 | MISSING | — | — | Secondo le onde del piano |
+| F → R7 · NAM e TONE3000 (R5–R7) | MISSING, sospese (D-58) | — | — | Onda 5; il rig esistente resta intatto |
+| Q9 · PWA installabile (D-58) | MISSING | — | — | Onda 4 |
+
+Prossimo: M3 (modello ritmico, count-in) e M4 (corde e vincoli sul manico) sul binario motore; J1/J2 (sampler e licenze dei campioni) sul binario audio; poi le onde successive senza attese.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 

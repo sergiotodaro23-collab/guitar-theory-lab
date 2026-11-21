@@ -75,3 +75,34 @@ test('changing the key moves the advanced exercise: summary, board and playback 
   expect(await played()).toEqual(inC);
   expect(await marks()).toBe(boardInC);
 });
+
+test('relational transposition (M1): C → D moves A minor phases to B, a fixed phase stays', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/?debug=1');
+  await reveal(page, page.getByTestId('open-editor'));
+  await page.getByTestId('open-editor').click();
+  const editor = page.getByTestId('routine-editor');
+  await editor.getByLabel('Parti da un modello').selectOption({ label: 'Rispetto alla tonalità: La minore naturale su, La minore melodica giù' });
+  await editor.getByTestId('routine-apply').click();
+  const summary = page.getByTestId('routine-summary');
+  await reveal(page, summary);
+  await expect(summary.locator('li').nth(0)).toContainText('A Minore naturale');
+  await expect(summary.locator('li').nth(1)).toContainText('A Minore melodica');
+
+  await reveal(page, page.getByTestId('tonic'));
+  await page.getByTestId('tonic').selectOption('D');
+  await reveal(page, summary);
+  await expect(summary.locator('li').nth(0)).toContainText('B Minore naturale');
+  await expect(summary.locator('li').nth(1)).toContainText('B Minore melodica');
+
+  // Second phase made independent: the next key change leaves it on B.
+  await reveal(page, page.getByTestId('open-editor'));
+  await page.getByTestId('open-editor').click();
+  await editor.getByRole('group', { name: 'Trasposizione della fase 2' }).getByRole('button', { name: 'Fissa' }).click();
+  await editor.getByTestId('routine-apply').click();
+  await reveal(page, page.getByTestId('tonic'));
+  await page.getByTestId('tonic').selectOption('E');
+  await reveal(page, summary);
+  await expect(summary.locator('li').nth(0)).toContainText('C# Minore naturale');
+  await expect(summary.locator('li').nth(1)).toContainText('B Minore melodica');
+});
