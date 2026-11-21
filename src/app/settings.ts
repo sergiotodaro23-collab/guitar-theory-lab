@@ -95,7 +95,7 @@ export interface HarmonySettings {
   readonly changeMode: ChangeMode;
   readonly quantize: 'beat' | 'bar';
   readonly focus: HarmonyFocus;
-  /** Voicings from the engine (HA3, D-64): each chord of the progression drawn and comped in this voicing. */
+  /** Voicings from the engine (HA3, D-65): each chord of the progression drawn and comped in this voicing. */
   readonly voicingOn: boolean;
   readonly voicingType: HarmonyVoicingType;
   /** String group, guitarist numbers from the highest string: "1-2-3-4". Ignored by the full chord. */
