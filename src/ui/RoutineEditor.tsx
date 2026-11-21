@@ -29,6 +29,7 @@ import { Fretboard } from '../viz/Fretboard';
 import { buildMarkerLayer } from '../viz/markers';
 import { Field, Segmented, Select } from './controls';
 import { RhythmFields } from './RhythmFields';
+import { StringsField } from './StringsField';
 
 const FRET_OPTIONS = Array.from({ length: DEFAULT_FRETS + 1 }, (_, f) => ({ value: f, label: String(f) }));
 
@@ -140,6 +141,7 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
           <Field label="Ottava">
             <Segmented label={`Ottava della fase ${n}`} value={phase.octave} options={[{ value: 0 as const, label: 'Bassa' }, { value: 1 as const, label: 'Alta (+12)' }]} onChange={(octave) => onChange({ octave })} />
           </Field>
+          <StringsField strings={phase.strings} name={`della fase ${n}`} onChange={(strings) => onChange({ strings })} />
         </fieldset>
 
         <fieldset className="block-group">

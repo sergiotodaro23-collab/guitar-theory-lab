@@ -20,6 +20,7 @@ import {
 import { SCALES, TONICS, buildScale, chromaticName, diatonicSeventh, mod, noteName, parseNote, pitchClass, spelledIntervalBetween, transposeBySpelled, tryParseChord, type Scale, type ScaleId, type SpelledInterval } from '../theory';
 import { arpeggioSequence } from './arpeggio';
 import { ticksPerBar, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
+import { describeStrings, normalizeStrings, onStrings, type StringNumber } from './strings';
 import { isRhythmError, layoutRhythm, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, type TimedNote } from './rhythm';
 import { generateSequence, parseCustomPattern, type Direction, type ExerciseKind, type IntervalNumber, type PairMotion } from './generator';
 
@@ -64,6 +65,8 @@ export interface RoutinePhase {
   readonly repeatStart: RepeatStart;
   /** Empty bars after the phase, to move the hand or listen (0–4). */
   readonly barsAfter: number;
+  /** Strings the phase uses (M4), 1 high E … 6 low E; empty means all. Non-adjacent sets are string skipping. */
+  readonly strings: readonly StringNumber[];
 }
 
 export type RepeatStart = 'continuous' | 'bar';
@@ -176,6 +179,17 @@ export function resolvePhase(phase: RoutinePhase, tuning: readonly number[] = ST
       const frets = notes.map((n) => n.fret);
       notes = pitchesInWindow(chord.tones.map((t) => t.pc), Math.min(...frets), Math.max(...frets), tuning);
     }
+  }
+
+  // Strings the phase may use (M4): the shape stays the engine's, only its notes on other strings drop out.
+  if (phase.strings.length > 0 && notes.length > 0) {
+    const kept = onStrings(notes, phase.strings, tuning.length);
+    if (kept.length === 0) {
+      issues.push({ level: 'error', message: `Questa forma non ha note su ${describeStrings(phase.strings)}.`, fix: { label: 'Usa tutte le corde', change: { strings: [] } } });
+    } else if (kept.length < 3) {
+      issues.push({ level: 'warning', message: `Su ${describeStrings(phase.strings)} questa forma ha solo ${kept.length} note.` });
+    }
+    notes = kept;
   }
 
   const customPattern = parseCustomPattern(phase.customText);
@@ -403,6 +417,7 @@ export function defaultPhase(id: string, base?: Partial<RoutinePhase>): RoutineP
     articulation: 'legato',
     repeatStart: 'continuous',
     barsAfter: 0,
+    strings: [],
     ...base,
   };
 }
@@ -451,6 +466,7 @@ export function sanitizeRoutine(raw: unknown, fallback: Routine): Routine {
       articulation: oneOf(p.articulation, ['legato', 'normal', 'staccato'] as const, d.articulation),
       repeatStart: oneOf(p.repeatStart, ['continuous', 'bar'] as const, d.repeatStart),
       barsAfter: clampInt(p.barsAfter, 0, MAX_BARS_AFTER, 0),
+      strings: normalizeStrings(p.strings),
     };
   });
   if (phases.length === 0) return fallback;

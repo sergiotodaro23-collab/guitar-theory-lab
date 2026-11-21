@@ -1,6 +1,6 @@
 /** Everything the user can configure and save. Pure and framework-free. */
 import { CAGED_FORMS, STANDARD_TUNING, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
-import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, isRhythmError, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
+import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, normalizeStrings, onStrings, type StringNumber, isRhythmError, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
 import { HOME_MODES, type AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
@@ -62,6 +62,8 @@ export interface StudySettings {
   readonly exerciseRhythm: string;
   /** Bars clicked before bar 1 when playback starts from a stop (M3): 0, 1 or 2. */
   readonly countInBars: 0 | 1 | 2;
+  /** Strings the single exercise uses (M4), 1 high E … 6 low E; empty = all. */
+  readonly exerciseStrings: readonly StringNumber[];
   readonly exerciseArticulation: Articulation;
   readonly bpm: number;
   readonly meterId: string;
@@ -219,6 +221,7 @@ export const DEFAULT_SETTINGS: Settings = {
   notesPerBeat: 2,
   exerciseRhythm: '',
   countInBars: 0,
+  exerciseStrings: [],
   exerciseArticulation: 'legato',
   bpm: 80,
   meterId: '4/4',
@@ -345,6 +348,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     notesPerBeat: oneOf(r.notesPerBeat, [1, 2, 3, 4] as const, d.notesPerBeat),
     exerciseRhythm: typeof r.exerciseRhythm === 'string' && (r.exerciseRhythm.trim() === '' || !isRhythmError(parseRhythm(r.exerciseRhythm))) ? r.exerciseRhythm.slice(0, 200) : d.exerciseRhythm,
     countInBars: oneOf(r.countInBars, [0, 1, 2] as const, d.countInBars),
+    exerciseStrings: normalizeStrings(r.exerciseStrings),
     exerciseArticulation: oneOf(r.exerciseArticulation, ['legato', 'normal', 'staccato'] as const, d.exerciseArticulation),
     bpm: typeof r.bpm === 'number' && Number.isFinite(r.bpm) ? clamp(Math.round(r.bpm), BPM_MIN, BPM_MAX) : d.bpm,
     meterId: oneOf(r.meterId, Object.keys(METERS), d.meterId),
@@ -471,7 +475,7 @@ export function exerciseSpecOf(s: StudySettings): ExerciseSpec {
 export function currentExerciseSequence(s: StudySettings) {
   const scale = currentScale(s);
   const notes = s.positionType === 'neck' ? cagedPosition(scale, s.cagedForm, DEFAULT_FRETS, tuningOf(s)).notes : currentPositionNotes(s);
-  return generateSequence(notes, scale, exerciseSpecOf(s));
+  return generateSequence(onStrings(notes, s.exerciseStrings, tuningOf(s).length), scale, exerciseSpecOf(s));
 }
 
 export const arpeggioSpecOf = (s: ArpeggioSettings): ArpeggioSpec => ({
