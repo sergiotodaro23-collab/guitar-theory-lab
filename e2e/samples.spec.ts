@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { reveal } from './studio';
 
-/** J1: the jam's acoustic kit, bass and piano play recorded samples, loaded on demand. */
+/** J1: the jam's kits, bass, piano and electric piano play recorded samples, loaded on demand. */
 
 const open = async (page: Page) => {
   const errors: string[] = [];
@@ -56,3 +57,36 @@ test('a missing sample set falls back to the synthesised sound, with no error', 
   await page.getByTestId('play').click();
   expect(errors).toEqual([]);
 });
+
+for (const [drums, comp] of [['brushes', 'epiano'], ['electronic', 'keys']] as const) {
+  test(`the ${drums} kit and the ${comp === 'epiano' ? 'electric piano' : 'piano'} play recorded samples once chosen`, async ({ page }) => {
+    const requests: string[] = [];
+    page.on('request', (r) => {
+      if (r.url().includes('/samples/')) requests.push(r.url());
+    });
+    const errors = await open(page);
+    await reveal(page, page.getByTestId('drum-sound'));
+    await page.getByTestId('drum-sound').selectOption(drums);
+    await page.getByTestId('comp-timbre').selectOption(comp);
+    const comped = comp === 'epiano' ? 'epiano' : 'piano';
+    const status = await page.evaluate(() => window.__gtl?.engine.prepareSamples());
+    expect(await page.evaluate(() => window.__gtl?.engine.sampleSets())).toEqual({ drums, bass: 'ebass', comp: comped });
+    const byId = Object.fromEntries((status ?? []).map((s) => [s.id, s]));
+    for (const id of [drums, comped]) {
+      expect(byId[id]?.state, id).toBe('ready');
+      expect(byId[id]?.decoded, id).toBeGreaterThan(0);
+    }
+    // The stick kit is not chosen: nothing of it is loaded.
+    expect(byId.drums?.state).toBe('idle');
+    expect(requests.some((u) => u.includes('/samples/drums/'))).toBe(false);
+
+    await page.getByTestId('play').click();
+    await expect.poll(() => page.evaluate(() => window.__gtl?.engine.sampledCount()?.drums ?? 0), { timeout: 8000 }).toBeGreaterThan(8);
+    await expect.poll(() => page.evaluate(() => window.__gtl?.engine.sampledCount()?.comp ?? 0), { timeout: 8000 }).toBeGreaterThan(2);
+    for (const channel of ['drums', 'comp'] as const) {
+      await expect.poll(() => page.evaluate((c) => window.__gtl?.engine.channelLevel(c) ?? 0, channel), { timeout: 6000 }).toBeGreaterThan(0.002);
+    }
+    await page.getByTestId('play').click();
+    expect(errors).toEqual([]);
+  });
+}

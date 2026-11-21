@@ -88,7 +88,7 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
 | J1 | Motore sampler: multisample per zona, velocity layer, round robin, caricamento pigro con cache, limite di voci, ripiego sintetico | PARTIAL (zone, layer, round robin, caricamento pigro, ripiego, polifonia; manca il budget CPU di J9) | — | Test offline (OfflineAudioContext): layer e round robin scelti correttamente; CPU entro budget |
-| J2 | Ricerca e registro delle librerie con licenza compatibile (CC0, CC-BY, GPL): batteria, basso, piano acustico, piano elettrico, organo/tastiere; budget di dimensioni | PARTIAL (batteria, piano, basso elettrico, contrabbasso in CC0; mancano piano elettrico e organo) | — | `docs/AUDIO_ASSETS.md` con fonte, licenza, attribuzione per ogni file |
+| J2 | Ricerca e registro delle librerie con licenza compatibile (CC0, CC-BY, GPL): batteria, basso, piano acustico, piano elettrico, organo/tastiere; budget di dimensioni | PARTIAL (in CC0: batteria con bacchette e con spazzole, drum machine, piano, basso elettrico, contrabbasso; Wurlitzer in CC BY 3.0; manca l'organo, nessuna fonte libera trovata) | — | `docs/AUDIO_ASSETS.md` con fonte, licenza, attribuzione per ogni file |
 | J3 | Batteria: articolazioni, hi-hat chiuso/aperto/pedale, ghost notes, fill, velocity; sequencer Advanced (velocity, probabilità, 32/64 passi) | PARTIAL | J1, J2 | Ascolto del proprietario; test sui pattern |
 | J4 | Basso: dinamiche, articolazioni (staccato, ghost, slide), walking jazz | PARTIAL | J1 | Walking su ii–V–I con note di approccio corrette |
 | J5 | Tastiere con voicing coerenti dal motore (HA3) e voice leading nel comping | PARTIAL | HA3, J1 | Comping senza salti oltre la soglia |
@@ -176,6 +176,7 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | M1 · trasposizione relazionale: intervallo con la lettera, fasi Segue/Fissa (D-57) | #44 | unit + e2e; M2 resta |
 | 21/11/2026 | M3 · ritmo a cicli, articolazione, attacco sul clock unico; M4 · corde e salto di corda (D-59) | #45 | unit + e2e; Arpeggios Lab e percorso su tutta la tastiera restano |
 | 21/11/2026 | J2 · quattro set CC0 convertiti e registrati; J1 · sampler con caricamento pigro e ripiego sintetico (D-60) | #46 | unit sulle zone e sui manifest, e2e con segnale sui canali in Chromium; ascolto del proprietario da fare |
+| 21/11/2026 | J2 · spazzole, drum machine e Wurlitzer campionati; attribuzione CC BY nell'app (D-64) | — | unit (layer prima della radice, kit per kit, copertura del Wurlitzer), e2e con segnale sui canali; livelli misurati; ascolto del proprietario da fare |
 | 21/11/2026 | M6 · quattro livelli come dato dello studio, «Base» → Principiante, livello scelto al salvataggio (D-61) | #47 | unit + e2e della biblioteca |
 | 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | #48 | unit su casi da manuale e catene, e2e nell'editor |
 | 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | questo branch | unit su casi da manuale in Do, e2e sul sequencer |

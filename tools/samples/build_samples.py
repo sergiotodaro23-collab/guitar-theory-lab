@@ -3,7 +3,7 @@
 Build the Jam Studio multisample sets (J2, D-60) from their public sources.
 
 Every source is pinned to a commit and carries a licence compatible with
-GPL-3.0-or-later (CC0 here); see docs/AUDIO_ASSETS.md. Files are fetched one
+GPL-3.0-or-later (CC0, or CC BY 3.0 for the electric piano); see docs/AUDIO_ASSETS.md. Files are fetched one
 by one from raw.githubusercontent.com, decoded with ffmpeg, mixed (drum
 microphones), trimmed, faded, scaled by ONE gain per instrument (so velocity
 layers keep their real dynamics), checked for pitch, and encoded to Opus.
@@ -11,7 +11,7 @@ layers keep their real dynamics), checked for pitch, and encoded to Opus.
 Output: public/samples/<instrument>/*.ogg and manifest.json, read by
 src/audio/sampler.ts. Run from the repository root:
 
-    python3 tools/samples/build_samples.py [--only drums,piano,ebass,upright]
+    python3 tools/samples/build_samples.py [--only drums,piano,ebass,upright,brushes,electronic,epiano]
 
 Needs ffmpeg and numpy. Downloads are cached in $SAMPLES_CACHE (default
 ~/.cache/gtl-samples) so a rebuild does not download again.
@@ -43,6 +43,9 @@ SOURCES = {
     'vcsl': ('sgossner/VCSL', 'c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e'),
     'growlybass': ('sfzinstruments/karoryfer.growlybass', '4f483268fc66b5a6d5781d421c0d11b8d08d3fc6'),
     'meatbass': ('sfzinstruments/karoryfer.meatbass', 'ac9e859564bda286ab5ec672d00ff1aa2fef2895'),
+    'bigrusty': ('sfzinstruments/karoryfer.big-rusty-drums', 'f07ce00df34a46b6b08375be56fe116cf15782bc'),
+    'mck': ('MckAudio/MckSamplePacks', '5db40e8fe26785c256845a5bb38921b2654a887f'),
+    'sullivan': ('sfzinstruments/GregSullivan.E-Pianos', '8c3e581acda3594b553948ff0222d4f84a698376'),
 }
 
 NOTE_PC = {'c': 0, 'd': 2, 'e': 4, 'f': 5, 'g': 7, 'a': 9, 'b': 11}
@@ -358,7 +361,125 @@ def build_upright() -> dict:
     })
 
 
-BUILDERS = {'drums': build_drums, 'piano': build_piano, 'ebass': build_ebass, 'upright': build_upright}
+# Brushes: Big Rusty Drums (Karoryfer, CC0). Every piece played with brushes, except the kick (a felt beater
+# is what a brush player's foot uses) and the hi-hat foot. Mics: close (snare top/bottom, toms, cymbals) and overhead.
+# voice: (sample folder, file stem, ((mic, gain), ...), layers, round robins, seconds)
+BRUSHES = [
+    ('kick', 'kick_24/kick', 'k', (('kick', 1.0), ('oh', 0.5)), 14, 4, 1.0),
+    ('snare', 'snare_14/brush', 'sn_b', (('top', 1.0), ('btm', 0.25), ('oh', 0.6)), 8, 4, 1.2),
+    ('hhClosed', 'hihat_14/cl_brush', 'ht_cl_b', (('cl', 0.7), ('oh', 0.8)), 5, 4, 0.8),
+    ('hhHalf', 'hihat_14/lc_brush', 'ht_lc_b', (('cl', 0.7), ('oh', 0.8)), 5, 4, 1.2),
+    ('hhOpen', 'hihat_14/open_brush', 'ht_open_b', (('cl', 0.7), ('oh', 0.8)), 4, 4, 2.0),
+    ('hhPedal', 'hihat_14/chik', 'ht_chik', (('cl', 0.7), ('oh', 0.8)), 5, 4, 0.6),
+    ('ride', 'ride_22/brush', 'rd_b', (('cl', 0.6), ('oh', 0.9)), 4, 4, 2.5),
+    ('crash', 'crash_17/brush', 'cr_b', (('cl', 0.6), ('oh', 0.9)), 4, 4, 3.0),
+    ('tomHigh', 'tom_14/brush', 't14_b', (('cl', 1.0), ('oh', 0.6)), 5, 4, 1.5),
+    ('tomLow', 'tom_18/brush', 't18_b', (('cl', 1.0), ('oh', 0.6)), 5, 4, 2.0),
+]
+
+# Peak of each voice's loudest layer, in dBFS: a brush kit as mixed for a jazz trio.
+BRUSH_PEAK_DB = {'kick': -4, 'snare': -3, 'hhClosed': -10, 'hhHalf': -9, 'hhOpen': -8, 'hhPedal': -10,
+                 'ride': -7, 'crash': -5, 'tomHigh': -4, 'tomLow': -4}
+
+
+def build_brushes() -> dict:
+    jobs = [(voice, folder, stem, mics, seconds, v, r, layers)
+            for voice, folder, stem, mics, layers, rrs, seconds in BRUSHES
+            for v in range(1, layers + 1) for r in range(1, rrs + 1)]
+
+    def render(job):
+        voice, folder, stem, mics, seconds, v, r, _layers = job
+        parts = [(decode(fetch('bigrusty', f'Samples/{folder}/{mic}/{stem}_vl{v}_rr{r}.flac'), 2), gain) for mic, gain in mics]
+        return job, trim(mix(parts), seconds)
+
+    with ThreadPoolExecutor(8) as pool:
+        rendered = list(pool.map(render, jobs))
+    # One gain per voice, not per kit: close mics make the kick peak 25 dB over a brushed ride. Each voice's loudest
+    # layer is set to its place in a mixed kit; inside a voice the layers keep their recorded dynamics.
+    peaks: dict[str, float] = {}
+    for (voice, *_rest), audio in rendered:
+        peaks[voice] = max(peaks.get(voice, 0.0), float(np.max(np.abs(audio))))
+    zones = []
+    for (voice, _f, _s, _m, _sec, v, r, layers), audio in rendered:
+        lo, hi = vel_ranges(layers)[v - 1]
+        name = f'{voice}_v{v}_r{r}.ogg'
+        gain = 10 ** (BRUSH_PEAK_DB[voice] / 20) / peaks[voice]
+        encode(audio * gain, OUT / 'brushes' / name, '80k')
+        zones.append({'voice': voice, 'file': name, 'velLo': lo, 'velHi': hi, 'rr': r})
+    return {
+        'id': 'brushes', 'name': 'Big Rusty Drums (spazzole, mix close/overhead)', 'kind': 'drums',
+        'source': 'https://github.com/sfzinstruments/karoryfer.big-rusty-drums', 'commit': SOURCES['bigrusty'][1],
+        'license': 'CC0-1.0', 'author': 'Karoryfer Samples (D. Smolken)',
+        'zones': sorted(zones, key=lambda z: (z['voice'], z['velLo'], z['rr'])),
+    }
+
+
+# Electronic kit: one-shots of a Roland TR-8 recorded by MckAudio (CC0), the 808 voices with a 909 ride.
+# A drum machine has one sound per voice whatever the velocity: the sampler scales the level (`normalized`).
+ELECTRONIC = [
+    ('kick', 'BD/001_808_Bass_Drum_1.wav', 1.6),
+    ('snare', 'SD/001_808_Snare_Drum_1.wav', 0.8),
+    ('hhClosed', 'HATS/002_808_Closed_HiHat.wav', 0.5),
+    ('hhOpen', 'HATS/001_808_Open_HiHat.wav', 1.2),
+    ('ride', 'HATS/026_909_Ride_Cymbal.wav', 2.5),
+    ('crash', 'HATS/017_808_Crash_Cymbal.wav', 3.0),
+    ('clap', 'PERC/017_808_Hand_Clap.wav', 0.8),
+    ('rimshot', 'PERC/008_808_Rim_Shot.wav', 0.4),
+    ('tomHigh', 'TOMS/002_808_Mid_Tom.wav', 1.0),
+    ('tomLow', 'TOMS/001_808_Low_Tom.wav', 1.2),
+]
+
+
+def build_electronic() -> dict:
+    def render(entry):
+        voice, path, seconds = entry
+        return voice, trim(decode(fetch('mck', f'TR8/{path}'), 1), seconds, floor_db=-66.0)
+
+    with ThreadPoolExecutor(8) as pool:
+        rendered = list(pool.map(render, ELECTRONIC))
+    peak = max(float(np.max(np.abs(a))) for _, a in rendered)
+    gain = 10 ** (-1 / 20) / peak
+    zones = []
+    for voice, audio in rendered:
+        name = f'{voice}.ogg'
+        encode(audio * gain, OUT / 'electronic' / name, '64k')
+        zones.append({'voice': voice, 'file': name, 'velLo': 1, 'velHi': 127, 'rr': 1})
+    return {
+        'id': 'electronic', 'name': 'Roland TR-8 (voci 808, ride 909), registrato da MckAudio', 'kind': 'drums', 'normalized': True,
+        'source': 'https://github.com/MckAudio/MckSamplePacks', 'commit': SOURCES['mck'][1],
+        'license': 'CC0-1.0', 'author': 'MckAudio (Henri Schaffer)',
+        'zones': sorted(zones, key=lambda z: z['voice']),
+    }
+
+
+# Electric piano: Wurlitzer EP200 by Greg Sullivan (CC BY 3.0). Four velocity layers (pp, mp, f, ff) whose
+# roots differ from layer to layer, as in the source's mapping; the sampler picks the layer first, then the root.
+WURLITZER = {
+    # Above C#5 the source has no pp take: its pp layer plays the mp ones, and so does this.
+    1: ['a1pp', 'ab2pp', 'eb3pp', 'ab3pp', 'db4pp', 'g4pp', 'db5pp', 'g5mp', 'db6mp', 'ab6mp'],
+    2: ['a1mp', 'e2mp', 'a2mp', 'eb3mp', 'ab3mp', 'db4mp', 'gb4mp', 'b4mp', 'db5mp', 'g5mp', 'db6mp', 'ab6mp'],
+    3: ['a1f', 'c2f', 'f2f', 'b2f', 'e3f', 'ab3f', 'db4f', 'ab4f', 'db5f', 'g5f', 'db6f', 'ab6f'],
+    # Above G5 the ff layer plays the f takes, as in the source.
+    4: ['a1ff', 'c2ff', 'f2ff', 'b2ff', 'e3ff', 'ab3ff', 'db4ff', 'e4ff', 'g4ff', 'db5ff', 'g5ff', 'db6f', 'ab6f'],
+}
+
+
+def build_epiano() -> dict:
+    entries = []
+    for layer, names in WURLITZER.items():
+        for name in names:
+            note = re.fullmatch(r'([a-g]b?)(\d)(pp|mp|f|ff)', name)
+            assert note, name
+            entries.append((f'Wurlitzer EP200/Samples/{name}.flac', note_midi(note.group(1) + note.group(2)), layer, 1, 'sustain'))
+    return build_pitched('epiano', 'sullivan', entries, lambda midi, _a: 4.0 if midi < 60 else 3.0, 1, '56k', {
+        # Every take is peak-normalised in the source (its mapping adds no velocity tracking): the sampler sets the level.
+        'name': 'Wurlitzer EP200 (Greg Sullivan)', 'kind': 'pitched', 'normalized': True, 'layerFirst': True,
+        'source': 'https://github.com/sfzinstruments/GregSullivan.E-Pianos', 'license': 'CC-BY-3.0', 'author': 'Greg Sullivan',
+    })
+
+
+BUILDERS = {'drums': build_drums, 'piano': build_piano, 'ebass': build_ebass, 'upright': build_upright,
+            'brushes': build_brushes, 'electronic': build_electronic, 'epiano': build_epiano}
 
 
 def main() -> None:

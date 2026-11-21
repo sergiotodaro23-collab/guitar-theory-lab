@@ -18,7 +18,7 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | M2 · Fasi ancorate (D-62) | IMPLEMENTED | #48 | `exercises/anchors.test.ts`, `e2e/routine-arpeggio.spec.ts` | — |
 | M3 · Ritmo, articolazione, attacco (D-59) | PARTIAL | #45 | `exercises/rhythm.test.ts`, `timeline/countIn.test.ts`, `e2e/rhythm.spec.ts` | Manca il ritmo nell'Arpeggios Lab |
 | M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |
-| J2 · Campioni CC0 (D-60) | PARTIAL | #46 | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, copertura, intonazione) | Piano elettrico e organo ancora sintetizzati |
+| J2 · Campioni CC0 e CC BY (D-60, D-64) | PARTIAL | #46, PR di questo incremento | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, licenze, copertura, intonazione), `e2e/samples.spec.ts` | Organo ancora sintetizzato (nessuna fonte libera); ascolto del proprietario |
 | J1 · Sampler (D-60) | PARTIAL | #46 | `audio/samplerMap.test.ts`, `e2e/samples.spec.ts` | Budget CPU (J9); ascolto del proprietario |
 | M6 · Quattro livelli (D-61) | IMPLEMENTED | #47 | `exercises/levels.test.ts`, `app/presetLibrary.test.ts`, `e2e/studio-v6-shell.spec.ts` | Preset per ogni livello con FB/HA/AR |
 | Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 | 564 unit, 211 e2e | Scheda audio reale non provata (R10) |

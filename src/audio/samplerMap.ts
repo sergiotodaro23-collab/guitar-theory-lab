@@ -8,9 +8,12 @@
  *   repeating one while another is available (no "machine gun").
  * - Pitched sets: the nearest recorded root plays, shifted by playbackRate.
  *   `tune` is the zone's measured offset in cents; the rate removes it.
- * - A `normalized` set (VCSL piano) has every layer at the same loudness: the
- *   layer gives the timbre and a velocity curve gives the level. Otherwise the
- *   recorded dynamics are the level, with a small trim inside a layer.
+ * - A `normalized` set (VCSL piano, Wurlitzer, drum machine) has every layer at
+ *   the same loudness: the layer gives the timbre and a velocity curve gives the
+ *   level. Otherwise the recorded dynamics are the level, with a small trim
+ *   inside a layer.
+ * - A `layerFirst` set (Wurlitzer) was sampled on different keys in each layer:
+ *   the velocity layer is chosen first, then the nearest root inside it.
  */
 
 export interface DrumZone {
@@ -37,6 +40,7 @@ export interface SampleManifest {
   readonly name: string;
   readonly kind: 'drums' | 'pitched';
   readonly normalized?: boolean;
+  readonly layerFirst?: boolean;
   readonly source: string;
   readonly license: string;
   readonly author: string;
@@ -44,22 +48,23 @@ export interface SampleManifest {
   readonly zones: readonly (DrumZone | PitchedZone)[];
 }
 
-export type SampleSetId = 'drums' | 'piano' | 'ebass' | 'upright';
-export const SAMPLE_SETS: readonly SampleSetId[] = ['drums', 'piano', 'ebass', 'upright'];
+export type SampleSetId = 'drums' | 'brushes' | 'electronic' | 'piano' | 'epiano' | 'ebass' | 'upright';
+export const SAMPLE_SETS: readonly SampleSetId[] = ['drums', 'brushes', 'electronic', 'piano', 'epiano', 'ebass', 'upright'];
 
 /** Velocity 0–1 of the engines to MIDI 1–127. */
 export const midiVelocity = (velocity: number): number => Math.min(127, Math.max(1, Math.round(velocity * 127)));
 
-/** Jam kit pieces (src/jam/drums.ts) on the recorded kit. */
-export function drumVoiceFor(voice: string, velocity: number): string | null {
+/** Jam kit pieces (src/jam/drums.ts) on a recorded kit. */
+export function drumVoiceFor(voice: string, velocity: number, set: SampleSetId = 'drums'): string | null {
   switch (voice) {
     case 'kick': return 'kick';
     case 'snare': return 'snare';
     case 'hat': return 'hhClosed';
     case 'open': return 'hhOpen';
     case 'ride': return 'ride';
-    // An acoustic kit has no hand clap: a drummer plays the clave on the rim (cross-stick).
-    case 'clap': return 'crossStick';
+    // A drum machine has a hand clap. A drummer with sticks plays the clave on the rim (cross-stick);
+    // with brushes the 2 and 4 go to the hi-hat foot.
+    case 'clap': return set === 'electronic' ? 'clap' : set === 'brushes' ? 'hhPedal' : 'crossStick';
     // One tom line in the patterns: accents on the floor tom, the rest on the rack tom.
     case 'tom': return velocity >= 0.85 ? 'tomLow' : 'tomHigh';
     default: return null;
@@ -105,14 +110,14 @@ export interface DrumHit {
   readonly gain: number;
 }
 
-export function pickDrum(zones: readonly DrumZone[], voice: string, velocity: number, memory: RoundRobin): DrumHit | null {
+export function pickDrum(zones: readonly DrumZone[], voice: string, velocity: number, memory: RoundRobin, normalized = false): DrumHit | null {
   const vel = midiVelocity(velocity);
   const own = zones.filter((z) => z.voice === voice);
   if (!own.length) return null;
   const candidates = layer(own, vel);
   const first = candidates[0] as DrumZone;
   const zone = rotate(candidates, `${voice}:${first.velLo}`, memory);
-  return zone ? { zone, gain: recordedGain(zone, vel) } : null;
+  return zone ? { zone, gain: normalized ? normalizedGain(vel) : recordedGain(zone, vel) } : null;
 }
 
 export interface PitchedNote {
@@ -122,24 +127,37 @@ export interface PitchedNote {
   readonly gain: number;
 }
 
-/**
- * The zone that plays `midi`: the nearest recorded root (on a tie the higher
- * one, since shifting a recording down sounds more natural than up), then the
- * velocity layer, then the next round robin.
- */
-export function pickPitched(zones: readonly PitchedZone[], articulation: string, midi: number, velocity: number, memory: RoundRobin, normalized = false): PitchedNote | null {
-  const own = zones.filter((z) => z.articulation === articulation);
-  if (!own.length) return null;
-  let root = (own[0] as PitchedZone).root;
-  for (const z of own) {
+/** The recorded root nearest to `midi`; on a tie the higher one, since shifting a recording down sounds more natural than up. */
+function nearestRoot(zones: readonly PitchedZone[], midi: number): number {
+  let root = (zones[0] as PitchedZone).root;
+  for (const z of zones) {
     const d = Math.abs(z.root - midi);
     const best = Math.abs(root - midi);
     if (d < best || (d === best && z.root > root)) root = z.root;
   }
+  return root;
+}
+
+/**
+ * The zone that plays `midi`: the nearest recorded root, then the velocity
+ * layer, then the next round robin. With `layerFirst` (sets whose layers were
+ * sampled on different keys) the layer comes first, then the nearest root in it.
+ */
+export function pickPitched(zones: readonly PitchedZone[], articulation: string, midi: number, velocity: number, memory: RoundRobin, normalized = false, layerFirst = false): PitchedNote | null {
+  const own = zones.filter((z) => z.articulation === articulation);
+  if (!own.length) return null;
   const vel = midiVelocity(velocity);
-  const candidates = layer(own.filter((z) => z.root === root), vel);
+  let candidates: readonly PitchedZone[];
+  if (layerFirst) {
+    const inLayer = layer(own, vel);
+    const root = nearestRoot(inLayer, midi);
+    candidates = inLayer.filter((z) => z.root === root);
+  } else {
+    const root = nearestRoot(own, midi);
+    candidates = layer(own.filter((z) => z.root === root), vel);
+  }
   const first = candidates[0] as PitchedZone;
-  const zone = rotate(candidates, `${articulation}:${root}:${first.velLo}`, memory);
+  const zone = rotate(candidates, `${articulation}:${first.root}:${first.velLo}`, memory);
   if (!zone) return null;
   const rate = 2 ** ((midi - zone.root - zone.tune / 100) / 12);
   return { zone, rate, gain: normalized ? normalizedGain(vel) : recordedGain(zone, vel) };
@@ -151,8 +169,8 @@ export function zonesForDrum(zones: readonly DrumZone[], voice: string, velocity
   return own.length ? layer(own, midiVelocity(velocity)) : [];
 }
 
-export function zonesForPitched(zones: readonly PitchedZone[], articulation: string, midi: number, velocity: number): readonly PitchedZone[] {
-  const probe = pickPitched(zones, articulation, midi, velocity, new Map());
+export function zonesForPitched(zones: readonly PitchedZone[], articulation: string, midi: number, velocity: number, layerFirst = false): readonly PitchedZone[] {
+  const probe = pickPitched(zones, articulation, midi, velocity, new Map(), false, layerFirst);
   if (!probe) return [];
   const { root, velLo } = probe.zone;
   return zones.filter((z) => z.articulation === articulation && z.root === root && z.velLo === velLo);
