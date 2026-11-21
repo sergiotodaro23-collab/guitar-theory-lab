@@ -21,6 +21,7 @@ import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
 import { RhythmFields } from './RhythmFields';
 import { StringsField } from './StringsField';
 import { LevelSelect } from './LevelSelect';
+import { SequenceFields } from './SequenceFields';
 import { ArpShapeControls } from './ArpShapePanel';
 
 export const tonicOptions = TONICS.map((t) => ({ value: t, label: t }));
@@ -238,7 +239,6 @@ export function ScalePanel({ showLabels = true }: { readonly showLabels?: boolea
 export function ExercisePanel() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
-  const validCustom = parseCustomPattern(s.customText) !== null;
   const setEditorOpen = useApp((state) => state.setEditorOpen);
   return (
     <Panel title="Esercizio">
@@ -255,7 +255,7 @@ export function ExercisePanel() {
         />
       </Field>
       <button type="button" className="btn btn-editor" data-testid="open-editor" onClick={() => setEditorOpen(true)}>Apri editor avanzato</button>
-      {s.exerciseMode === 'routine' ? <RoutineSummary /> : <SingleExercise validCustom={validCustom} />}
+      {s.exerciseMode === 'routine' ? <RoutineSummary /> : <SingleExercise />}
     </Panel>
   );
 }
@@ -285,7 +285,7 @@ function RoutineSummary() {
   );
 }
 
-function SingleExercise({ validCustom }: { readonly validCustom: boolean }) {
+function SingleExercise() {
   const s = useApp((state) => state.settings);
   const update = useApp((state) => state.update);
   return (
@@ -328,9 +328,7 @@ function SingleExercise({ validCustom }: { readonly validCustom: boolean }) {
         </>
       ) : null}
       {s.exerciseKind === 'custom' ? (
-        <Field label="Passi della scala" hint={validCustom ? 'La sequenza riparte da ogni nota: 1 3 2 4 fa Do Mi Re Fa, Re Fa Mi Sol…' : 'Scrivi numeri da 1 a 24 separati da spazi, per esempio 1 3 2 4.'}>
-          <input className={`text-input ${validCustom ? '' : 'is-invalid'}`} data-testid="custom-pattern" value={s.customText} aria-invalid={!validCustom} onChange={(event) => update({ customText: event.target.value })} />
-        </Field>
+        <SequenceFields text={s.customText} motion={s.groupMotion} name="" testId="custom-pattern" onChange={(change) => update(change)} />
       ) : null}
       <div className="row">
         <Field label="Percorso">

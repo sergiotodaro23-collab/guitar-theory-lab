@@ -45,6 +45,8 @@ export interface RoutinePhase {
   readonly chord: string;
   readonly interval: IntervalNumber;
   readonly pairMotion: PairMotion;
+  /** How each group of a sequence runs (M5). */
+  readonly groupMotion: PairMotion;
   readonly direction: Direction;
   readonly customText: string;
   readonly notesPerBeat: Subdivision;
@@ -197,11 +199,11 @@ export function resolvePhase(phase: RoutinePhase, tuning: readonly number[] = ST
     notes = kept;
   }
 
-  const customPattern = parseCustomPattern(phase.customText);
+  const customPattern = parseCustomPattern(phase.customText, { chromatic: true });
   if (phase.kind === 'custom' && !customPattern) {
     issues.push({
       level: 'error',
-      message: 'Sequenza non valida: scrivi numeri da 1 a 24 separati da spazi.',
+      message: 'Sequenza non valida: scrivi numeri da 1 a 24 separati da spazi; «c» dopo un numero è la nota cromatica sotto quel grado.',
       fix: { label: 'Usa la sequenza 1 2 3 5', change: { customText: '1 2 3 5' } },
     });
   }
@@ -219,6 +221,7 @@ export function resolvePhase(phase: RoutinePhase, tuning: readonly number[] = ST
         interval: phase.interval,
         direction: phase.direction,
         pairMotion: phase.pairMotion,
+        groupMotion: phase.groupMotion,
         customPattern: customPattern ?? [1],
       });
 
@@ -413,6 +416,7 @@ export function defaultPhase(id: string, base?: Partial<RoutinePhase>): RoutineP
     kind: 'scale',
     interval: 3,
     pairMotion: 'ascending',
+    groupMotion: 'ascending',
     direction: 'up',
     customText: '1 2 3 5',
     notesPerBeat: 2,
@@ -465,6 +469,7 @@ export function sanitizeRoutine(raw: unknown, fallback: Routine): Routine {
       chord: typeof p.chord === 'string' ? p.chord.slice(0, 24) : d.chord,
       interval: oneOf(p.interval, [2, 3, 4, 5, 6, 7, 8] as const, d.interval),
       pairMotion: oneOf(p.pairMotion, ['ascending', 'descending', 'alternating'] as const, d.pairMotion),
+      groupMotion: oneOf(p.groupMotion, ['ascending', 'descending', 'alternating'] as const, d.groupMotion),
       direction: oneOf(p.direction, ['up', 'down', 'updown'] as const, d.direction),
       customText: typeof p.customText === 'string' ? p.customText.slice(0, 200) : d.customText,
       notesPerBeat: oneOf(p.notesPerBeat, [1, 2, 3, 4] as const, d.notesPerBeat),

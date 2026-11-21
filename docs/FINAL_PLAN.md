@@ -44,7 +44,7 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | M2 | Relazioni personalizzate: fase ancorata a un'altra fase o al riferimento con un intervallo scelto; trasposizione indipendente di una fase | IMPLEMENTED (D-62) | M1 | Unit su catene di relazioni, round-trip, nessun ciclo |
 | M3 | Modello ritmico: figure (intero…sedicesimo, terzine, quintine), punto, pause, legature di valore, battute di separazione tra fasi, count-in e countdown sul clock unico | PARTIAL (#45: esercizio singolo e fasi; manca Arpeggios Lab) | — | 5 note di pentatonica in crome in 4/4 attraversano la stanghetta correttamente; in 3/4 e 6/8 idem; count-in udibile senza spostare la battuta 1 |
 | M4 | Vincoli sul manico: corde utilizzate (1–6, insiemi qualsiasi), intervallo di tasti, posizione, string skipping, attraversamento dell'intera tastiera | PARTIAL (#45: corde e salto di corda; manca il percorso su tutta la tastiera) | — | Ogni nota generata rispetta i vincoli; combinazioni impossibili segnalate con alternativa |
-| M5 | Sequenze generative: gruppi di 3–5+ note, intervalli diatonici e cromatici, permutazioni, pattern irregolari, alternanza su/giù | PARTIAL | M3 | Casi da manuale (gruppi di 4 in Do, terze alternate, quarte) |
+| M5 | Sequenze generative: gruppi di 3–5+ note, intervalli diatonici e cromatici, permutazioni, pattern irregolari, alternanza su/giù | IMPLEMENTED (D-63) | M3 | Casi da manuale (gruppi di 4 in Do, terze alternate, quarte) |
 | M6 | Quattro livelli (principiante, intermedio, avanzato, esperto) come dato dell'esercizio; migrazione dei preset a tre livelli | IMPLEMENTED (D-61) | — | Preset esistenti migrati senza perdite; filtro per livello |
 | M7 | Preset: salvataggio, export/import file, condivisione via link senza backend, versionamento e validazione | PARTIAL | M1–M6 | Round-trip file e link; preset malformati rifiutati con messaggio |
 | M8 | Esercizio unico per tutti i laboratori: stesso modello di fasi per scale, accordi, arpeggi, con trasporto e cambi alla stanghetta | PARTIAL | M1–M4 | Una routine mista scala/arpeggio/accordo suona e si visualizza nei tre laboratori |
@@ -64,10 +64,10 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
-| HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | IMPLEMENTED nel motore (D-63, `harmony/harmonize.test.ts`) | — | Tabelle da manuale per le quattro scale |
+| HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | IMPLEMENTED nel motore (D-64, `harmony/harmonize.test.ts`) | — | Tabelle da manuale per le quattro scale |
 | HA2 | Estesi 9/11/13, alterazioni, formula libera (P1-07b) | PARTIAL | — | Spelling da manuale |
-| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | PARTIAL (motore e test, D-63; manca l'uso nel laboratorio) | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
-| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | PARTIAL (motore e test, D-63; manca l'uso nel laboratorio) | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
+| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | PARTIAL (motore e test, D-64; manca l'uso nel laboratorio) | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
+| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | PARTIAL (motore e test, D-64; manca l'uso nel laboratorio) | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
 | HA5 | Preset di armonizzazione progressiva su gruppi di corde attraverso tutti i rivolti; accordi su 4–6 corde | MISSING | HA3, M8 | Preset per livello, suonabili |
 | HA6 | Visualizzazione che distingue note suonate, corde e gradi armonici | PARTIAL | N2 | e2e sulla legenda |
 
@@ -177,5 +177,6 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | M3 · ritmo a cicli, articolazione, attacco sul clock unico; M4 · corde e salto di corda (D-59) | #45 | unit + e2e; Arpeggios Lab e percorso su tutta la tastiera restano |
 | 21/11/2026 | J2 · quattro set CC0 convertiti e registrati; J1 · sampler con caricamento pigro e ripiego sintetico (D-60) | #46 | unit sulle zone e sui manifest, e2e con segnale sui canali in Chromium; ascolto del proprietario da fare |
 | 21/11/2026 | M6 · quattro livelli come dato dello studio, «Base» → Principiante, livello scelto al salvataggio (D-61) | #47 | unit + e2e della biblioteca |
-| 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | questo branch | unit su casi da manuale e catene, e2e nell'editor |
-| 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-63) | questo branch | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
+| 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | #48 | unit su casi da manuale e catene, e2e nell'editor |
+| 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | questo branch | unit su casi da manuale in Do, e2e sul sequencer |
+| 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-64) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
