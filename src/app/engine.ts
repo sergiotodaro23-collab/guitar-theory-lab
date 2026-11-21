@@ -11,7 +11,7 @@ import {
   type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink, type TrackPayload,
 } from '../timeline';
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
-import { fileOffsetAt, loopRegion, progressionLength, sectionSpans, stepAt } from '../jam';
+import { fileOffsetAt, loopRegion, progressionLength, sectionSpans, drumPosition } from '../jam';
 import { backingTrack } from '../audio/backingTrack';
 import { benchmarkNam, namHost, namLatencySamples, useNam, type NamStatus } from '../audio/namHost';
 import { BPM_MAX, BPM_MIN, MIX_CHANNELS, backingTrackVolume, channelVolume, meterOf, type MixChannel, type Settings } from './settings';
@@ -132,8 +132,8 @@ class Engine {
     const local = (tick - track.originTick) % track.lengthTicks;
     const bar = ticksPerBar(segmentAt(this.scheduler.timeConfig, tick).meter);
     const s = useApp.getState().settings;
-    const fill = s.drumFillEvery > 0 && Math.floor(local / bar) === Math.round(track.lengthTicks / bar) - 1;
-    return { drumStep: stepAt(Math.floor((local % bar) / (PPQ / 4))), drumFill: fill };
+    const { step, fill } = drumPosition(s.drumKit, s.drumPattern, s.drumFillEvery, Math.floor(local / bar), Math.floor((local % bar) / (PPQ / 4)));
+    return { drumStep: step, drumFill: fill };
   }
 
   /** With `meterChanged`, every track restarts on the bar line where the new meter begins. */

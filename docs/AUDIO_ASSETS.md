@@ -1,6 +1,6 @@
 # Campioni audio: fonti, licenze, conversione
 
-Registro J2 del piano (`docs/FINAL_PLAN.md`), decisioni D-60 e D-65. Ogni file in `public/samples/` viene da una fonte pubblica fissata a un commit, con licenza compatibile con GPL-3.0-or-later (CC0, oppure CC BY 3.0 con attribuzione), ed è rigenerabile con `python3 tools/samples/build_samples.py` (servono ffmpeg e numpy; i download finiscono in una cache locale).
+Registro J2 del piano (`docs/FINAL_PLAN.md`), decisioni D-60 e D-66. Ogni file in `public/samples/` viene da una fonte pubblica fissata a un commit, con licenza compatibile con GPL-3.0-or-later (CC0, oppure CC BY 3.0 con attribuzione), ed è rigenerabile con `python3 tools/samples/build_samples.py` (servono ffmpeg e numpy; i download finiscono in una cache locale).
 
 ## Inclusi
 
