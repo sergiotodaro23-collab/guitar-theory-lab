@@ -19,7 +19,8 @@ import {
 } from '../fretboard';
 import { SCALES, TONICS, buildScale, chromaticName, diatonicSeventh, mod, noteName, parseNote, pitchClass, spelledIntervalBetween, transposeBySpelled, tryParseChord, type Scale, type ScaleId, type SpelledInterval } from '../theory';
 import { arpeggioSequence } from './arpeggio';
-import { ticksPerBar, ticksPerBeat, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
+import { ticksPerBar, type Meter, type NotePayload, type Subdivision, type Track } from '../timeline';
+import { isRhythmError, layoutRhythm, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, type TimedNote } from './rhythm';
 import { generateSequence, parseCustomPattern, type Direction, type ExerciseKind, type IntervalNumber, type PairMotion } from './generator';
 
 export type PhaseKind = ExerciseKind | 'arpeggio';
@@ -53,7 +54,20 @@ export interface RoutinePhase {
    * B minor under D; "fixed" stays where it is (an independent phase).
    */
   readonly link: PhaseLink;
+  /**
+   * Rhythm cycle in the text form of `parseRhythm` (M3), e.g. "8. 16".
+   * Empty means `notesPerBeat` notes on every beat of the meter.
+   */
+  readonly rhythm: string;
+  readonly articulation: Articulation;
+  /** "bar": every repetition starts on a downbeat; "continuous": they follow each other on the cycle. */
+  readonly repeatStart: RepeatStart;
+  /** Empty bars after the phase, to move the hand or listen (0–4). */
+  readonly barsAfter: number;
 }
+
+export type RepeatStart = 'continuous' | 'bar';
+export const MAX_BARS_AFTER = 4;
 
 export type PhaseLink = 'follow' | 'fixed';
 export const PHASE_LINKS: readonly PhaseLink[] = ['follow', 'fixed'];
@@ -210,24 +224,55 @@ export function resolvePhase(phase: RoutinePhase, tuning: readonly number[] = ST
   };
 }
 
+/** The rhythm cycle a phase plays: its own text if valid, otherwise its notes per beat in the meter. */
+export function phaseRhythm(phase: RoutinePhase, meter: Meter): readonly RhythmStep[] {
+  if (phase.rhythm.trim()) {
+    const parsed = parseRhythm(phase.rhythm);
+    if (!isRhythmError(parsed)) return parsed;
+  }
+  return uniformRhythm(meter, phase.notesPerBeat);
+}
+
+export interface PlacedNote extends TimedNote {
+  readonly note: SpelledFretNote;
+}
+
 export interface RoutinePlan {
-  readonly phases: readonly (ResolvedPhase & { readonly startTick: number; readonly lengthTicks: number })[];
+  readonly phases: readonly (ResolvedPhase & { readonly startTick: number; readonly lengthTicks: number; readonly timed: readonly PlacedNote[] })[];
   readonly lengthTicks: number;
 }
 
+const ceilTo = (ticks: number, unit: number) => (ticks === 0 ? 0 : Math.ceil(ticks / unit) * unit);
+
 /**
- * Lay phases end to end. Each phase repeats as asked, then rests to the bar
- * line, so every phase starts on a downbeat and the hand has a beat to move.
+ * Lay phases end to end on the rhythm of each (M3). Repetitions either run
+ * on along the cycle or restart on a downbeat; then the phase rests to the
+ * bar line and for its separation bars, so every phase starts on a downbeat
+ * and the hand has time to move.
  */
 export function planRoutine(routine: Routine, meter: Meter, tuning: readonly number[] = STANDARD_TUNING): RoutinePlan {
   const bar = ticksPerBar(meter);
   let start = 0;
   const phases = routine.phases.map((phase) => {
     const resolved = resolvePhase(phase, tuning);
-    const step = ticksPerBeat(meter) / phase.notesPerBeat;
-    const played = resolved.sequence.length * step * phase.repeats;
-    const lengthTicks = played === 0 ? 0 : Math.ceil(played / bar) * bar;
-    const placed = { ...resolved, startTick: start, lengthTicks };
+    const steps = phaseRhythm(phase, meter);
+    const sequence = resolved.sequence;
+    const timed: PlacedNote[] = [];
+    let played = 0;
+    if (sequence.length > 0) {
+      const runs = phase.repeatStart === 'bar' ? phase.repeats : 1;
+      const perRun = phase.repeatStart === 'bar' ? sequence.length : sequence.length * phase.repeats;
+      const layout = layoutRhythm(perRun, steps, phase.articulation);
+      const runLength = phase.repeatStart === 'bar' ? ceilTo(layout.lengthTicks, bar) : layout.lengthTicks;
+      for (let run = 0; run < runs; run += 1) {
+        for (const n of layout.notes) {
+          timed.push({ ...n, index: timed.length, tick: start + run * runLength + n.tick, note: sequence[n.index % sequence.length] as SpelledFretNote });
+        }
+      }
+      played = runLength * (runs - 1) + layout.lengthTicks;
+    }
+    const lengthTicks = played === 0 ? 0 : ceilTo(played, bar) + phase.barsAfter * bar;
+    const placed = { ...resolved, startTick: start, lengthTicks, timed };
     start += lengthTicks;
     return placed;
   });
@@ -239,16 +284,11 @@ export function routineTrack(routine: Routine, meter: Meter, tuning: readonly nu
   if (plan.lengthTicks === 0) return null;
   const events: { tick: number; payload: NotePayload }[] = [];
   plan.phases.forEach((resolved, phaseIndex) => {
-    const step = ticksPerBeat(meter) / resolved.phase.notesPerBeat;
-    let tick = resolved.startTick;
-    for (let round = 0; round < resolved.phase.repeats; round += 1) {
-      for (const note of resolved.sequence) {
-        events.push({
-          tick,
-          payload: { type: 'note', midi: note.midi, string: note.string, fret: note.fret, durationTicks: step, index: events.length, phase: phaseIndex },
-        });
-        tick += step;
-      }
+    for (const { tick, durationTicks, note } of resolved.timed) {
+      events.push({
+        tick,
+        payload: { type: 'note', midi: note.midi, string: note.string, fret: note.fret, durationTicks, index: events.length, phase: phaseIndex },
+      });
     }
   });
   return { id: 'exercise', lengthTicks: plan.lengthTicks, loop: true, events };
@@ -359,6 +399,10 @@ export function defaultPhase(id: string, base?: Partial<RoutinePhase>): RoutineP
     repeats: 1,
     chord: 'Cmaj7',
     link: 'follow',
+    rhythm: '',
+    articulation: 'legato',
+    repeatStart: 'continuous',
+    barsAfter: 0,
     ...base,
   };
 }
@@ -403,6 +447,10 @@ export function sanitizeRoutine(raw: unknown, fallback: Routine): Routine {
       notesPerBeat: oneOf(p.notesPerBeat, [1, 2, 3, 4] as const, d.notesPerBeat),
       repeats: clampInt(p.repeats, 1, MAX_REPEATS, 1),
       link: oneOf(p.link, PHASE_LINKS, d.link),
+      rhythm: typeof p.rhythm === 'string' && !isRhythmError(parseRhythm(p.rhythm)) ? p.rhythm.slice(0, 200) : d.rhythm,
+      articulation: oneOf(p.articulation, ['legato', 'normal', 'staccato'] as const, d.articulation),
+      repeatStart: oneOf(p.repeatStart, ['continuous', 'bar'] as const, d.repeatStart),
+      barsAfter: clampInt(p.barsAfter, 0, MAX_BARS_AFTER, 0),
     };
   });
   if (phases.length === 0) return fallback;

@@ -8,6 +8,7 @@ import { useApp } from '../app/store';
 import {
   INTERVAL_NAMES,
   MAX_PHASES,
+  MAX_BARS_AFTER,
   MAX_REPEATS,
   ROUTINE_TEMPLATES,
   defaultPhase,
@@ -16,6 +17,7 @@ import {
   planRoutine,
   type IntervalNumber,
   type PhaseLink,
+  type RepeatStart,
   type PhasePosition,
   type Routine,
   type RoutinePhase,
@@ -26,6 +28,7 @@ import { ticksPerBar } from '../timeline';
 import { Fretboard } from '../viz/Fretboard';
 import { buildMarkerLayer } from '../viz/markers';
 import { Field, Segmented, Select } from './controls';
+import { RhythmFields } from './RhythmFields';
 
 const FRET_OPTIONS = Array.from({ length: DEFAULT_FRETS + 1 }, (_, f) => ({ value: f, label: String(f) }));
 
@@ -192,6 +195,20 @@ function PhaseBlock({ phase, index, count, selected, summary, issues, onSelect, 
             </Field>
             <Field label="Ripetizioni">
               <Select label={`Ripetizioni della fase ${n}`} value={phase.repeats} options={Array.from({ length: MAX_REPEATS }, (_, i) => ({ value: i + 1, label: `${i + 1}×` }))} onChange={(repeats) => onChange({ repeats })} />
+            </Field>
+          </div>
+          <RhythmFields rhythm={phase.rhythm} articulation={phase.articulation} name={`della fase ${n}`} onChange={onChange} />
+          <div className="row">
+            <Field label="Ogni ripetizione">
+              <Select<RepeatStart>
+                label={`Inizio delle ripetizioni della fase ${n}`}
+                value={phase.repeatStart}
+                options={[{ value: 'continuous', label: 'Di seguito' }, { value: 'bar', label: 'Sul battere' }]}
+                onChange={(repeatStart) => onChange({ repeatStart })}
+              />
+            </Field>
+            <Field label="Battute di pausa dopo">
+              <Select label={`Battute di pausa dopo la fase ${n}`} value={phase.barsAfter} options={Array.from({ length: MAX_BARS_AFTER + 1 }, (_, i) => ({ value: i, label: String(i) }))} onChange={(barsAfter) => onChange({ barsAfter })} />
             </Field>
           </div>
         </fieldset>

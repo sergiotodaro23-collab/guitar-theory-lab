@@ -1,6 +1,6 @@
 /** Everything the user can configure and save. Pure and framework-free. */
 import { CAGED_FORMS, STANDARD_TUNING, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
-import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
+import { ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, isRhythmError, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
 import { HOME_MODES, type AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
@@ -58,6 +58,9 @@ export interface StudySettings {
   readonly pairMotion: PairMotion;
   readonly customText: string;
   readonly notesPerBeat: Subdivision;
+  /** Rhythm cycle of the single exercise (M3), text form of `parseRhythm`; empty = notes per beat. */
+  readonly exerciseRhythm: string;
+  readonly exerciseArticulation: Articulation;
   readonly bpm: number;
   readonly meterId: string;
   readonly subdivision: Subdivision;
@@ -212,6 +215,8 @@ export const DEFAULT_SETTINGS: Settings = {
   pairMotion: 'ascending',
   customText: '1 2 3 5',
   notesPerBeat: 2,
+  exerciseRhythm: '',
+  exerciseArticulation: 'legato',
   bpm: 80,
   meterId: '4/4',
   subdivision: 1,
@@ -335,6 +340,8 @@ export function sanitizeSettings(raw: unknown): Settings {
     pairMotion: oneOf(r.pairMotion, ['ascending', 'descending', 'alternating'] as const, d.pairMotion),
     customText: typeof r.customText === 'string' ? r.customText : d.customText,
     notesPerBeat: oneOf(r.notesPerBeat, [1, 2, 3, 4] as const, d.notesPerBeat),
+    exerciseRhythm: typeof r.exerciseRhythm === 'string' && (r.exerciseRhythm.trim() === '' || !isRhythmError(parseRhythm(r.exerciseRhythm))) ? r.exerciseRhythm.slice(0, 200) : d.exerciseRhythm,
+    exerciseArticulation: oneOf(r.exerciseArticulation, ['legato', 'normal', 'staccato'] as const, d.exerciseArticulation),
     bpm: typeof r.bpm === 'number' && Number.isFinite(r.bpm) ? clamp(Math.round(r.bpm), BPM_MIN, BPM_MAX) : d.bpm,
     meterId: oneOf(r.meterId, Object.keys(METERS), d.meterId),
     subdivision: oneOf(r.subdivision, [1, 2, 3, 4] as const, d.subdivision),
@@ -553,4 +560,13 @@ export function analysisSettingsOf(s: Pick<Settings, 'liveSensitivity' | 'livePr
  */
 export function activeChords(s: Pick<Settings, 'mode' | 'arrangementOn' | 'arrangement' | 'progression'>): Progression['chords'] {
   return s.mode === 'jam' && s.arrangementOn && s.arrangement.length > 0 ? songChords(s.progression, s.arrangement).chords : s.progression.chords;
+}
+
+/** The single exercise's rhythm cycle: its own text when valid, otherwise notes per beat in the meter. */
+export function exerciseRhythmOf(s: Settings): readonly RhythmStep[] {
+  if (s.exerciseRhythm.trim()) {
+    const parsed = parseRhythm(s.exerciseRhythm);
+    if (!isRhythmError(parsed)) return parsed;
+  }
+  return uniformRhythm(meterOf(s), s.notesPerBeat);
 }
