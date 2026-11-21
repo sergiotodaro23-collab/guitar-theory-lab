@@ -1,4 +1,5 @@
 /** Everything the user can configure and save. Pure and framework-free. */
+import { sanitizeMarkerColors, type MarkerColors } from '../viz/palette';
 import { CAGED_FORMS, STANDARD_TUNING, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
 import { parseLevel, type ExerciseLevel, ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, normalizeStrings, onStrings, type StringNumber, isRhythmError, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
 import { HOME_MODES, type AvoidProfile } from '../harmony';
@@ -136,6 +137,8 @@ export interface HarmonySettings {
   readonly tunerA4: number;
   readonly tunerTuning: string;
   readonly liveOnBoard: boolean;
+  /** Marker colours the user replaced (N3, viz/palette); a missing role keeps its theme colour. */
+  readonly markerColors: MarkerColors;
   readonly inputChannel: 'mix' | 'left' | 'right';
   /** Live Monitor 2.0 (D-31): sensitivity, calibration profiles, the chosen one ('' none). */
   readonly liveSensitivity: Sensitivity;
@@ -277,6 +280,7 @@ export const DEFAULT_SETTINGS: Settings = {
   tunerA4: 440,
   tunerTuning: 'standard',
   liveOnBoard: true,
+  markerColors: {},
   inputChannel: 'mix',
   liveSensitivity: 'balanced',
   liveProfiles: [],
@@ -408,6 +412,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     tunerA4: typeof r.tunerA4 === 'number' && r.tunerA4 >= 415 && r.tunerA4 <= 466 ? Math.round(r.tunerA4) : d.tunerA4,
     tunerTuning: oneOf(r.tunerTuning, TUNINGS.map((t) => t.id), d.tunerTuning),
     liveOnBoard: typeof r.liveOnBoard === 'boolean' ? r.liveOnBoard : d.liveOnBoard,
+    markerColors: sanitizeMarkerColors(r.markerColors),
     inputChannel: oneOf(r.inputChannel, ['mix', 'left', 'right'] as const, d.inputChannel),
     liveSensitivity: oneOf(r.liveSensitivity, SENSITIVITIES, d.liveSensitivity),
     liveProfiles: sanitizeProfiles(r.liveProfiles),

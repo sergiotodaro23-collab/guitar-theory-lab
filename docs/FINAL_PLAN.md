@@ -117,8 +117,8 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
 | N1 | Pannello Note solo consultazione: nessun input, gain, calibrazione o controllo ampli | PARTIAL | R2 | e2e: nessun controllo audio nel pannello |
-| N2 | Legenda geometrica condivisa: cerchi, triangoli, rombi, quadrati per ruolo (scala, arpeggio, accordo, target, intervalli); A3 residuo | PARTIAL | — | Unit su `viz/legend`; screenshot |
-| N3 | Colori personalizzabili | PARTIAL | N2 | Salvati e applicati ovunque |
+| N2 | Legenda geometrica condivisa: cerchi, triangoli, rombi, quadrati per ruolo (scala, arpeggio, accordo, target, intervalli); A3 residuo | IMPLEMENTED (D-63; restano forme per intervalli e note sovrapposte composte, con FB3) | — | Unit su `viz/glyphs`, `viz/legend`; e2e `legend-geometry.spec.ts`; screenshot |
+| N3 | Colori personalizzabili | IMPLEMENTED (D-63; la scelta si fa solo dalla Studio, la Semplificata la applica) | N2 | Salvati e applicati ovunque |
 | N4 | Seconda tastiera | PARTIAL | N2 | Segue il prossimo accordo o una scelta |
 | N5 | Default: modo della scala di riferimento pertinente all'accordo in esecuzione; alternative, sovrapposizioni, scale compatibili | PARTIAL | HA1 | G7 in Do mostra Sol misolidio; alternative selezionabili |
 | N6 | Ogni cambio armonico aggiorna tutte le viste rispettando le relazioni dell'esercizio (M1, M2) | PARTIAL | M1, N5 | e2e in riproduzione |
@@ -178,3 +178,4 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | J2 · quattro set CC0 convertiti e registrati; J1 · sampler con caricamento pigro e ripiego sintetico (D-60) | #46 | unit sulle zone e sui manifest, e2e con segnale sui canali in Chromium; ascolto del proprietario da fare |
 | 21/11/2026 | M6 · quattro livelli come dato dello studio, «Base» → Principiante, livello scelto al salvataggio (D-61) | #47 | unit + e2e della biblioteca |
 | 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | questo branch | unit su casi da manuale e catene, e2e nell'editor |
+| 21/11/2026 | N2 · legenda geometrica condivisa con la tastiera; N3 · colori delle note personalizzabili (D-63) | questo branch | unit + e2e, screenshot a 1440 × 900 e 1280 × 720 |

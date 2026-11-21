@@ -9,6 +9,8 @@ import { buildScale, chromaticName, mod, tryParseChord, type Chord, type Scale }
 import { resolveChordLayer } from '../app/chordLayers';
 import { Fretboard, type LayerMarks, type LayerStyle } from '../viz/Fretboard';
 import { legendEntries, type LegendEntry } from '../viz/legend';
+import { LEGEND_GLYPH } from '../viz/glyphs';
+import { LegendGlyph } from '../viz/Glyph';
 import { useLive } from '../audio/liveInput';
 import { midiPitch, useMidi } from '../audio/midi';
 import { HandEstimator, noteOf } from '../pitch';
@@ -73,8 +75,8 @@ function Legend({ entries, overlays, marks }: { readonly entries: readonly Legen
     <ul className="legend" aria-label="Legenda" data-testid="legend">
       {entries.map((entry) => (
         <li key={entry.kind} className={`legend-item legend-${entry.kind}`} data-kind={entry.kind}>
-          <span className="legend-swatch" aria-hidden="true" />
-          {entry.label}
+          <LegendGlyph kind={entry.kind} />
+          <span className="legend-text">{entry.label} <span className="legend-shape">· {LEGEND_GLYPH[entry.kind].shapeName}</span></span>
         </li>
       ))}
       {overlays.map((o) => (

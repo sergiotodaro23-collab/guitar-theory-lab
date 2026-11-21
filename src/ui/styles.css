@@ -176,20 +176,7 @@ button, select, input { font: inherit; color: inherit; }
 .board-foot { display: flex; gap: 12px 28px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; margin-top: 8px; min-height: 48px; }
 .legend { display: flex; gap: 6px 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
 .legend-item { display: flex; align-items: center; gap: 6px; }
-.legend-swatch { width: 12px; height: 12px; display: inline-block; border-radius: 50%; }
-/* Legend swatches repeat the marker shapes: circle, ringed circle, diamond, triangle, hollow ring. */
-.legend-root .legend-swatch { background: var(--root); }
-.legend-scale .legend-swatch { background: #2d1e63; border: 2px solid var(--scale); }
-.legend-guide .legend-swatch { background: var(--chord-tone); box-shadow: 0 0 0 2px var(--void), 0 0 0 3.5px var(--chord-tone); }
-.legend-chord-tone .legend-swatch { background: var(--chord-tone); }
-.legend-tension .legend-swatch { background: var(--tension); border-radius: 0; transform: rotate(45deg); }
-.legend-avoid .legend-swatch { background: transparent; width: 0; height: 0; border-radius: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 12px solid var(--avoid); }
-.legend-outside .legend-swatch { border: 2px solid var(--outside); }
-.legend-other-scale .legend-swatch { border: 2px dashed var(--muted); }
-.legend-voicing .legend-swatch { border: 2px solid var(--ink); border-radius: 3px; }
-.legend-target-now .legend-swatch, .legend-target-next .legend-swatch { border: 2px solid var(--hot); background: transparent; }
-.legend-target-next .legend-swatch { border-style: dashed; }
-.legend-played .legend-swatch { background: var(--hot); box-shadow: 0 0 6px var(--hot); }
+/* Legend swatches are drawn by viz/Glyph with the markers own classes (N2). */
 .aids-off { color: var(--muted); }
 
 .inspector { max-width: 100%; }
@@ -483,8 +470,6 @@ button, select, input { font: inherit; color: inherit; }
 .live-layer { pointer-events: none; transition: opacity 260ms linear; }
 .live-possible { fill: none; stroke: #e0261b; stroke-width: 2.6; stroke-dasharray: 4 3; }
 .live-likely { fill: #e0261b; stroke: #fff2ee; stroke-width: 2; }
-.legend-live-likely .legend-swatch { background: #e0261b; box-shadow: 0 0 0 2px #fff2ee; }
-.legend-live-possible .legend-swatch { border: 2px dashed #e0261b; background: transparent; }
 
 /* ---- Guitar input, Live Monitor, Tuner ---- */
 .live-input { display: grid; gap: 10px; }
@@ -612,3 +597,22 @@ button, select, input { font: inherit; color: inherit; }
 .string-pick { min-width: 28px; height: 28px; border-radius: 4px; border: 1px solid currentColor; background: transparent; color: inherit; opacity: 0.45; font-variant-numeric: tabular-nums; cursor: pointer; }
 .string-pick.is-on { opacity: 1; font-weight: 700; }
 .string-pick:focus-visible { outline: 2px solid var(--accent, #ff8a3d); outline-offset: 2px; }
+
+/* N2 · geometric legend: the swatch is the neck's own glyph (viz/Glyph), so the two never drift apart. */
+.arp-mark { fill: none; stroke: var(--arp-mark, #1d1409); stroke-width: 1.9; stroke-linejoin: round; pointer-events: none; }
+.legend-glyph { flex: none; overflow: visible; }
+.legend-glyph .marker { pointer-events: none; }
+.legend-glyph .legend-plain { opacity: .55; }
+.legend-glyph .target-ring { stroke-width: 2; }
+.legend-glyph .target-next { stroke-dasharray: 3 2; }
+.legend-text { min-width: 0; }
+.legend-shape { opacity: .72; font-size: .92em; }
+
+/* N3 · colour pickers for the marker roles. */
+.marker-colors { display: grid; gap: 8px; }
+.marker-colors-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 14px; }
+.marker-colors-row { display: flex; align-items: center; gap: 8px; min-height: 30px; }
+.marker-colors-input { width: 34px; height: 24px; padding: 0; border: 1px solid rgba(0, 0, 0, .35); border-radius: 4px; background: none; cursor: pointer; flex: none; }
+.marker-colors-name { flex: 1; min-width: 0; }
+.marker-colors-theme { font-size: .85em; }
+.marker-colors-all { justify-self: start; }
