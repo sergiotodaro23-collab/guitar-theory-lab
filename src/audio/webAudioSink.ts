@@ -1,9 +1,16 @@
 /**
  * Audio output of the timeline. It receives absolute AudioContext times and
- * never decides when something plays. Synthesised on purpose: no samples to ship.
+ * never decides when something plays. The jam's acoustic kit, electric bass,
+ * double bass and piano play recorded samples (J1, D-60) once loaded; every
+ * other sound, and these until their zones are decoded, is synthesised (D-32).
  */
 import { midiToHz } from '../theory';
-import type { AccentLevel, ScheduledTrackEvent } from '../timeline';
+import type { AccentLevel, ScheduledTrackEvent, TrackPayload } from '../timeline';
+import { SampleLibrary } from './sampler';
+import {
+  bassArticulation, drumVoiceFor, pickDrum, pickPitched, zonesForDrum, zonesForPitched,
+  type DrumZone, type PitchedZone, type RoundRobin, type SampleSetId,
+} from './samplerMap';
 import { clickRecipe, type ClickSound } from './clickSounds';
 import { drumRecipe } from './drumSounds';
 import { BASS_RECIPES, COMP_RECIPES, kitRecipe, strumOffsets, type BassTimbre, type CompTimbre, type DrumKitSound, type ToneRecipe } from './instruments';
@@ -27,7 +34,18 @@ export class WebAudioSink {
   private readonly taps: Record<AudioBus, AnalyserNode>;
   private readonly tapData = new Float32Array(512);
 
-  constructor(private readonly ctx: AudioContext, private readonly secondsPerTick: () => number) {
+  readonly samples: SampleLibrary;
+  private readonly roundRobin: RoundRobin = new Map();
+  /** The jam's notes, so a change of sound loads what the new one needs. */
+  private prepared: readonly TrackPayload[] = [];
+  /** Open hi-hats still ringing: the next closed or pedal hat chokes them, as a drummer's foot does. */
+  private openHats: Voice[] = [];
+  private readonly faded = new WeakSet<Voice>();
+  /** Recorded notes played per channel since the start: what the tests read to tell samples from synthesis. */
+  readonly sampledCount: Record<AudioBus, number> = { click: 0, notes: 0, comp: 0, bass: 0, drums: 0 };
+
+  constructor(private readonly ctx: AudioContext, private readonly secondsPerTick: () => number, samplesBase = 'samples/') {
+    this.samples = new SampleLibrary(ctx, samplesBase);
     this.master = ctx.createGain();
     this.master.gain.value = 0.85;
     const limiter = ctx.createDynamicsCompressor();
@@ -95,7 +113,63 @@ export class WebAudioSink {
 
   /** Kit and instrument sounds for the jam (D-32); they apply from the next note. */
   setTimbres(timbres: { drums: DrumKitSound; bass: BassTimbre; comp: CompTimbre }): void {
+    const changed = timbres.drums !== this.timbres.drums || timbres.bass !== this.timbres.bass || timbres.comp !== this.timbres.comp;
     this.timbres = timbres;
+    if (changed) void this.loadPrepared();
+  }
+
+  /** The sampled set each channel plays with the current sounds, or null for a synthesised one. */
+  sampleSets(): { drums: SampleSetId | null; bass: SampleSetId | null; comp: SampleSetId | null } {
+    const { drums, bass, comp } = this.timbres;
+    return {
+      drums: drums === 'acoustic' ? 'drums' : null,
+      bass: bass === 'finger' || bass === 'pick' ? 'ebass' : bass === 'upright' ? 'upright' : null,
+      comp: comp === 'keys' ? 'piano' : null,
+    };
+  }
+
+  /** Load ahead the zones these notes will use; resolves when they are decoded (or failed). */
+  prepare(payloads: readonly TrackPayload[]): Promise<void> {
+    this.prepared = payloads;
+    return this.loadPrepared();
+  }
+
+  private async loadPrepared(): Promise<void> {
+    const payloads = this.prepared;
+    const sets = this.sampleSets();
+    const jobs: Promise<void>[] = [];
+    const need = async (id: SampleSetId, files: (manifestZones: readonly (DrumZone | PitchedZone)[]) => Iterable<string>) => {
+      const manifest = await this.samples.manifest(id);
+      if (manifest) await this.samples.require(id, [...new Set(files(manifest.zones))]);
+    };
+    const seconds = this.secondsPerTick();
+    if (sets.drums) {
+      jobs.push(need(sets.drums, function* (zones) {
+        for (const p of payloads) {
+          if (p.type !== 'drum') continue;
+          const voice = drumVoiceFor(p.voice, p.velocity);
+          if (voice) for (const z of zonesForDrum(zones as DrumZone[], voice, p.velocity)) yield z.file;
+        }
+      }));
+    }
+    const bassSet = sets.bass;
+    if (bassSet) {
+      jobs.push(need(bassSet, function* (zones) {
+        for (const p of payloads) {
+          if (p.type !== 'bass') continue;
+          for (const z of zonesForPitched(zones as PitchedZone[], bassArticulation(bassSet, p.durationTicks * seconds), p.midi, p.velocity)) yield z.file;
+        }
+      }));
+    }
+    if (sets.comp) {
+      jobs.push(need(sets.comp, function* (zones) {
+        for (const p of payloads) {
+          if (p.type !== 'comp') continue;
+          for (const [i, midi] of p.midis.entries()) for (const z of zonesForPitched(zones as PitchedZone[], 'sustain', midi, compVelocity(p.velocity, i))) yield z.file;
+        }
+      }));
+    }
+    await Promise.all(jobs);
   }
 
   trackEvent(event: ScheduledTrackEvent, time: number): void {
@@ -108,6 +182,7 @@ export class WebAudioSink {
       this.pluck(payload.midi, time);
     } else if (payload.type === 'comp') {
       const duration = payload.durationTicks * this.secondsPerTick();
+      if (this.sampledChord(payload.midis, duration, payload.velocity, time)) return;
       const recipe = COMP_RECIPES[this.timbres.comp];
       const offsets = strumOffsets(payload.midis.length, recipe);
       payload.midis.forEach((midi, i) => {
@@ -117,8 +192,29 @@ export class WebAudioSink {
     }
   }
 
-  /** One hit of the jam drum kit: a gliding tone and/or a filtered noise burst. */
+  /** Piano chord from the samples: every note or none, so a chord never mixes sampled and synthesised notes. */
+  private sampledChord(midis: readonly number[], duration: number, velocity: number, time: number): boolean {
+    const id = this.sampleSets().comp;
+    const manifest = id ? this.samples.manifestNow(id) : undefined;
+    if (!id || !manifest) return false;
+    const zones = manifest.zones as PitchedZone[];
+    const notes = midis.map((midi, i) => {
+      const note = pickPitched(zones, 'sustain', midi, compVelocity(velocity, i), this.roundRobin, manifest.normalized);
+      const buffer = note && this.samples.buffer(id, note.zone.file);
+      return note && buffer ? { note, buffer } : null;
+    });
+    if (notes.some((n) => !n)) {
+      void this.samples.require(id, midis.flatMap((midi, i) => zonesForPitched(zones, 'sustain', midi, compVelocity(velocity, i)).map((z) => z.file)));
+      return false;
+    }
+    // Four or five piano notes add up: each sits about 10 dB under a solo note. Dampers fall in 0.3 s.
+    for (const n of notes) if (n) this.sample('comp', n.buffer, time, n.note.rate, n.note.gain * SAMPLE_TRIM.piano, duration, 0.3);
+    return true;
+  }
+
+  /** One hit of the jam drum kit: a recorded hit, or a gliding tone and/or a filtered noise burst. */
   drum(voice: string, velocity: number, time: number): void {
+    if (velocity > 0 && this.sampledDrum(voice, velocity, time)) return;
     const recipe = kitRecipe(voice, this.timbres.drums, drumRecipe);
     if (!recipe || velocity <= 0) return;
     const { tone, noise } = recipe;
@@ -170,10 +266,107 @@ export class WebAudioSink {
     }
   }
 
+  private sampledDrum(voice: string, velocity: number, time: number): boolean {
+    const id = this.sampleSets().drums;
+    const manifest = id ? this.samples.manifestNow(id) : undefined;
+    const recorded = drumVoiceFor(voice, velocity);
+    if (!id || !manifest || !recorded) return false;
+    const zones = manifest.zones as DrumZone[];
+    const hit = pickDrum(zones, recorded, velocity, this.roundRobin);
+    const buffer = hit && this.samples.buffer(id, hit.zone.file);
+    if (!hit || !buffer) {
+      void this.samples.require(id, zonesForDrum(zones, recorded, velocity).map((z) => z.file));
+      return false;
+    }
+    if (recorded === 'hhClosed' || recorded === 'hhPedal' || recorded === 'hhHalf') this.chokeHats(time);
+    const played = this.sample('drums', buffer, time, 1, hit.gain * SAMPLE_TRIM.drums, null, 0);
+    if (recorded === 'hhOpen') this.openHats.push(played);
+    return true;
+  }
+
+  /** Past MAX_VOICES sounding at `time`, the oldest fade out in 20 ms: long cymbal and piano tails never pile up. */
+  private limitVoices(time: number): void {
+    const sounding = this.voices.filter((v) => v.start <= time && v.end > time && !this.faded.has(v));
+    for (const voice of sounding.slice(0, Math.max(0, sounding.length - MAX_VOICES + 1))) {
+      this.faded.add(voice);
+      voice.gain.gain.cancelScheduledValues(time);
+      voice.gain.gain.setTargetAtTime(0, time, 0.02);
+    }
+  }
+
+  private chokeHats(time: number): void {
+    for (const hat of this.openHats) {
+      if (hat.start < time && hat.end > time) {
+        hat.gain.gain.cancelScheduledValues(time);
+        hat.gain.gain.setTargetAtTime(0, time, 0.02);
+      }
+    }
+    this.openHats = this.openHats.filter((h) => h.end > time && h.start >= time);
+  }
+
   /** A bass note in the chosen timbre. */
   bassNote(midi: number, duration: number, velocity: number, time: number): void {
+    if (this.sampledBass(midi, duration, velocity, time)) return;
     const recipe = BASS_RECIPES[this.timbres.bass];
     this.tone('bass', recipe, midiToHz(midi), time, duration, 0.55 * velocity * recipe.gain);
+  }
+
+  private sampledBass(midi: number, duration: number, velocity: number, time: number): boolean {
+    const id = this.sampleSets().bass;
+    const manifest = id ? this.samples.manifestNow(id) : undefined;
+    if (!id || !manifest) return false;
+    const zones = manifest.zones as PitchedZone[];
+    const articulation = bassArticulation(id, duration);
+    const note = pickPitched(zones, articulation, midi, velocity, this.roundRobin, manifest.normalized);
+    const buffer = note && this.samples.buffer(id, note.zone.file);
+    if (!note || !buffer) {
+      void this.samples.require(id, zonesForPitched(zones, articulation, midi, velocity).map((z) => z.file));
+      return false;
+    }
+    // With a pick the same strings sound brighter: a presence lift, no other change.
+    const bright = this.timbres.bass === 'pick';
+    this.sample('bass', buffer, time, note.rate, note.gain * SAMPLE_TRIM.bass, duration, 0.07, bright);
+    return true;
+  }
+
+  /**
+   * A recorded zone: played from its start at `rate`, held for `hold` seconds
+   * (null: to its natural end) and released over `release`.
+   */
+  private sample(bus: AudioBus, buffer: AudioBuffer, time: number, rate: number, peak: number, hold: number | null, release: number, bright = false): Voice {
+    this.limitVoices(time);
+    const source = this.ctx.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.value = rate;
+    const out = this.ctx.createGain();
+    out.gain.setValueAtTime(peak, time);
+    let end = time + buffer.duration / rate;
+    if (hold !== null && time + hold + release < end) {
+      out.gain.setValueAtTime(peak, time + hold);
+      out.gain.setTargetAtTime(0, time + hold, release / 4);
+      end = time + hold + release;
+    }
+    if (bright) {
+      const presence = this.ctx.createBiquadFilter();
+      presence.type = 'peaking';
+      presence.frequency.value = 2200;
+      presence.Q.value = 0.8;
+      presence.gain.value = 6;
+      source.connect(presence).connect(out);
+    } else {
+      source.connect(out);
+    }
+    out.connect(this.buses[bus]);
+    this.sampledCount[bus] += 1;
+    source.start(time);
+    source.stop(end + 0.01);
+    const voiceEntry: Voice = { start: time, end, gain: out, sources: [source] };
+    this.voices.push(voiceEntry);
+    source.onended = () => {
+      out.disconnect();
+      this.voices = this.voices.filter((v) => v !== voiceEntry);
+    };
+    return voiceEntry;
   }
 
   /**
@@ -306,6 +499,20 @@ export class WebAudioSink {
     };
   }
 }
+
+/**
+ * Level of the recorded sets against the synthesised ones they replace, so the
+ * mixer balance does not jump when the samples arrive. Measured on the bus
+ * meters: within 3 dB RMS of the synthesised sound, a little under it,
+ * because a recording has more dynamics (peaks) for the same loudness.
+ */
+const SAMPLE_TRIM = { drums: 1.2, bass: 1.4, piano: 1 } as const;
+
+/** Polyphony of the whole output; a jam at 240 bpm with sixteenth hats and piano tails stays well under it. */
+const MAX_VOICES = 64;
+
+/** In a chord the lowest note leads a little, as a pianist's left hand does. */
+const compVelocity = (velocity: number, index: number): number => velocity * (index === 0 ? 1 : 0.85);
 
 const WORKER_SOURCE = `
 let id = null;

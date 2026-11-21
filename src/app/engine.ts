@@ -3,11 +3,12 @@
  * Nothing else owns a clock: the UI reads positions derived from AudioContext time.
  */
 import { WebAudioSink, workerTimer } from '../audio/webAudioSink';
+import { SAMPLE_SETS } from '../audio/samplerMap';
 import { liveInput, refreshOutputLatency, setDeviceNotice } from '../audio/liveInput';
 import { sinkSelectionSupported } from '../audio/devices';
 import {
   PPQ, TimelineScheduler, accentLevel, barBeatAt, ticksPerBar, segmentAt, trackEventAt, type ChordChangePayload, type MetronomeEvent,
-  type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink,
+  type NotePayload, type ScheduledTrackEvent, type TimeConfig, type TimelineSink, type TrackPayload,
 } from '../timeline';
 import { manualCompDuration, manualCompMidis, buildTracks, type ModeTracks } from './tracks';
 import { fileOffsetAt, loopRegion, progressionLength, sectionSpans, stepAt } from '../jam';
@@ -113,6 +114,7 @@ class Engine {
       };
       this.audio = new WebAudioSink(this.ctx, secondsPerTick);
       this.applyVolumes(useApp.getState().settings);
+      void this.audio.prepare(this.jamPayloads);
     }
     return this.ctx;
   }
@@ -153,6 +155,29 @@ class Engine {
     // A new drum pattern, fill or edit comes in on the next bar line, like a drummer would.
     apply('drums', true);
     this.scheduler.setEnd(tracks.endTick, tracks.endTick === null ? null : () => this.stop(), 'chords');
+    // The sampled instruments load the zones these notes use before they are due.
+    this.jamPayloads = (['comp', 'bass', 'drums'] as const).flatMap((id) => tracks[id]?.events.map((e) => e.payload) ?? []);
+    void this.audio?.prepare(this.jamPayloads);
+  }
+
+  private jamPayloads: readonly TrackPayload[] = [];
+
+  /** Load the samples the current jam needs; resolves when they are decoded. For tests and diagnostics. */
+  async prepareSamples(): Promise<ReturnType<WebAudioSink['samples']['status']>[]> {
+    this.ensureAudio();
+    const audio = this.audio as WebAudioSink;
+    await audio.prepare(this.jamPayloads);
+    return SAMPLE_SETS.map((id) => audio.samples.status(id));
+  }
+
+  /** Which recorded set each jam channel plays with the chosen sounds (null: synthesised). */
+  sampleSets(): ReturnType<WebAudioSink['sampleSets']> | null {
+    return this.audio?.sampleSets() ?? null;
+  }
+
+  /** Recorded notes played per channel. */
+  sampledCount(): Readonly<Record<MixChannel, number>> | null {
+    return this.audio ? { ...this.audio.sampledCount } : null;
   }
 
   private onSettings(s: Settings, previous: Settings): void {

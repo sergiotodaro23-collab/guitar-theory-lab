@@ -1,0 +1,1092 @@
+{
+ "name": "Steinway B (VCSL, microfoni vicini)",
+ "kind": "pitched",
+ "normalized": true,
+ "source": "https://github.com/sgossner/VCSL",
+ "license": "CC0-1.0",
+ "author": "Versilian Studios, VCSL",
+ "id": "piano",
+ "commit": "c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e",
+ "zones": [
+  {
+   "articulation": "sustain",
+   "root": 22,
+   "file": "sustain_22_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 22,
+   "file": "sustain_22_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 22,
+   "file": "sustain_22_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 24,
+   "file": "sustain_24_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 24,
+   "file": "sustain_24_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 24,
+   "file": "sustain_24_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 26,
+   "file": "sustain_26_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 26,
+   "file": "sustain_26_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 26,
+   "file": "sustain_26_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 28,
+   "file": "sustain_28_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 28,
+   "file": "sustain_28_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 28,
+   "file": "sustain_28_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 30,
+   "file": "sustain_30_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 30,
+   "file": "sustain_30_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 30,
+   "file": "sustain_30_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 32,
+   "file": "sustain_32_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 32,
+   "file": "sustain_32_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 32,
+   "file": "sustain_32_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 34,
+   "file": "sustain_34_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 34,
+   "file": "sustain_34_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 34,
+   "file": "sustain_34_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 36,
+   "file": "sustain_36_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 36,
+   "file": "sustain_36_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 36,
+   "file": "sustain_36_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 38,
+   "file": "sustain_38_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 38,
+   "file": "sustain_38_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 38,
+   "file": "sustain_38_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 40,
+   "file": "sustain_40_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 40,
+   "file": "sustain_40_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 40,
+   "file": "sustain_40_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 42,
+   "file": "sustain_42_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 42,
+   "file": "sustain_42_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 42,
+   "file": "sustain_42_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 44,
+   "file": "sustain_44_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 44,
+   "file": "sustain_44_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 44,
+   "file": "sustain_44_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 46,
+   "file": "sustain_46_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 46,
+   "file": "sustain_46_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 46,
+   "file": "sustain_46_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 48,
+   "file": "sustain_48_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 48,
+   "file": "sustain_48_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 48,
+   "file": "sustain_48_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 50,
+   "file": "sustain_50_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 50,
+   "file": "sustain_50_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 50,
+   "file": "sustain_50_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 52,
+   "file": "sustain_52_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 52,
+   "file": "sustain_52_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 52,
+   "file": "sustain_52_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 54,
+   "file": "sustain_54_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 54,
+   "file": "sustain_54_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 54,
+   "file": "sustain_54_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 56,
+   "file": "sustain_56_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 56,
+   "file": "sustain_56_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 56,
+   "file": "sustain_56_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 58,
+   "file": "sustain_58_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 58,
+   "file": "sustain_58_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 58,
+   "file": "sustain_58_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 60,
+   "file": "sustain_60_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 60,
+   "file": "sustain_60_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 60,
+   "file": "sustain_60_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 62,
+   "file": "sustain_62_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 62,
+   "file": "sustain_62_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 62,
+   "file": "sustain_62_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 64,
+   "file": "sustain_64_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 64,
+   "file": "sustain_64_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 64,
+   "file": "sustain_64_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 66,
+   "file": "sustain_66_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 66,
+   "file": "sustain_66_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 66,
+   "file": "sustain_66_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 68,
+   "file": "sustain_68_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 68,
+   "file": "sustain_68_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 68,
+   "file": "sustain_68_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 70,
+   "file": "sustain_70_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 70,
+   "file": "sustain_70_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 70,
+   "file": "sustain_70_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 72,
+   "file": "sustain_72_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 72,
+   "file": "sustain_72_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 72,
+   "file": "sustain_72_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 74,
+   "file": "sustain_74_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 74,
+   "file": "sustain_74_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 74,
+   "file": "sustain_74_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 76,
+   "file": "sustain_76_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 76,
+   "file": "sustain_76_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 76,
+   "file": "sustain_76_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 78,
+   "file": "sustain_78_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 78,
+   "file": "sustain_78_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 78,
+   "file": "sustain_78_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 80,
+   "file": "sustain_80_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 80,
+   "file": "sustain_80_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 80,
+   "file": "sustain_80_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 82,
+   "file": "sustain_82_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 82,
+   "file": "sustain_82_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 82,
+   "file": "sustain_82_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 84,
+   "file": "sustain_84_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 84,
+   "file": "sustain_84_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 84,
+   "file": "sustain_84_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 86,
+   "file": "sustain_86_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 86,
+   "file": "sustain_86_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 86,
+   "file": "sustain_86_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 88,
+   "file": "sustain_88_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 88,
+   "file": "sustain_88_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 88,
+   "file": "sustain_88_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 90,
+   "file": "sustain_90_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 90,
+   "file": "sustain_90_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 90,
+   "file": "sustain_90_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 92,
+   "file": "sustain_92_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 92,
+   "file": "sustain_92_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 92,
+   "file": "sustain_92_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 94,
+   "file": "sustain_94_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 94,
+   "file": "sustain_94_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 94,
+   "file": "sustain_94_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 96,
+   "file": "sustain_96_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 96,
+   "file": "sustain_96_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 96,
+   "file": "sustain_96_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 98,
+   "file": "sustain_98_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 98,
+   "file": "sustain_98_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 98,
+   "file": "sustain_98_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 100,
+   "file": "sustain_100_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 42,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 100,
+   "file": "sustain_100_v2_r1.ogg",
+   "velLo": 43,
+   "velHi": 85,
+   "rr": 1,
+   "tune": 0.0
+  },
+  {
+   "articulation": "sustain",
+   "root": 100,
+   "file": "sustain_100_v3_r1.ogg",
+   "velLo": 86,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 0.0
+  }
+ ]
+}

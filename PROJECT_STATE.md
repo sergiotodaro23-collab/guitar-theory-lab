@@ -13,7 +13,11 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | Attività | Stato | PR / branch | Prove | Residui · prossima azione |
 |---|---|---|---|---|
 | Piano e tracker (D-56) | IMPLEMENTED | `claude/project-thread-inqgn7` | — | — |
-| M1 · Trasposizione relazionale (D-57) | PARTIAL | `claude/project-thread-inqgn7` | `exercises/relational.test.ts` (caso del proprietario, tutte le tonalità, fasi fisse), e2e in `routine-arpeggio.spec.ts` | Fatto: intervallo con la lettera, fasi «Segue»/«Fissa», modello d'esempio. Manca: relazioni personalizzate (M2) |
+| M1 · Trasposizione relazionale (D-57) | PARTIAL | #44 | `exercises/relational.test.ts` (caso del proprietario, tutte le tonalità, fasi fisse), e2e in `routine-arpeggio.spec.ts` | Fatto: intervallo con la lettera, fasi «Segue»/«Fissa», modello d'esempio. Manca: relazioni personalizzate (M2) |
+| M3 · Ritmo, articolazione, attacco (D-59) | PARTIAL | #45 | `exercises/rhythm.test.ts`, `timeline/countIn.test.ts`, `e2e/rhythm.spec.ts` | Manca il ritmo nell'Arpeggios Lab |
+| M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |
+| J2 · Campioni CC0 (D-60) | PARTIAL | `claude/project-thread-inqgn7` | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, copertura, intonazione) | Piano elettrico e organo ancora sintetizzati |
+| J1 · Sampler (D-60) | PARTIAL | `claude/project-thread-inqgn7` | `audio/samplerMap.test.ts`, `e2e/samples.spec.ts` | Budget CPU (J9); ascolto del proprietario |
 | Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 | 564 unit, 211 e2e | Scheda audio reale non provata (R10) |
 | A1 → M1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | #39 | `exercises/transpose.test.ts` | Raffinata da D-57 |
 | A2 → AR5 · Arpeggi: note mostrate = note suonate | IMPLEMENTED | #40 | `app/arpCoherence.test.ts` | — |
@@ -24,7 +28,7 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | F → R7 · NAM e TONE3000 (R5–R7) | MISSING, sospese (D-58) | — | — | Onda 5; il rig esistente resta intatto |
 | Q9 · PWA installabile (D-58) | MISSING | — | — | Onda 4 |
 
-Prossimo: M3 (modello ritmico, count-in) e M4 (corde e vincoli sul manico) sul binario motore; J1/J2 (sampler e licenze dei campioni) sul binario audio; poi le onde successive senza attese.
+Prossimo: M6 (quattro livelli) e M2 (relazioni personalizzate) sul binario motore; J3/J4 (batteria e basso con le nuove articolazioni) sul binario audio; poi le onde successive senza attese.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 

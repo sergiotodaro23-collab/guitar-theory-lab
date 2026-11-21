@@ -1,0 +1,1020 @@
+{
+ "name": "Meatbass (contrabbasso pizzicato)",
+ "kind": "pitched",
+ "normalized": false,
+ "source": "https://github.com/sfzinstruments/karoryfer.meatbass",
+ "license": "CC0-1.0",
+ "author": "Karoryfer Lecolds",
+ "id": "upright",
+ "commit": "ac9e859564bda286ab5ec672d00ff1aa2fef2895",
+ "zones": [
+  {
+   "articulation": "pizz",
+   "root": 21,
+   "file": "pizz_21_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": 15.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 21,
+   "file": "pizz_21_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": 15.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 21,
+   "file": "pizz_21_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": 15.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 21,
+   "file": "pizz_21_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": 15.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 21,
+   "file": "pizz_21_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": 15.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 21,
+   "file": "pizz_21_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": 15.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 21,
+   "file": "pizz_21_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 15.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 21,
+   "file": "pizz_21_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": 15.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 24,
+   "file": "pizz_24_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": -36.8
+  },
+  {
+   "articulation": "pizz",
+   "root": 24,
+   "file": "pizz_24_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": -36.8
+  },
+  {
+   "articulation": "pizz",
+   "root": 24,
+   "file": "pizz_24_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": -36.8
+  },
+  {
+   "articulation": "pizz",
+   "root": 24,
+   "file": "pizz_24_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": -36.8
+  },
+  {
+   "articulation": "pizz",
+   "root": 24,
+   "file": "pizz_24_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": -36.8
+  },
+  {
+   "articulation": "pizz",
+   "root": 24,
+   "file": "pizz_24_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": -36.8
+  },
+  {
+   "articulation": "pizz",
+   "root": 24,
+   "file": "pizz_24_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": -36.8
+  },
+  {
+   "articulation": "pizz",
+   "root": 24,
+   "file": "pizz_24_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": -36.8
+  },
+  {
+   "articulation": "pizz",
+   "root": 27,
+   "file": "pizz_27_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": -21.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 27,
+   "file": "pizz_27_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": -21.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 27,
+   "file": "pizz_27_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": -21.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 27,
+   "file": "pizz_27_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": -21.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 27,
+   "file": "pizz_27_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": -21.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 27,
+   "file": "pizz_27_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": -21.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 27,
+   "file": "pizz_27_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": -21.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 27,
+   "file": "pizz_27_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": -21.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 30,
+   "file": "pizz_30_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": 1.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 30,
+   "file": "pizz_30_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": 1.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 30,
+   "file": "pizz_30_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": 1.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 30,
+   "file": "pizz_30_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": 1.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 30,
+   "file": "pizz_30_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": 1.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 30,
+   "file": "pizz_30_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": 1.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 30,
+   "file": "pizz_30_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 1.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 30,
+   "file": "pizz_30_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": 1.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 33,
+   "file": "pizz_33_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 33,
+   "file": "pizz_33_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 33,
+   "file": "pizz_33_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 33,
+   "file": "pizz_33_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 33,
+   "file": "pizz_33_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 33,
+   "file": "pizz_33_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 33,
+   "file": "pizz_33_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 33,
+   "file": "pizz_33_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 36,
+   "file": "pizz_36_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": -11.3
+  },
+  {
+   "articulation": "pizz",
+   "root": 36,
+   "file": "pizz_36_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": -11.3
+  },
+  {
+   "articulation": "pizz",
+   "root": 36,
+   "file": "pizz_36_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": -11.3
+  },
+  {
+   "articulation": "pizz",
+   "root": 36,
+   "file": "pizz_36_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": -11.3
+  },
+  {
+   "articulation": "pizz",
+   "root": 36,
+   "file": "pizz_36_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": -11.3
+  },
+  {
+   "articulation": "pizz",
+   "root": 36,
+   "file": "pizz_36_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": -11.3
+  },
+  {
+   "articulation": "pizz",
+   "root": 36,
+   "file": "pizz_36_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": -11.3
+  },
+  {
+   "articulation": "pizz",
+   "root": 36,
+   "file": "pizz_36_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": -11.3
+  },
+  {
+   "articulation": "pizz",
+   "root": 39,
+   "file": "pizz_39_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": 7.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 39,
+   "file": "pizz_39_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": 7.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 39,
+   "file": "pizz_39_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": 7.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 39,
+   "file": "pizz_39_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": 7.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 39,
+   "file": "pizz_39_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": 7.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 39,
+   "file": "pizz_39_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": 7.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 39,
+   "file": "pizz_39_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 7.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 39,
+   "file": "pizz_39_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": 7.1
+  },
+  {
+   "articulation": "pizz",
+   "root": 42,
+   "file": "pizz_42_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 42,
+   "file": "pizz_42_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 42,
+   "file": "pizz_42_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 42,
+   "file": "pizz_42_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 42,
+   "file": "pizz_42_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 42,
+   "file": "pizz_42_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 42,
+   "file": "pizz_42_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 42,
+   "file": "pizz_42_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": 1.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 45,
+   "file": "pizz_45_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": -2.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 45,
+   "file": "pizz_45_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": -2.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 45,
+   "file": "pizz_45_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": -2.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 45,
+   "file": "pizz_45_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": -2.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 45,
+   "file": "pizz_45_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": -2.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 45,
+   "file": "pizz_45_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": -2.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 45,
+   "file": "pizz_45_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": -2.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 45,
+   "file": "pizz_45_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": -2.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 48,
+   "file": "pizz_48_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": 4.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 48,
+   "file": "pizz_48_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": 4.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 48,
+   "file": "pizz_48_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": 4.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 48,
+   "file": "pizz_48_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": 4.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 48,
+   "file": "pizz_48_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": 4.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 48,
+   "file": "pizz_48_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": 4.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 48,
+   "file": "pizz_48_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": 4.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 48,
+   "file": "pizz_48_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": 4.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 51,
+   "file": "pizz_51_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": -11.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 51,
+   "file": "pizz_51_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": -11.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 51,
+   "file": "pizz_51_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": -11.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 51,
+   "file": "pizz_51_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": -11.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 51,
+   "file": "pizz_51_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": -11.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 51,
+   "file": "pizz_51_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": -11.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 51,
+   "file": "pizz_51_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": -11.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 51,
+   "file": "pizz_51_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": -11.4
+  },
+  {
+   "articulation": "pizz",
+   "root": 54,
+   "file": "pizz_54_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": -3.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 54,
+   "file": "pizz_54_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": -3.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 54,
+   "file": "pizz_54_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": -3.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 54,
+   "file": "pizz_54_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": -3.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 54,
+   "file": "pizz_54_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": -3.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 54,
+   "file": "pizz_54_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": -3.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 54,
+   "file": "pizz_54_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": -3.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 54,
+   "file": "pizz_54_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": -3.2
+  },
+  {
+   "articulation": "pizz",
+   "root": 57,
+   "file": "pizz_57_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": -10.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 57,
+   "file": "pizz_57_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": -10.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 57,
+   "file": "pizz_57_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": -10.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 57,
+   "file": "pizz_57_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": -10.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 57,
+   "file": "pizz_57_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": -10.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 57,
+   "file": "pizz_57_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": -10.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 57,
+   "file": "pizz_57_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": -10.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 57,
+   "file": "pizz_57_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": -10.6
+  },
+  {
+   "articulation": "pizz",
+   "root": 60,
+   "file": "pizz_60_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1,
+   "tune": -14.0
+  },
+  {
+   "articulation": "pizz",
+   "root": 60,
+   "file": "pizz_60_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2,
+   "tune": -14.0
+  },
+  {
+   "articulation": "pizz",
+   "root": 60,
+   "file": "pizz_60_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1,
+   "tune": -14.0
+  },
+  {
+   "articulation": "pizz",
+   "root": 60,
+   "file": "pizz_60_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2,
+   "tune": -14.0
+  },
+  {
+   "articulation": "pizz",
+   "root": 60,
+   "file": "pizz_60_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1,
+   "tune": -14.0
+  },
+  {
+   "articulation": "pizz",
+   "root": 60,
+   "file": "pizz_60_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2,
+   "tune": -14.0
+  },
+  {
+   "articulation": "pizz",
+   "root": 60,
+   "file": "pizz_60_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1,
+   "tune": -14.0
+  },
+  {
+   "articulation": "pizz",
+   "root": 60,
+   "file": "pizz_60_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2,
+   "tune": -14.0
+  }
+ ]
+}
