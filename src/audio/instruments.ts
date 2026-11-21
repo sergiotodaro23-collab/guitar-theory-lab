@@ -25,12 +25,18 @@ const KIT_OVERRIDES: Readonly<Record<Exclude<DrumKitSound, 'acoustic'>, Readonly
     open: { tone: { type: 'square', from: 7400, to: 7200, decay: 0.2, level: 0.05 }, noise: { filter: 'highpass', frequency: 8500, q: 0.7, decay: 0.25, level: 0.35 }, bursts: [0] },
     clap: { tone: null, noise: { filter: 'bandpass', frequency: 1100, q: 1.1, decay: 0.16, level: 0.8 }, bursts: [0, 0.008, 0.017, 0.027] },
     tom: { tone: { type: 'sine', from: 220, to: 90, decay: 0.4, level: 0.85 }, noise: null, bursts: [0] },
+    // Drum-machine rimshot and crash: a short tonal click, a metallic noise tail.
+    cross: { tone: { type: 'square', from: 1800, to: 1800, decay: 0.025, level: 0.3 }, noise: { filter: 'bandpass', frequency: 3000, q: 4, decay: 0.02, level: 0.3 }, bursts: [0] },
+    crash: { tone: { type: 'square', from: 5200, to: 5000, decay: 0.6, level: 0.05 }, noise: { filter: 'highpass', frequency: 5000, q: 0.7, decay: 1.2, level: 0.38 }, bursts: [0] },
   },
   // Brushes: a swept snare, a soft felt kick, a quiet hi-hat foot.
   brushes: {
     kick: { tone: { type: 'sine', from: 110, to: 55, decay: 0.25, level: 0.7 }, noise: { filter: 'lowpass', frequency: 600, q: 0.7, decay: 0.02, level: 0.1 }, bursts: [0] },
     snare: { tone: null, noise: { filter: 'bandpass', frequency: 3200, q: 0.5, decay: 0.22, level: 0.45 }, bursts: [0, 0.03] },
     hat: { tone: null, noise: { filter: 'highpass', frequency: 6000, q: 0.5, decay: 0.03, level: 0.25 }, bursts: [0] },
+    pedal: { tone: null, noise: { filter: 'bandpass', frequency: 4800, q: 1, decay: 0.03, level: 0.22 }, bursts: [0] },
+    // Played with the brushes a crash is a soft wash, not a splash.
+    crash: { tone: null, noise: { filter: 'highpass', frequency: 4200, q: 0.5, decay: 1.1, level: 0.24 }, bursts: [0] },
     clap: { tone: null, noise: { filter: 'bandpass', frequency: 2400, q: 0.6, decay: 0.12, level: 0.35 }, bursts: [0] },
     tom: { tone: { type: 'sine', from: 160, to: 120, decay: 0.25, level: 0.55 }, noise: { filter: 'bandpass', frequency: 2500, q: 0.5, decay: 0.08, level: 0.15 }, bursts: [0] },
   },

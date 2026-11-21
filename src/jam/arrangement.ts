@@ -7,7 +7,7 @@
  */
 import type { BassPattern } from './bass';
 import { bassTrack } from './bass';
-import { drumTrack, type DrumKit } from './drums';
+import { drumTrack, landingBar, type DrumKit } from './drums';
 import { chordTrack, compTrack, progressionLength, withChord, type CompPattern, type Progression } from './progression';
 import { tryParseChord } from '../theory';
 import { ticksPerBar, type BassPayload, type ChordChangePayload, type CompPayload, type DrumPayload, type Meter, type Track, type TrackPayload } from '../timeline';
@@ -188,8 +188,11 @@ export function arrangementTracks(a: ArrangementInput): ArrangementTracks {
   const bar = ticksPerBar(a.meter);
   const { offsets } = songChords(a.progression, a.sections);
   const events = { chords: [] as { tick: number; payload: ChordChangePayload }[], comp: [] as { tick: number; payload: CompPayload }[], bass: [] as { tick: number; payload: BassPayload }[], drums: [] as { tick: number; payload: DrumPayload }[] };
-  for (const span of spans) {
+  for (const [index, span] of spans.entries()) {
     const s = span.section;
+    // The section before (the last one, when the song loops) ended on a fill.
+    const before = index > 0 ? spans[index - 1]?.section : a.loop ? spans.at(-1)?.section : undefined;
+    const landing = !!before && before.drums && before.fill;
     const scale = DYNAMICS[s.dynamics].scale;
     const progression = sectionProgression(s, a.progression);
     const offset = offsets.get(s.id) ?? 0;
@@ -205,7 +208,15 @@ export function arrangementTracks(a: ArrangementInput): ArrangementTracks {
       const groove = drumTrack(a.kit, s.pattern, a.meter, 0);
       const fillBar = drumTrack({ ...a.kit, patterns: [a.kit.fill, a.kit.fill, a.kit.fill, a.kit.fill] }, 0, a.meter, 0);
       const fillFrom = s.fill ? span.lengthTicks - bar : span.lengthTicks;
-      events.drums.push(...place(groove, span.tick, fillFrom, (p) => ({ ...p, velocity: p.velocity * scale })));
+      // After a fill the section opens on a crash (J3): its first bar is the landing bar.
+      const main = a.kit.patterns[s.pattern] ?? a.kit.patterns[0];
+      const landingFrom = landing && fillFrom >= bar ? bar : 0;
+      if (landingFrom) {
+        const land = landingBar(main);
+        const first = drumTrack({ ...a.kit, patterns: [land, land, land, land] }, 0, a.meter, 0);
+        events.drums.push(...place(first, span.tick, bar, (p) => ({ ...p, velocity: p.velocity * scale })));
+      }
+      events.drums.push(...place(groove, span.tick + landingFrom, fillFrom - landingFrom, (p) => ({ ...p, velocity: p.velocity * scale })));
       if (s.fill) events.drums.push(...place(fillBar, span.tick + fillFrom, bar, (p) => ({ ...p, velocity: p.velocity * scale })));
     }
   }
