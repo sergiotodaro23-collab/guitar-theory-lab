@@ -45,6 +45,13 @@ Lavoro in parallelo (dal 21 novembre 2026, approvato dal proprietario), un threa
 
 Prossimo sul binario motore e Jam: humanization deterministica (J6), voice leading del comping (J5, con HA3), M7 e M8.
 
+**In pausa dal 22 novembre 2026** (decisione del proprietario). Cosa resta su Harmony Lab e Arpeggios Lab:
+- AR6: ritmiche per nota; editing nota per nota e percorso a mano sulla progressione (oggi solo su un accordo singolo).
+- AR5: percorsi continui su più ottave lungo una progressione, diteggiatura diversa tra salita e discesa sulla progressione.
+- HA2: accordi estesi 9/11/13 e alterazioni con formula libera; HA6: legenda che distingue note suonate, corde e gradi.
+- HA4: sostituzioni diatoniche presenti nel motore ma non ancora nel pannello.
+- Ascolto del proprietario su voicing, comping e linguaggi degli arpeggi: niente è stato verificato a orecchio, solo con test.
+
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 
 ## Verificato in questa sessione
