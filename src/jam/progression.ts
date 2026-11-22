@@ -5,6 +5,7 @@
 import { mod, noteName, parseChord, parseDegree, parseNote, spellDegree, transposeNote, tryParseChord, type Chord, type ScaleId } from '../theory';
 import { ticksPerBar, ticksPerBeat, type ChordChangePayload, type CompPayload, type Meter, type Track } from '../timeline';
 import { guideTones } from '../harmony';
+import { compBass, voiceLead } from './voiceLeading';
 
 export interface ChordDuration {
   readonly value: number;
@@ -170,8 +171,9 @@ export function compTrack(p: Progression, meter: Meter, pattern: CompPattern, lo
   const bar = ticksPerBar(meter);
   const patternTicks = patternBeats(pattern, meter.beatsPerBar).map((b) => b * beat);
   const spans = chordSpans(p, meter);
-  const voicings: (readonly number[])[] = [];
-  spans.forEach((span, i) => voicings.push(fixed?.[i] ?? voiceChord(span.chord, voicings[i - 1])));
+  // The progression is voiced as one line (J5): least motion, common tones held, the loop back included.
+  const lead = voiceLead(spans.map((s) => s.chord), loop, fixed?.map((f) => (f ? f.slice(1) : null)));
+  const voicings: (readonly number[])[] = spans.map((span, i) => fixed?.[i] ?? [compBass(span.chord), ...(lead[i] ?? [])]);
 
   type Hit = { tick: number; chord: number; anticipated: boolean };
   const hits: Hit[] = [];

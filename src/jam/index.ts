@@ -5,3 +5,4 @@ export * from './genres';
 export * from './arrangement';
 export * from './backing';
 export * from './humanize';
+export * from './voiceLeading';
