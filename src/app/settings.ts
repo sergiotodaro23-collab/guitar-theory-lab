@@ -1,6 +1,6 @@
 /** Everything the user can configure and save. Pure and framework-free. */
-import { VOICING_TYPES, findStringSet, type VoicingType, CAGED_FORMS, STANDARD_TUNING, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote } from '../fretboard';
-import { ARP_PATTERNS, UPPER_STRUCTURES, parsePermutation, patternLine, type ArpPattern, type UpperStructure, parseLevel, type ExerciseLevel, ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, normalizeStrings, onStrings, type StringNumber, isRhythmError, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
+import { VOICING_TYPES, findStringSet, type VoicingType, CAGED_FORMS, STANDARD_TUNING, cagedPosition, threeNpsPosition, allFretNotes, DEFAULT_FRETS, type CagedForm, type FretNote, type FingeredNote } from '../fretboard';
+import { ARP_PATTERNS, OVERLAYS, DEFAULT_ERGO, applyEdits, fingerLine, lineKey, parseRoute, type ArpEdit, type ErgoRules, type Overlay, UPPER_STRUCTURES, parsePermutation, patternLine, type ArpPattern, type UpperStructure, parseLevel, type ExerciseLevel, ARP_SHAPES, ARP_SPAN, ROUTINE_TEMPLATES, normalizeStrings, onStrings, type StringNumber, isRhythmError, parseRhythm, uniformRhythm, type Articulation, type RhythmStep, arpeggioPlan, generateSequence, nearestCagedForm, parseCustomPattern, resolvePhase, sanitizeRoutine, type ArpOctaves, type ArpPlan, type ArpReturn, type ArpShape, type Direction, type ExerciseKind, type ExerciseSpec, type IntervalNumber, type PairMotion, type Routine, type ArpDirection, type ArpLink, type ArpeggioSpec, type ShapeChoice, type SweepStrings } from '../exercises';
 import { HOME_MODES, type AvoidProfile } from '../harmony';
 import { CLICK_SOUNDS, type ClickSound } from '../audio/clickSounds';
 import { BASS_TIMBRES, COMP_TIMBRES, DRUM_KIT_SOUNDS, type BassTimbre, type CompTimbre, type DrumKitSound } from '../audio/instruments';
@@ -199,6 +199,16 @@ export interface ArpeggioSettings {
   readonly arpUpper: UpperStructure;
   /** Notes per irregular group; the first of each group is accented. */
   readonly arpGroup: 3 | 4 | 5 | 7;
+  /** Overlay (AR4): the seventh chord from the third, fifth or seventh, or the tritone substitute. */
+  readonly arpOverlay: Overlay;
+  /** Note-by-note edits (AR6), valid for the line whose signature is `arpEditKey`. */
+  readonly arpEdits: readonly ArpEdit[];
+  readonly arpEditKey: string;
+  /** A route written by hand (AR6): string/fret, replaces the engine's line on a single chord. */
+  readonly arpRouteOn: boolean;
+  readonly arpRouteText: string;
+  /** Ergonomic limits the line is checked against (AR6). */
+  readonly arpErgo: ErgoRules;
 }
 
 /** Two permanent looks over the same state: Semplificata (the console) and Studio (the workbench). */
@@ -337,6 +347,12 @@ export const DEFAULT_SETTINGS: Settings = {
   arpPerm: '1 5 3 7',
   arpUpper: 'II',
   arpGroup: 3,
+  arpOverlay: '3',
+  arpEdits: [],
+  arpEditKey: '',
+  arpRouteOn: false,
+  arpRouteText: '',
+  arpErgo: DEFAULT_ERGO,
 };
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -479,6 +495,12 @@ export function sanitizeSettings(raw: unknown): Settings {
     arpPerm: typeof r.arpPerm === 'string' && parsePermutation(r.arpPerm) ? r.arpPerm.slice(0, 40) : d.arpPerm,
     arpUpper: oneOf(r.arpUpper, UPPER_STRUCTURES, d.arpUpper),
     arpGroup: oneOf(r.arpGroup, [3, 4, 5, 7] as const, d.arpGroup),
+    arpOverlay: oneOf(r.arpOverlay, OVERLAYS, d.arpOverlay),
+    arpEdits: sanitizeEdits(r.arpEdits),
+    arpEditKey: typeof r.arpEditKey === 'string' ? r.arpEditKey.slice(0, 800) : d.arpEditKey,
+    arpRouteOn: typeof r.arpRouteOn === 'boolean' ? r.arpRouteOn : d.arpRouteOn,
+    arpRouteText: typeof r.arpRouteText === 'string' ? r.arpRouteText.slice(0, 400) : d.arpRouteText,
+    arpErgo: sanitizeErgo(r.arpErgo),
   };
 }
 
@@ -543,7 +565,7 @@ export const shapeChoiceOf = (s: ArpeggioSettings): ShapeChoice => ({
  * One chord's arpeggio plan. On a progression a CAGED shape picks, for each
  * chord, the form nearest the chosen area of the neck, so the hand stays put.
  */
-export function arpeggioPlanOf(chord: Chord | null, s: ArpeggioSettings & Pick<StudySettings, 'neckTuning' | 'customTuning'>): ArpPlan | null {
+function enginePlanOf(chord: Chord | null, s: ArpeggioSettings & Pick<StudySettings, 'neckTuning' | 'customTuning'>): ArpPlan | null {
   if (!chord) return null;
   const choice = shapeChoiceOf(s);
   const form = s.arpSource === 'progression' && s.arpShape === 'caged' ? nearestCagedForm(chord, s.arpLow + 2) : s.arpForm;
@@ -551,10 +573,61 @@ export function arpeggioPlanOf(chord: Chord | null, s: ArpeggioSettings & Pick<S
   if (s.arpPattern === 'none' || !plan.playable) return plan;
   // A pattern (AR2–AR4) plays its own line over the notes the shape offers: drawn exactly, fingered by the board.
   const line = patternLine(chord, plan.notes, {
-    pattern: s.arpPattern, perm: parsePermutation(s.arpPerm) ?? [1, 3, 5, 7], upper: s.arpUpper, group: s.arpGroup,
+    pattern: s.arpPattern, perm: parsePermutation(s.arpPerm) ?? [1, 3, 5, 7], upper: s.arpUpper, overlay: s.arpOverlay, group: s.arpGroup,
     direction: s.arpDirection, scale: buildScale(chord.rootName, defaultScaleFor(chord)), tuning: tuningOf(s),
   });
   return { ...plan, notes: line.notes, sequence: line.sequence, fingers: null, playable: line.sequence.length > 0, route: true };
+}
+
+/** The plan as the engine builds it, then (on a single chord) the user's own route or note edits (AR6). */
+export function arpeggioPlanOf(chord: Chord | null, s: ArpeggioSettings & Pick<StudySettings, 'neckTuning' | 'customTuning'>): ArpPlan | null {
+  const plan = enginePlanOf(chord, s);
+  if (!plan || s.arpSource !== 'chord') return plan;
+  const tuning = tuningOf(s);
+  if (s.arpRouteOn) {
+    const route = parseRoute(s.arpRouteText, tuning).notes;
+    return route.length ? planFromLine(route) : { ...plan, notes: [], sequence: [], fingers: null, playable: false, route: true };
+  }
+  if (!s.arpEdits.length || !plan.playable || s.arpEditKey !== lineKey(plan.sequence)) return plan;
+  return planFromLine(applyEdits(plan.sequence, s.arpEdits, tuning));
+}
+
+/** A played line as a plan: draw exactly its notes, fingered along the line. */
+function planFromLine(line: readonly FretNote[]): ArpPlan {
+  const fingered = fingerLine(line);
+  const drawn = new Map<string, FingeredNote>();
+  for (const n of fingered.notes) if (!drawn.has(`${n.string}:${n.fret}`)) drawn.set(`${n.string}:${n.fret}`, n);
+  const notes = [...drawn.values()];
+  return { notes, sequence: line, fingers: notes, shifts: fingered.shifts.length, playable: line.length > 0, route: true };
+}
+
+/** The line the engine gives before any edit: what the edits are made on. */
+export const engineArpeggioLine = (chord: Chord | null, s: ArpeggioSettings & Pick<StudySettings, 'neckTuning' | 'customTuning'>): readonly FretNote[] =>
+  enginePlanOf(chord, s)?.sequence ?? [];
+
+function sanitizeEdits(raw: unknown): readonly ArpEdit[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ArpEdit[] = [];
+  for (const e of raw.slice(0, 128)) {
+    if (!e || typeof e !== 'object') continue;
+    const { index, to } = e as { index?: unknown; to?: unknown };
+    if (!Number.isInteger(index) || (index as number) < 0) continue;
+    if (to === null) { out.push({ index: index as number, to: null }); continue; }
+    const t = to as { string?: unknown; fret?: unknown } | undefined;
+    if (t && Number.isInteger(t.string) && Number.isInteger(t.fret)) out.push({ index: index as number, to: { string: t.string as number, fret: t.fret as number } });
+  }
+  return out;
+}
+
+function sanitizeErgo(raw: unknown): ErgoRules {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Partial<Record<keyof ErgoRules, unknown>>;
+  const int = (v: unknown, lo: number, hi: number, fallback: number) => (Number.isInteger(v) && (v as number) >= lo && (v as number) <= hi ? (v as number) : fallback);
+  return {
+    maxStretch: int(r.maxStretch, 2, 6, DEFAULT_ERGO.maxStretch),
+    maxJump: int(r.maxJump, 2, 12, DEFAULT_ERGO.maxJump),
+    maxShifts: int(r.maxShifts, 0, 12, DEFAULT_ERGO.maxShifts),
+    allowOpen: typeof r.allowOpen === 'boolean' ? r.allowOpen : DEFAULT_ERGO.allowOpen,
+  };
 }
 
 /** What the board draws for the arpeggio. */

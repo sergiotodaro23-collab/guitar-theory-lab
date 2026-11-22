@@ -78,9 +78,9 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | AR1 | Principiante: triadi, rivolti, 1–2 ottave, posizioni semplici | IMPLEMENTED (6 preset, D-68) | — | Preset dedicati |
 | AR2 | Intermedio: quadriadi, CAGED, permutazioni 1-3-5-7 / 1-5-3-7 ecc., string skipping, salti d'ottava, arpeggi diatonici, collegamenti | IMPLEMENTED (D-68: permutazioni per gradi con l'8 d'ottava, `exercises/arpPatterns.test.ts`) | M5 | Permutazioni generate, test |
 | AR3 | Avanzato: 9/11/13, enclosure, cromatismi, sweep/economy, upper structures, triad pairs, voice leading, note target | IMPLEMENTED (D-68; cromatismi solo come enclosure) | AR2, HA2 | Enclosure e triad pairs da manuale |
-| AR4 | Esperto: sovrapposizioni, sostituzioni, quartali, tensioni alterate, poliritmie (raggruppamenti contro la metrica), pattern irregolari, intera tastiera | PARTIAL (D-68: gruppi di 3, 4, 5, 7 con accento, upper structure alterate; mancano quartali e sovrapposizioni come arpeggio) | AR3, M3 | Gruppi di 3 su 4/4 con accenti corretti |
+| AR4 | Esperto: sovrapposizioni, sostituzioni, quartali, tensioni alterate, poliritmie (raggruppamenti contro la metrica), pattern irregolari, intera tastiera | IMPLEMENTED (D-68: gruppi di 3, 4, 5, 7 con accento, upper structure alterate; D-69: quarte diatoniche, sovrapposizioni dalla terza, quinta, settima, sostituto di tritono) | AR3, M3 | Gruppi di 3 su 4/4 con accenti corretti |
 | AR5 | Percorsi continui su più ottave e posizioni, diteggiatura e rivolto diversi tra salita e discesa | PARTIAL | M4 | Già parziale (D-27): estendere a percorsi su progressione |
-| AR6 | Editing nota per nota, vincoli ergonomici, ritmiche, percorsi manuali | MISSING | M3, M4 | Modifica di una nota senza rompere il resto; validazione |
+| AR6 | Editing nota per nota, vincoli ergonomici, ritmiche, percorsi manuali | PARTIAL (D-69: editing per nota, percorso a mano, controllo ergonomico su un accordo singolo; mancano ritmiche per nota e l'editing sulla progressione) | M3, M4 | Modifica di una nota senza rompere il resto; validazione |
 | AR7 | Biblioteca di preset per i quattro livelli | IMPLEMENTED (24 preset, 6 per livello, `app/arpeggioPresets.ts`) | AR1–AR6 | Almeno 6 preset per livello |
 
 ### F3 · Jam Studio (priorità 3)
@@ -185,3 +185,4 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-67) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
 | 21/11/2026 | HA3–HA5 nel laboratorio · voicing del motore su tastiera e comping, armonizza la scala, progressioni funzionali con tritoni, 24 preset su quattro livelli (D-67) | #50 | unit + e2e in Studio e Semplificata; ascolto del proprietario da fare |
 | 21/11/2026 | AR2–AR4, AR7 · permutazioni, salti d'ottava, enclosure, triad pairs, upper structures, gruppi irregolari accentati; 24 preset su quattro livelli (D-68) | #50 | unit su casi da manuale, e2e in Studio e Semplificata |
+| 22/11/2026 | AR4 · quarte diatoniche e sovrapposizioni; AR6 · editing nota per nota, percorso a mano, vincoli ergonomici; 7 preset (D-69) | questo branch | unit su casi da manuale (Do Fa Si Mi, Em7 su Cmaj7, Db7 su G7), e2e in Studio e Semplificata |

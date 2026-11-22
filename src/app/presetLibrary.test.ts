@@ -39,7 +39,7 @@ describe('preset library', () => {
     expect(filterLibrary(library, { ...NO_FILTER, lab: 'fretboard' }).every((e) => e.lab === 'fretboard')).toBe(true);
     expect(filterLibrary(library, { ...NO_FILTER, lab: 'fretboard', type: 'Intervalli', level: 'Principiante' }).map((e) => e.id)).toEqual(['thirds-c']);
     expect(filterLibrary(starters, { ...NO_FILTER, key: 'A' }).map((e) => e.id)).toEqual(['sixths-harmonic', 'blues-a']);
-    expect(filterLibrary(library, { ...NO_FILTER, query: 'DORICO quarte' }).map((e) => e.id)).toEqual(['fourths-dorian']);
+    expect(filterLibrary(starters, { ...NO_FILTER, query: 'DORICO quarte' }).map((e) => e.id)).toEqual(['fourths-dorian']);
     expect(filterLibrary(library, { ...NO_FILTER, query: 'ii-v-i' })).toHaveLength(0);
     expect(filterLibrary(starters, { ...NO_FILTER, query: 'ii–V–I' }).map((e) => e.id)).toEqual(['arp-251-connected', 'guide-251', 'thirds-251']);
     expect(filterLibrary(library, { ...NO_FILTER, lab: 'harmony', level: 'Esperto', query: 'tritono' }).map((e) => e.id)).toEqual(['ha-tritone-eb']);

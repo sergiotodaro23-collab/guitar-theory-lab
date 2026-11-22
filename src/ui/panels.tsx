@@ -18,6 +18,7 @@ import { voicingKey } from '../fretboard';
 import { ChordDiagram } from '../viz/ChordDiagram';
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
 import { VoicingPanel } from './VoicingPanel';
+import { ArpEditor } from './ArpEditor';
 import { ArpPatternControls } from './ArpPatternControls';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
 import { RhythmFields } from './RhythmFields';
@@ -643,6 +644,7 @@ export function ArpeggioPanel({ part = 'all' }: { readonly part?: 'all' | 'shape
         </Field>
       ) : null}
       <ArpPatternControls />
+      <ArpEditor />
       </>
       ) : null}
     </Panel>
