@@ -4,7 +4,7 @@
  */
 import type { Marker, MarkerRole } from './markers';
 
-export type LegendKind = MarkerRole | 'guide' | 'arpeggio' | 'voicing' | 'target-now' | 'target-next' | 'played' | 'live-likely' | 'live-possible';
+export type LegendKind = MarkerRole | 'chord-root' | 'guide' | 'arpeggio' | 'voicing' | 'target-now' | 'target-next' | 'played' | 'live-likely' | 'live-possible';
 
 export interface LegendEntry {
   readonly kind: LegendKind;
@@ -14,9 +14,10 @@ export interface LegendEntry {
 const ORDER: readonly LegendEntry[] = [
   { kind: 'root', label: 'Tonica' },
   { kind: 'scale', label: 'Nota della scala' },
+  { kind: 'chord-root', label: "Fondamentale dell'accordo" },
   { kind: 'guide', label: 'Guide tone (3ª e 7ª)' },
   { kind: 'chord-tone', label: "Nota dell'accordo" },
-  { kind: 'arpeggio', label: "Nota dell'arpeggio (triangolo)" },
+  { kind: 'arpeggio', label: "Nota dell'arpeggio" },
   { kind: 'tension', label: 'Tensione' },
   { kind: 'avoid', label: 'Avoid contestuale' },
   { kind: 'outside', label: 'Nota esterna' },
@@ -32,7 +33,8 @@ const ORDER: readonly LegendEntry[] = [
 export function legendEntries(markers: readonly Marker[], options: { readonly played: boolean; readonly live?: { readonly likely: boolean; readonly others: boolean } }): readonly LegendEntry[] {
   const present = new Set<LegendKind>();
   for (const m of markers) {
-    present.add(m.role === 'chord-tone' && m.isGuide ? 'guide' : m.role);
+    if (m.role === 'chord-tone' && m.fn?.degree === '1') present.add('chord-root');
+    else present.add(m.role === 'chord-tone' && m.isGuide ? 'guide' : m.role);
     if (m.inVoicing) present.add('voicing');
     if (m.arpeggio) present.add('arpeggio');
     if (m.target === 'now') present.add('target-now');

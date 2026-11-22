@@ -117,8 +117,8 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
 | N1 | Pannello Note solo consultazione: nessun input, gain, calibrazione o controllo ampli | PARTIAL | R2 | e2e: nessun controllo audio nel pannello |
-| N2 | Legenda geometrica condivisa: cerchi, triangoli, rombi, quadrati per ruolo (scala, arpeggio, accordo, target, intervalli); A3 residuo | PARTIAL | — | Unit su `viz/legend`; screenshot |
-| N3 | Colori personalizzabili | PARTIAL | N2 | Salvati e applicati ovunque |
+| N2 | Legenda geometrica condivisa: cerchi, triangoli, rombi, quadrati per ruolo (scala, arpeggio, accordo, target, intervalli); A3 residuo | IMPLEMENTED (D-69; restano forme per intervalli e note sovrapposte composte, con FB3) | — | Unit su `viz/glyphs`, `viz/legend`; e2e `legend-geometry.spec.ts`; screenshot |
+| N3 | Colori personalizzabili | IMPLEMENTED (D-69; la scelta si fa solo dalla Studio, la Semplificata la applica) | N2 | Salvati e applicati ovunque |
 | N4 | Seconda tastiera | PARTIAL | N2 | Segue il prossimo accordo o una scelta |
 | N5 | Default: modo della scala di riferimento pertinente all'accordo in esecuzione; alternative, sovrapposizioni, scale compatibili | PARTIAL | HA1 | G7 in Do mostra Sol misolidio; alternative selezionabili |
 | N6 | Ogni cambio armonico aggiorna tutte le viste rispettando le relazioni dell'esercizio (M1, M2) | PARTIAL | M1, N5 | e2e in riproduzione |
@@ -187,3 +187,4 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-67) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
 | 21/11/2026 | HA3–HA5 nel laboratorio · voicing del motore su tastiera e comping, armonizza la scala, progressioni funzionali con tritoni, 24 preset su quattro livelli (D-67) | #50 | unit + e2e in Studio e Semplificata; ascolto del proprietario da fare |
 | 21/11/2026 | AR2–AR4, AR7 · permutazioni, salti d'ottava, enclosure, triad pairs, upper structures, gruppi irregolari accentati; 24 preset su quattro livelli (D-68) | #50 | unit su casi da manuale, e2e in Studio e Semplificata |
+| 21/11/2026 | N2 · legenda geometrica condivisa con la tastiera; N3 · colori delle note personalizzabili (D-69) | #51 | unit + e2e, screenshot a 1440 × 900 e 1280 × 720 |

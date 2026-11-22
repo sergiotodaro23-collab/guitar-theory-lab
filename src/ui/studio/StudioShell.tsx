@@ -10,7 +10,9 @@
  * notebook from whose bottom edge the devices rise. A presentation of the
  * same store and engine as Semplificata: nothing musical is decided here.
  */
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
+import { useApp } from '../../app/store';
+import { markerColorVars } from '../../viz/palette';
 import { MixerShown } from '../panels';
 import { Console } from './v57/Console';
 import { FretboardPanel } from './v57/FretboardPanel';
@@ -52,6 +54,9 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
   const [mixRef, mix] = useBox<HTMLDivElement>();
   const [legendHost, setLegendHost] = useState<HTMLElement | null>(null);
   const [dragging, setDragging] = useState(false);
+  // N3: customized marker colours as custom properties on the shell: the neck, the secondary neck and the legend all read them.
+  const markerColors = useApp((s) => s.settings.markerColors);
+  const colorVars = useMemo(() => markerColorVars(markerColors, 'studio') as CSSProperties, [markerColors]);
   // Leaving Studio closes its panels and drawer, so coming back starts clean (no exit animation on mount).
   useEffect(() => () => { useStudioUi.setState({ settingsOpen: false, vizOpen: false, metroOpen: false, device: null, launcher: null }); }, []);
   const drag = useRef<{ y: number; h: number } | null>(null);
@@ -89,7 +94,7 @@ export function StudioShell({ studioAllowed }: { readonly studioAllowed: boolean
 
   return (
     <MixerShown.Provider value>
-      <div className="v57 v6" data-testid="studio" data-drag={dragging ? '1' : '0'}>
+      <div className="v57 v6" data-testid="studio" data-drag={dragging ? '1' : '0'} style={colorVars}>
         <Header />
         <div className="v57-desk">
           <Rail studioAllowed={studioAllowed} />

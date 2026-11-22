@@ -12,6 +12,7 @@ import { DrumPanel } from '../../DrumMachine';
 import { InputPanels } from '../../LivePanels';
 import { ArpeggioPanel, ChordsPanel, ExercisePanel, HarmonyPanel, JamPanels, ScalePanel } from '../../panels';
 import { TutorPhone } from '../TutorPhone';
+import { MarkerColorsPanel } from '../../MarkerColors';
 import { DeviceDrawer } from './DeviceDrawer';
 import { TUNER, TunerDevice } from './devices';
 import { Mixer } from '../v6/Mixer';
@@ -33,7 +34,11 @@ function LegendPage({ onLegendHost }: { readonly onLegendHost: (el: HTMLElement 
       <section className="v57-sc v57-sc-wide" aria-label="Legenda">
         <h4 className="v57-sh">Legenda · solo ciò che è sulla tastiera ora</h4>
         <div ref={onLegendHost} className="v57-legend" data-testid="notebook-legend" />
-        <p className="v57-note">Le voci compaiono e scompaiono con ciò che la tastiera disegna: forme e colori, mai solo il colore. Le preferenze di visualizzazione sono nel menu Visualizzazione sopra la tastiera.</p>
+        <p className="v57-note">Le voci compaiono e scompaiono con ciò che la tastiera disegna. Ogni ruolo ha la sua forma (cerchio, quadrato, rombo, triangolo), così si legge anche senza i colori. Le preferenze di visualizzazione sono nel menu Visualizzazione sopra la tastiera.</p>
+      </section>
+      <section className="v57-sc" aria-label="Colori delle note">
+        <h4 className="v57-sh">Colori delle note</h4>
+        <MarkerColorsPanel look="studio" />
       </section>
       <section className="v57-sc v57-sc-tutor" aria-label="Tutor">
         <TutorPhone />

@@ -189,7 +189,11 @@ html .v57 .v57-lctl-knob .accent-toggle[aria-expanded='true'] { color: #2a1606; 
 .v57 .role-scale .shape { fill: var(--marker-scale); stroke: #0e2f63; }
 .v57 .role-chord-tone .shape { fill: var(--marker-chord); stroke: #0b3d19; }
 .v57 .role-tension .shape { fill: var(--marker-tension); stroke: #3a1660; }
-.v57 .role-root .marker-label, .v57 .role-scale .marker-label, .v57 .role-chord-tone .marker-label, .v57 .role-tension .marker-label { fill: #14100a; }
+/* Label ink: dark by default; a customized colour (N3, viz/palette) brings the ink that reads on it. */
+.v57 .role-root .marker-label { fill: var(--ink-root, #14100a); }
+.v57 .role-scale .marker-label { fill: var(--ink-scale, #14100a); }
+.v57 .role-chord-tone .marker-label { fill: var(--ink-chord, #14100a); }
+.v57 .role-tension .marker-label { fill: var(--ink-tension, #14100a); }
 .v57 .guide-ring { stroke: #0b3d19; stroke-width: 2.6; }
 .v57 .pip-bar { stroke: rgba(20, 16, 10, .55); stroke-width: .6; }
 /* display preferences (never computational) */
