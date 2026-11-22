@@ -216,7 +216,8 @@ export function arrangementTracks(a: ArrangementInput): ArrangementTracks {
         const first = drumTrack({ ...a.kit, patterns: [land, land, land, land] }, 0, a.meter, 0);
         events.drums.push(...place(first, span.tick, bar, (p) => ({ ...p, velocity: p.velocity * scale })));
       }
-      events.drums.push(...place(groove, span.tick + landingFrom, fillFrom - landingFrom, (p) => ({ ...p, velocity: p.velocity * scale })));
+      // The groove keeps its own bar count from the section start (a two-bar pattern stays in step); the landing bar replaces its first bar.
+      events.drums.push(...place(groove, span.tick, fillFrom, (p) => ({ ...p, velocity: p.velocity * scale })).filter((e) => e.tick >= span.tick + landingFrom));
       if (s.fill) events.drums.push(...place(fillBar, span.tick + fillFrom, bar, (p) => ({ ...p, velocity: p.velocity * scale })));
     }
   }

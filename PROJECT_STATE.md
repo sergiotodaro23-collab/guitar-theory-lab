@@ -15,14 +15,14 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | Piano e tracker (D-56) | IMPLEMENTED | `claude/project-thread-inqgn7` | — | — |
 | M1 · Trasposizione relazionale (D-57) | IMPLEMENTED | #44 | `exercises/relational.test.ts` (caso del proprietario, tutte le tonalità, fasi fisse), e2e in `routine-arpeggio.spec.ts` | Fatto: intervallo con la lettera, fasi «Segue»/«Fissa», modello d'esempio. Relazioni personalizzate in M2 |
 | M5 · Sequenze generative (D-63) | IMPLEMENTED | #49 | `exercises/sequences.test.ts`, `e2e/sequences.spec.ts` | — |
-| HA1, HA3, HA4 · Armonizzazioni, voicing su gruppi di corde, progressioni (D-65) | IMPLEMENTED | #50 | `harmony/harmonize.test.ts`, `fretboard/stringVoicings.test.ts` | Sostituzioni diatoniche solo nel motore |
-| HA5 · Voicing nel laboratorio e 24 preset (D-65) | IMPLEMENTED | `claude/project-thread-9rm3i9` | `app/harmonyVoicings.test.ts`, `e2e/harmony-voicings.spec.ts` | Ascolto del proprietario |
-| AR2–AR4, AR7 · Linguaggio degli arpeggi e 24 preset (D-66) | IMPLEMENTED (AR4 PARTIAL) | `claude/project-thread-9rm3i9` | `exercises/arpPatterns.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-vocabulary.spec.ts` | Arpeggi quartali e sovrapposizioni (AR4), editing nota per nota (AR6) |
+| HA1, HA3, HA4 · Armonizzazioni, voicing su gruppi di corde, progressioni (D-67) | IMPLEMENTED | #50 | `harmony/harmonize.test.ts`, `fretboard/stringVoicings.test.ts` | Sostituzioni diatoniche solo nel motore |
+| HA5 · Voicing nel laboratorio e 24 preset (D-67) | IMPLEMENTED | #50 | `app/harmonyVoicings.test.ts`, `e2e/harmony-voicings.spec.ts` | Ascolto del proprietario |
+| AR2–AR4, AR7 · Linguaggio degli arpeggi e 24 preset (D-68) | IMPLEMENTED (AR4 PARTIAL) | #50 | `exercises/arpPatterns.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-vocabulary.spec.ts` | Arpeggi quartali e sovrapposizioni (AR4), editing nota per nota (AR6) |
 | M2 · Fasi ancorate (D-62) | IMPLEMENTED | #48 | `exercises/anchors.test.ts`, `e2e/routine-arpeggio.spec.ts` | — |
 | M3 · Ritmo, articolazione, attacco (D-59) | PARTIAL | #45 | `exercises/rhythm.test.ts`, `timeline/countIn.test.ts`, `e2e/rhythm.spec.ts` | Manca il ritmo nell'Arpeggios Lab |
 | M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |
-| J3 · Batteria: pedale, crash, cross-stick, crash dopo il fill (D-64) | PARTIAL | `claude/project-thread-inqgn7` | `jam/kitPieces.test.ts`, `jam/arrangement.test.ts`, `e2e/genres.spec.ts` | Sequencer Advanced (velocity, probabilità, 32/64 passi); ascolto del proprietario |
-| J4 · Basso: seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | IMPLEMENTED | `claude/project-thread-inqgn7` | `jam/bass.test.ts` (walking per grado su ii–V–I), `jam/groove.test.ts` | Ascolto del proprietario |
+| J3 · Batteria: pedale, crash, cross-stick, crash dopo il fill (D-64); sequencer Advanced (D-65) | IMPLEMENTED | #52, `claude/project-thread-inqgn7` | `jam/kitPieces.test.ts`, `jam/advancedDrums.test.ts`, `jam/arrangement.test.ts`, `e2e/drums.spec.ts`, `e2e/genres.spec.ts` | Ascolto del proprietario |
+| J4 · Basso: seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | IMPLEMENTED | #52 | `jam/bass.test.ts` (walking per grado su ii–V–I), `jam/groove.test.ts` | Ascolto del proprietario |
 | J2 · Campioni CC0 (D-60) | PARTIAL | #46 | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, copertura, intonazione) | Piano elettrico e organo ancora sintetizzati |
 | J1 · Sampler (D-60) | PARTIAL | #46 | `audio/samplerMap.test.ts`, `e2e/samples.spec.ts` | Budget CPU (J9); ascolto del proprietario |
 | M6 · Quattro livelli (D-61) | IMPLEMENTED | #47 | `exercises/levels.test.ts`, `app/presetLibrary.test.ts`, `e2e/studio-v6-shell.spec.ts` | Preset per ogni livello con FB/HA/AR |
@@ -42,7 +42,7 @@ Lavoro in parallelo (dal 21 novembre 2026, approvato dal proprietario), un threa
 - pannello Note e interfaccia Studio: thread dedicato;
 - campioni liberi di piano elettrico, organo, spazzole e kit elettronico (J2): thread dedicato.
 
-Prossimo sul binario motore e Jam: sequencer Advanced della batteria (J3), humanization deterministica (J6), M7 e M8.
+Prossimo sul binario motore e Jam: humanization deterministica (J6), voice leading del comping (J5, con HA3), M7 e M8.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 

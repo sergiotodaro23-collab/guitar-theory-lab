@@ -163,7 +163,7 @@ const SHORT: ReadonlySet<CompPattern> = new Set(['stabs']);
  */
 /**
  * `voicings`, when given, fixes the notes of each chord (Harmony Lab's engine
- * voicings, D-65); a null entry keeps the comping's own voice leading.
+ * voicings, D-67); a null entry keeps the comping's own voice leading.
  */
 export function compTrack(p: Progression, meter: Meter, pattern: CompPattern, loop: boolean, bassLine = false, fixed?: readonly (readonly number[] | null)[]): Omit<Track<CompPayload>, 'originTick'> {
   const beat = ticksPerBeat(meter);

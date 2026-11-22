@@ -1,5 +1,5 @@
 /**
- * Harmony Lab voicings (HA3–HA5, D-65): one engine voicing per chord of the
+ * Harmony Lab voicings (HA3–HA5, D-67): one engine voicing per chord of the
  * progression, chosen by voice leading, by climbing the inversions, or by a
  * fixed inversion. What the board draws and what the comping plays come from
  * here, so the two never disagree. Pure.

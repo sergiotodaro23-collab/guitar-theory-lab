@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { chooseLook, loadPreset, reveal } from './studio';
 
-/** HA3–HA5 (D-65): engine voicings in Harmony Lab — the board draws the voicing the panel describes. */
+/** HA3–HA5 (D-67): engine voicings in Harmony Lab — the board draws the voicing the panel describes. */
 
 const voicingFrets = (page: import('@playwright/test').Page) =>
   page.$$eval('.fretboard .in-voicing', (els) => els.map((e) => Number(e.getAttribute('data-fret'))).sort((a, b) => a - b));

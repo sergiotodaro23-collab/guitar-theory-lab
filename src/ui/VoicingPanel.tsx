@@ -1,5 +1,5 @@
 /**
- * Harmony Lab voicings (HA3–HA5, D-65): harmonize a scale or load a
+ * Harmony Lab voicings (HA3–HA5, D-67): harmonize a scale or load a
  * functional progression, then voice every chord with the engine on a group
  * of strings. The board and the comping read the same voicings.
  */

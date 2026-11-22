@@ -48,7 +48,7 @@ export function useHarmonyContext() {
     const chordIndex = Math.min(playheadChord ?? selected, Math.max(0, chords.length - 1));
     const chord = chords[chordIndex] ?? null;
     const nextChord = chords.length > 1 ? chords[(chordIndex + 1) % chords.length] ?? null : null;
-    // Harmony Lab with engine voicings (D-65): the playing chord's voicing is drawn, as the comping plays it.
+    // Harmony Lab with engine voicings (D-67): the playing chord's voicing is drawn, as the comping plays it.
     const voicing = settings.mode === 'harmony' ? progressionVoicings(settings)[chordIndex]?.notes ?? null : null;
     return { chords, chord, nextChord, chordIndex, voicing };
   }, [settings, song, playheadChord, selected, tuning]);
