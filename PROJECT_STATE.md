@@ -23,6 +23,8 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |
 | J3 · Batteria: pedale, crash, cross-stick, crash dopo il fill (D-64); sequencer Advanced (D-65) | IMPLEMENTED | #52, `claude/project-thread-inqgn7` | `jam/kitPieces.test.ts`, `jam/advancedDrums.test.ts`, `jam/arrangement.test.ts`, `e2e/drums.spec.ts`, `e2e/genres.spec.ts` | Ascolto del proprietario |
 | J4 · Basso: seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | IMPLEMENTED | #52 | `jam/bass.test.ts` (walking per grado su ii–V–I), `jam/groove.test.ts` | Ascolto del proprietario |
+| J6 · Humanization deterministica (D-69) | IMPLEMENTED | #55 | `jam/humanize.test.ts`, `e2e/drums.spec.ts` | Ascolto del proprietario |
+| J5 · Voice leading del comping (D-70) | IMPLEMENTED | #55 | `jam/voiceLeading.test.ts`, `e2e/backing.spec.ts`, `e2e/harmony-voicings.spec.ts` | Ascolto del proprietario |
 | J2 · Campioni CC0 e CC BY (D-60, D-66) | PARTIAL | #46, #54 | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, licenze, copertura, intonazione), `e2e/samples.spec.ts` | Organo ancora sintetizzato (nessuna fonte libera); ascolto del proprietario |
 | J1 · Sampler (D-60) | PARTIAL | #46 | `audio/samplerMap.test.ts`, `e2e/samples.spec.ts` | Budget CPU (J9); ascolto del proprietario |
 | M6 · Quattro livelli (D-61) | IMPLEMENTED | #47 | `exercises/levels.test.ts`, `app/presetLibrary.test.ts`, `e2e/studio-v6-shell.spec.ts` | Preset per ogni livello con FB/HA/AR |
@@ -42,7 +44,11 @@ Lavoro in parallelo (dal 21 novembre 2026, approvato dal proprietario), un threa
 - pannello Note e interfaccia Studio: thread dedicato;
 - campioni liberi di piano elettrico, organo, spazzole e kit elettronico (J2): thread dedicato.
 
-Prossimo sul binario motore e Jam: humanization deterministica (J6), voice leading del comping (J5, con HA3), M7 e M8.
+**In pausa dal 22 novembre 2026** (decisione del proprietario). Nessun lavoro aperto sul binario motore e Jam dopo la #55. Alla ripresa, in ordine:
+1. Ascolto del proprietario di J1–J6 (campioni, batteria, basso, humanization, comping): è l'unica verifica che manca a quei lotti.
+2. Jam: J7 (pan reale misurato sui canali), J8 (pattern modificabili, loop, count-in in Jam), J9 (budget di latenza e CPU, `npm run perf`); organo campionato (J2) se si trova una fonte libera.
+3. Motore: M3 (ritmo nell'Arpeggios Lab), M4 (percorso su tutta la tastiera), M7 (condivisione dei preset), M8 (esercizio unico per i laboratori), AR4 (arpeggi quartali e sovrapposizioni).
+4. Onde successive del piano: R1 e R2 con scheda audio reale, N1–N5 (pannello Note), U1–U5 (interfaccia), Q9 (PWA), poi R5–R7 (NAM e TONE3000, sospese per D-58), infine release (serve l'approvazione del proprietario).
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 

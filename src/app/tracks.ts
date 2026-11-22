@@ -3,7 +3,7 @@ import { exerciseTrack, generateSequence, progressionArpeggioTrack, progressionE
 import type { FretNote } from '../fretboard';
 import { chordAsScale, viewNotes, viewScale } from './chordViews';
 import { voicingMidis } from './harmonyVoicings';
-import { arrangementTracks, bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
+import { arrangementTracks, bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, humanize, progressionLength, parsedChords } from '../jam';
 import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
 import { ticksPerBeat, type NotePayload, type Track } from '../timeline';
@@ -23,6 +23,15 @@ export interface ModeTracks {
 }
 
 export function buildTracks(s: Settings): ModeTracks {
+  const tracks = bandTracks(s);
+  if (s.mode !== 'jam' || s.humanize <= 0) return tracks;
+  // The band plays like players (J6); the exercise and the chord changes stay on the grid.
+  const meter = meterOf(s);
+  const feel = (t: TrackSpec | null): TrackSpec | null => (t ? humanize(t, meter, s.bpm, s.humanize) : null);
+  return { ...tracks, comp: feel(tracks.comp), bass: feel(tracks.bass), drums: feel(tracks.drums) };
+}
+
+function bandTracks(s: Settings): ModeTracks {
   const meter = meterOf(s);
   if (s.mode === 'arpeggio') return arpeggioTracks(s);
   const inHarmony = s.mode !== 'fretboard';

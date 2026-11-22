@@ -77,6 +77,8 @@ export interface StudySettings {
   readonly meterId: string;
   readonly subdivision: Subdivision;
   readonly swing: number;
+  /** Jam humanization (J6): 0 on the grid, 1 the widest feel (±12 ms, ±12 % velocity). */
+  readonly humanize: number;
 }
 
 export interface HarmonySettings {
@@ -255,6 +257,7 @@ export const DEFAULT_SETTINGS: Settings = {
   meterId: '4/4',
   subdivision: 1,
   swing: 0,
+  humanize: 0,
   progression: instantiateTemplate(firstTemplate, firstTemplate.defaultKey),
   chordViewsOn: true,
   harmonyKey: 'C',
@@ -394,6 +397,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     meterId: oneOf(r.meterId, Object.keys(METERS), d.meterId),
     subdivision: oneOf(r.subdivision, [1, 2, 3, 4] as const, d.subdivision),
     swing: typeof r.swing === 'number' && Number.isFinite(r.swing) ? clamp(r.swing, 0, 0.5) : d.swing,
+    humanize: typeof r.humanize === 'number' && Number.isFinite(r.humanize) ? clamp(r.humanize, 0, 1) : d.humanize,
     progression: validProgression,
     chordViewsOn: typeof r.chordViewsOn === 'boolean' ? r.chordViewsOn : d.chordViewsOn,
     harmonyKey: typeof r.harmonyKey === 'string' && TONICS.includes(r.harmonyKey) ? r.harmonyKey : d.harmonyKey,
