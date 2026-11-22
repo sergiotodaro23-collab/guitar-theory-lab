@@ -78,9 +78,9 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | AR1 | Principiante: triadi, rivolti, 1–2 ottave, posizioni semplici | IMPLEMENTED (6 preset, D-68) | — | Preset dedicati |
 | AR2 | Intermedio: quadriadi, CAGED, permutazioni 1-3-5-7 / 1-5-3-7 ecc., string skipping, salti d'ottava, arpeggi diatonici, collegamenti | IMPLEMENTED (D-68: permutazioni per gradi con l'8 d'ottava, `exercises/arpPatterns.test.ts`) | M5 | Permutazioni generate, test |
 | AR3 | Avanzato: 9/11/13, enclosure, cromatismi, sweep/economy, upper structures, triad pairs, voice leading, note target | IMPLEMENTED (D-68; cromatismi solo come enclosure) | AR2, HA2 | Enclosure e triad pairs da manuale |
-| AR4 | Esperto: sovrapposizioni, sostituzioni, quartali, tensioni alterate, poliritmie (raggruppamenti contro la metrica), pattern irregolari, intera tastiera | IMPLEMENTED (D-68: gruppi di 3, 4, 5, 7 con accento, upper structure alterate; D-69: quarte diatoniche, sovrapposizioni dalla terza, quinta, settima, sostituto di tritono) | AR3, M3 | Gruppi di 3 su 4/4 con accenti corretti |
+| AR4 | Esperto: sovrapposizioni, sostituzioni, quartali, tensioni alterate, poliritmie (raggruppamenti contro la metrica), pattern irregolari, intera tastiera | IMPLEMENTED (D-68: gruppi di 3, 4, 5, 7 con accento, upper structure alterate; D-71: quarte diatoniche, sovrapposizioni dalla terza, quinta, settima, sostituto di tritono) | AR3, M3 | Gruppi di 3 su 4/4 con accenti corretti |
 | AR5 | Percorsi continui su più ottave e posizioni, diteggiatura e rivolto diversi tra salita e discesa | PARTIAL | M4 | Già parziale (D-27): estendere a percorsi su progressione |
-| AR6 | Editing nota per nota, vincoli ergonomici, ritmiche, percorsi manuali | PARTIAL (D-69: editing per nota, percorso a mano, controllo ergonomico su un accordo singolo; mancano ritmiche per nota e l'editing sulla progressione) | M3, M4 | Modifica di una nota senza rompere il resto; validazione |
+| AR6 | Editing nota per nota, vincoli ergonomici, ritmiche, percorsi manuali | PARTIAL (D-71: editing per nota, percorso a mano, controllo ergonomico su un accordo singolo; mancano ritmiche per nota e l'editing sulla progressione) | M3, M4 | Modifica di una nota senza rompere il resto; validazione |
 | AR7 | Biblioteca di preset per i quattro livelli | IMPLEMENTED (24 preset, 6 per livello, `app/arpeggioPresets.ts`) | AR1–AR6 | Almeno 6 preset per livello |
 
 ### F3 · Jam Studio (priorità 3)
@@ -91,8 +91,8 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | J2 | Ricerca e registro delle librerie con licenza compatibile (CC0, CC-BY, GPL): batteria, basso, piano acustico, piano elettrico, organo/tastiere; budget di dimensioni | PARTIAL (in CC0: batteria con bacchette e con spazzole, drum machine, piano, basso elettrico, contrabbasso; Wurlitzer in CC BY 3.0; manca l'organo, nessuna fonte libera trovata) | — | `docs/AUDIO_ASSETS.md` con fonte, licenza, attribuzione per ogni file |
 | J3 | Batteria: articolazioni, hi-hat chiuso/aperto/pedale, ghost notes, fill, velocity; sequencer Advanced (velocity, probabilità, 32/64 passi) | IMPLEMENTED (pedale, crash, cross-stick, crash dopo il fill, choke: D-64; sequencer Advanced con 16/32/64 passi, intensità e probabilità per passo: D-65; ascolto del proprietario da fare) | J1, J2 | Ascolto del proprietario; test sui pattern |
 | J4 | Basso: dinamiche, articolazioni (staccato, ghost, slide), walking jazz | IMPLEMENTED (D-64; ascolto del proprietario da fare) | J1 | Walking su ii–V–I con note di approccio corrette |
-| J5 | Tastiere con voicing coerenti dal motore (HA3) e voice leading nel comping | PARTIAL | HA3, J1 | Comping senza salti oltre la soglia |
-| J6 | Groove, stili, swing, humanization deterministica (tempo, velocity) | PARTIAL | — | Test con seme fisso |
+| J5 | Tastiere con voicing coerenti dal motore (HA3) e voice leading nel comping | IMPLEMENTED (D-70; ascolto del proprietario da fare) | HA3, J1 | Comping senza salti oltre la soglia |
+| J6 | Groove, stili, swing, humanization deterministica (tempo, velocity) | IMPLEMENTED (humanization D-69; ascolto del proprietario da fare) | — | Test con seme fisso |
 | J7 | Mixer: volume, pan, mute, solo, meter per bus | PARTIAL | — | Pan reale misurato sui canali |
 | J8 | Pattern modificabili, loop, count-in (D1), sincronizzazione armonica | PARTIAL | M3 | e2e |
 | J9 | Budget di latenza e CPU della Jam | MISSING | J1 | `npm run perf` con soglie |
@@ -117,8 +117,8 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
 | N1 | Pannello Note solo consultazione: nessun input, gain, calibrazione o controllo ampli | PARTIAL | R2 | e2e: nessun controllo audio nel pannello |
-| N2 | Legenda geometrica condivisa: cerchi, triangoli, rombi, quadrati per ruolo (scala, arpeggio, accordo, target, intervalli); A3 residuo | PARTIAL | — | Unit su `viz/legend`; screenshot |
-| N3 | Colori personalizzabili | PARTIAL | N2 | Salvati e applicati ovunque |
+| N2 | Legenda geometrica condivisa: cerchi, triangoli, rombi, quadrati per ruolo (scala, arpeggio, accordo, target, intervalli); A3 residuo | IMPLEMENTED (D-69; restano forme per intervalli e note sovrapposte composte, con FB3) | — | Unit su `viz/glyphs`, `viz/legend`; e2e `legend-geometry.spec.ts`; screenshot |
+| N3 | Colori personalizzabili | IMPLEMENTED (D-69; la scelta si fa solo dalla Studio, la Semplificata la applica) | N2 | Salvati e applicati ovunque |
 | N4 | Seconda tastiera | PARTIAL | N2 | Segue il prossimo accordo o una scelta |
 | N5 | Default: modo della scala di riferimento pertinente all'accordo in esecuzione; alternative, sovrapposizioni, scale compatibili | PARTIAL | HA1 | G7 in Do mostra Sol misolidio; alternative selezionabili |
 | N6 | Ogni cambio armonico aggiorna tutte le viste rispettando le relazioni dell'esercizio (M1, M2) | PARTIAL | M1, N5 | e2e in riproduzione |
@@ -182,7 +182,10 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | #49 | unit su casi da manuale in Do, e2e sul sequencer |
 | 21/11/2026 | J3 · pedale, crash, cross-stick, crash dopo il fill; J4 · seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | #52 | unit su ii–V–I, clave e pattern, e2e dei generi e dei campioni; ascolto del proprietario da fare |
 | 21/11/2026 | J3 · sequencer Advanced: pattern di 1, 2 o 4 battute, intensità e probabilità per passo con seme fisso (D-65) | #53 | unit su lunghezze, livelli, dado deterministico, ciclo col fill; e2e nel sequencer |
+| 22/11/2026 | J6 · humanization deterministica di tempo e velocity, primo tempo fermo, cassa e basso più stretti (D-69) | #55 | unit con seme fisso (limiti in ms, downbeat, srotolamento), e2e sui tick della batteria |
+| 22/11/2026 | J5 · voice leading del comping come percorso di minimo movimento, loop incluso, registro stabile (D-70) | #55 | unit su ii–V–I, blues, rhythm changes, ciclo delle quinte; e2e di backing, generi, voicing, arrangiamento |
 | 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-67) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
 | 21/11/2026 | HA3–HA5 nel laboratorio · voicing del motore su tastiera e comping, armonizza la scala, progressioni funzionali con tritoni, 24 preset su quattro livelli (D-67) | #50 | unit + e2e in Studio e Semplificata; ascolto del proprietario da fare |
 | 21/11/2026 | AR2–AR4, AR7 · permutazioni, salti d'ottava, enclosure, triad pairs, upper structures, gruppi irregolari accentati; 24 preset su quattro livelli (D-68) | #50 | unit su casi da manuale, e2e in Studio e Semplificata |
-| 22/11/2026 | AR4 · quarte diatoniche e sovrapposizioni; AR6 · editing nota per nota, percorso a mano, vincoli ergonomici; 7 preset (D-69) | #56 | unit su casi da manuale (Do Fa Si Mi, Em7 su Cmaj7, Db7 su G7), e2e in Studio e Semplificata |
+| 22/11/2026 | AR4 · quarte diatoniche e sovrapposizioni; AR6 · editing nota per nota, percorso a mano, vincoli ergonomici; 7 preset (D-71) | #56 | unit su casi da manuale (Do Fa Si Mi, Em7 su Cmaj7, Db7 su G7), e2e in Studio e Semplificata |
+| 21/11/2026 | N2 · legenda geometrica condivisa con la tastiera; N3 · colori delle note personalizzabili (D-69) | #51 | unit + e2e, screenshot a 1440 × 900 e 1280 × 720 |

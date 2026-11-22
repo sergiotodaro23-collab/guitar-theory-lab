@@ -12,5 +12,8 @@ test('Arpeggios Lab: the arpeggio mark is drawn on the arpeggio notes and listed
   expect(marks).toBeGreaterThan(0);
   expect(marks).toBeLessThanOrEqual(markers);
   await page.getByTestId('notebook').getByRole('tab', { name: 'Legenda e visualizzazione', exact: true }).click();
-  await expect(page.getByText("Nota dell'arpeggio (triangolo)").first()).toBeAttached();
+  const entry = page.getByTestId('notebook-legend').locator('[data-kind="arpeggio"]');
+  await expect(entry).toContainText("Nota dell'arpeggio");
+  await expect(entry).toContainText('triangolo a contorno');
+  await expect(entry.locator('svg.legend-glyph .arp-mark')).toHaveCount(1);
 });

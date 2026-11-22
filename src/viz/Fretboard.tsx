@@ -1,6 +1,8 @@
 import { memo, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { DEFAULT_FRETS, type FretPosition } from '../fretboard';
 import type { FretArrow, Marker } from './markers';
+import { GlyphShapeEl } from './Glyph';
+import { markerGlyph } from './glyphs';
 
 const WIDTH = 1240;
 const HEIGHT = 252;
@@ -90,7 +92,7 @@ function roleName(marker: Marker): string {
     case 'root': return 'tonica';
     case 'scale': return 'nota della scala';
     case 'other-scale': return 'nota di una scala sovrapposta';
-    case 'chord-tone': return marker.isGuide ? 'guide tone' : 'chord tone';
+    case 'chord-tone': return marker.fn?.degree === '1' ? 'fondamentale dell’accordo' : marker.isGuide ? 'guide tone' : 'chord tone';
     case 'tension': return 'tensione';
     case 'avoid': return 'avoid contestuale';
     case 'outside': return 'nota esterna';
@@ -98,14 +100,9 @@ function roleName(marker: Marker): string {
 }
 
 function Shape({ marker, x, y }: { readonly marker: Marker; readonly x: number; readonly y: number }) {
-  const r = RADIUS;
-  if (marker.role === 'tension') {
-    return <rect className="shape" x={x - r * 0.86} y={y - r * 0.86} width={r * 1.72} height={r * 1.72} transform={`rotate(45 ${x} ${y})`} />;
-  }
-  if (marker.role === 'avoid') {
-    return <polygon className="shape" points={`${x},${y - r * 1.1} ${x + r * 1.05},${y + r * 0.8} ${x - r * 1.05},${y + r * 0.8}`} />;
-  }
-  return <circle className="shape" cx={x} cy={y} r={marker.role === 'outside' ? r * 0.85 : r} />;
+  // One table for the neck and the legend (viz/glyphs): the shape says the role without the colour.
+  const r = marker.role === 'outside' ? RADIUS * 0.85 : RADIUS;
+  return <GlyphShapeEl shape={markerGlyph(marker).shape} x={x} y={y} r={r} className="shape" />;
 }
 
 /**
@@ -116,7 +113,7 @@ function Shape({ marker, x, y }: { readonly marker: Marker; readonly x: number; 
 function ArpeggioMark({ x, y }: { readonly x: number; readonly y: number }) {
   const r = RADIUS * 1.62;
   const points = `${x},${y - r} ${x + r * 0.95},${y + r * 0.62} ${x - r * 0.95},${y + r * 0.62}`;
-  return <polygon className="arp-mark" points={points} fill="none" stroke="#1d1409" strokeWidth={1.9} strokeLinejoin="round" />;
+  return <polygon className="arp-mark" points={points} />;
 }
 
 /** Look of an overlaid scale, indexed by its position in the user's list. */
@@ -177,7 +174,7 @@ const MarkerGlyph = memo(function MarkerGlyph({ marker, geo, layerStyles, layerM
       onClick={() => onPick(marker)}
       onKeyDown={onKey}
     >
-      {marker.inVoicing ? <rect className="voicing-ring" x={x - RADIUS - 5} y={y - RADIUS - 5} width={(RADIUS + 5) * 2} height={(RADIUS + 5) * 2} rx={6} /> : null}
+      {marker.inVoicing ? <rect className="voicing-ring" x={x - RADIUS - 5} y={y - RADIUS - 5} width={(RADIUS + 5) * 2} height={(RADIUS + 5) * 2} rx={3} /> : null}
       {marker.isGuide && !marker.dim ? <circle className="guide-ring" cx={x} cy={y} r={RADIUS + 3.5} /> : null}
       {marker.target ? <circle className={`target-ring target-${marker.target}`} cx={x} cy={y} r={RADIUS + 6} /> : null}
       <Shape marker={marker} x={x} y={y} />

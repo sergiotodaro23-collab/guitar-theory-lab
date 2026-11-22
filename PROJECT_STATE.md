@@ -18,12 +18,14 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | HA1, HA3, HA4 · Armonizzazioni, voicing su gruppi di corde, progressioni (D-67) | IMPLEMENTED | #50 | `harmony/harmonize.test.ts`, `fretboard/stringVoicings.test.ts` | Sostituzioni diatoniche solo nel motore |
 | HA5 · Voicing nel laboratorio e 24 preset (D-67) | IMPLEMENTED | #50 | `app/harmonyVoicings.test.ts`, `e2e/harmony-voicings.spec.ts` | Ascolto del proprietario |
 | AR2–AR4, AR7 · Linguaggio degli arpeggi e 24 preset (D-68) | IMPLEMENTED | #50 | `exercises/arpPatterns.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-vocabulary.spec.ts` | — |
-| AR4, AR6 · Quarte, sovrapposizioni, editing nota per nota, percorso a mano, ergonomia (D-69) | IMPLEMENTED (AR6 PARTIAL) | #56 | `exercises/arpExpert.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-editing.spec.ts` | Ritmiche per nota, editing sulla progressione |
+| AR4, AR6 · Quarte, sovrapposizioni, editing nota per nota, percorso a mano, ergonomia (D-71) | IMPLEMENTED (AR6 PARTIAL) | #56 | `exercises/arpExpert.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-editing.spec.ts` | Ritmiche per nota, editing sulla progressione |
 | M2 · Fasi ancorate (D-62) | IMPLEMENTED | #48 | `exercises/anchors.test.ts`, `e2e/routine-arpeggio.spec.ts` | — |
 | M3 · Ritmo, articolazione, attacco (D-59) | PARTIAL | #45 | `exercises/rhythm.test.ts`, `timeline/countIn.test.ts`, `e2e/rhythm.spec.ts` | Manca il ritmo nell'Arpeggios Lab |
 | M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |
 | J3 · Batteria: pedale, crash, cross-stick, crash dopo il fill (D-64); sequencer Advanced (D-65) | IMPLEMENTED | #52, `claude/project-thread-inqgn7` | `jam/kitPieces.test.ts`, `jam/advancedDrums.test.ts`, `jam/arrangement.test.ts`, `e2e/drums.spec.ts`, `e2e/genres.spec.ts` | Ascolto del proprietario |
 | J4 · Basso: seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | IMPLEMENTED | #52 | `jam/bass.test.ts` (walking per grado su ii–V–I), `jam/groove.test.ts` | Ascolto del proprietario |
+| J6 · Humanization deterministica (D-69) | IMPLEMENTED | #55 | `jam/humanize.test.ts`, `e2e/drums.spec.ts` | Ascolto del proprietario |
+| J5 · Voice leading del comping (D-70) | IMPLEMENTED | #55 | `jam/voiceLeading.test.ts`, `e2e/backing.spec.ts`, `e2e/harmony-voicings.spec.ts` | Ascolto del proprietario |
 | J2 · Campioni CC0 e CC BY (D-60, D-66) | PARTIAL | #46, #54 | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, licenze, copertura, intonazione), `e2e/samples.spec.ts` | Organo ancora sintetizzato (nessuna fonte libera); ascolto del proprietario |
 | J1 · Sampler (D-60) | PARTIAL | #46 | `audio/samplerMap.test.ts`, `e2e/samples.spec.ts` | Budget CPU (J9); ascolto del proprietario |
 | M6 · Quattro livelli (D-61) | IMPLEMENTED | #47 | `exercises/levels.test.ts`, `app/presetLibrary.test.ts`, `e2e/studio-v6-shell.spec.ts` | Preset per ogni livello con FB/HA/AR |
@@ -31,6 +33,8 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | A1 → M1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | #39 | `exercises/transpose.test.ts` | Raffinata da D-57 |
 | A2 → AR5 · Arpeggi: note mostrate = note suonate | IMPLEMENTED | #40 | `app/arpCoherence.test.ts` | — |
 | A3 → N2/FB3 · Legenda avanzata e forme sovrapposte | PARTIAL | #41 | `viz/legend.test.ts` | Legenda condivisa per intervalli e target, forme di più scale |
+| N2 · Legenda geometrica condivisa · N3 · Colori personalizzabili (D-69) | IMPLEMENTED | #51 | `viz/glyphs.test.ts`, `viz/palette.test.ts`, `e2e/legend-geometry.spec.ts` | — |
+| N4 · Tastiera secondaria a scelta · N5 · Modo dell'accordo in esecuzione | PARTIAL (in pausa) | branch `claude/project-thread-lmp1pi-n4n5`, nessuna PR | unit verdi in locale; e2e `chord-scale.spec.ts` verde, `secondary-neck.spec.ts` non ancora eseguito; suite e2e completa da rifare | Progetto in pausa dal 22/11/2026: riprendere aprendo la PR del branch, poi N1 (via l'Ingresso dal taccuino, con R2) e N6 |
 | B1 → R1 · Selezione dispositivi audio | PARTIAL | #42 | dispositivi simulati | Da verificare con scheda reale |
 | B2, B3 → R2, N1 | MISSING | — | — | Onda 1 |
 | C1–C3 → U1, U2 · D1 → M3/J8 · D2 → U3 · E → U5 | MISSING | — | — | Secondo le onde del piano |
@@ -43,9 +47,13 @@ Lavoro in parallelo (dal 21 novembre 2026, approvato dal proprietario), un threa
 - pannello Note e interfaccia Studio: thread dedicato;
 - campioni liberi di piano elettrico, organo, spazzole e kit elettronico (J2): thread dedicato.
 
-Prossimo sul binario motore e Jam: humanization deterministica (J6), voice leading del comping (J5, con HA3), M7 e M8.
+**In pausa dal 22 novembre 2026** (decisione del proprietario). Nessun lavoro aperto sul binario motore e Jam dopo la #55. Alla ripresa, in ordine:
+1. Ascolto del proprietario di J1–J6 (campioni, batteria, basso, humanization, comping): è l'unica verifica che manca a quei lotti.
+2. Jam: J7 (pan reale misurato sui canali), J8 (pattern modificabili, loop, count-in in Jam), J9 (budget di latenza e CPU, `npm run perf`); organo campionato (J2) se si trova una fonte libera.
+3. Motore: M3 (ritmo nell'Arpeggios Lab), M4 (percorso su tutta la tastiera), M7 (condivisione dei preset), M8 (esercizio unico per i laboratori), AR4 (arpeggi quartali e sovrapposizioni).
+4. Onde successive del piano: R1 e R2 con scheda audio reale, N1–N5 (pannello Note), U1–U5 (interfaccia), Q9 (PWA), poi R5–R7 (NAM e TONE3000, sospese per D-58), infine release (serve l'approvazione del proprietario).
 
-**In pausa dal 22 novembre 2026** (decisione del proprietario). Cosa resta su Harmony Lab e Arpeggios Lab:
+**Harmony Lab e Arpeggios Lab, cosa resta alla ripresa:**
 - AR6: ritmiche per nota; editing nota per nota e percorso a mano sulla progressione (oggi solo su un accordo singolo).
 - AR5: percorsi continui su più ottave lungo una progressione, diteggiatura diversa tra salita e discesa sulla progressione.
 - HA2: accordi estesi 9/11/13 e alterazioni con formula libera; HA6: legenda che distingue note suonate, corde e gradi.

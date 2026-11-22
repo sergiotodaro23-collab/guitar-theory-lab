@@ -1,3 +1,4 @@
+import { markerColorVars } from '../viz/palette';
 import { useEffect, useState } from 'react';
 import { engine } from '../app/engine';
 import { useApp } from '../app/store';
@@ -71,6 +72,15 @@ export function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = appearance;
   }, [appearance]);
+  // N3: the Simple look reads its marker colours from the root; Studio sets them on its own shell.
+  const markerColors = useApp((s) => s.settings.markerColors);
+  useEffect(() => {
+    if (appearance !== 'simple') return undefined;
+    const root = document.documentElement;
+    const vars = markerColorVars(markerColors, 'simple');
+    for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value);
+    return () => { for (const name of Object.keys(vars)) root.style.removeProperty(name); };
+  }, [appearance, markerColors]);
   return (
     <>
       {appearance === 'studio' ? <StudioShell studioAllowed={allowed} /> : <SimpleShell studioAllowed={allowed} />}

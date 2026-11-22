@@ -231,16 +231,16 @@
 :root[data-theme='simple'] .fret-number { fill: var(--silk); }
 
 /* Markers: printed discs on maple, each role with its own fill and a cream label. */
-:root[data-theme='simple'] .marker .shape { fill: #fbf7ec; stroke: var(--scale); filter: drop-shadow(0 1px 1px rgba(40, 20, 0, 0.45)); }
+:root[data-theme='simple'] :is(.marker, .legend-mark) .shape { fill: #fbf7ec; stroke: var(--scale); filter: drop-shadow(0 1px 1px rgba(40, 20, 0, 0.45)); }
 :root[data-theme='simple'] .marker-label { fill: #241b12; }
 :root[data-theme='simple'] .role-scale .shape { fill: var(--scale); stroke: #0f1f3d; }
 :root[data-theme='simple'] .role-root .shape { fill: var(--root); stroke: #5e0f0b; }
 :root[data-theme='simple'] .role-chord-tone .shape { fill: var(--chord-tone); stroke: #063b36; }
 :root[data-theme='simple'] .role-tension .shape { fill: var(--tension); stroke: #5a3300; }
-:root[data-theme='simple'] .role-scale .marker-label,
-:root[data-theme='simple'] .role-root .marker-label,
-:root[data-theme='simple'] .role-chord-tone .marker-label,
-:root[data-theme='simple'] .role-tension .marker-label { fill: #fbf7ec; }
+:root[data-theme='simple'] .role-scale .marker-label { fill: var(--ink-scale, #fbf7ec); }
+:root[data-theme='simple'] .role-root .marker-label { fill: var(--ink-root, #fbf7ec); }
+:root[data-theme='simple'] .role-chord-tone .marker-label { fill: var(--ink-chord, #fbf7ec); }
+:root[data-theme='simple'] .role-tension .marker-label { fill: var(--ink-tension, #fbf7ec); }
 :root[data-theme='simple'] .role-avoid .shape { fill: #fbf7ec; stroke: var(--avoid); }
 :root[data-theme='simple'] .role-avoid .marker-label { fill: var(--avoid); }
 :root[data-theme='simple'] .role-outside .shape { fill: #fbf7ec; stroke: var(--outside); }
@@ -274,15 +274,6 @@
   gap: 8px 18px;
   max-width: 760px;
 }
-:root[data-theme='simple'] .legend-swatch { width: 14px; height: 14px; }
-:root[data-theme='simple'] .legend-scale .legend-swatch { background: var(--scale); border: 1.5px solid #c9ced6; }
-:root[data-theme='simple'] .legend-chord-tone .legend-swatch,
-:root[data-theme='simple'] .legend-guide .legend-swatch,
-:root[data-theme='simple'] .legend-root .legend-swatch,
-:root[data-theme='simple'] .legend-tension .legend-swatch { border: 1.5px solid #c9ced6; }
-:root[data-theme='simple'] .legend-guide .legend-swatch { box-shadow: 0 0 0 2px #0f1012, 0 0 0 3.5px #3fbfb2; }
-:root[data-theme='simple'] .legend-avoid .legend-swatch { border-bottom-color: #ff6b5e; }
-:root[data-theme='simple'] .legend-outside .legend-swatch { border-color: #c9ced6; }
 :root[data-theme='simple'] .legend-pip-ring { fill: var(--scale); stroke: #c9ced6; }
 :root[data-theme='simple'] .legend .muted { color: var(--muted); }
 :root[data-theme='simple'] .inspector,
@@ -450,7 +441,6 @@
   .cs-lower { margin-top: 6px; }
   .cs-module { padding: 8px; }
 }
-:root[data-theme='simple'] .legend-played .legend-swatch { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
 
 /*
  * ---- Desktop window (D-24): header, transport and neck stay put; the lower
@@ -507,3 +497,9 @@
   .cs-header .mode-nav .segment { padding-left: 12px; padding-right: 12px; }
   .cs-transport { gap: 10px 12px; }
 }
+
+/* N2 in the Simple look: a compact glyph, the shape's name kept for screen readers only, so the legend keeps its rows. */
+:root[data-theme='simple'] .legend-glyph { width: 16px; height: 16px; }
+:root[data-theme='simple'] .legend-played-halo { fill: #fff3c4; opacity: .75; }
+:root[data-theme='simple'] .legend-played-core { fill: #12100c; }
+:root[data-theme='simple'] .legend-shape { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
