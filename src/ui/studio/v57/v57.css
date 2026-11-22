@@ -384,3 +384,8 @@ html .v57 .v57-labels .segment[aria-pressed='true'] { color: #2a2418; background
 /* transport glyphs in the colours of the approved V6.7 console: green to go, amber to hold */
 .v57-tp .v57-key[data-testid='play']:not([data-on='1']) svg { color: #5fd46e; }
 .v57-tp .v57-key[data-testid='pause']:not([data-on='1']):not(:disabled) svg, .v57-tp .v57-key[data-testid='stop']:not(:disabled) svg { color: #f2bb4b; }
+
+/* N4 · which chord the secondary neck shows. */
+.v57-nxpick { display: grid; gap: 2px; align-self: center; }
+.v57-nxpick small { font: 600 10px/12px 'Barlow Condensed', sans-serif; letter-spacing: .12em; text-transform: uppercase; opacity: .75; }
+.v57-nxpick select { min-width: 150px; }

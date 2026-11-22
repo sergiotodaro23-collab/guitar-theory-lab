@@ -3,7 +3,7 @@ import { DEFAULT_SETTINGS } from '../../../app/settings';
 import { parseChord } from '../../../theory';
 import {
   BOARD_ASPECT, FB_CHROME, FB_MIN, NB_MIN, STORAGE_KEYS, VIZ_DEFAULTS, activeTab, clampRatio, compactLevel, fitScale, gainDb, gainToKnob,
-  hzToKnob, knobToGain, knobToHz, lcdModel, loadPrefs, savePref, splitHeight, tabKeyTarget, tabsFor, type KeyValueStore,
+  hzToKnob, knobToGain, knobToHz, lcdModel, loadPrefs, savePref, secondaryIndex, splitHeight, tabKeyTarget, tabsFor, type KeyValueStore,
 } from './layout';
 
 const memory = (seed: Record<string, string> = {}): KeyValueStore & { data: Record<string, string> } => {
@@ -177,5 +177,24 @@ describe('device knob mappings', () => {
     expect(gainDb(2)).toBe('+6.0 dB');
     expect(gainDb(0.5)).toBe('−6.0 dB');
     expect(gainDb(0)).toBe('−∞ dB');
+  });
+});
+
+describe('N4 · the secondary neck: next chord or a picked one', () => {
+  it('follows the next chord by default, a picked position otherwise, clamped to the list', () => {
+    expect(secondaryIndex('next', 2, 4)).toBe(2);
+    expect(secondaryIndex('next', null, 1)).toBeNull();
+    expect(secondaryIndex(0, 2, 4)).toBe(0);
+    expect(secondaryIndex(7, 2, 4)).toBe(3);
+    expect(secondaryIndex(1, null, 0)).toBeNull();
+  });
+  it('the choice is saved with the display preferences and repaired when malformed', () => {
+    const store = new Map<string, string>();
+    const kv = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => { store.set(k, v); } };
+    expect(loadPrefs(kv).viz.secondary).toBe('next');
+    savePref(kv, 'viz', { ...VIZ_DEFAULTS, secondary: 2 });
+    expect(loadPrefs(kv).viz.secondary).toBe(2);
+    kv.setItem(STORAGE_KEYS.viz, JSON.stringify({ secondary: -1 }));
+    expect(loadPrefs(kv).viz.secondary).toBe('next');
   });
 });

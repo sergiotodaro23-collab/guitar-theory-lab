@@ -173,9 +173,20 @@ export interface VizPrefs {
   readonly showPlayback: boolean;
   readonly showArrows: boolean;
   readonly showOverlays: boolean;
+  /** N4 · the secondary neck: the next chord (default) or a chord the user picks from the list, by position. */
+  readonly secondary: 'next' | number;
 }
 
-export const VIZ_DEFAULTS: VizPrefs = { layerMarks: 'bars', anim: 'pulse', showTargets: true, showPlayback: true, showArrows: true, showOverlays: true };
+export const VIZ_DEFAULTS: VizPrefs = { layerMarks: 'bars', anim: 'pulse', showTargets: true, showPlayback: true, showArrows: true, showOverlays: true, secondary: 'next' };
+
+/**
+ * N4 · which chord the secondary neck shows: the next one, or the picked
+ * position clamped to the list (a shorter progression keeps a valid pick).
+ */
+export function secondaryIndex(choice: VizPrefs['secondary'], nextIndex: number | null, count: number): number | null {
+  if (choice === 'next' || count <= 0) return choice === 'next' ? nextIndex : null;
+  return Math.min(Math.max(0, Math.floor(choice)), count - 1);
+}
 
 export interface UiPrefs {
   readonly split: number;
@@ -254,6 +265,7 @@ export function loadPrefs(store: KeyValueStore, viewportWidth = RACK_OPEN_MIN_WI
       showPlayback: bool(viz.showPlayback, true),
       showArrows: bool(viz.showArrows, true),
       showOverlays: bool(viz.showOverlays, true),
+      secondary: typeof viz.secondary === 'number' && Number.isInteger(viz.secondary) && viz.secondary >= 0 ? viz.secondary : 'next',
     },
   };
 }

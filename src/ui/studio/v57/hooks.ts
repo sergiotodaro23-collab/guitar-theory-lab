@@ -12,6 +12,8 @@ export interface NowNext {
   /** Index of the next chord in its list (progression, or the Fretboard Lab chord list). */
   readonly nextIndex: number | null;
   readonly source: 'chords' | 'progression' | 'single';
+  /** Every chord of that list, by position (null where a Fretboard Lab chord does not parse): what the secondary neck can pick (N4). */
+  readonly list: readonly (Chord | null)[];
 }
 
 /**
@@ -24,13 +26,12 @@ export function useNowNext(): NowNext {
   return useMemo(() => {
     if (settings.mode === 'fretboard') {
       const layers = settings.chordLayers;
-      if (layers.length < 2) return { now: chord, next: null, nextIndex: null, source: 'chords' };
+      const list = layers.map((l) => resolveChordLayer(l, tuningOf(settings)).chord);
+      if (layers.length < 2) return { now: chord, next: null, nextIndex: null, source: 'chords', list };
       const nextIndex = (settings.activeChord + 1) % layers.length;
-      const layer = layers[nextIndex];
-      const next = layer ? resolveChordLayer(layer, tuningOf(settings)).chord : null;
-      return { now: chord, next, nextIndex, source: 'chords' };
+      return { now: chord, next: list[nextIndex] ?? null, nextIndex, source: 'chords', list };
     }
-    if (settings.mode === 'arpeggio' && settings.arpSource === 'chord') return { now: chord, next: null, nextIndex: null, source: 'single' };
-    return { now: chord, next: nextChord, nextIndex: chords.length > 1 ? (chordIndex + 1) % chords.length : null, source: 'progression' };
-  }, [settings, chord, nextChord, chordIndex, chords.length]);
+    if (settings.mode === 'arpeggio' && settings.arpSource === 'chord') return { now: chord, next: null, nextIndex: null, source: 'single', list: [] };
+    return { now: chord, next: nextChord, nextIndex: chords.length > 1 ? (chordIndex + 1) % chords.length : null, source: 'progression', list: chords };
+  }, [settings, chord, nextChord, chordIndex, chords]);
 }

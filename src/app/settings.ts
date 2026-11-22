@@ -262,7 +262,8 @@ export const DEFAULT_SETTINGS: Settings = {
   chordViewsOn: true,
   harmonyKey: 'C',
   harmonyMode: 'ionian',
-  contextScales: false,
+  // N5: by default the Note views show the mode of the reference key on the chord in play.
+  contextScales: true,
   exerciseFollowsView: true,
   chordViews: {},
   loop: true,
