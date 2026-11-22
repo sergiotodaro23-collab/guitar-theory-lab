@@ -89,11 +89,45 @@ describe('sampler zones (J1)', () => {
     expect(needed.map((z) => z.file).sort()).toEqual(['51_64_1', '51_64_2']);
   });
 
-  it('every jam kit piece has a recorded voice; short bass notes are staccato', () => {
-    const kit = manifest('drums');
-    const voices = new Set(kit.zones.map((z) => (z as DrumZone).voice));
-    for (const { voice } of DRUM_VOICES) expect(voices.has(drumVoiceFor(voice, 0.8) ?? ''), voice).toBe(true);
-    expect(voices.has(drumVoiceFor('tom', 1) ?? '')).toBe(true);
+  it('a layer-first set picks the layer, then the nearest root sampled in it', () => {
+    // Wurlitzer-like: the soft layer has C3 and G3, the loud one only E3.
+    const zones = [...pitched(48, 0, [[1, 63]]), ...pitched(55, 0, [[1, 63]]), ...pitched(52, 0, [[64, 127]])];
+    const memory: RoundRobin = new Map();
+    // A soft F3 (53) stays in its layer: G3 shifted down a whole tone, not the loud E3 a semitone away.
+    const soft = pickPitched(zones, 'sustain', 53, 0.3, memory, true, true);
+    expect(soft?.zone.root).toBe(55);
+    expect(soft?.rate).toBeCloseTo(2 ** (-2 / 12), 6);
+    // A loud C3 plays the only loud root, E3 a major third down.
+    expect(pickPitched(zones, 'sustain', 48, 0.9, memory, true, true)?.zone.root).toBe(52);
+    // Root first (the default) would take the soft C3 itself: the layer was lost.
+    expect(pickPitched(zones, 'sustain', 48, 0.9, memory)?.zone.velHi).toBe(63);
+    expect(zonesForPitched(zones, 'sustain', 53, 0.3, true).map((z) => z.root)).toEqual([55]);
+  });
+
+  it('a drum machine set keeps one sound and scales its level with the velocity curve', () => {
+    const zones: DrumZone[] = [{ voice: 'clap', file: 'clap', velLo: 1, velHi: 127, rr: 1 }];
+    const memory: RoundRobin = new Map();
+    const soft = pickDrum(zones, 'clap', 0.5, memory, true);
+    const loud = pickDrum(zones, 'clap', 1, memory, true);
+    expect(soft?.zone.file).toBe('clap');
+    expect(20 * Math.log10(soft?.gain ?? 0)).toBeCloseTo(-12, 0);
+    expect(loud?.gain).toBe(1);
+  });
+
+  it('every jam kit piece has a recorded voice in each kit; short bass notes are staccato', () => {
+    for (const set of ['drums', 'brushes', 'electronic'] as const) {
+      const voices = new Set(manifest(set).zones.map((z) => (z as DrumZone).voice));
+      for (const { voice } of DRUM_VOICES) expect(voices.has(drumVoiceFor(voice, 0.8, set) ?? ''), `${set} ${voice}`).toBe(true);
+      expect(voices.has(drumVoiceFor('tom', 1, set) ?? ''), set).toBe(true);
+    }
+    // The clap row: cross-stick on a real kit, a hand clap on the drum machine, whose rim shot and closed hat
+    // stand in for the cross-stick and the hi-hat foot it lacks.
+    expect(drumVoiceFor('clap', 0.8)).toBe('crossStick');
+    expect(drumVoiceFor('clap', 0.8, 'brushes')).toBe('crossStick');
+    expect(drumVoiceFor('clap', 0.8, 'electronic')).toBe('clap');
+    expect(drumVoiceFor('cross', 0.8, 'electronic')).toBe('rimshot');
+    expect(drumVoiceFor('pedal', 0.8, 'electronic')).toBe('hhClosed');
+    expect(drumVoiceFor('pedal', 0.8, 'brushes')).toBe('hhPedal');
     expect(bassArticulation('ebass', 0.12)).toBe('staccato');
     expect(bassArticulation('ebass', 0.6)).toBe('sustain');
     expect(bassArticulation('upright', 0.12)).toBe('pizz');
@@ -101,11 +135,13 @@ describe('sampler zones (J1)', () => {
 });
 
 describe('shipped sample sets (J2)', () => {
-  it('every manifest is valid, CC0, pinned to a commit, and lists files that exist', () => {
+  it('every manifest is valid, CC0 or CC BY, pinned to a commit, and lists files that exist', () => {
     for (const id of SAMPLE_SETS) {
       const m = manifest(id);
       expect(m.id).toBe(id);
-      expect(m.license).toBe('CC0-1.0');
+      // Licences compatible with GPL-3.0-or-later and free redistribution; CC BY asks for the credit in AUDIO_ASSETS.md.
+      expect(['CC0-1.0', 'CC-BY-3.0'], id).toContain(m.license);
+      expect(m.author.length, id).toBeGreaterThan(0);
       expect(m.commit).toMatch(/^[0-9a-f]{40}$/);
       for (const z of m.zones) expect(() => readFileSync(`public/samples/${id}/${z.file}`)).not.toThrow();
     }
@@ -125,8 +161,24 @@ describe('shipped sample sets (J2)', () => {
     }
   });
 
+  it('the Wurlitzer covers A1 to G#6 in every layer, each note within a fourth of a root of its own layer', () => {
+    const m = manifest('epiano');
+    expect(m.layerFirst).toBe(true);
+    expect(m.normalized).toBe(true);
+    const zones = m.zones as PitchedZone[];
+    for (const velocity of [0.15, 0.4, 0.65, 0.95]) {
+      for (let midi = 33; midi <= 92; midi += 1) {
+        const note = pickPitched(zones, 'sustain', midi, velocity, new Map(), true, true);
+        expect(Math.abs(midi - (note?.zone.root ?? -99)), `${velocity} ${midi}`).toBeLessThanOrEqual(5);
+      }
+    }
+    // Four layers, softest first, and a loud note plays a loud take.
+    expect(new Set(zones.map((z) => z.velLo)).size).toBe(4);
+    expect(pickPitched(zones, 'sustain', 61, 1, new Map(), true, true)?.zone.velHi).toBe(127);
+  });
+
   it('tuning corrections stay within a quarter tone', () => {
-    for (const id of ['ebass', 'upright', 'piano']) {
+    for (const id of ['ebass', 'upright', 'piano', 'epiano']) {
       for (const z of manifest(id).zones as PitchedZone[]) expect(Math.abs(z.tune), `${id} ${z.file}`).toBeLessThan(50);
     }
   });

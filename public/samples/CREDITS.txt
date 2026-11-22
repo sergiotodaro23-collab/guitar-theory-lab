@@ -1,0 +1,27 @@
+Guitar Theory Lab: sample sets in this folder
+==============================================
+
+Every file was downloaded from the source below (pinned commit in each
+manifest.json), mixed, trimmed, faded, level-adjusted and encoded to Opus
+by tools/samples/build_samples.py. Details: docs/AUDIO_ASSETS.md.
+
+drums/      Virtuosity Drums, Versilian Studios and Karoryfer Samples
+            (drummer Austin McMahon). CC0 1.0.
+            https://github.com/sfzinstruments/virtuosity_drums
+brushes/    Big Rusty Drums, Karoryfer Samples. CC0 1.0.
+            https://github.com/sfzinstruments/karoryfer.big-rusty-drums
+electronic/ MckSamplePacks, Roland TR-8 one-shots recorded by MckAudio. CC0 1.0.
+            https://github.com/MckAudio/MckSamplePacks
+piano/      VCSL Steinway B, Versilian Studios. CC0 1.0.
+            https://github.com/sgossner/VCSL
+epiano/     "Wurlitzer EP200 Electric Piano" by Greg Sullivan
+            (http://www.sullivang.net/), sfz mapping by kinwie.
+            Licensed under Creative Commons Attribution 3.0 Unported
+            (https://creativecommons.org/licenses/by/3.0/).
+            Changes: takes trimmed to 3-4 s with a 50 ms fade, one gain
+            for the whole set, converted to 48 kHz mono Opus at 56 kbps.
+            https://github.com/sfzinstruments/GregSullivan.E-Pianos
+ebass/      Growlybass, Karoryfer Samples. CC0 1.0.
+            https://github.com/sfzinstruments/karoryfer.growlybass
+upright/    Meatbass, Karoryfer Samples. CC0 1.0.
+            https://github.com/sfzinstruments/karoryfer.meatbass
