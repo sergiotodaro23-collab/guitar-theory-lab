@@ -17,7 +17,8 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | M5 · Sequenze generative (D-63) | IMPLEMENTED | #49 | `exercises/sequences.test.ts`, `e2e/sequences.spec.ts` | — |
 | HA1, HA3, HA4 · Armonizzazioni, voicing su gruppi di corde, progressioni (D-67) | IMPLEMENTED | #50 | `harmony/harmonize.test.ts`, `fretboard/stringVoicings.test.ts` | Sostituzioni diatoniche solo nel motore |
 | HA5 · Voicing nel laboratorio e 24 preset (D-67) | IMPLEMENTED | #50 | `app/harmonyVoicings.test.ts`, `e2e/harmony-voicings.spec.ts` | Ascolto del proprietario |
-| AR2–AR4, AR7 · Linguaggio degli arpeggi e 24 preset (D-68) | IMPLEMENTED (AR4 PARTIAL) | #50 | `exercises/arpPatterns.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-vocabulary.spec.ts` | Arpeggi quartali e sovrapposizioni (AR4), editing nota per nota (AR6) |
+| AR2–AR4, AR7 · Linguaggio degli arpeggi e 24 preset (D-68) | IMPLEMENTED | #50 | `exercises/arpPatterns.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-vocabulary.spec.ts` | — |
+| AR4, AR6 · Quarte, sovrapposizioni, editing nota per nota, percorso a mano, ergonomia (D-71) | IMPLEMENTED (AR6 PARTIAL) | #56 | `exercises/arpExpert.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-editing.spec.ts` | Ritmiche per nota, editing sulla progressione |
 | M2 · Fasi ancorate (D-62) | IMPLEMENTED | #48 | `exercises/anchors.test.ts`, `e2e/routine-arpeggio.spec.ts` | — |
 | M3 · Ritmo, articolazione, attacco (D-59) | PARTIAL | #45 | `exercises/rhythm.test.ts`, `timeline/countIn.test.ts`, `e2e/rhythm.spec.ts` | Manca il ritmo nell'Arpeggios Lab |
 | M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |
@@ -51,6 +52,13 @@ Lavoro in parallelo (dal 21 novembre 2026, approvato dal proprietario), un threa
 2. Jam: J7 (pan reale misurato sui canali), J8 (pattern modificabili, loop, count-in in Jam), J9 (budget di latenza e CPU, `npm run perf`); organo campionato (J2) se si trova una fonte libera.
 3. Motore: M3 (ritmo nell'Arpeggios Lab), M4 (percorso su tutta la tastiera), M7 (condivisione dei preset), M8 (esercizio unico per i laboratori), AR4 (arpeggi quartali e sovrapposizioni).
 4. Onde successive del piano: R1 e R2 con scheda audio reale, N1–N5 (pannello Note), U1–U5 (interfaccia), Q9 (PWA), poi R5–R7 (NAM e TONE3000, sospese per D-58), infine release (serve l'approvazione del proprietario).
+
+**Harmony Lab e Arpeggios Lab, cosa resta alla ripresa:**
+- AR6: ritmiche per nota; editing nota per nota e percorso a mano sulla progressione (oggi solo su un accordo singolo).
+- AR5: percorsi continui su più ottave lungo una progressione, diteggiatura diversa tra salita e discesa sulla progressione.
+- HA2: accordi estesi 9/11/13 e alterazioni con formula libera; HA6: legenda che distingue note suonate, corde e gradi.
+- HA4: sostituzioni diatoniche presenti nel motore ma non ancora nel pannello.
+- Ascolto del proprietario su voicing, comping e linguaggi degli arpeggi: niente è stato verificato a orecchio, solo con test.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 

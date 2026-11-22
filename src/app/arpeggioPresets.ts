@@ -18,7 +18,8 @@ interface Preset {
 const BASE: Partial<Settings> = {
   mode: 'arpeggio', arpCustomOn: false, labelMode: 'function', arpShape: 'window', arpForm: 'E', arpOctaves: 2, arpStrings: 5,
   arpReturn: 'same', arpStart: 0, arpDirection: 'updown', arpLink: 'connect', arpTarget: 1, arpNotesPerBeat: 2,
-  arpPattern: 'none', arpPerm: '1 5 3 7', arpUpper: 'II', arpGroup: 3, compOn: true,
+  arpPattern: 'none', arpPerm: '1 5 3 7', arpUpper: 'II', arpGroup: 3, arpOverlay: '3', compOn: true,
+  arpEdits: [], arpEditKey: '', arpRouteOn: false, arpRouteText: '',
 };
 
 const chordPreset = (id: string, name: string, level: ExerciseLevel, symbol: string, bpm: number, data: Partial<Settings>): Preset => ({
@@ -52,6 +53,7 @@ export const ARPEGGIO_PRESETS: readonly Preset[] = [
   chordPreset('ar-c7-ust-ii', 'Upper structure II su C7: 9, #11, 13', 'Avanzato', 'C7', 72, { arpLow: 7, arpPattern: 'upper', arpUpper: 'II' }),
   chordPreset('ar-g7-ust-bvi', 'Upper structure bVI su G7: b13, 1, #9', 'Avanzato', 'G7', 72, { arpLow: 2, arpPattern: 'upper', arpUpper: 'bVI' }),
   chordPreset('ar-am7-sweep', 'Am7 in sweep su cinque corde', 'Avanzato', 'Am7', 76, { arpShape: 'sweep', arpStrings: 5, arpLow: 5, arpNotesPerBeat: 3 }),
+  chordPreset('ar-cmaj7-route-by-hand', 'Percorso a mano: Cmaj7 in diagonale su due ottave', 'Avanzato', 'Cmaj7', 66, { arpRouteOn: true, arpRouteText: '6/8 5/7 5/10 4/9 4/10 3/9 2/8 1/7', arpDirection: 'up' }),
   chordPreset('ar-cm9-rootless', 'Cm9 senza fondamentale: 3-5-7-9', 'Avanzato', 'Cm9', 70, { arpShape: 'octaves', arpOctaves: 2, arpLow: 3, arpPattern: 'perm', arpPerm: '3 5 7 9', arpDirection: 'up' }),
   // Esperto: irregular groups against the meter, triad pairs in minor, patterns over progressions.
   chordPreset('ar-dm7-groups-of-3', 'Gruppi di 3 in sedicesimi su Dm7: poliritmia 3 contro 4', 'Esperto', 'Dm7', 72, { arpShape: 'octaves', arpOctaves: 2, arpLow: 5, arpPattern: 'group', arpGroup: 3, arpNotesPerBeat: 4, arpDirection: 'up' }),
@@ -60,4 +62,11 @@ export const ARPEGGIO_PRESETS: readonly Preset[] = [
   progressionPreset('ar-f-251-enclosure', 'Enclosure sui ii–V–I in Fa', 'Esperto', 'F', functionalProgression('ii-V-I', 'F'), 76, { arpLow: 5, arpPattern: 'enclosure', arpNotesPerBeat: 3, arpDirection: 'up' }),
   chordPreset('ar-bb7-groups-of-7', 'Gruppi di 7 su Bb7 su tre ottave', 'Esperto', 'Bb7', 66, { arpShape: 'octaves', arpOctaves: 3, arpLow: 1, arpPattern: 'group', arpGroup: 7, arpNotesPerBeat: 4, arpDirection: 'up' }),
   progressionPreset('ar-turnaround-perm', 'Permutazione 3-1-5-7 sul turnaround I–VI7–ii–V in Do', 'Esperto', 'C', functionalProgression('I-VI7-ii-V', 'C'), 80, { arpShape: 'octaves', arpOctaves: 2, arpLow: 5, arpPattern: 'perm', arpPerm: '3 1 5 7', arpDirection: 'up' }),
+  // Esperto (AR4): fourths, overlays and substitutions over the chord.
+  chordPreset('ar-dm7-quartal', 'Quarte del Re dorico su Dm7: il suono di So What', 'Esperto', 'Dm7', 72, { arpLow: 5, arpPattern: 'quartal', arpNotesPerBeat: 3, arpDirection: 'updown' }),
+  chordPreset('ar-cmaj7-quartal', 'Catena di quarte di Do maggiore su Cmaj7', 'Esperto', 'Cmaj7', 72, { arpLow: 7, arpPattern: 'quartal', arpNotesPerBeat: 2, arpDirection: 'up' }),
+  chordPreset('ar-em7-over-cmaj7', 'Em7 sopra Cmaj7: la nona dalla terza', 'Esperto', 'Cmaj7', 72, { arpLow: 7, arpPattern: 'overlay', arpOverlay: '3' }),
+  chordPreset('ar-em7b5-over-c7', 'Em7b5 sopra C7: un C9 senza fondamentale', 'Esperto', 'C7', 72, { arpLow: 7, arpPattern: 'overlay', arpOverlay: '3' }),
+  chordPreset('ar-db7-over-g7', 'Db7 sopra G7: arpeggio del sostituto di tritono', 'Esperto', 'G7', 76, { arpLow: 3, arpPattern: 'overlay', arpOverlay: 'tritone' }),
+  progressionPreset('ar-251-overlay-third', 'ii–V–I in Do con l’arpeggio dalla terza di ogni accordo', 'Esperto', 'C', functionalProgression('ii-V-I', 'C'), 76, { arpLow: 5, arpPattern: 'overlay', arpOverlay: '3', arpDirection: 'up' }),
 ];

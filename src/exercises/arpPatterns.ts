@@ -5,11 +5,12 @@
  * a played line, ascending; the caller applies the direction. Pure: no DOM.
  */
 import { DEFAULT_FRETS, STANDARD_TUNING, pitchesInWindow, type FretNote } from '../fretboard';
+import { diatonicChord, tritoneSubstitute } from '../harmony';
 import { mod, parseChord, parseDegree, spellDegree, noteName, type Chord, type Scale } from '../theory';
 import type { ArpDirection } from './arpeggio';
 
-export type ArpPattern = 'none' | 'perm' | 'enclosure' | 'pair' | 'upper' | 'group';
-export const ARP_PATTERNS: readonly ArpPattern[] = ['none', 'perm', 'enclosure', 'pair', 'upper', 'group'];
+export type ArpPattern = 'none' | 'perm' | 'enclosure' | 'pair' | 'upper' | 'group' | 'quartal' | 'overlay';
+export const ARP_PATTERNS: readonly ArpPattern[] = ['none', 'perm', 'enclosure', 'pair', 'upper', 'group', 'quartal', 'overlay'];
 export const ARP_PATTERN_NAMES: Readonly<Record<ArpPattern, string>> = {
   none: 'Arpeggio diretto',
   perm: 'Permutazione',
@@ -17,6 +18,8 @@ export const ARP_PATTERN_NAMES: Readonly<Record<ArpPattern, string>> = {
   pair: 'Triad pair',
   upper: 'Upper structure',
   group: 'Gruppi irregolari',
+  quartal: 'Quarte diatoniche',
+  overlay: 'Sovrapposizione',
 };
 
 /** Permutations of the chord tones the method books drill, written with chord degrees; 8 is the root an octave up. */
@@ -142,8 +145,11 @@ export function upperStructure(chord: Chord, which: UpperStructure): Chord {
 }
 
 /** What an upper-structure triad adds over its chord, as degrees of the chord: "9 #11 13". */
-export function upperStructureTensions(chord: Chord, which: UpperStructure): readonly string[] {
-  const triad = upperStructure(chord, which);
+export const upperStructureTensions = (chord: Chord, which: UpperStructure): readonly string[] => tensionsOver(chord, upperStructure(chord, which));
+
+/** The tones of `other` named as degrees of `chord`: its own degree where they share a tone, else the tension. */
+export function tensionsOver(chord: Chord, other: Chord): readonly string[] {
+  const triad = other;
   const names = ['1', 'b9', '9', '#9', '3', '11', '#11', '5', 'b13', '13', 'b7', '7'];
   return triad.tones.map((t) => {
     const own = chord.tones.find((c) => c.pc === t.pc);
@@ -151,6 +157,51 @@ export function upperStructureTensions(chord: Chord, which: UpperStructure): rea
     const semis = mod(t.pc - (chord.tones[0]?.pc ?? 0), 12);
     return names[semis] as string;
   });
+}
+
+/**
+ * Diatonic fourths (AR4): from the chord's root, every fourth note of its
+ * scale in turn (C F B E A D in C major), each pitch the nearest one above
+ * the last, as long as the hand position offers it. Perfect fourths, and the
+ * one augmented fourth the scale holds. Seven-note scales only.
+ */
+export function quartalLine(chord: Chord, scale: Scale, notes: readonly FretNote[]): readonly FretNote[] {
+  const tones = scale.tones;
+  if (tones.length !== 7) return [];
+  const rootPc = chord.tones[0]?.pc ?? 0;
+  let k = tones.findIndex((t) => t.pc === rootPc);
+  if (k < 0) return [];
+  const sorted = [...notes].sort(byPitch);
+  const first = sorted.find((n) => n.pc === rootPc);
+  if (!first) return [];
+  const line: FretNote[] = [first];
+  for (;;) {
+    k = (k + 3) % 7;
+    const pc = tones[k]?.pc;
+    const last = line[line.length - 1] as FretNote;
+    const next = sorted.find((n) => n.pc === pc && n.midi > last.midi && n.midi - last.midi <= 6);
+    if (!next) break;
+    line.push(next);
+  }
+  return line;
+}
+
+export type Overlay = '3' | '5' | '7' | 'tritone';
+export const OVERLAYS: readonly Overlay[] = ['3', '5', '7', 'tritone'];
+export const OVERLAY_NAMES: Readonly<Record<Overlay, string>> = { '3': 'Dalla terza', '5': 'Dalla quinta', '7': 'Dalla settima', tritone: 'Sostituto di tritono' };
+
+/**
+ * The seventh chord played over another (AR4): the diatonic one built on its
+ * third, fifth or seventh in its scale (Em7 over Cmaj7 gives the 9, Em7b5
+ * over C7 is C9), or the tritone substitute over a dominant (Db7 over G7).
+ * Null where there is none: a tritone over a chord that is not a dominant.
+ */
+export function overlayChord(chord: Chord, scale: Scale, which: Overlay): Chord | null {
+  if (which === 'tritone') return chord.family === 'dominant' ? parseChord(tritoneSubstitute(chord)) : null;
+  const degree = Number(which) - 1;
+  // The scale starts on the chord's root (its chord-scale), so chord degree n is scale degree n.
+  if ((scale.tones[0]?.pc ?? -1) !== chord.tones[0]?.pc) return null;
+  return diatonicChord(scale.tonicName, scale.definition.id, degree, 'seventh');
 }
 
 /** The notes of any chord inside a hand position starting at `low`. */
@@ -185,6 +236,7 @@ export interface PatternChoice {
   /** Permutation order, chord degrees ("1 5 3 7"). */
   readonly perm: readonly number[];
   readonly upper: UpperStructure;
+  readonly overlay?: Overlay;
   /** Notes per group for irregular groups. */
   readonly group: number;
   readonly direction: ArpDirection;
@@ -227,6 +279,12 @@ export function patternLine(chord: Chord, shapeNotes: readonly FretNote[], c: Pa
     }
     case 'upper': up = uniquePitches(windowNotes(upperStructure(chord, c.upper), low, span, tuning)); break;
     case 'group': up = groupedLine(run, Math.max(2, c.group)); break;
+    case 'quartal': up = quartalLine(chord, c.scale, uniquePitches(pitchesInWindow(c.scale.tones.map((t) => t.pc), low, low + span, tuning))); break;
+    case 'overlay': {
+      const over = overlayChord(chord, c.scale, c.overlay ?? '3');
+      if (over) up = uniquePitches(windowNotes(over, low, span, tuning));
+      break;
+    }
   }
   const drawn = new Map<string, FretNote>();
   for (const n of up) drawn.set(`${n.string}:${n.fret}`, n);
