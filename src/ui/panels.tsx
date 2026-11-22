@@ -913,6 +913,20 @@ export function JamPanels({ part = 'all' }: { readonly part?: 'all' | 'progressi
         <button type="button" className="btn" disabled={s.bpm === genreOf(s.jamGenre).bpm} onClick={() => update({ bpm: genreOf(s.jamGenre).bpm })}>
           Usa {genreOf(s.jamGenre).bpm} BPM
         </button>
+        <Field label="Umanizzazione" hint="Sposta le note della band di pochi millesimi di secondo e ne varia l'intensità, come un musicista. Il primo tempo resta fermo; a parità di impostazione l'esecuzione è sempre la stessa.">
+          <input
+            className="range"
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={s.humanize}
+            aria-label="Umanizzazione"
+            aria-valuetext={s.humanize > 0 ? `${Math.round(s.humanize * 100)}%, fino a ${Math.round(s.humanize * 12)} ms` : 'spenta, sulla griglia'}
+            data-testid="jam-humanize"
+            onChange={(event) => update({ humanize: Number(event.target.value) })}
+          />
+        </Field>
         <div className="row" data-testid="jam-sounds">
           <Field label="Batteria">
             <Select<DrumKitSound> label="Suono della batteria" testId="drum-sound" value={s.drumSound} options={(Object.keys(DRUM_KIT_SOUNDS) as DrumKitSound[]).map((k) => ({ value: k, label: DRUM_KIT_SOUNDS[k] }))} onChange={(drumSound) => update({ drumSound })} />

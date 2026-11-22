@@ -92,7 +92,7 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | J3 | Batteria: articolazioni, hi-hat chiuso/aperto/pedale, ghost notes, fill, velocity; sequencer Advanced (velocity, probabilità, 32/64 passi) | IMPLEMENTED (pedale, crash, cross-stick, crash dopo il fill, choke: D-64; sequencer Advanced con 16/32/64 passi, intensità e probabilità per passo: D-65; ascolto del proprietario da fare) | J1, J2 | Ascolto del proprietario; test sui pattern |
 | J4 | Basso: dinamiche, articolazioni (staccato, ghost, slide), walking jazz | IMPLEMENTED (D-64; ascolto del proprietario da fare) | J1 | Walking su ii–V–I con note di approccio corrette |
 | J5 | Tastiere con voicing coerenti dal motore (HA3) e voice leading nel comping | PARTIAL | HA3, J1 | Comping senza salti oltre la soglia |
-| J6 | Groove, stili, swing, humanization deterministica (tempo, velocity) | PARTIAL | — | Test con seme fisso |
+| J6 | Groove, stili, swing, humanization deterministica (tempo, velocity) | IMPLEMENTED (humanization D-69; ascolto del proprietario da fare) | — | Test con seme fisso |
 | J7 | Mixer: volume, pan, mute, solo, meter per bus | PARTIAL | — | Pan reale misurato sui canali |
 | J8 | Pattern modificabili, loop, count-in (D1), sincronizzazione armonica | PARTIAL | M3 | e2e |
 | J9 | Budget di latenza e CPU della Jam | MISSING | J1 | `npm run perf` con soglie |
@@ -182,6 +182,7 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | #49 | unit su casi da manuale in Do, e2e sul sequencer |
 | 21/11/2026 | J3 · pedale, crash, cross-stick, crash dopo il fill; J4 · seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | #52 | unit su ii–V–I, clave e pattern, e2e dei generi e dei campioni; ascolto del proprietario da fare |
 | 21/11/2026 | J3 · sequencer Advanced: pattern di 1, 2 o 4 battute, intensità e probabilità per passo con seme fisso (D-65) | #53 | unit su lunghezze, livelli, dado deterministico, ciclo col fill; e2e nel sequencer |
+| 22/11/2026 | J6 · humanization deterministica di tempo e velocity, primo tempo fermo, cassa e basso più stretti (D-69) | questo branch | unit con seme fisso (limiti in ms, downbeat, srotolamento), e2e sui tick della batteria |
 | 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-67) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
 | 21/11/2026 | HA3–HA5 nel laboratorio · voicing del motore su tastiera e comping, armonizza la scala, progressioni funzionali con tritoni, 24 preset su quattro livelli (D-67) | #50 | unit + e2e in Studio e Semplificata; ascolto del proprietario da fare |
 | 21/11/2026 | AR2–AR4, AR7 · permutazioni, salti d'ottava, enclosure, triad pairs, upper structures, gruppi irregolari accentati; 24 preset su quattro livelli (D-68) | #50 | unit su casi da manuale, e2e in Studio e Semplificata |

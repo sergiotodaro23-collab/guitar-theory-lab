@@ -159,3 +159,26 @@ test('Advanced: a two-bar pattern, a softer step and a step played by chance', a
   await page.getByTestId('play').click();
   expect(errors).toEqual([]);
 });
+
+test('humanization moves the band off the grid by a few ms, never the downbeat', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const errors = await open(page);
+  await page.getByRole('button', { name: 'Jam Studio', exact: true }).click();
+  await reveal(page, page.getByTestId('drum-fill-every'));
+  await page.getByTestId('drum-fill-every').selectOption('0');
+  await reveal(page, page.getByTestId('jam-humanize'));
+  await page.getByTestId('jam-humanize').fill('1');
+  await page.getByTestId('bpm').fill('200');
+  await page.getByTestId('play').click();
+  await expect.poll(() => drumCount(page), { timeout: 6000 }).toBeGreaterThan(30);
+  const kicks = await hits(page, 'kick');
+  const hats = await hits(page, 'hat');
+  // Pattern A: every bar's downbeat kick stays on the bar line.
+  expect(kicks.filter((t) => t % BAR === 0).length).toBeGreaterThan(0);
+  // The eighth-note hats are no longer all on the grid, and none is more than 12 ms (19.2 ticks at 200 BPM) away.
+  const off = hats.map((t) => Math.abs(t - Math.round(t / 240) * 240));
+  expect(off.some((d) => d > 0)).toBe(true);
+  expect(Math.max(...off)).toBeLessThanOrEqual(20);
+  await page.getByTestId('play').click();
+  expect(errors).toEqual([]);
+});

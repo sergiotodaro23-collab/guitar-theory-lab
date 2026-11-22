@@ -4,3 +4,4 @@ export * from './bass';
 export * from './genres';
 export * from './arrangement';
 export * from './backing';
+export * from './humanize';
