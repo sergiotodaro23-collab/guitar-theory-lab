@@ -44,7 +44,7 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | M2 | Relazioni personalizzate: fase ancorata a un'altra fase o al riferimento con un intervallo scelto; trasposizione indipendente di una fase | IMPLEMENTED (D-62) | M1 | Unit su catene di relazioni, round-trip, nessun ciclo |
 | M3 | Modello ritmico: figure (intero…sedicesimo, terzine, quintine), punto, pause, legature di valore, battute di separazione tra fasi, count-in e countdown sul clock unico | PARTIAL (#45: esercizio singolo e fasi; manca Arpeggios Lab) | — | 5 note di pentatonica in crome in 4/4 attraversano la stanghetta correttamente; in 3/4 e 6/8 idem; count-in udibile senza spostare la battuta 1 |
 | M4 | Vincoli sul manico: corde utilizzate (1–6, insiemi qualsiasi), intervallo di tasti, posizione, string skipping, attraversamento dell'intera tastiera | PARTIAL (#45: corde e salto di corda; manca il percorso su tutta la tastiera) | — | Ogni nota generata rispetta i vincoli; combinazioni impossibili segnalate con alternativa |
-| M5 | Sequenze generative: gruppi di 3–5+ note, intervalli diatonici e cromatici, permutazioni, pattern irregolari, alternanza su/giù | PARTIAL | M3 | Casi da manuale (gruppi di 4 in Do, terze alternate, quarte) |
+| M5 | Sequenze generative: gruppi di 3–5+ note, intervalli diatonici e cromatici, permutazioni, pattern irregolari, alternanza su/giù | IMPLEMENTED (D-63) | M3 | Casi da manuale (gruppi di 4 in Do, terze alternate, quarte) |
 | M6 | Quattro livelli (principiante, intermedio, avanzato, esperto) come dato dell'esercizio; migrazione dei preset a tre livelli | IMPLEMENTED (D-61) | — | Preset esistenti migrati senza perdite; filtro per livello |
 | M7 | Preset: salvataggio, export/import file, condivisione via link senza backend, versionamento e validazione | PARTIAL | M1–M6 | Round-trip file e link; preset malformati rifiutati con messaggio |
 | M8 | Esercizio unico per tutti i laboratori: stesso modello di fasi per scale, accordi, arpeggi, con trasporto e cambi alla stanghetta | PARTIAL | M1–M4 | Una routine mista scala/arpeggio/accordo suona e si visualizza nei tre laboratori |
@@ -64,33 +64,33 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
-| HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | PARTIAL | — | Tabelle da manuale per le quattro scale |
+| HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | IMPLEMENTED nel motore (D-67, `harmony/harmonize.test.ts`) | — | Tabelle da manuale per le quattro scale |
 | HA2 | Estesi 9/11/13, alterazioni, formula libera (P1-07b) | PARTIAL | — | Spelling da manuale |
-| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | MISSING | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
-| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | PARTIAL | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
-| HA5 | Preset di armonizzazione progressiva su gruppi di corde attraverso tutti i rivolti; accordi su 4–6 corde | MISSING | HA3, M8 | Preset per livello, suonabili |
+| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | IMPLEMENTED (D-67: motore, tastiera, comping, pannello «Voicing e armonizzazioni») | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
+| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | IMPLEMENTED (D-67; sostituzioni diatoniche solo nel motore) | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
+| HA5 | Preset di armonizzazione progressiva su gruppi di corde attraverso tutti i rivolti; accordi su 4–6 corde | IMPLEMENTED (24 preset, 6 per livello, `app/harmonyPresets.ts`, e2e `harmony-voicings.spec.ts`) | HA3, M8 | Preset per livello, suonabili |
 | HA6 | Visualizzazione che distingue note suonate, corde e gradi armonici | PARTIAL | N2 | e2e sulla legenda |
 
 **Arpeggios Lab**
 
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
-| AR1 | Principiante: triadi, rivolti, 1–2 ottave, posizioni semplici | IMPLEMENTED in gran parte | — | Preset dedicati |
-| AR2 | Intermedio: quadriadi, CAGED, permutazioni 1-3-5-7 / 1-5-3-7 ecc., string skipping, salti d'ottava, arpeggi diatonici, collegamenti | PARTIAL | M5 | Permutazioni generate, test |
-| AR3 | Avanzato: 9/11/13, enclosure, cromatismi, sweep/economy, upper structures, triad pairs, voice leading, note target | PARTIAL | AR2, HA2 | Enclosure e triad pairs da manuale |
-| AR4 | Esperto: sovrapposizioni, sostituzioni, quartali, tensioni alterate, poliritmie (raggruppamenti contro la metrica), pattern irregolari, intera tastiera | MISSING | AR3, M3 | Gruppi di 3 su 4/4 con accenti corretti |
+| AR1 | Principiante: triadi, rivolti, 1–2 ottave, posizioni semplici | IMPLEMENTED (6 preset, D-68) | — | Preset dedicati |
+| AR2 | Intermedio: quadriadi, CAGED, permutazioni 1-3-5-7 / 1-5-3-7 ecc., string skipping, salti d'ottava, arpeggi diatonici, collegamenti | IMPLEMENTED (D-68: permutazioni per gradi con l'8 d'ottava, `exercises/arpPatterns.test.ts`) | M5 | Permutazioni generate, test |
+| AR3 | Avanzato: 9/11/13, enclosure, cromatismi, sweep/economy, upper structures, triad pairs, voice leading, note target | IMPLEMENTED (D-68; cromatismi solo come enclosure) | AR2, HA2 | Enclosure e triad pairs da manuale |
+| AR4 | Esperto: sovrapposizioni, sostituzioni, quartali, tensioni alterate, poliritmie (raggruppamenti contro la metrica), pattern irregolari, intera tastiera | PARTIAL (D-68: gruppi di 3, 4, 5, 7 con accento, upper structure alterate; mancano quartali e sovrapposizioni come arpeggio) | AR3, M3 | Gruppi di 3 su 4/4 con accenti corretti |
 | AR5 | Percorsi continui su più ottave e posizioni, diteggiatura e rivolto diversi tra salita e discesa | PARTIAL | M4 | Già parziale (D-27): estendere a percorsi su progressione |
 | AR6 | Editing nota per nota, vincoli ergonomici, ritmiche, percorsi manuali | MISSING | M3, M4 | Modifica di una nota senza rompere il resto; validazione |
-| AR7 | Biblioteca di preset per i quattro livelli | PARTIAL | AR1–AR6 | Almeno 6 preset per livello |
+| AR7 | Biblioteca di preset per i quattro livelli | IMPLEMENTED (24 preset, 6 per livello, `app/arpeggioPresets.ts`) | AR1–AR6 | Almeno 6 preset per livello |
 
 ### F3 · Jam Studio (priorità 3)
 
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
 | J1 | Motore sampler: multisample per zona, velocity layer, round robin, caricamento pigro con cache, limite di voci, ripiego sintetico | PARTIAL (zone, layer, round robin, caricamento pigro, ripiego, polifonia; manca il budget CPU di J9) | — | Test offline (OfflineAudioContext): layer e round robin scelti correttamente; CPU entro budget |
-| J2 | Ricerca e registro delle librerie con licenza compatibile (CC0, CC-BY, GPL): batteria, basso, piano acustico, piano elettrico, organo/tastiere; budget di dimensioni | PARTIAL (batteria, piano, basso elettrico, contrabbasso in CC0; mancano piano elettrico e organo) | — | `docs/AUDIO_ASSETS.md` con fonte, licenza, attribuzione per ogni file |
-| J3 | Batteria: articolazioni, hi-hat chiuso/aperto/pedale, ghost notes, fill, velocity; sequencer Advanced (velocity, probabilità, 32/64 passi) | PARTIAL | J1, J2 | Ascolto del proprietario; test sui pattern |
-| J4 | Basso: dinamiche, articolazioni (staccato, ghost, slide), walking jazz | PARTIAL | J1 | Walking su ii–V–I con note di approccio corrette |
+| J2 | Ricerca e registro delle librerie con licenza compatibile (CC0, CC-BY, GPL): batteria, basso, piano acustico, piano elettrico, organo/tastiere; budget di dimensioni | PARTIAL (in CC0: batteria con bacchette e con spazzole, drum machine, piano, basso elettrico, contrabbasso; Wurlitzer in CC BY 3.0; manca l'organo, nessuna fonte libera trovata) | — | `docs/AUDIO_ASSETS.md` con fonte, licenza, attribuzione per ogni file |
+| J3 | Batteria: articolazioni, hi-hat chiuso/aperto/pedale, ghost notes, fill, velocity; sequencer Advanced (velocity, probabilità, 32/64 passi) | IMPLEMENTED (pedale, crash, cross-stick, crash dopo il fill, choke: D-64; sequencer Advanced con 16/32/64 passi, intensità e probabilità per passo: D-65; ascolto del proprietario da fare) | J1, J2 | Ascolto del proprietario; test sui pattern |
+| J4 | Basso: dinamiche, articolazioni (staccato, ghost, slide), walking jazz | IMPLEMENTED (D-64; ascolto del proprietario da fare) | J1 | Walking su ii–V–I con note di approccio corrette |
 | J5 | Tastiere con voicing coerenti dal motore (HA3) e voice leading nel comping | PARTIAL | HA3, J1 | Comping senza salti oltre la soglia |
 | J6 | Groove, stili, swing, humanization deterministica (tempo, velocity) | PARTIAL | — | Test con seme fisso |
 | J7 | Mixer: volume, pan, mute, solo, meter per bus | PARTIAL | — | Pan reale misurato sui canali |
@@ -117,8 +117,8 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
 | N1 | Pannello Note solo consultazione: nessun input, gain, calibrazione o controllo ampli | PARTIAL | R2 | e2e: nessun controllo audio nel pannello |
-| N2 | Legenda geometrica condivisa: cerchi, triangoli, rombi, quadrati per ruolo (scala, arpeggio, accordo, target, intervalli); A3 residuo | IMPLEMENTED (D-63; restano forme per intervalli e note sovrapposte composte, con FB3) | — | Unit su `viz/glyphs`, `viz/legend`; e2e `legend-geometry.spec.ts`; screenshot |
-| N3 | Colori personalizzabili | IMPLEMENTED (D-63; la scelta si fa solo dalla Studio, la Semplificata la applica) | N2 | Salvati e applicati ovunque |
+| N2 | Legenda geometrica condivisa: cerchi, triangoli, rombi, quadrati per ruolo (scala, arpeggio, accordo, target, intervalli); A3 residuo | IMPLEMENTED (D-69; restano forme per intervalli e note sovrapposte composte, con FB3) | — | Unit su `viz/glyphs`, `viz/legend`; e2e `legend-geometry.spec.ts`; screenshot |
+| N3 | Colori personalizzabili | IMPLEMENTED (D-69; la scelta si fa solo dalla Studio, la Semplificata la applica) | N2 | Salvati e applicati ovunque |
 | N4 | Seconda tastiera | PARTIAL | N2 | Segue il prossimo accordo o una scelta |
 | N5 | Default: modo della scala di riferimento pertinente all'accordo in esecuzione; alternative, sovrapposizioni, scale compatibili | PARTIAL | HA1 | G7 in Do mostra Sol misolidio; alternative selezionabili |
 | N6 | Ogni cambio armonico aggiorna tutte le viste rispettando le relazioni dell'esercizio (M1, M2) | PARTIAL | M1, N5 | e2e in riproduzione |
@@ -176,6 +176,13 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | M1 · trasposizione relazionale: intervallo con la lettera, fasi Segue/Fissa (D-57) | #44 | unit + e2e; M2 resta |
 | 21/11/2026 | M3 · ritmo a cicli, articolazione, attacco sul clock unico; M4 · corde e salto di corda (D-59) | #45 | unit + e2e; Arpeggios Lab e percorso su tutta la tastiera restano |
 | 21/11/2026 | J2 · quattro set CC0 convertiti e registrati; J1 · sampler con caricamento pigro e ripiego sintetico (D-60) | #46 | unit sulle zone e sui manifest, e2e con segnale sui canali in Chromium; ascolto del proprietario da fare |
+| 21/11/2026 | J2 · spazzole, drum machine e Wurlitzer campionati; attribuzione CC BY nell'app (D-66) | #54 | unit (layer prima della radice, kit per kit, copertura del Wurlitzer), e2e con segnale sui canali; livelli misurati; ascolto del proprietario da fare |
 | 21/11/2026 | M6 · quattro livelli come dato dello studio, «Base» → Principiante, livello scelto al salvataggio (D-61) | #47 | unit + e2e della biblioteca |
-| 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | questo branch | unit su casi da manuale e catene, e2e nell'editor |
-| 21/11/2026 | N2 · legenda geometrica condivisa con la tastiera; N3 · colori delle note personalizzabili (D-63) | questo branch | unit + e2e, screenshot a 1440 × 900 e 1280 × 720 |
+| 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | #48 | unit su casi da manuale e catene, e2e nell'editor |
+| 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | #49 | unit su casi da manuale in Do, e2e sul sequencer |
+| 21/11/2026 | J3 · pedale, crash, cross-stick, crash dopo il fill; J4 · seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | #52 | unit su ii–V–I, clave e pattern, e2e dei generi e dei campioni; ascolto del proprietario da fare |
+| 21/11/2026 | J3 · sequencer Advanced: pattern di 1, 2 o 4 battute, intensità e probabilità per passo con seme fisso (D-65) | #53 | unit su lunghezze, livelli, dado deterministico, ciclo col fill; e2e nel sequencer |
+| 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-67) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
+| 21/11/2026 | HA3–HA5 nel laboratorio · voicing del motore su tastiera e comping, armonizza la scala, progressioni funzionali con tritoni, 24 preset su quattro livelli (D-67) | #50 | unit + e2e in Studio e Semplificata; ascolto del proprietario da fare |
+| 21/11/2026 | AR2–AR4, AR7 · permutazioni, salti d'ottava, enclosure, triad pairs, upper structures, gruppi irregolari accentati; 24 preset su quattro livelli (D-68) | #50 | unit su casi da manuale, e2e in Studio e Semplificata |
+| 21/11/2026 | N2 · legenda geometrica condivisa con la tastiera; N3 · colori delle note personalizzabili (D-69) | #51 | unit + e2e, screenshot a 1440 × 900 e 1280 × 720 |

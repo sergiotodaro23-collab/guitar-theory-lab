@@ -154,6 +154,8 @@ export interface NotePayload {
   readonly index: number;
   /** Phase of a multi-phase routine, so the board can show that phase's shape. */
   readonly phase?: number;
+  /** Played louder: the first note of an irregular group (AR4). */
+  readonly accent?: boolean;
 }
 
 export interface ChordChangePayload {
@@ -182,6 +184,10 @@ export interface BassPayload {
   readonly midi: number;
   readonly durationTicks: number;
   readonly velocity: number;
+  /** Absent: a normal note. */
+  readonly articulation?: 'ghost' | 'staccato' | 'slide';
+  /** With a slide: the note it slides from. */
+  readonly slideFrom?: number;
 }
 
 export type TrackPayload = NotePayload | ChordChangePayload | CompPayload | DrumPayload | BassPayload;

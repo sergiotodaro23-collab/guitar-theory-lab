@@ -14,24 +14,36 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 |---|---|---|---|---|
 | Piano e tracker (D-56) | IMPLEMENTED | `claude/project-thread-inqgn7` | — | — |
 | M1 · Trasposizione relazionale (D-57) | IMPLEMENTED | #44 | `exercises/relational.test.ts` (caso del proprietario, tutte le tonalità, fasi fisse), e2e in `routine-arpeggio.spec.ts` | Fatto: intervallo con la lettera, fasi «Segue»/«Fissa», modello d'esempio. Relazioni personalizzate in M2 |
-| M2 · Fasi ancorate (D-62) | IMPLEMENTED | `claude/project-thread-inqgn7` | `exercises/anchors.test.ts`, `e2e/routine-arpeggio.spec.ts` | — |
+| M5 · Sequenze generative (D-63) | IMPLEMENTED | #49 | `exercises/sequences.test.ts`, `e2e/sequences.spec.ts` | — |
+| HA1, HA3, HA4 · Armonizzazioni, voicing su gruppi di corde, progressioni (D-67) | IMPLEMENTED | #50 | `harmony/harmonize.test.ts`, `fretboard/stringVoicings.test.ts` | Sostituzioni diatoniche solo nel motore |
+| HA5 · Voicing nel laboratorio e 24 preset (D-67) | IMPLEMENTED | #50 | `app/harmonyVoicings.test.ts`, `e2e/harmony-voicings.spec.ts` | Ascolto del proprietario |
+| AR2–AR4, AR7 · Linguaggio degli arpeggi e 24 preset (D-68) | IMPLEMENTED (AR4 PARTIAL) | #50 | `exercises/arpPatterns.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-vocabulary.spec.ts` | Arpeggi quartali e sovrapposizioni (AR4), editing nota per nota (AR6) |
+| M2 · Fasi ancorate (D-62) | IMPLEMENTED | #48 | `exercises/anchors.test.ts`, `e2e/routine-arpeggio.spec.ts` | — |
 | M3 · Ritmo, articolazione, attacco (D-59) | PARTIAL | #45 | `exercises/rhythm.test.ts`, `timeline/countIn.test.ts`, `e2e/rhythm.spec.ts` | Manca il ritmo nell'Arpeggios Lab |
 | M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |
-| J2 · Campioni CC0 (D-60) | PARTIAL | #46 | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, copertura, intonazione) | Piano elettrico e organo ancora sintetizzati |
+| J3 · Batteria: pedale, crash, cross-stick, crash dopo il fill (D-64); sequencer Advanced (D-65) | IMPLEMENTED | #52, `claude/project-thread-inqgn7` | `jam/kitPieces.test.ts`, `jam/advancedDrums.test.ts`, `jam/arrangement.test.ts`, `e2e/drums.spec.ts`, `e2e/genres.spec.ts` | Ascolto del proprietario |
+| J4 · Basso: seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | IMPLEMENTED | #52 | `jam/bass.test.ts` (walking per grado su ii–V–I), `jam/groove.test.ts` | Ascolto del proprietario |
+| J2 · Campioni CC0 e CC BY (D-60, D-66) | PARTIAL | #46, #54 | `docs/AUDIO_ASSETS.md`, `audio/samplerMap.test.ts` (manifest, licenze, copertura, intonazione), `e2e/samples.spec.ts` | Organo ancora sintetizzato (nessuna fonte libera); ascolto del proprietario |
 | J1 · Sampler (D-60) | PARTIAL | #46 | `audio/samplerMap.test.ts`, `e2e/samples.spec.ts` | Budget CPU (J9); ascolto del proprietario |
 | M6 · Quattro livelli (D-61) | IMPLEMENTED | #47 | `exercises/levels.test.ts`, `app/presetLibrary.test.ts`, `e2e/studio-v6-shell.spec.ts` | Preset per ogni livello con FB/HA/AR |
 | Integrazione TONE3000 + sticker + due gain | IMPLEMENTED | #38 | 564 unit, 211 e2e | Scheda audio reale non provata (R10) |
 | A1 → M1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | #39 | `exercises/transpose.test.ts` | Raffinata da D-57 |
 | A2 → AR5 · Arpeggi: note mostrate = note suonate | IMPLEMENTED | #40 | `app/arpCoherence.test.ts` | — |
 | A3 → N2/FB3 · Legenda avanzata e forme sovrapposte | PARTIAL | #41 | `viz/legend.test.ts` | Legenda condivisa per intervalli e target, forme di più scale |
-| N2 · Legenda geometrica condivisa · N3 · Colori personalizzabili (D-63) | IMPLEMENTED | `claude/project-thread-lmp1pi` | `viz/glyphs.test.ts`, `viz/palette.test.ts`, `e2e/legend-geometry.spec.ts` | Prossimo: N4 tastiera secondaria con scelta, N5 modo dell'accordo in esecuzione |
+| N2 · Legenda geometrica condivisa · N3 · Colori personalizzabili (D-69) | IMPLEMENTED | #51 | `viz/glyphs.test.ts`, `viz/palette.test.ts`, `e2e/legend-geometry.spec.ts` | Prossimo: N4 tastiera secondaria con scelta, N5 modo dell'accordo in esecuzione |
 | B1 → R1 · Selezione dispositivi audio | PARTIAL | #42 | dispositivi simulati | Da verificare con scheda reale |
 | B2, B3 → R2, N1 | MISSING | — | — | Onda 1 |
 | C1–C3 → U1, U2 · D1 → M3/J8 · D2 → U3 · E → U5 | MISSING | — | — | Secondo le onde del piano |
 | F → R7 · NAM e TONE3000 (R5–R7) | MISSING, sospese (D-58) | — | — | Onda 5; il rig esistente resta intatto |
 | Q9 · PWA installabile (D-58) | MISSING | — | — | Onda 4 |
 
-Prossimo: M5 (sequenze generative) sul binario motore; J3/J4 (batteria e basso con le nuove articolazioni) sul binario audio; poi le onde successive senza attese.
+Lavoro in parallelo (dal 21 novembre 2026, approvato dal proprietario), un thread per binario, senza toccare le aree degli altri:
+- motore musicale e Jam (J3–J9, M7, M8): thread «motore e Jam»;
+- preset di Harmony Lab e Arpeggios Lab: thread dedicato;
+- pannello Note e interfaccia Studio: thread dedicato;
+- campioni liberi di piano elettrico, organo, spazzole e kit elettronico (J2): thread dedicato.
+
+Prossimo sul binario motore e Jam: humanization deterministica (J6), voice leading del comping (J5, con HA3), M7 e M8.
 
 Per riprendere: leggi questo file, poi `docs/ROADMAP.md` (registro con stati) e, solo se serve, `docs/MASTER_SPEC.md`.
 

@@ -38,6 +38,14 @@ describe('arrangements (P3-08)', () => {
     expect(song.lengthTicks).toBe(4 * BAR);
   });
 
+  it('a section after a fill opens on a crash; after a section without a fill it does not (J3)', () => {
+    const song = arrangementTracks(input([section('verse', { pattern: 1 }), section('chorus', { pattern: 3, fill: false })]));
+    const crashes = song.drums.events.filter((e) => e.payload.voice === 'crash').map((e) => e.tick);
+    // The chorus follows the verse's fill; the verse (after the looped chorus, no fill) does not crash.
+    expect(crashes).toEqual([2 * BAR]);
+    expect(song.drums.events.filter((e) => e.payload.voice === 'kick' && e.tick >= 2 * BAR && e.tick < 4 * BAR)).toHaveLength(8);
+  });
+
   it('a part switched off in a section leaves no events there; the chord changes go on', () => {
     const song = arrangementTracks(input([section('intro', { bass: false, comp: false }), section('verse')]));
     expect(song.bass.events.some((e) => e.tick < 2 * BAR)).toBe(false);
