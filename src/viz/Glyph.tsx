@@ -42,32 +42,32 @@ export function LegendGlyph({ kind }: { readonly kind: LegendKind }) {
   return (
     <svg className="legend-glyph" viewBox="0 0 28 28" width="22" height="22" aria-hidden="true" data-glyph={spec.shape} data-style={spec.style}>
       {body ? (
-        <g className={`marker ${body}`}>
+        <g className={`legend-mark ${body}`}>
           {kind === 'guide' ? <circle className="guide-ring" cx={C} cy={C} r={R + 2.6} /> : null}
           <GlyphShapeEl shape={kind === 'guide' ? 'circle' : spec.shape} x={C} y={C} r={kind === 'guide' ? R - 1 : R} className="shape" />
         </g>
       ) : null}
       {kind === 'voicing' ? (
-        <g className="marker role-scale in-voicing">
+        <g className="legend-mark role-scale in-voicing">
           <rect className="voicing-ring" x={C - R - 3.5} y={C - R - 3.5} width={(R + 3.5) * 2} height={(R + 3.5) * 2} rx={2.5} />
           <circle className="shape legend-plain" cx={C} cy={C} r={R - 3} />
         </g>
       ) : null}
       {kind === 'arpeggio' ? (
-        <g className="marker role-scale">
+        <g className="legend-mark role-scale">
           <circle className="shape legend-plain" cx={C} cy={C + 2} r={R - 4} />
           <polygon className="arp-mark" points={`${C},${C - 12} ${C + 11.5},${C + 8} ${C - 11.5},${C + 8}`} />
         </g>
       ) : null}
       {kind === 'target-now' || kind === 'target-next' ? (
-        <g className="marker role-scale">
+        <g className="legend-mark role-scale">
           <circle className={`target-ring target-${kind === 'target-now' ? 'now' : 'next'}`} cx={C} cy={C} r={R + 3.5} />
           <circle className="shape legend-plain" cx={C} cy={C} r={R - 3} />
         </g>
       ) : null}
-      {kind === 'played' ? <g className="active-note"><circle className="active-halo" cx={C} cy={C} r={R + 3} /><circle className="active-core" cx={C} cy={C} r={R - 1} /></g> : null}
-      {kind === 'live-likely' ? <circle className="live-likely" cx={C} cy={C} r={R} /> : null}
-      {kind === 'live-possible' ? <circle className="live-possible" cx={C} cy={C} r={R} /> : null}
+      {kind === 'played' ? <g className="legend-played"><circle className="legend-played-halo" cx={C} cy={C} r={R + 3} /><circle className="legend-played-core" cx={C} cy={C} r={R - 1} /></g> : null}
+      {kind === 'live-likely' ? <circle className="legend-live-likely" cx={C} cy={C} r={R} /> : null}
+      {kind === 'live-possible' ? <circle className="legend-live-possible" cx={C} cy={C} r={R} /> : null}
     </svg>
   );
 }

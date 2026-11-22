@@ -141,7 +141,7 @@ button, select, input { font: inherit; color: inherit; }
 .fret-number { fill: var(--muted); font: 600 14px var(--display); text-anchor: middle; }
 
 .marker { cursor: pointer; outline: none; }
-.marker .shape { fill: var(--deck-raised); stroke: var(--scale); stroke-width: 2.2; transition: opacity 120ms linear; }
+.marker .shape, .legend-mark .shape { fill: var(--deck-raised); stroke: var(--scale); stroke-width: 2.2; transition: opacity 120ms linear; }
 .marker-label { font: 700 13px var(--display); fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .marker:hover .shape, .marker:focus-visible .shape { stroke: var(--hot); stroke-width: 3; }
 .role-root .shape { fill: var(--root); stroke: var(--root); }
@@ -603,7 +603,11 @@ button, select, input { font: inherit; color: inherit; }
 /* N2 · geometric legend: the swatch is the neck's own glyph (viz/Glyph), so the two never drift apart. */
 .arp-mark { fill: none; stroke: var(--arp-mark, #1d1409); stroke-width: 1.9; stroke-linejoin: round; pointer-events: none; }
 .legend-glyph { flex: none; overflow: visible; }
-.legend-glyph .marker { pointer-events: none; }
+.legend-glyph .legend-mark { pointer-events: none; }
+.legend-played-halo { fill: var(--hot); opacity: .22; }
+.legend-played-core { fill: var(--hot); }
+.legend-live-likely { fill: #e0261b; stroke: #fff2ee; stroke-width: 2; }
+.legend-live-possible { fill: none; stroke: #e0261b; stroke-width: 2.6; stroke-dasharray: 4 3; }
 .legend-glyph .legend-plain { opacity: .55; }
 .legend-glyph .target-ring { stroke-width: 2; }
 .legend-glyph .target-next { stroke-dasharray: 3 2; }

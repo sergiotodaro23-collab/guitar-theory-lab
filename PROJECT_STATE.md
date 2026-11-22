@@ -30,7 +30,8 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | A1 → M1 · Trasposizione degli esercizi avanzati | IMPLEMENTED | #39 | `exercises/transpose.test.ts` | Raffinata da D-57 |
 | A2 → AR5 · Arpeggi: note mostrate = note suonate | IMPLEMENTED | #40 | `app/arpCoherence.test.ts` | — |
 | A3 → N2/FB3 · Legenda avanzata e forme sovrapposte | PARTIAL | #41 | `viz/legend.test.ts` | Legenda condivisa per intervalli e target, forme di più scale |
-| N2 · Legenda geometrica condivisa · N3 · Colori personalizzabili (D-69) | IMPLEMENTED | #51 | `viz/glyphs.test.ts`, `viz/palette.test.ts`, `e2e/legend-geometry.spec.ts` | Prossimo: N4 tastiera secondaria con scelta, N5 modo dell'accordo in esecuzione |
+| N2 · Legenda geometrica condivisa · N3 · Colori personalizzabili (D-69) | IMPLEMENTED | #51 | `viz/glyphs.test.ts`, `viz/palette.test.ts`, `e2e/legend-geometry.spec.ts` | — |
+| N4 · Tastiera secondaria a scelta · N5 · Modo dell'accordo in esecuzione | PARTIAL (in pausa) | branch `claude/project-thread-lmp1pi-n4n5`, nessuna PR | unit verdi in locale; e2e `chord-scale.spec.ts` verde, `secondary-neck.spec.ts` non ancora eseguito; suite e2e completa da rifare | Progetto in pausa dal 22/11/2026: riprendere aprendo la PR del branch, poi N1 (via l'Ingresso dal taccuino, con R2) e N6 |
 | B1 → R1 · Selezione dispositivi audio | PARTIAL | #42 | dispositivi simulati | Da verificare con scheda reale |
 | B2, B3 → R2, N1 | MISSING | — | — | Onda 1 |
 | C1–C3 → U1, U2 · D1 → M3/J8 · D2 → U3 · E → U5 | MISSING | — | — | Secondo le onde del piano |
