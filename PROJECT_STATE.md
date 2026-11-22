@@ -15,6 +15,9 @@ Ordine operativo in **`docs/FINAL_PLAN.md`** (D-56): fasi F1–F6, attività con
 | Piano e tracker (D-56) | IMPLEMENTED | `claude/project-thread-inqgn7` | — | — |
 | M1 · Trasposizione relazionale (D-57) | IMPLEMENTED | #44 | `exercises/relational.test.ts` (caso del proprietario, tutte le tonalità, fasi fisse), e2e in `routine-arpeggio.spec.ts` | Fatto: intervallo con la lettera, fasi «Segue»/«Fissa», modello d'esempio. Relazioni personalizzate in M2 |
 | M5 · Sequenze generative (D-63) | IMPLEMENTED | #49 | `exercises/sequences.test.ts`, `e2e/sequences.spec.ts` | — |
+| HA1, HA3, HA4 · Armonizzazioni, voicing su gruppi di corde, progressioni (D-67) | IMPLEMENTED | #50 | `harmony/harmonize.test.ts`, `fretboard/stringVoicings.test.ts` | Sostituzioni diatoniche solo nel motore |
+| HA5 · Voicing nel laboratorio e 24 preset (D-67) | IMPLEMENTED | #50 | `app/harmonyVoicings.test.ts`, `e2e/harmony-voicings.spec.ts` | Ascolto del proprietario |
+| AR2–AR4, AR7 · Linguaggio degli arpeggi e 24 preset (D-68) | IMPLEMENTED (AR4 PARTIAL) | #50 | `exercises/arpPatterns.test.ts`, `app/arpeggioPresets.test.ts`, `e2e/arpeggio-vocabulary.spec.ts` | Arpeggi quartali e sovrapposizioni (AR4), editing nota per nota (AR6) |
 | M2 · Fasi ancorate (D-62) | IMPLEMENTED | #48 | `exercises/anchors.test.ts`, `e2e/routine-arpeggio.spec.ts` | — |
 | M3 · Ritmo, articolazione, attacco (D-59) | PARTIAL | #45 | `exercises/rhythm.test.ts`, `timeline/countIn.test.ts`, `e2e/rhythm.spec.ts` | Manca il ritmo nell'Arpeggios Lab |
 | M4 · Corde e salto di corda (D-59) | PARTIAL | #45 | `exercises/strings.test.ts`, `e2e/strings.spec.ts` | Manca il percorso su tutta la tastiera |

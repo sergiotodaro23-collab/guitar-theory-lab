@@ -2,10 +2,11 @@
 import { exerciseTrack, generateSequence, progressionArpeggioTrack, progressionExerciseTrack, routineTrack } from '../exercises';
 import type { FretNote } from '../fretboard';
 import { chordAsScale, viewNotes, viewScale } from './chordViews';
+import { voicingMidis } from './harmonyVoicings';
 import { arrangementTracks, bassTrack, chordSpans, chordTrack, compTrack, drumTrack, genreOf, progressionLength, parsedChords } from '../jam';
 import { tryParseChord, type Chord } from '../theory';
 import { guideTones } from '../harmony';
-import { ticksPerBeat, type Track } from '../timeline';
+import { ticksPerBeat, type NotePayload, type Track } from '../timeline';
 import { exerciseRhythmOf, arpeggioPlanOf, arpeggioSpecOf, currentExerciseSequence, exerciseSpecOf, meterOf, tuningOf, type Settings } from './settings';
 
 export type TrackSpec = Omit<Track, 'originTick'>;
@@ -64,7 +65,7 @@ export function buildTracks(s: Settings): ModeTracks {
   return {
     exercise,
     chords: auto ? chordTrack(s.progression, meter, loop) : null,
-    comp: auto && s.compOn ? compTrack(s.progression, meter, s.compPattern, loop, bassPlays) : null,
+    comp: auto && s.compOn ? compTrack(s.progression, meter, s.compPattern, loop, bassPlays, s.mode === 'harmony' ? voicingMidis(s) : undefined) : null,
     bass: bassPlays ? bassTrack(s.progression, meter, genreOf(s.jamGenre).bass[s.bassPattern] ?? genreOf(s.jamGenre).bass[0], loop) : null,
     drums: s.mode === 'jam' && s.drumOn ? drumTrack(s.drumKit, s.drumPattern, meter, s.drumFillEvery) : null,
     endTick: s.mode === 'jam' && !s.loop && hasProgression ? progressionLength(s.progression, meter) : null,
@@ -96,19 +97,23 @@ function arpeggioTracks(s: Settings): ModeTracks {
   const spec = arpeggioSpecOf(s);
   if (s.arpSource === 'chord') {
     const sequence = arpeggioPlanOf(tryParseChord(s.arpSymbol), s)?.sequence ?? [];
-    return { exercise: sequence.length ? exerciseTrack(sequence, meter, s.arpNotesPerBeat) : null, chords: null, comp: null, drums: null, bass: null, endTick: null };
+    const track = sequence.length ? accented(exerciseTrack(sequence, meter, s.arpNotesPerBeat), s, () => 0, ticksPerBeat(meter) / s.arpNotesPerBeat) : null;
+    return { exercise: track, chords: null, comp: null, drums: null, bass: null, endTick: null };
   }
   if (s.progression.chords.length === 0) return { exercise: null, chords: null, comp: null, drums: null, bass: null, endTick: null };
   const lengthTicks = progressionLength(s.progression, meter);
-  const route = s.arpShape === 'octaves' || s.arpShape === 'sweep' || s.arpShape === 'skip';
+  // A route or a pattern plays a fixed line for each chord.
+  const route = s.arpShape === 'octaves' || s.arpShape === 'sweep' || s.arpShape === 'skip' || s.arpPattern !== 'none';
   const exercise = progressionArpeggioTrack({
     spans: chordSpans(s.progression, meter), lengthTicks, loop: true, meter, low: s.arpLow, spec, notesPerBeat: s.arpNotesPerBeat, link: s.arpLink,
     target: s.arpTarget,
     notesOf: (chord) => arpeggioPlanOf(chord, s)?.notes ?? [],
     ...(route ? { sequenceOf: (chord: Chord) => arpeggioPlanOf(chord, s)?.sequence ?? [] } : {}),
   });
+  const spans = chordSpans(s.progression, meter);
+  const spanStart = (tick: number) => spans.reduce((start, span) => (span.tick <= tick ? span.tick : start), 0);
   return {
-    exercise: exercise.events.length ? exercise : null,
+    exercise: exercise.events.length ? accented(exercise, s, spanStart, ticksPerBeat(meter) / s.arpNotesPerBeat) : null,
     chords: chordTrack(s.progression, meter, true),
     comp: s.compOn ? compTrack(s.progression, meter, s.compPattern, true) : null,
     drums: null,
@@ -117,10 +122,30 @@ function arpeggioTracks(s: Settings): ModeTracks {
   };
 }
 
+/**
+ * Irregular groups (AR4): the first note of every group is accented, counted
+ * from the start of each chord, so groups of three run across the beats of
+ * a 4/4 bar as the exercise intends.
+ */
+function accented<T extends TrackSpec>(track: T, s: Settings, startOf: (tick: number) => number, step: number): T {
+  if (s.arpPattern !== 'group') return track;
+  return {
+    ...track,
+    events: track.events.map((e) => {
+      const payload = e.payload as NotePayload;
+      if (payload.type !== 'note') return e;
+      const local = Math.round((e.tick - startOf(e.tick)) / step);
+      return { ...e, payload: { ...payload, accent: local % s.arpGroup === 0 } };
+    }),
+  };
+}
+
 /** A sustained guide-tone shell for manual changes, one bar long. */
 export function manualCompMidis(s: Settings, chordIndex: number): readonly number[] {
   const chord = parsedChords(s.progression)[chordIndex];
   if (!chord) return [];
+  const own = s.mode === 'harmony' ? voicingMidis(s)[chordIndex] : null;
+  if (own) return own;
   const bass = 40 + (((chord.bass?.pc ?? chord.tones[0]?.pc ?? 0) - 4 + 12) % 12);
   return [bass, ...guideTones(chord).map((tone) => 60 + tone.pc), 72 + (chord.tones.find((t) => t.degree.includes('5'))?.pc ?? 0) - 12];
 }

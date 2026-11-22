@@ -186,7 +186,7 @@ export class WebAudioSink {
     } else if (payload.type === 'bass') {
       this.bassNote(payload.midi, payload.durationTicks * this.secondsPerTick(), payload.velocity, time, payload.articulation, payload.slideFrom);
     } else if (payload.type === 'note') {
-      this.pluck(payload.midi, time);
+      this.pluck(payload.midi, time, payload.accent ? 0.62 : 0.42);
     } else if (payload.type === 'comp') {
       const duration = payload.durationTicks * this.secondsPerTick();
       if (this.sampledChord(payload.midis, duration, payload.velocity, time)) return;
@@ -452,9 +452,9 @@ export class WebAudioSink {
     return this.noise;
   }
 
-  pluck(midi: number, time: number): void {
+  pluck(midi: number, time: number, level = 0.42): void {
     const frequency = midiToHz(midi);
-    this.voice('notes', time, 0.5, 0.42, 0.003, [
+    this.voice('notes', time, 0.5, level, 0.003, [
       { type: 'triangle', frequency },
       { type: 'sine', frequency: frequency * 2, mix: 0.25 },
     ], true);

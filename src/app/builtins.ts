@@ -2,6 +2,8 @@
 import { ROUTINE_TEMPLATES, type ExerciseLevel } from '../exercises';
 import { PROGRESSION_TEMPLATES, instantiateTemplate } from '../jam';
 import type { ChordLayer } from './chordLayers';
+import { HARMONY_PRESETS } from './harmonyPresets';
+import { ARPEGGIO_PRESETS } from './arpeggioPresets';
 import type { Settings } from './settings';
 
 export interface BuiltinPreset {
@@ -99,4 +101,4 @@ const STARTERS: readonly BuiltinPreset[] = [
 ];
 
 /** The level is part of the study (M6): loading a starter preset sets it, saving keeps it. */
-export const STUDY_PRESETS: readonly BuiltinPreset[] = STARTERS.map((p) => ({ ...p, data: { ...p.data, studyLevel: p.level } }));
+export const STUDY_PRESETS: readonly BuiltinPreset[] = [...STARTERS, ...HARMONY_PRESETS, ...ARPEGGIO_PRESETS].map((p) => ({ ...p, data: { ...p.data, studyLevel: p.level } }));

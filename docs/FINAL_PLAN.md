@@ -64,24 +64,24 @@ Formato: **ID · attività** — stato · dipendenze. Accettazione.
 
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
-| HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | PARTIAL | — | Tabelle da manuale per le quattro scale |
+| HA1 | Armonizzazione di maggiore, minore naturale, armonica, melodica in triadi (incl. aumentate, sus) e quadriadi (Maj7, m7, 7, m7b5, dim7, mMaj7, maj7#5) | IMPLEMENTED nel motore (D-67, `harmony/harmonize.test.ts`) | — | Tabelle da manuale per le quattro scale |
 | HA2 | Estesi 9/11/13, alterazioni, formula libera (P1-07b) | PARTIAL | — | Spelling da manuale |
-| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | MISSING | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
-| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | PARTIAL | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
-| HA5 | Preset di armonizzazione progressiva su gruppi di corde attraverso tutti i rivolti; accordi su 4–6 corde | MISSING | HA3, M8 | Preset per livello, suonabili |
+| HA3 | Motore di voicing: shell, Drop 2, Drop 3, Drop 2&4, quartali, strutture modali; gruppi di corde (1-2-3, 2-3-4, …) con tutti i rivolti; note obbligatorie/omissibili; difficoltà ergonomica | IMPLEMENTED (D-67: motore, tastiera, comping, pannello «Voicing e armonizzazioni») | HA1 | Drop 2 di Cmaj7 sulle corde 1–4 e 2–5 da manuale; ogni voicing eseguibile (apertura, dita) |
+| HA4 | Progressioni: II-V-I, turnaround, dominanti secondarie, sostituzioni (tritono, diatoniche), voice leading tra voicing (P1-11) | IMPLEMENTED (D-67; sostituzioni diatoniche solo nel motore) | HA3 | Voice leading minimo su ii–V–I in tutte le tonalità |
+| HA5 | Preset di armonizzazione progressiva su gruppi di corde attraverso tutti i rivolti; accordi su 4–6 corde | IMPLEMENTED (24 preset, 6 per livello, `app/harmonyPresets.ts`, e2e `harmony-voicings.spec.ts`) | HA3, M8 | Preset per livello, suonabili |
 | HA6 | Visualizzazione che distingue note suonate, corde e gradi armonici | PARTIAL | N2 | e2e sulla legenda |
 
 **Arpeggios Lab**
 
 | ID | Attività | Stato | Dip. | Accettazione |
 |---|---|---|---|---|
-| AR1 | Principiante: triadi, rivolti, 1–2 ottave, posizioni semplici | IMPLEMENTED in gran parte | — | Preset dedicati |
-| AR2 | Intermedio: quadriadi, CAGED, permutazioni 1-3-5-7 / 1-5-3-7 ecc., string skipping, salti d'ottava, arpeggi diatonici, collegamenti | PARTIAL | M5 | Permutazioni generate, test |
-| AR3 | Avanzato: 9/11/13, enclosure, cromatismi, sweep/economy, upper structures, triad pairs, voice leading, note target | PARTIAL | AR2, HA2 | Enclosure e triad pairs da manuale |
-| AR4 | Esperto: sovrapposizioni, sostituzioni, quartali, tensioni alterate, poliritmie (raggruppamenti contro la metrica), pattern irregolari, intera tastiera | MISSING | AR3, M3 | Gruppi di 3 su 4/4 con accenti corretti |
+| AR1 | Principiante: triadi, rivolti, 1–2 ottave, posizioni semplici | IMPLEMENTED (6 preset, D-68) | — | Preset dedicati |
+| AR2 | Intermedio: quadriadi, CAGED, permutazioni 1-3-5-7 / 1-5-3-7 ecc., string skipping, salti d'ottava, arpeggi diatonici, collegamenti | IMPLEMENTED (D-68: permutazioni per gradi con l'8 d'ottava, `exercises/arpPatterns.test.ts`) | M5 | Permutazioni generate, test |
+| AR3 | Avanzato: 9/11/13, enclosure, cromatismi, sweep/economy, upper structures, triad pairs, voice leading, note target | IMPLEMENTED (D-68; cromatismi solo come enclosure) | AR2, HA2 | Enclosure e triad pairs da manuale |
+| AR4 | Esperto: sovrapposizioni, sostituzioni, quartali, tensioni alterate, poliritmie (raggruppamenti contro la metrica), pattern irregolari, intera tastiera | PARTIAL (D-68: gruppi di 3, 4, 5, 7 con accento, upper structure alterate; mancano quartali e sovrapposizioni come arpeggio) | AR3, M3 | Gruppi di 3 su 4/4 con accenti corretti |
 | AR5 | Percorsi continui su più ottave e posizioni, diteggiatura e rivolto diversi tra salita e discesa | PARTIAL | M4 | Già parziale (D-27): estendere a percorsi su progressione |
 | AR6 | Editing nota per nota, vincoli ergonomici, ritmiche, percorsi manuali | MISSING | M3, M4 | Modifica di una nota senza rompere il resto; validazione |
-| AR7 | Biblioteca di preset per i quattro livelli | PARTIAL | AR1–AR6 | Almeno 6 preset per livello |
+| AR7 | Biblioteca di preset per i quattro livelli | IMPLEMENTED (24 preset, 6 per livello, `app/arpeggioPresets.ts`) | AR1–AR6 | Almeno 6 preset per livello |
 
 ### F3 · Jam Studio (priorità 3)
 
@@ -181,4 +181,7 @@ Corrispondenza con il tracker precedente: A1 → M1 (base), A2 → AR5, A3 → N
 | 21/11/2026 | M2 · fasi ancorate a un'altra fase con un intervallo scritto, catene, cicli segnalati (D-62) | #48 | unit su casi da manuale e catene, e2e nell'editor |
 | 21/11/2026 | M5 · modelli di sequenza, gruppi rovesciati o alternati, approcci cromatici, permutazioni dal motore (D-63) | #49 | unit su casi da manuale in Do, e2e sul sequencer |
 | 21/11/2026 | J3 · pedale, crash, cross-stick, crash dopo il fill; J4 · seconda di passaggio, ghost, staccato, slide, dinamiche (D-64) | #52 | unit su ii–V–I, clave e pattern, e2e dei generi e dei campioni; ascolto del proprietario da fare |
-| 21/11/2026 | J3 · sequencer Advanced: pattern di 1, 2 o 4 battute, intensità e probabilità per passo con seme fisso (D-65) | questo branch | unit su lunghezze, livelli, dado deterministico, ciclo col fill; e2e nel sequencer |
+| 21/11/2026 | J3 · sequencer Advanced: pattern di 1, 2 o 4 battute, intensità e probabilità per passo con seme fisso (D-65) | #53 | unit su lunghezze, livelli, dado deterministico, ciclo col fill; e2e nel sequencer |
+| 21/11/2026 | HA1, HA3, HA4 (motore) · armonizzazioni delle quattro scale, voicing su gruppi di corde con tutti i rivolti, progressioni e sostituzioni, voice leading (D-67) | #50 | unit su forme e tabelle da manuale; il laboratorio li userà nella PR successiva |
+| 21/11/2026 | HA3–HA5 nel laboratorio · voicing del motore su tastiera e comping, armonizza la scala, progressioni funzionali con tritoni, 24 preset su quattro livelli (D-67) | #50 | unit + e2e in Studio e Semplificata; ascolto del proprietario da fare |
+| 21/11/2026 | AR2–AR4, AR7 · permutazioni, salti d'ottava, enclosure, triad pairs, upper structures, gruppi irregolari accentati; 24 preset su quattro livelli (D-68) | #50 | unit su casi da manuale, e2e in Studio e Semplificata |

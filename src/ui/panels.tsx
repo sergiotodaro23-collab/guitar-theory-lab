@@ -17,6 +17,8 @@ import { MAX_CHORDS, addChordLayer, moveChordLayer, resolveChordLayer, type Chor
 import { voicingKey } from '../fretboard';
 import { ChordDiagram } from '../viz/ChordDiagram';
 import { LAYER_COLORS, LAYER_COLOR_NAMES, MAX_EXTRA_SCALES, MAX_SCALES, addLayer, isCrowded, moveLayer, type LayerColor, type ScaleLayer } from '../app/scaleLayers';
+import { VoicingPanel } from './VoicingPanel';
+import { ArpPatternControls } from './ArpPatternControls';
 import { Field, Panel, Segmented, Select, Toggle, Volume } from './controls';
 import { RhythmFields } from './RhythmFields';
 import { StringsField } from './StringsField';
@@ -640,6 +642,7 @@ export function ArpeggioPanel({ part = 'all' }: { readonly part?: 'all' | 'shape
           <input className={`text-input ${customValid ? '' : 'is-invalid'}`} data-testid="arp-pattern" value={s.arpCustomText} aria-invalid={!customValid} onChange={(e) => update({ arpCustomText: e.target.value })} />
         </Field>
       ) : null}
+      <ArpPatternControls />
       </>
       ) : null}
     </Panel>
@@ -835,6 +838,7 @@ export function HarmonyPanel({ part = 'all' }: { readonly part?: 'all' | 'progre
         </div>
         ) : null}
       </Panel>
+      {show('voice') ? <VoicingPanel /> : null}
     </>
   );
 }
