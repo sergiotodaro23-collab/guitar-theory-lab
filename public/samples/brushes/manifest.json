@@ -1,0 +1,1775 @@
+{
+ "id": "brushes",
+ "name": "Big Rusty Drums (spazzole, mix close/overhead)",
+ "kind": "drums",
+ "source": "https://github.com/sfzinstruments/karoryfer.big-rusty-drums",
+ "commit": "f07ce00df34a46b6b08375be56fe116cf15782bc",
+ "license": "CC0-1.0",
+ "author": "Karoryfer Samples (D. Smolken)",
+ "zones": [
+  {
+   "voice": "crash",
+   "file": "crash_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 3
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 4
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v2_r3.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 3
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v2_r4.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 4
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v3_r3.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 3
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v3_r4.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 4
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v4_r3.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "crash",
+   "file": "crash_v4_r4.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 3
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 4
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v2_r3.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 3
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v2_r4.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 4
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v3_r3.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 3
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v3_r4.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 4
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v4_r3.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "crossStick",
+   "file": "crossStick_v4_r4.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 1
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 2
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 3
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 4
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v2_r1.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 1
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v2_r2.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 2
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v2_r3.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 3
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v2_r4.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 4
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v3_r1.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 1
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v3_r2.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 2
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v3_r3.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 3
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v3_r4.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 4
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v4_r1.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 1
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v4_r2.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 2
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v4_r3.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 3
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v4_r4.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 4
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v5_r1.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v5_r2.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v5_r3.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed_v5_r4.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 1
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 2
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 3
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 4
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v2_r1.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 1
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v2_r2.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 2
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v2_r3.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 3
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v2_r4.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 4
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v3_r1.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 1
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v3_r2.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 2
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v3_r3.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 3
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v3_r4.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 4
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v4_r1.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 1
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v4_r2.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 2
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v4_r3.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 3
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v4_r4.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 4
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v5_r1.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v5_r2.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v5_r3.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "hhHalf",
+   "file": "hhHalf_v5_r4.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 3
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 4
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v2_r3.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 3
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v2_r4.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 4
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v3_r3.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 3
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v3_r4.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 4
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v4_r3.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen_v4_r4.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 1
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 2
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 3
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 4
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v2_r1.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 1
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v2_r2.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 2
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v2_r3.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 3
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v2_r4.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 4
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v3_r1.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 1
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v3_r2.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 2
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v3_r3.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 3
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v3_r4.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 4
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v4_r1.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 1
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v4_r2.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 2
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v4_r3.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 3
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v4_r4.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 4
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v5_r1.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v5_r2.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v5_r3.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "hhPedal",
+   "file": "hhPedal_v5_r4.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 9,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 9,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 9,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 9,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v2_r1.ogg",
+   "velLo": 10,
+   "velHi": 18,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v2_r2.ogg",
+   "velLo": 10,
+   "velHi": 18,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v2_r3.ogg",
+   "velLo": 10,
+   "velHi": 18,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v2_r4.ogg",
+   "velLo": 10,
+   "velHi": 18,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v3_r1.ogg",
+   "velLo": 19,
+   "velHi": 27,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v3_r2.ogg",
+   "velLo": 19,
+   "velHi": 27,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v3_r3.ogg",
+   "velLo": 19,
+   "velHi": 27,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v3_r4.ogg",
+   "velLo": 19,
+   "velHi": 27,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v4_r1.ogg",
+   "velLo": 28,
+   "velHi": 36,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v4_r2.ogg",
+   "velLo": 28,
+   "velHi": 36,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v4_r3.ogg",
+   "velLo": 28,
+   "velHi": 36,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v4_r4.ogg",
+   "velLo": 28,
+   "velHi": 36,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v5_r1.ogg",
+   "velLo": 37,
+   "velHi": 45,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v5_r2.ogg",
+   "velLo": 37,
+   "velHi": 45,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v5_r3.ogg",
+   "velLo": 37,
+   "velHi": 45,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v5_r4.ogg",
+   "velLo": 37,
+   "velHi": 45,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v6_r1.ogg",
+   "velLo": 46,
+   "velHi": 54,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v6_r2.ogg",
+   "velLo": 46,
+   "velHi": 54,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v6_r3.ogg",
+   "velLo": 46,
+   "velHi": 54,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v6_r4.ogg",
+   "velLo": 46,
+   "velHi": 54,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v7_r1.ogg",
+   "velLo": 55,
+   "velHi": 63,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v7_r2.ogg",
+   "velLo": 55,
+   "velHi": 63,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v7_r3.ogg",
+   "velLo": 55,
+   "velHi": 63,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v7_r4.ogg",
+   "velLo": 55,
+   "velHi": 63,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v8_r1.ogg",
+   "velLo": 64,
+   "velHi": 73,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v8_r2.ogg",
+   "velLo": 64,
+   "velHi": 73,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v8_r3.ogg",
+   "velLo": 64,
+   "velHi": 73,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v8_r4.ogg",
+   "velLo": 64,
+   "velHi": 73,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v9_r1.ogg",
+   "velLo": 74,
+   "velHi": 82,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v9_r2.ogg",
+   "velLo": 74,
+   "velHi": 82,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v9_r3.ogg",
+   "velLo": 74,
+   "velHi": 82,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v9_r4.ogg",
+   "velLo": 74,
+   "velHi": 82,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v10_r1.ogg",
+   "velLo": 83,
+   "velHi": 91,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v10_r2.ogg",
+   "velLo": 83,
+   "velHi": 91,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v10_r3.ogg",
+   "velLo": 83,
+   "velHi": 91,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v10_r4.ogg",
+   "velLo": 83,
+   "velHi": 91,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v11_r1.ogg",
+   "velLo": 92,
+   "velHi": 100,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v11_r2.ogg",
+   "velLo": 92,
+   "velHi": 100,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v11_r3.ogg",
+   "velLo": 92,
+   "velHi": 100,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v11_r4.ogg",
+   "velLo": 92,
+   "velHi": 100,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v12_r1.ogg",
+   "velLo": 101,
+   "velHi": 109,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v12_r2.ogg",
+   "velLo": 101,
+   "velHi": 109,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v12_r3.ogg",
+   "velLo": 101,
+   "velHi": 109,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v12_r4.ogg",
+   "velLo": 101,
+   "velHi": 109,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v13_r1.ogg",
+   "velLo": 110,
+   "velHi": 118,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v13_r2.ogg",
+   "velLo": 110,
+   "velHi": 118,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v13_r3.ogg",
+   "velLo": 110,
+   "velHi": 118,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v13_r4.ogg",
+   "velLo": 110,
+   "velHi": 118,
+   "rr": 4
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v14_r1.ogg",
+   "velLo": 119,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v14_r2.ogg",
+   "velLo": 119,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v14_r3.ogg",
+   "velLo": 119,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "kick",
+   "file": "kick_v14_r4.ogg",
+   "velLo": 119,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 1
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 2
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 3
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 32,
+   "rr": 4
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v2_r1.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 1
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v2_r2.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 2
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v2_r3.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 3
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v2_r4.ogg",
+   "velLo": 33,
+   "velHi": 63,
+   "rr": 4
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v3_r1.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 1
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v3_r2.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 2
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v3_r3.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 3
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v3_r4.ogg",
+   "velLo": 64,
+   "velHi": 95,
+   "rr": 4
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v4_r1.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v4_r2.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v4_r3.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "ride",
+   "file": "ride_v4_r4.ogg",
+   "velLo": 96,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 16,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 16,
+   "rr": 2
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 16,
+   "rr": 3
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 16,
+   "rr": 4
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v2_r1.ogg",
+   "velLo": 17,
+   "velHi": 32,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v2_r2.ogg",
+   "velLo": 17,
+   "velHi": 32,
+   "rr": 2
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v2_r3.ogg",
+   "velLo": 17,
+   "velHi": 32,
+   "rr": 3
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v2_r4.ogg",
+   "velLo": 17,
+   "velHi": 32,
+   "rr": 4
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v3_r1.ogg",
+   "velLo": 33,
+   "velHi": 48,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v3_r2.ogg",
+   "velLo": 33,
+   "velHi": 48,
+   "rr": 2
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v3_r3.ogg",
+   "velLo": 33,
+   "velHi": 48,
+   "rr": 3
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v3_r4.ogg",
+   "velLo": 33,
+   "velHi": 48,
+   "rr": 4
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v4_r1.ogg",
+   "velLo": 49,
+   "velHi": 63,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v4_r2.ogg",
+   "velLo": 49,
+   "velHi": 63,
+   "rr": 2
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v4_r3.ogg",
+   "velLo": 49,
+   "velHi": 63,
+   "rr": 3
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v4_r4.ogg",
+   "velLo": 49,
+   "velHi": 63,
+   "rr": 4
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v5_r1.ogg",
+   "velLo": 64,
+   "velHi": 79,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v5_r2.ogg",
+   "velLo": 64,
+   "velHi": 79,
+   "rr": 2
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v5_r3.ogg",
+   "velLo": 64,
+   "velHi": 79,
+   "rr": 3
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v5_r4.ogg",
+   "velLo": 64,
+   "velHi": 79,
+   "rr": 4
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v6_r1.ogg",
+   "velLo": 80,
+   "velHi": 95,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v6_r2.ogg",
+   "velLo": 80,
+   "velHi": 95,
+   "rr": 2
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v6_r3.ogg",
+   "velLo": 80,
+   "velHi": 95,
+   "rr": 3
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v6_r4.ogg",
+   "velLo": 80,
+   "velHi": 95,
+   "rr": 4
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v7_r1.ogg",
+   "velLo": 96,
+   "velHi": 111,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v7_r2.ogg",
+   "velLo": 96,
+   "velHi": 111,
+   "rr": 2
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v7_r3.ogg",
+   "velLo": 96,
+   "velHi": 111,
+   "rr": 3
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v7_r4.ogg",
+   "velLo": 96,
+   "velHi": 111,
+   "rr": 4
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v8_r1.ogg",
+   "velLo": 112,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v8_r2.ogg",
+   "velLo": 112,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v8_r3.ogg",
+   "velLo": 112,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "snare",
+   "file": "snare_v8_r4.ogg",
+   "velLo": 112,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 1
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 2
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 3
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 4
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v2_r1.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 1
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v2_r2.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 2
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v2_r3.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 3
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v2_r4.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 4
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v3_r1.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 1
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v3_r2.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 2
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v3_r3.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 3
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v3_r4.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 4
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v4_r1.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 1
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v4_r2.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 2
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v4_r3.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 3
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v4_r4.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 4
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v5_r1.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v5_r2.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v5_r3.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh_v5_r4.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 4
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v1_r1.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 1
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v1_r2.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 2
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v1_r3.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 3
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v1_r4.ogg",
+   "velLo": 1,
+   "velHi": 25,
+   "rr": 4
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v2_r1.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 1
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v2_r2.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 2
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v2_r3.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 3
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v2_r4.ogg",
+   "velLo": 26,
+   "velHi": 51,
+   "rr": 4
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v3_r1.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 1
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v3_r2.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 2
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v3_r3.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 3
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v3_r4.ogg",
+   "velLo": 52,
+   "velHi": 76,
+   "rr": 4
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v4_r1.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 1
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v4_r2.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 2
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v4_r3.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 3
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v4_r4.ogg",
+   "velLo": 77,
+   "velHi": 102,
+   "rr": 4
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v5_r1.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v5_r2.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 2
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v5_r3.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 3
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow_v5_r4.ogg",
+   "velLo": 103,
+   "velHi": 127,
+   "rr": 4
+  }
+ ]
+}

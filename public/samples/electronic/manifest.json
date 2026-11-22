@@ -1,0 +1,82 @@
+{
+ "id": "electronic",
+ "name": "Roland TR-8 (voci 808, ride 909), registrato da MckAudio",
+ "kind": "drums",
+ "normalized": true,
+ "source": "https://github.com/MckAudio/MckSamplePacks",
+ "commit": "5db40e8fe26785c256845a5bb38921b2654a887f",
+ "license": "CC0-1.0",
+ "author": "MckAudio (Henri Schaffer)",
+ "zones": [
+  {
+   "voice": "clap",
+   "file": "clap.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "crash",
+   "file": "crash.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "hhClosed",
+   "file": "hhClosed.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "hhOpen",
+   "file": "hhOpen.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "kick",
+   "file": "kick.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "ride",
+   "file": "ride.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "rimshot",
+   "file": "rimshot.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "snare",
+   "file": "snare.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "tomHigh",
+   "file": "tomHigh.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  },
+  {
+   "voice": "tomLow",
+   "file": "tomLow.ogg",
+   "velLo": 1,
+   "velHi": 127,
+   "rr": 1
+  }
+ ]
+}
